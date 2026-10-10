@@ -1,9 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import { dbConnect } from "./dbConnect";
-import { User } from "@/models/User";
-import { Shop } from "@/models/Shop";
+import { prisma } from "@/lib/prisma";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -15,42 +13,40 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email and password are required.");
+          throw new Error("Please enter both email and password.");
         }
 
-        await dbConnect();
-        const user = await User.findOne({ email: credentials.email.toLowerCase() });
+        // Query MySQL via Prisma
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email.toLowerCase().trim() },
+          include: { shop: { select: { name: true } } },
+        });
 
         if (!user) {
           throw new Error("No user found with this email.");
         }
 
         if (!user.isActive) {
-          throw new Error("Your account is deactivated. Contact store owner.");
-        }
-
-        if (!user.password) {
-          throw new Error("User account has no password configured.");
+          throw new Error("Your account has been deactivated. Contact your administrator.");
         }
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) {
-          throw new Error("Incorrect password.");
+          throw new Error("Invalid password.");
         }
 
-        const shop = await Shop.findById(user.shopId).select("name").lean();
-
         return {
-          id: user._id.toString(),
+          id: user.id,
           name: user.name,
           email: user.email,
           role: user.role,
-          shopId: user.shopId.toString(),
-          shopName: shop?.name || "Grocery Store",
+          shopId: user.shopId,
+          shopName: user.shop.name,
         };
       },
     }),
   ],
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -71,6 +67,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+
   pages: {
     signIn: "/login",
   },

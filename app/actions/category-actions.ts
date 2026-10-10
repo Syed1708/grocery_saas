@@ -2,102 +2,123 @@
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/services/authOptions";
-import { dbConnect } from "@/services/dbConnect";
-import { Category } from "@/models/Category";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { saveUploadedFile, deleteUploadedFile } from "@/lib/file-storage";
 
-// Helper to verify user permissions
 async function getAuthenticatedUser() {
   const session = await getServerSession(authOptions);
-
   if (!session?.user?.shopId) {
     throw new Error("Unauthorized: Please log in.");
   }
-
   if (session.user.role !== "OWNER" && session.user.role !== "MANAGER") {
-    throw new Error("Forbidden: Only Owners and Managers can modify categories.");
+    throw new Error("Forbidden: Only Owners and Managers can manage categories.");
   }
-
   return session.user;
 }
 
 export async function createCategoryAction(formData: FormData) {
-  const user = await getAuthenticatedUser();
-  await dbConnect();
-
-  const name = formData.get("name")?.toString().trim();
-  const description = formData.get("description")?.toString().trim() || "";
-  const image = formData.get("image")?.toString().trim() || "";
-
-  if (!name) {
-    return { success: false, error: "Category name is required." };
-  }
-
   try {
-    const existing = await Category.findOne({ shopId: user.shopId, name });
+    const user = await getAuthenticatedUser();
+
+    const name = formData.get("name")?.toString().trim();
+    const description = formData.get("description")?.toString().trim() || "";
+    const imageFile = formData.get("image") as File | null;
+
+    if (!name) return { success: false, error: "Category name is required." };
+
+    const existing = await prisma.category.findUnique({
+      where: { shopId_name: { shopId: user.shopId, name } },
+    });
     if (existing) {
-      return { success: false, error: "A category with this name already exists." };
+      return { success: false, error: "A category with this name already exists in your store." };
     }
 
-    await Category.create({
-      name,
-      description,
-      image,
-      shopId: user.shopId,
+    // Save image to public/uploads/categories
+    let imageUrl = "";
+    if (imageFile && imageFile.size > 0) {
+      imageUrl = await saveUploadedFile(imageFile, "categories");
+    }
+
+    await prisma.category.create({
+      data: {
+        name,
+        description,
+        image: imageUrl || null,
+        shopId: user.shopId,
+      },
     });
 
     revalidatePath("/dashboard/admin/categories");
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Failed to create category." };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to create category." };
   }
 }
 
 export async function updateCategoryAction(formData: FormData) {
-  const user = await getAuthenticatedUser();
-  await dbConnect();
-
-  const id = formData.get("id")?.toString();
-  const name = formData.get("name")?.toString().trim();
-  const description = formData.get("description")?.toString().trim() || "";
-  const image = formData.get("image")?.toString().trim() || "";
-
-  if (!id || !name) {
-    return { success: false, error: "Missing required fields." };
-  }
-
   try {
-    const category = await Category.findOneAndUpdate(
-      { _id: id, shopId: user.shopId },
-      { name, description, image },
-      { new: true }
-    );
+    const user = await getAuthenticatedUser();
 
-    if (!category) {
-      return { success: false, error: "Category not found." };
+    const id = formData.get("id")?.toString();
+    const name = formData.get("name")?.toString().trim();
+    const description = formData.get("description")?.toString().trim() || "";
+    const imageFile = formData.get("image") as File | null;
+
+    if (!id || !name) return { success: false, error: "Missing required fields." };
+
+    const currentCategory = await prisma.category.findFirst({
+      where: { id, shopId: user.shopId },
+    });
+    if (!currentCategory) return { success: false, error: "Category not found." };
+
+    let imageUrl = currentCategory.image;
+
+    // If new image uploaded, delete old image from disk and save new
+    if (imageFile && imageFile.size > 0) {
+      if (currentCategory.image) {
+        await deleteUploadedFile(currentCategory.image);
+      }
+      imageUrl = await saveUploadedFile(imageFile, "categories");
     }
+
+    await prisma.category.update({
+      where: { id },
+      data: {
+        name,
+        description,
+        image: imageUrl,
+      },
+    });
 
     revalidatePath("/dashboard/admin/categories");
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Failed to update category." };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to update category." };
   }
 }
 
 export async function deleteCategoryAction(id: string) {
-  const user = await getAuthenticatedUser();
-  await dbConnect();
-
   try {
-    const deleted = await Category.findOneAndDelete({ _id: id, shopId: user.shopId });
+    const user = await getAuthenticatedUser();
 
-    if (!deleted) {
-      return { success: false, error: "Category not found or unauthorized." };
+    const category = await prisma.category.findFirst({
+      where: { id, shopId: user.shopId },
+    });
+    if (!category) return { success: false, error: "Category not found." };
+
+    // Delete associated image file from disk
+    if (category.image) {
+      await deleteUploadedFile(category.image);
     }
+
+    await prisma.category.delete({
+      where: { id },
+    });
 
     revalidatePath("/dashboard/admin/categories");
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Failed to delete category." };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to delete category." };
   }
 }

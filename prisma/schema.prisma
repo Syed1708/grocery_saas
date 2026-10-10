@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum UserRole {
+  OWNER
+  MANAGER
+  CASHIER
+}
+
+model Shop {
+  id             String    @id @default(cuid())
+  name           String
+  phone          String
+  email          String?
+  currency       String    @default("USD")
+  currencySymbol String    @default("$")
+  village        String?
+  district       String?
+  addressLine    String?
+  receiptHeader  String?   @default("Thank you for shopping with us!")
+  receiptFooter  String?   @default("Goods sold are eligible for return within 7 days.")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  users          User[]
+  categories     Category[]
+
+  @@map("shops")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  password     String
+  phone        String?
+  role         UserRole  @default(CASHIER)
+  profileImage String?
+  isActive     Boolean   @default(true)
+  shopId       String
+  shop         Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([shopId])
+  @@map("users")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  image       String?
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([shopId, name])
+  @@index([shopId])
+  @@map("categories")
+}
