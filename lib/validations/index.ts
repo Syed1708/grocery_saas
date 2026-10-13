@@ -1,5 +1,21 @@
 import { z } from "zod";
 
+
+// 👈 Add Register Schema to lib/validations/index.ts
+export const registerSchema = z.object({
+  shopName: z.string().min(2, "Store name must be at least 2 characters").max(100),
+  phone: z.string().min(5, "Phone number is too short").max(20),
+  currency: z.string().default("BDT"),
+  currencySymbol: z.string().default("৳"),
+  village: z.string().max(50).optional().nullable(),
+  district: z.string().max(50).optional().nullable(),
+  ownerName: z.string().min(2, "Owner name must be at least 2 characters").max(70),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+
 // Category Validation Schema
 export const categorySchema = z.object({
   id: z.string().optional(),
@@ -49,6 +65,19 @@ export const customerSchema = z.object({
 
 export type CustomerInput = z.infer<typeof customerSchema>;
 
+export const supplierSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "Contact person name is required"),
+  companyName: z.string().min(2, "Company / Distributor name is required"),
+  phone: z.string().min(5, "Phone number is required"),
+  email: z.string().email("Invalid email").optional().nullable().or(z.literal("")),
+  village: z.string().optional().nullable(),
+  district: z.string().optional().nullable(),
+  addressLine: z.string().optional().nullable(),
+  openingBalance: z.coerce.number().default(0),
+});
+
 export type CategoryInput = z.infer<typeof categorySchema>;
 export type UnitInput = z.infer<typeof unitSchema>;
 export type ProductInput = z.infer<typeof productSchema>;
+export type SupplierInput = z.infer<typeof supplierSchema>;

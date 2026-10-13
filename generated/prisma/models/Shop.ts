@@ -20,22 +20,36 @@ export type ShopModel = runtime.Types.Result.DefaultSelection<Prisma.$ShopPayloa
 
 export type AggregateShop = {
   _count: ShopCountAggregateOutputType | null
+  _avg: ShopAvgAggregateOutputType | null
+  _sum: ShopSumAggregateOutputType | null
   _min: ShopMinAggregateOutputType | null
   _max: ShopMaxAggregateOutputType | null
+}
+
+export type ShopAvgAggregateOutputType = {
+  vatPercent: runtime.Decimal | null
+}
+
+export type ShopSumAggregateOutputType = {
+  vatPercent: runtime.Decimal | null
 }
 
 export type ShopMinAggregateOutputType = {
   id: string | null
   name: string | null
+  nameEn: string | null
   phone: string | null
   email: string | null
-  currency: string | null
+  address: string | null
+  tradeLicense: string | null
+  binVatNumber: string | null
   currencySymbol: string | null
-  village: string | null
-  district: string | null
-  addressLine: string | null
-  receiptHeader: string | null
-  receiptFooter: string | null
+  vatPercent: runtime.Decimal | null
+  enableVat: boolean | null
+  thermalWidth: string | null
+  invoiceHeader: string | null
+  invoiceFooter: string | null
+  banglaReceipt: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -43,15 +57,19 @@ export type ShopMinAggregateOutputType = {
 export type ShopMaxAggregateOutputType = {
   id: string | null
   name: string | null
+  nameEn: string | null
   phone: string | null
   email: string | null
-  currency: string | null
+  address: string | null
+  tradeLicense: string | null
+  binVatNumber: string | null
   currencySymbol: string | null
-  village: string | null
-  district: string | null
-  addressLine: string | null
-  receiptHeader: string | null
-  receiptFooter: string | null
+  vatPercent: runtime.Decimal | null
+  enableVat: boolean | null
+  thermalWidth: string | null
+  invoiceHeader: string | null
+  invoiceFooter: string | null
+  banglaReceipt: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -59,33 +77,49 @@ export type ShopMaxAggregateOutputType = {
 export type ShopCountAggregateOutputType = {
   id: number
   name: number
+  nameEn: number
   phone: number
   email: number
-  currency: number
+  address: number
+  tradeLicense: number
+  binVatNumber: number
   currencySymbol: number
-  village: number
-  district: number
-  addressLine: number
-  receiptHeader: number
-  receiptFooter: number
+  vatPercent: number
+  enableVat: number
+  thermalWidth: number
+  invoiceHeader: number
+  invoiceFooter: number
+  banglaReceipt: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
 
+export type ShopAvgAggregateInputType = {
+  vatPercent?: true
+}
+
+export type ShopSumAggregateInputType = {
+  vatPercent?: true
+}
+
 export type ShopMinAggregateInputType = {
   id?: true
   name?: true
+  nameEn?: true
   phone?: true
   email?: true
-  currency?: true
+  address?: true
+  tradeLicense?: true
+  binVatNumber?: true
   currencySymbol?: true
-  village?: true
-  district?: true
-  addressLine?: true
-  receiptHeader?: true
-  receiptFooter?: true
+  vatPercent?: true
+  enableVat?: true
+  thermalWidth?: true
+  invoiceHeader?: true
+  invoiceFooter?: true
+  banglaReceipt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -93,15 +127,19 @@ export type ShopMinAggregateInputType = {
 export type ShopMaxAggregateInputType = {
   id?: true
   name?: true
+  nameEn?: true
   phone?: true
   email?: true
-  currency?: true
+  address?: true
+  tradeLicense?: true
+  binVatNumber?: true
   currencySymbol?: true
-  village?: true
-  district?: true
-  addressLine?: true
-  receiptHeader?: true
-  receiptFooter?: true
+  vatPercent?: true
+  enableVat?: true
+  thermalWidth?: true
+  invoiceHeader?: true
+  invoiceFooter?: true
+  banglaReceipt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -109,15 +147,19 @@ export type ShopMaxAggregateInputType = {
 export type ShopCountAggregateInputType = {
   id?: true
   name?: true
+  nameEn?: true
   phone?: true
   email?: true
-  currency?: true
+  address?: true
+  tradeLicense?: true
+  binVatNumber?: true
   currencySymbol?: true
-  village?: true
-  district?: true
-  addressLine?: true
-  receiptHeader?: true
-  receiptFooter?: true
+  vatPercent?: true
+  enableVat?: true
+  thermalWidth?: true
+  invoiceHeader?: true
+  invoiceFooter?: true
+  banglaReceipt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -161,6 +203,18 @@ export type ShopAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: ShopAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: ShopSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: ShopMinAggregateInputType
@@ -191,6 +245,8 @@ export type ShopGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: ShopCountAggregateInputType | true
+  _avg?: ShopAvgAggregateInputType
+  _sum?: ShopSumAggregateInputType
   _min?: ShopMinAggregateInputType
   _max?: ShopMaxAggregateInputType
 }
@@ -198,18 +254,24 @@ export type ShopGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type ShopGroupByOutputType = {
   id: string
   name: string
+  nameEn: string | null
   phone: string
   email: string | null
-  currency: string
+  address: string | null
+  tradeLicense: string | null
+  binVatNumber: string | null
   currencySymbol: string
-  village: string | null
-  district: string | null
-  addressLine: string | null
-  receiptHeader: string | null
-  receiptFooter: string | null
+  vatPercent: runtime.Decimal
+  enableVat: boolean
+  thermalWidth: string
+  invoiceHeader: string | null
+  invoiceFooter: string | null
+  banglaReceipt: boolean
   createdAt: Date
   updatedAt: Date
   _count: ShopCountAggregateOutputType | null
+  _avg: ShopAvgAggregateOutputType | null
+  _sum: ShopSumAggregateOutputType | null
   _min: ShopMinAggregateOutputType | null
   _max: ShopMaxAggregateOutputType | null
 }
@@ -235,43 +297,95 @@ export type ShopWhereInput = {
   NOT?: Prisma.ShopWhereInput | Prisma.ShopWhereInput[]
   id?: Prisma.StringFilter<"Shop"> | string
   name?: Prisma.StringFilter<"Shop"> | string
+  nameEn?: Prisma.StringNullableFilter<"Shop"> | string | null
   phone?: Prisma.StringFilter<"Shop"> | string
   email?: Prisma.StringNullableFilter<"Shop"> | string | null
-  currency?: Prisma.StringFilter<"Shop"> | string
+  address?: Prisma.StringNullableFilter<"Shop"> | string | null
+  tradeLicense?: Prisma.StringNullableFilter<"Shop"> | string | null
+  binVatNumber?: Prisma.StringNullableFilter<"Shop"> | string | null
   currencySymbol?: Prisma.StringFilter<"Shop"> | string
-  village?: Prisma.StringNullableFilter<"Shop"> | string | null
-  district?: Prisma.StringNullableFilter<"Shop"> | string | null
-  addressLine?: Prisma.StringNullableFilter<"Shop"> | string | null
-  receiptHeader?: Prisma.StringNullableFilter<"Shop"> | string | null
-  receiptFooter?: Prisma.StringNullableFilter<"Shop"> | string | null
+  vatPercent?: Prisma.DecimalFilter<"Shop"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFilter<"Shop"> | boolean
+  thermalWidth?: Prisma.StringFilter<"Shop"> | string
+  invoiceHeader?: Prisma.StringNullableFilter<"Shop"> | string | null
+  invoiceFooter?: Prisma.StringNullableFilter<"Shop"> | string | null
+  banglaReceipt?: Prisma.BoolFilter<"Shop"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
+  branches?: Prisma.BranchListRelationFilter
   users?: Prisma.UserListRelationFilter
   categories?: Prisma.CategoryListRelationFilter
-  products?: Prisma.ProductListRelationFilter
+  brands?: Prisma.BrandListRelationFilter
+  sections?: Prisma.ProductSectionListRelationFilter
   units?: Prisma.UnitListRelationFilter
+  products?: Prisma.ProductListRelationFilter
   customers?: Prisma.CustomerListRelationFilter
+  suppliers?: Prisma.SupplierListRelationFilter
+  purchases?: Prisma.PurchaseListRelationFilter
+  sales?: Prisma.SaleListRelationFilter
+  saleReturns?: Prisma.SaleReturnListRelationFilter
+  quotations?: Prisma.QuotationListRelationFilter
+  accounts?: Prisma.AccountListRelationFilter
+  expenses?: Prisma.ExpenseListRelationFilter
+  expenseCategories?: Prisma.ExpenseCategoryListRelationFilter
+  otherIncomes?: Prisma.OtherIncomeListRelationFilter
+  departments?: Prisma.DepartmentListRelationFilter
+  staffProfiles?: Prisma.StaffProfileListRelationFilter
+  payrolls?: Prisma.PayrollListRelationFilter
+  salaryAdvances?: Prisma.SalaryAdvanceListRelationFilter
+  loans?: Prisma.LoanListRelationFilter
+  bankCheques?: Prisma.BankChequeListRelationFilter
+  companyAssets?: Prisma.CompanyAssetListRelationFilter
+  ownerTransactions?: Prisma.OwnerTransactionListRelationFilter
+  cashRegisters?: Prisma.CashRegisterListRelationFilter
+  licenses?: Prisma.LicenseListRelationFilter
 }
 
 export type ShopOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nameEn?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
-  currency?: Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
+  tradeLicense?: Prisma.SortOrderInput | Prisma.SortOrder
+  binVatNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   currencySymbol?: Prisma.SortOrder
-  village?: Prisma.SortOrderInput | Prisma.SortOrder
-  district?: Prisma.SortOrderInput | Prisma.SortOrder
-  addressLine?: Prisma.SortOrderInput | Prisma.SortOrder
-  receiptHeader?: Prisma.SortOrderInput | Prisma.SortOrder
-  receiptFooter?: Prisma.SortOrderInput | Prisma.SortOrder
+  vatPercent?: Prisma.SortOrder
+  enableVat?: Prisma.SortOrder
+  thermalWidth?: Prisma.SortOrder
+  invoiceHeader?: Prisma.SortOrderInput | Prisma.SortOrder
+  invoiceFooter?: Prisma.SortOrderInput | Prisma.SortOrder
+  banglaReceipt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  branches?: Prisma.BranchOrderByRelationAggregateInput
   users?: Prisma.UserOrderByRelationAggregateInput
   categories?: Prisma.CategoryOrderByRelationAggregateInput
-  products?: Prisma.ProductOrderByRelationAggregateInput
+  brands?: Prisma.BrandOrderByRelationAggregateInput
+  sections?: Prisma.ProductSectionOrderByRelationAggregateInput
   units?: Prisma.UnitOrderByRelationAggregateInput
+  products?: Prisma.ProductOrderByRelationAggregateInput
   customers?: Prisma.CustomerOrderByRelationAggregateInput
+  suppliers?: Prisma.SupplierOrderByRelationAggregateInput
+  purchases?: Prisma.PurchaseOrderByRelationAggregateInput
+  sales?: Prisma.SaleOrderByRelationAggregateInput
+  saleReturns?: Prisma.SaleReturnOrderByRelationAggregateInput
+  quotations?: Prisma.QuotationOrderByRelationAggregateInput
+  accounts?: Prisma.AccountOrderByRelationAggregateInput
+  expenses?: Prisma.ExpenseOrderByRelationAggregateInput
+  expenseCategories?: Prisma.ExpenseCategoryOrderByRelationAggregateInput
+  otherIncomes?: Prisma.OtherIncomeOrderByRelationAggregateInput
+  departments?: Prisma.DepartmentOrderByRelationAggregateInput
+  staffProfiles?: Prisma.StaffProfileOrderByRelationAggregateInput
+  payrolls?: Prisma.PayrollOrderByRelationAggregateInput
+  salaryAdvances?: Prisma.SalaryAdvanceOrderByRelationAggregateInput
+  loans?: Prisma.LoanOrderByRelationAggregateInput
+  bankCheques?: Prisma.BankChequeOrderByRelationAggregateInput
+  companyAssets?: Prisma.CompanyAssetOrderByRelationAggregateInput
+  ownerTransactions?: Prisma.OwnerTransactionOrderByRelationAggregateInput
+  cashRegisters?: Prisma.CashRegisterOrderByRelationAggregateInput
+  licenses?: Prisma.LicenseOrderByRelationAggregateInput
   _relevance?: Prisma.ShopOrderByRelevanceInput
 }
 
@@ -281,41 +395,73 @@ export type ShopWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ShopWhereInput[]
   NOT?: Prisma.ShopWhereInput | Prisma.ShopWhereInput[]
   name?: Prisma.StringFilter<"Shop"> | string
+  nameEn?: Prisma.StringNullableFilter<"Shop"> | string | null
   phone?: Prisma.StringFilter<"Shop"> | string
   email?: Prisma.StringNullableFilter<"Shop"> | string | null
-  currency?: Prisma.StringFilter<"Shop"> | string
+  address?: Prisma.StringNullableFilter<"Shop"> | string | null
+  tradeLicense?: Prisma.StringNullableFilter<"Shop"> | string | null
+  binVatNumber?: Prisma.StringNullableFilter<"Shop"> | string | null
   currencySymbol?: Prisma.StringFilter<"Shop"> | string
-  village?: Prisma.StringNullableFilter<"Shop"> | string | null
-  district?: Prisma.StringNullableFilter<"Shop"> | string | null
-  addressLine?: Prisma.StringNullableFilter<"Shop"> | string | null
-  receiptHeader?: Prisma.StringNullableFilter<"Shop"> | string | null
-  receiptFooter?: Prisma.StringNullableFilter<"Shop"> | string | null
+  vatPercent?: Prisma.DecimalFilter<"Shop"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFilter<"Shop"> | boolean
+  thermalWidth?: Prisma.StringFilter<"Shop"> | string
+  invoiceHeader?: Prisma.StringNullableFilter<"Shop"> | string | null
+  invoiceFooter?: Prisma.StringNullableFilter<"Shop"> | string | null
+  banglaReceipt?: Prisma.BoolFilter<"Shop"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
+  branches?: Prisma.BranchListRelationFilter
   users?: Prisma.UserListRelationFilter
   categories?: Prisma.CategoryListRelationFilter
-  products?: Prisma.ProductListRelationFilter
+  brands?: Prisma.BrandListRelationFilter
+  sections?: Prisma.ProductSectionListRelationFilter
   units?: Prisma.UnitListRelationFilter
+  products?: Prisma.ProductListRelationFilter
   customers?: Prisma.CustomerListRelationFilter
+  suppliers?: Prisma.SupplierListRelationFilter
+  purchases?: Prisma.PurchaseListRelationFilter
+  sales?: Prisma.SaleListRelationFilter
+  saleReturns?: Prisma.SaleReturnListRelationFilter
+  quotations?: Prisma.QuotationListRelationFilter
+  accounts?: Prisma.AccountListRelationFilter
+  expenses?: Prisma.ExpenseListRelationFilter
+  expenseCategories?: Prisma.ExpenseCategoryListRelationFilter
+  otherIncomes?: Prisma.OtherIncomeListRelationFilter
+  departments?: Prisma.DepartmentListRelationFilter
+  staffProfiles?: Prisma.StaffProfileListRelationFilter
+  payrolls?: Prisma.PayrollListRelationFilter
+  salaryAdvances?: Prisma.SalaryAdvanceListRelationFilter
+  loans?: Prisma.LoanListRelationFilter
+  bankCheques?: Prisma.BankChequeListRelationFilter
+  companyAssets?: Prisma.CompanyAssetListRelationFilter
+  ownerTransactions?: Prisma.OwnerTransactionListRelationFilter
+  cashRegisters?: Prisma.CashRegisterListRelationFilter
+  licenses?: Prisma.LicenseListRelationFilter
 }, "id">
 
 export type ShopOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nameEn?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
-  currency?: Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
+  tradeLicense?: Prisma.SortOrderInput | Prisma.SortOrder
+  binVatNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   currencySymbol?: Prisma.SortOrder
-  village?: Prisma.SortOrderInput | Prisma.SortOrder
-  district?: Prisma.SortOrderInput | Prisma.SortOrder
-  addressLine?: Prisma.SortOrderInput | Prisma.SortOrder
-  receiptHeader?: Prisma.SortOrderInput | Prisma.SortOrder
-  receiptFooter?: Prisma.SortOrderInput | Prisma.SortOrder
+  vatPercent?: Prisma.SortOrder
+  enableVat?: Prisma.SortOrder
+  thermalWidth?: Prisma.SortOrder
+  invoiceHeader?: Prisma.SortOrderInput | Prisma.SortOrder
+  invoiceFooter?: Prisma.SortOrderInput | Prisma.SortOrder
+  banglaReceipt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ShopCountOrderByAggregateInput
+  _avg?: Prisma.ShopAvgOrderByAggregateInput
   _max?: Prisma.ShopMaxOrderByAggregateInput
   _min?: Prisma.ShopMinOrderByAggregateInput
+  _sum?: Prisma.ShopSumOrderByAggregateInput
 }
 
 export type ShopScalarWhereWithAggregatesInput = {
@@ -324,15 +470,19 @@ export type ShopScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ShopScalarWhereWithAggregatesInput | Prisma.ShopScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Shop"> | string
   name?: Prisma.StringWithAggregatesFilter<"Shop"> | string
+  nameEn?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
   phone?: Prisma.StringWithAggregatesFilter<"Shop"> | string
   email?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
-  currency?: Prisma.StringWithAggregatesFilter<"Shop"> | string
+  address?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
+  tradeLicense?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
+  binVatNumber?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
   currencySymbol?: Prisma.StringWithAggregatesFilter<"Shop"> | string
-  village?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
-  district?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
-  addressLine?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
-  receiptHeader?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
-  receiptFooter?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
+  vatPercent?: Prisma.DecimalWithAggregatesFilter<"Shop"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolWithAggregatesFilter<"Shop"> | boolean
+  thermalWidth?: Prisma.StringWithAggregatesFilter<"Shop"> | string
+  invoiceHeader?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
+  invoiceFooter?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
+  banglaReceipt?: Prisma.BoolWithAggregatesFilter<"Shop"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Shop"> | Date | string
 }
@@ -340,99 +490,207 @@ export type ShopScalarWhereWithAggregatesInput = {
 export type ShopCreateInput = {
   id?: string
   name: string
+  nameEn?: string | null
   phone: string
   email?: string | null
-  currency?: string
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
   currencySymbol?: string
-  village?: string | null
-  district?: string | null
-  addressLine?: string | null
-  receiptHeader?: string | null
-  receiptFooter?: string | null
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
   users?: Prisma.UserCreateNestedManyWithoutShopInput
   categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
-  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
   units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
   customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateInput = {
   id?: string
   name: string
+  nameEn?: string | null
   phone: string
   email?: string | null
-  currency?: string
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
   currencySymbol?: string
-  village?: string | null
-  district?: string | null
-  addressLine?: string | null
-  receiptHeader?: string | null
-  receiptFooter?: string | null
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
   users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
   categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
-  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
   units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
   users?: Prisma.UserUpdateManyWithoutShopNestedInput
   categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
-  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
   units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
   users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
   categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
-  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
   units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateManyInput = {
   id?: string
   name: string
+  nameEn?: string | null
   phone: string
   email?: string | null
-  currency?: string
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
   currencySymbol?: string
-  village?: string | null
-  district?: string | null
-  addressLine?: string | null
-  receiptHeader?: string | null
-  receiptFooter?: string | null
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -440,15 +698,19 @@ export type ShopCreateManyInput = {
 export type ShopUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -456,15 +718,19 @@ export type ShopUpdateManyMutationInput = {
 export type ShopUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -478,31 +744,43 @@ export type ShopOrderByRelevanceInput = {
 export type ShopCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nameEn?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  currency?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  tradeLicense?: Prisma.SortOrder
+  binVatNumber?: Prisma.SortOrder
   currencySymbol?: Prisma.SortOrder
-  village?: Prisma.SortOrder
-  district?: Prisma.SortOrder
-  addressLine?: Prisma.SortOrder
-  receiptHeader?: Prisma.SortOrder
-  receiptFooter?: Prisma.SortOrder
+  vatPercent?: Prisma.SortOrder
+  enableVat?: Prisma.SortOrder
+  thermalWidth?: Prisma.SortOrder
+  invoiceHeader?: Prisma.SortOrder
+  invoiceFooter?: Prisma.SortOrder
+  banglaReceipt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ShopAvgOrderByAggregateInput = {
+  vatPercent?: Prisma.SortOrder
 }
 
 export type ShopMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nameEn?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  currency?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  tradeLicense?: Prisma.SortOrder
+  binVatNumber?: Prisma.SortOrder
   currencySymbol?: Prisma.SortOrder
-  village?: Prisma.SortOrder
-  district?: Prisma.SortOrder
-  addressLine?: Prisma.SortOrder
-  receiptHeader?: Prisma.SortOrder
-  receiptFooter?: Prisma.SortOrder
+  vatPercent?: Prisma.SortOrder
+  enableVat?: Prisma.SortOrder
+  thermalWidth?: Prisma.SortOrder
+  invoiceHeader?: Prisma.SortOrder
+  invoiceFooter?: Prisma.SortOrder
+  banglaReceipt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -510,17 +788,25 @@ export type ShopMaxOrderByAggregateInput = {
 export type ShopMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nameEn?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  currency?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  tradeLicense?: Prisma.SortOrder
+  binVatNumber?: Prisma.SortOrder
   currencySymbol?: Prisma.SortOrder
-  village?: Prisma.SortOrder
-  district?: Prisma.SortOrder
-  addressLine?: Prisma.SortOrder
-  receiptHeader?: Prisma.SortOrder
-  receiptFooter?: Prisma.SortOrder
+  vatPercent?: Prisma.SortOrder
+  enableVat?: Prisma.SortOrder
+  thermalWidth?: Prisma.SortOrder
+  invoiceHeader?: Prisma.SortOrder
+  invoiceFooter?: Prisma.SortOrder
+  banglaReceipt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ShopSumOrderByAggregateInput = {
+  vatPercent?: Prisma.SortOrder
 }
 
 export type ShopScalarRelationFilter = {
@@ -536,8 +822,48 @@ export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
 
+export type DecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type ShopCreateNestedOneWithoutBranchesInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutBranchesInput, Prisma.ShopUncheckedCreateWithoutBranchesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutBranchesInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutBranchesNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutBranchesInput, Prisma.ShopUncheckedCreateWithoutBranchesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutBranchesInput
+  upsert?: Prisma.ShopUpsertWithoutBranchesInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutBranchesInput, Prisma.ShopUpdateWithoutBranchesInput>, Prisma.ShopUncheckedUpdateWithoutBranchesInput>
+}
+
+export type ShopCreateNestedOneWithoutLicensesInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutLicensesInput, Prisma.ShopUncheckedCreateWithoutLicensesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutLicensesInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutLicensesNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutLicensesInput, Prisma.ShopUncheckedCreateWithoutLicensesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutLicensesInput
+  upsert?: Prisma.ShopUpsertWithoutLicensesInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutLicensesInput, Prisma.ShopUpdateWithoutLicensesInput>, Prisma.ShopUncheckedUpdateWithoutLicensesInput>
 }
 
 export type ShopCreateNestedOneWithoutUsersInput = {
@@ -554,6 +880,34 @@ export type ShopUpdateOneRequiredWithoutUsersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutUsersInput, Prisma.ShopUpdateWithoutUsersInput>, Prisma.ShopUncheckedUpdateWithoutUsersInput>
 }
 
+export type ShopCreateNestedOneWithoutUnitsInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutUnitsInput, Prisma.ShopUncheckedCreateWithoutUnitsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutUnitsInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutUnitsNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutUnitsInput, Prisma.ShopUncheckedCreateWithoutUnitsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutUnitsInput
+  upsert?: Prisma.ShopUpsertWithoutUnitsInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutUnitsInput, Prisma.ShopUpdateWithoutUnitsInput>, Prisma.ShopUncheckedUpdateWithoutUnitsInput>
+}
+
+export type ShopCreateNestedOneWithoutSectionsInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutSectionsInput, Prisma.ShopUncheckedCreateWithoutSectionsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutSectionsInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutSectionsNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutSectionsInput, Prisma.ShopUncheckedCreateWithoutSectionsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutSectionsInput
+  upsert?: Prisma.ShopUpsertWithoutSectionsInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutSectionsInput, Prisma.ShopUpdateWithoutSectionsInput>, Prisma.ShopUncheckedUpdateWithoutSectionsInput>
+}
+
 export type ShopCreateNestedOneWithoutCategoriesInput = {
   create?: Prisma.XOR<Prisma.ShopCreateWithoutCategoriesInput, Prisma.ShopUncheckedCreateWithoutCategoriesInput>
   connectOrCreate?: Prisma.ShopCreateOrConnectWithoutCategoriesInput
@@ -568,18 +922,18 @@ export type ShopUpdateOneRequiredWithoutCategoriesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutCategoriesInput, Prisma.ShopUpdateWithoutCategoriesInput>, Prisma.ShopUncheckedUpdateWithoutCategoriesInput>
 }
 
-export type ShopCreateNestedOneWithoutUnitsInput = {
-  create?: Prisma.XOR<Prisma.ShopCreateWithoutUnitsInput, Prisma.ShopUncheckedCreateWithoutUnitsInput>
-  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutUnitsInput
+export type ShopCreateNestedOneWithoutBrandsInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutBrandsInput, Prisma.ShopUncheckedCreateWithoutBrandsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutBrandsInput
   connect?: Prisma.ShopWhereUniqueInput
 }
 
-export type ShopUpdateOneRequiredWithoutUnitsNestedInput = {
-  create?: Prisma.XOR<Prisma.ShopCreateWithoutUnitsInput, Prisma.ShopUncheckedCreateWithoutUnitsInput>
-  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutUnitsInput
-  upsert?: Prisma.ShopUpsertWithoutUnitsInput
+export type ShopUpdateOneRequiredWithoutBrandsNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutBrandsInput, Prisma.ShopUncheckedCreateWithoutBrandsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutBrandsInput
+  upsert?: Prisma.ShopUpsertWithoutBrandsInput
   connect?: Prisma.ShopWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutUnitsInput, Prisma.ShopUpdateWithoutUnitsInput>, Prisma.ShopUncheckedUpdateWithoutUnitsInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutBrandsInput, Prisma.ShopUpdateWithoutBrandsInput>, Prisma.ShopUncheckedUpdateWithoutBrandsInput>
 }
 
 export type ShopCreateNestedOneWithoutProductsInput = {
@@ -596,6 +950,34 @@ export type ShopUpdateOneRequiredWithoutProductsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutProductsInput, Prisma.ShopUpdateWithoutProductsInput>, Prisma.ShopUncheckedUpdateWithoutProductsInput>
 }
 
+export type ShopCreateNestedOneWithoutSuppliersInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutSuppliersInput, Prisma.ShopUncheckedCreateWithoutSuppliersInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutSuppliersInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutSuppliersNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutSuppliersInput, Prisma.ShopUncheckedCreateWithoutSuppliersInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutSuppliersInput
+  upsert?: Prisma.ShopUpsertWithoutSuppliersInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutSuppliersInput, Prisma.ShopUpdateWithoutSuppliersInput>, Prisma.ShopUncheckedUpdateWithoutSuppliersInput>
+}
+
+export type ShopCreateNestedOneWithoutPurchasesInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutPurchasesInput, Prisma.ShopUncheckedCreateWithoutPurchasesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutPurchasesInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutPurchasesNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutPurchasesInput, Prisma.ShopUncheckedCreateWithoutPurchasesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutPurchasesInput
+  upsert?: Prisma.ShopUpsertWithoutPurchasesInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutPurchasesInput, Prisma.ShopUpdateWithoutPurchasesInput>, Prisma.ShopUncheckedUpdateWithoutPurchasesInput>
+}
+
 export type ShopCreateNestedOneWithoutCustomersInput = {
   create?: Prisma.XOR<Prisma.ShopCreateWithoutCustomersInput, Prisma.ShopUncheckedCreateWithoutCustomersInput>
   connectOrCreate?: Prisma.ShopCreateOrConnectWithoutCustomersInput
@@ -610,44 +992,720 @@ export type ShopUpdateOneRequiredWithoutCustomersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutCustomersInput, Prisma.ShopUpdateWithoutCustomersInput>, Prisma.ShopUncheckedUpdateWithoutCustomersInput>
 }
 
+export type ShopCreateNestedOneWithoutSalesInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutSalesInput, Prisma.ShopUncheckedCreateWithoutSalesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutSalesInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutSalesNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutSalesInput, Prisma.ShopUncheckedCreateWithoutSalesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutSalesInput
+  upsert?: Prisma.ShopUpsertWithoutSalesInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutSalesInput, Prisma.ShopUpdateWithoutSalesInput>, Prisma.ShopUncheckedUpdateWithoutSalesInput>
+}
+
+export type ShopCreateNestedOneWithoutSaleReturnsInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutSaleReturnsInput, Prisma.ShopUncheckedCreateWithoutSaleReturnsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutSaleReturnsInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutSaleReturnsNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutSaleReturnsInput, Prisma.ShopUncheckedCreateWithoutSaleReturnsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutSaleReturnsInput
+  upsert?: Prisma.ShopUpsertWithoutSaleReturnsInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutSaleReturnsInput, Prisma.ShopUpdateWithoutSaleReturnsInput>, Prisma.ShopUncheckedUpdateWithoutSaleReturnsInput>
+}
+
+export type ShopCreateNestedOneWithoutQuotationsInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutQuotationsInput, Prisma.ShopUncheckedCreateWithoutQuotationsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutQuotationsInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutQuotationsNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutQuotationsInput, Prisma.ShopUncheckedCreateWithoutQuotationsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutQuotationsInput
+  upsert?: Prisma.ShopUpsertWithoutQuotationsInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutQuotationsInput, Prisma.ShopUpdateWithoutQuotationsInput>, Prisma.ShopUncheckedUpdateWithoutQuotationsInput>
+}
+
+export type ShopCreateNestedOneWithoutAccountsInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutAccountsInput, Prisma.ShopUncheckedCreateWithoutAccountsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutAccountsInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutAccountsNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutAccountsInput, Prisma.ShopUncheckedCreateWithoutAccountsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutAccountsInput
+  upsert?: Prisma.ShopUpsertWithoutAccountsInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutAccountsInput, Prisma.ShopUpdateWithoutAccountsInput>, Prisma.ShopUncheckedUpdateWithoutAccountsInput>
+}
+
+export type ShopCreateNestedOneWithoutBankChequesInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutBankChequesInput, Prisma.ShopUncheckedCreateWithoutBankChequesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutBankChequesInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutBankChequesNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutBankChequesInput, Prisma.ShopUncheckedCreateWithoutBankChequesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutBankChequesInput
+  upsert?: Prisma.ShopUpsertWithoutBankChequesInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutBankChequesInput, Prisma.ShopUpdateWithoutBankChequesInput>, Prisma.ShopUncheckedUpdateWithoutBankChequesInput>
+}
+
+export type ShopCreateNestedOneWithoutLoansInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutLoansInput, Prisma.ShopUncheckedCreateWithoutLoansInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutLoansInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutLoansNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutLoansInput, Prisma.ShopUncheckedCreateWithoutLoansInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutLoansInput
+  upsert?: Prisma.ShopUpsertWithoutLoansInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutLoansInput, Prisma.ShopUpdateWithoutLoansInput>, Prisma.ShopUncheckedUpdateWithoutLoansInput>
+}
+
+export type ShopCreateNestedOneWithoutExpenseCategoriesInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutExpenseCategoriesInput, Prisma.ShopUncheckedCreateWithoutExpenseCategoriesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutExpenseCategoriesInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutExpenseCategoriesNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutExpenseCategoriesInput, Prisma.ShopUncheckedCreateWithoutExpenseCategoriesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutExpenseCategoriesInput
+  upsert?: Prisma.ShopUpsertWithoutExpenseCategoriesInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutExpenseCategoriesInput, Prisma.ShopUpdateWithoutExpenseCategoriesInput>, Prisma.ShopUncheckedUpdateWithoutExpenseCategoriesInput>
+}
+
+export type ShopCreateNestedOneWithoutExpensesInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutExpensesInput, Prisma.ShopUncheckedCreateWithoutExpensesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutExpensesInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutExpensesNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutExpensesInput, Prisma.ShopUncheckedCreateWithoutExpensesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutExpensesInput
+  upsert?: Prisma.ShopUpsertWithoutExpensesInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutExpensesInput, Prisma.ShopUpdateWithoutExpensesInput>, Prisma.ShopUncheckedUpdateWithoutExpensesInput>
+}
+
+export type ShopCreateNestedOneWithoutOtherIncomesInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutOtherIncomesInput, Prisma.ShopUncheckedCreateWithoutOtherIncomesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutOtherIncomesInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutOtherIncomesNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutOtherIncomesInput, Prisma.ShopUncheckedCreateWithoutOtherIncomesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutOtherIncomesInput
+  upsert?: Prisma.ShopUpsertWithoutOtherIncomesInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutOtherIncomesInput, Prisma.ShopUpdateWithoutOtherIncomesInput>, Prisma.ShopUncheckedUpdateWithoutOtherIncomesInput>
+}
+
+export type ShopCreateNestedOneWithoutCompanyAssetsInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutCompanyAssetsInput, Prisma.ShopUncheckedCreateWithoutCompanyAssetsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutCompanyAssetsInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutCompanyAssetsNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutCompanyAssetsInput, Prisma.ShopUncheckedCreateWithoutCompanyAssetsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutCompanyAssetsInput
+  upsert?: Prisma.ShopUpsertWithoutCompanyAssetsInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutCompanyAssetsInput, Prisma.ShopUpdateWithoutCompanyAssetsInput>, Prisma.ShopUncheckedUpdateWithoutCompanyAssetsInput>
+}
+
+export type ShopCreateNestedOneWithoutOwnerTransactionsInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutOwnerTransactionsInput, Prisma.ShopUncheckedCreateWithoutOwnerTransactionsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutOwnerTransactionsInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutOwnerTransactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutOwnerTransactionsInput, Prisma.ShopUncheckedCreateWithoutOwnerTransactionsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutOwnerTransactionsInput
+  upsert?: Prisma.ShopUpsertWithoutOwnerTransactionsInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutOwnerTransactionsInput, Prisma.ShopUpdateWithoutOwnerTransactionsInput>, Prisma.ShopUncheckedUpdateWithoutOwnerTransactionsInput>
+}
+
+export type ShopCreateNestedOneWithoutDepartmentsInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutDepartmentsInput, Prisma.ShopUncheckedCreateWithoutDepartmentsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutDepartmentsInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutDepartmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutDepartmentsInput, Prisma.ShopUncheckedCreateWithoutDepartmentsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutDepartmentsInput
+  upsert?: Prisma.ShopUpsertWithoutDepartmentsInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutDepartmentsInput, Prisma.ShopUpdateWithoutDepartmentsInput>, Prisma.ShopUncheckedUpdateWithoutDepartmentsInput>
+}
+
+export type ShopCreateNestedOneWithoutStaffProfilesInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutStaffProfilesInput, Prisma.ShopUncheckedCreateWithoutStaffProfilesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutStaffProfilesInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutStaffProfilesNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutStaffProfilesInput, Prisma.ShopUncheckedCreateWithoutStaffProfilesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutStaffProfilesInput
+  upsert?: Prisma.ShopUpsertWithoutStaffProfilesInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutStaffProfilesInput, Prisma.ShopUpdateWithoutStaffProfilesInput>, Prisma.ShopUncheckedUpdateWithoutStaffProfilesInput>
+}
+
+export type ShopCreateNestedOneWithoutSalaryAdvancesInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutSalaryAdvancesInput, Prisma.ShopUncheckedCreateWithoutSalaryAdvancesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutSalaryAdvancesInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutSalaryAdvancesNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutSalaryAdvancesInput, Prisma.ShopUncheckedCreateWithoutSalaryAdvancesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutSalaryAdvancesInput
+  upsert?: Prisma.ShopUpsertWithoutSalaryAdvancesInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutSalaryAdvancesInput, Prisma.ShopUpdateWithoutSalaryAdvancesInput>, Prisma.ShopUncheckedUpdateWithoutSalaryAdvancesInput>
+}
+
+export type ShopCreateNestedOneWithoutPayrollsInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutPayrollsInput, Prisma.ShopUncheckedCreateWithoutPayrollsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutPayrollsInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutPayrollsNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutPayrollsInput, Prisma.ShopUncheckedCreateWithoutPayrollsInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutPayrollsInput
+  upsert?: Prisma.ShopUpsertWithoutPayrollsInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutPayrollsInput, Prisma.ShopUpdateWithoutPayrollsInput>, Prisma.ShopUncheckedUpdateWithoutPayrollsInput>
+}
+
+export type ShopCreateNestedOneWithoutCashRegistersInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutCashRegistersInput, Prisma.ShopUncheckedCreateWithoutCashRegistersInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutCashRegistersInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutCashRegistersNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutCashRegistersInput, Prisma.ShopUncheckedCreateWithoutCashRegistersInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutCashRegistersInput
+  upsert?: Prisma.ShopUpsertWithoutCashRegistersInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutCashRegistersInput, Prisma.ShopUpdateWithoutCashRegistersInput>, Prisma.ShopUncheckedUpdateWithoutCashRegistersInput>
+}
+
+export type ShopCreateWithoutBranchesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutBranchesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutBranchesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutBranchesInput, Prisma.ShopUncheckedCreateWithoutBranchesInput>
+}
+
+export type ShopUpsertWithoutBranchesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutBranchesInput, Prisma.ShopUncheckedUpdateWithoutBranchesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutBranchesInput, Prisma.ShopUncheckedCreateWithoutBranchesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutBranchesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutBranchesInput, Prisma.ShopUncheckedUpdateWithoutBranchesInput>
+}
+
+export type ShopUpdateWithoutBranchesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutBranchesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutLicensesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutLicensesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutLicensesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutLicensesInput, Prisma.ShopUncheckedCreateWithoutLicensesInput>
+}
+
+export type ShopUpsertWithoutLicensesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutLicensesInput, Prisma.ShopUncheckedUpdateWithoutLicensesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutLicensesInput, Prisma.ShopUncheckedCreateWithoutLicensesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutLicensesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutLicensesInput, Prisma.ShopUncheckedUpdateWithoutLicensesInput>
+}
+
+export type ShopUpdateWithoutLicensesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutLicensesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+}
+
 export type ShopCreateWithoutUsersInput = {
   id?: string
   name: string
+  nameEn?: string | null
   phone: string
   email?: string | null
-  currency?: string
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
   currencySymbol?: string
-  village?: string | null
-  district?: string | null
-  addressLine?: string | null
-  receiptHeader?: string | null
-  receiptFooter?: string | null
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
   categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
-  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
   units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
   customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutUsersInput = {
   id?: string
   name: string
+  nameEn?: string | null
   phone: string
   email?: string | null
-  currency?: string
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
   currencySymbol?: string
-  village?: string | null
-  district?: string | null
-  addressLine?: string | null
-  receiptHeader?: string | null
-  receiptFooter?: string | null
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
   categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
-  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
   units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutUsersInput = {
@@ -669,177 +1727,185 @@ export type ShopUpdateToOneWithWhereWithoutUsersInput = {
 export type ShopUpdateWithoutUsersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
   categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
-  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
   units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutUsersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
   categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
-  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
   units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
-  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
-}
-
-export type ShopCreateWithoutCategoriesInput = {
-  id?: string
-  name: string
-  phone: string
-  email?: string | null
-  currency?: string
-  currencySymbol?: string
-  village?: string | null
-  district?: string | null
-  addressLine?: string | null
-  receiptHeader?: string | null
-  receiptFooter?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  users?: Prisma.UserCreateNestedManyWithoutShopInput
-  products?: Prisma.ProductCreateNestedManyWithoutShopInput
-  units?: Prisma.UnitCreateNestedManyWithoutShopInput
-  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
-}
-
-export type ShopUncheckedCreateWithoutCategoriesInput = {
-  id?: string
-  name: string
-  phone: string
-  email?: string | null
-  currency?: string
-  currencySymbol?: string
-  village?: string | null
-  district?: string | null
-  addressLine?: string | null
-  receiptHeader?: string | null
-  receiptFooter?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
-  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
-  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
-  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
-}
-
-export type ShopCreateOrConnectWithoutCategoriesInput = {
-  where: Prisma.ShopWhereUniqueInput
-  create: Prisma.XOR<Prisma.ShopCreateWithoutCategoriesInput, Prisma.ShopUncheckedCreateWithoutCategoriesInput>
-}
-
-export type ShopUpsertWithoutCategoriesInput = {
-  update: Prisma.XOR<Prisma.ShopUpdateWithoutCategoriesInput, Prisma.ShopUncheckedUpdateWithoutCategoriesInput>
-  create: Prisma.XOR<Prisma.ShopCreateWithoutCategoriesInput, Prisma.ShopUncheckedCreateWithoutCategoriesInput>
-  where?: Prisma.ShopWhereInput
-}
-
-export type ShopUpdateToOneWithWhereWithoutCategoriesInput = {
-  where?: Prisma.ShopWhereInput
-  data: Prisma.XOR<Prisma.ShopUpdateWithoutCategoriesInput, Prisma.ShopUncheckedUpdateWithoutCategoriesInput>
-}
-
-export type ShopUpdateWithoutCategoriesInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
-  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  users?: Prisma.UserUpdateManyWithoutShopNestedInput
-  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
-  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
-  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
-}
-
-export type ShopUncheckedUpdateWithoutCategoriesInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
-  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
-  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutUnitsInput = {
   id?: string
   name: string
+  nameEn?: string | null
   phone: string
   email?: string | null
-  currency?: string
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
   currencySymbol?: string
-  village?: string | null
-  district?: string | null
-  addressLine?: string | null
-  receiptHeader?: string | null
-  receiptFooter?: string | null
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
   users?: Prisma.UserCreateNestedManyWithoutShopInput
   categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
   products?: Prisma.ProductCreateNestedManyWithoutShopInput
   customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutUnitsInput = {
   id?: string
   name: string
+  nameEn?: string | null
   phone: string
   email?: string | null
-  currency?: string
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
   currencySymbol?: string
-  village?: string | null
-  district?: string | null
-  addressLine?: string | null
-  receiptHeader?: string | null
-  receiptFooter?: string | null
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
   users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
   categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutUnitsInput = {
@@ -861,81 +1927,785 @@ export type ShopUpdateToOneWithWhereWithoutUnitsInput = {
 export type ShopUpdateWithoutUnitsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
   users?: Prisma.UserUpdateManyWithoutShopNestedInput
   categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
   products?: Prisma.ProductUpdateManyWithoutShopNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutUnitsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
   users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
   categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutSectionsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutSectionsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutSectionsInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutSectionsInput, Prisma.ShopUncheckedCreateWithoutSectionsInput>
+}
+
+export type ShopUpsertWithoutSectionsInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutSectionsInput, Prisma.ShopUncheckedUpdateWithoutSectionsInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutSectionsInput, Prisma.ShopUncheckedCreateWithoutSectionsInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutSectionsInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutSectionsInput, Prisma.ShopUncheckedUpdateWithoutSectionsInput>
+}
+
+export type ShopUpdateWithoutSectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutSectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutCategoriesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutCategoriesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutCategoriesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutCategoriesInput, Prisma.ShopUncheckedCreateWithoutCategoriesInput>
+}
+
+export type ShopUpsertWithoutCategoriesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutCategoriesInput, Prisma.ShopUncheckedUpdateWithoutCategoriesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutCategoriesInput, Prisma.ShopUncheckedCreateWithoutCategoriesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutCategoriesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutCategoriesInput, Prisma.ShopUncheckedUpdateWithoutCategoriesInput>
+}
+
+export type ShopUpdateWithoutCategoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutCategoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutBrandsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutBrandsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutBrandsInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutBrandsInput, Prisma.ShopUncheckedCreateWithoutBrandsInput>
+}
+
+export type ShopUpsertWithoutBrandsInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutBrandsInput, Prisma.ShopUncheckedUpdateWithoutBrandsInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutBrandsInput, Prisma.ShopUncheckedCreateWithoutBrandsInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutBrandsInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutBrandsInput, Prisma.ShopUncheckedUpdateWithoutBrandsInput>
+}
+
+export type ShopUpdateWithoutBrandsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutBrandsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutProductsInput = {
   id?: string
   name: string
+  nameEn?: string | null
   phone: string
   email?: string | null
-  currency?: string
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
   currencySymbol?: string
-  village?: string | null
-  district?: string | null
-  addressLine?: string | null
-  receiptHeader?: string | null
-  receiptFooter?: string | null
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
   users?: Prisma.UserCreateNestedManyWithoutShopInput
   categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
   units?: Prisma.UnitCreateNestedManyWithoutShopInput
   customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutProductsInput = {
   id?: string
   name: string
+  nameEn?: string | null
   phone: string
   email?: string | null
-  currency?: string
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
   currencySymbol?: string
-  village?: string | null
-  district?: string | null
-  addressLine?: string | null
-  receiptHeader?: string | null
-  receiptFooter?: string | null
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
   users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
   categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
   units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutProductsInput = {
@@ -957,81 +2727,585 @@ export type ShopUpdateToOneWithWhereWithoutProductsInput = {
 export type ShopUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
   users?: Prisma.UserUpdateManyWithoutShopNestedInput
   categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
   units?: Prisma.UnitUpdateManyWithoutShopNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
   users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
   categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
   units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutSuppliersInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutSuppliersInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutSuppliersInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutSuppliersInput, Prisma.ShopUncheckedCreateWithoutSuppliersInput>
+}
+
+export type ShopUpsertWithoutSuppliersInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutSuppliersInput, Prisma.ShopUncheckedUpdateWithoutSuppliersInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutSuppliersInput, Prisma.ShopUncheckedCreateWithoutSuppliersInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutSuppliersInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutSuppliersInput, Prisma.ShopUncheckedUpdateWithoutSuppliersInput>
+}
+
+export type ShopUpdateWithoutSuppliersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutSuppliersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutPurchasesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutPurchasesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutPurchasesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutPurchasesInput, Prisma.ShopUncheckedCreateWithoutPurchasesInput>
+}
+
+export type ShopUpsertWithoutPurchasesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutPurchasesInput, Prisma.ShopUncheckedUpdateWithoutPurchasesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutPurchasesInput, Prisma.ShopUncheckedCreateWithoutPurchasesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutPurchasesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutPurchasesInput, Prisma.ShopUncheckedUpdateWithoutPurchasesInput>
+}
+
+export type ShopUpdateWithoutPurchasesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutPurchasesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutCustomersInput = {
   id?: string
   name: string
+  nameEn?: string | null
   phone: string
   email?: string | null
-  currency?: string
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
   currencySymbol?: string
-  village?: string | null
-  district?: string | null
-  addressLine?: string | null
-  receiptHeader?: string | null
-  receiptFooter?: string | null
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
   users?: Prisma.UserCreateNestedManyWithoutShopInput
   categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
-  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
   units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutCustomersInput = {
   id?: string
   name: string
+  nameEn?: string | null
   phone: string
   email?: string | null
-  currency?: string
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
   currencySymbol?: string
-  village?: string | null
-  district?: string | null
-  addressLine?: string | null
-  receiptHeader?: string | null
-  receiptFooter?: string | null
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
   users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
   categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
-  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
   units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutCustomersInput = {
@@ -1053,41 +3327,3293 @@ export type ShopUpdateToOneWithWhereWithoutCustomersInput = {
 export type ShopUpdateWithoutCustomersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
   users?: Prisma.UserUpdateManyWithoutShopNestedInput
   categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
-  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
   units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutCustomersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
-  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  receiptFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
   users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
   categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
-  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
   units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutSalesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutSalesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutSalesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutSalesInput, Prisma.ShopUncheckedCreateWithoutSalesInput>
+}
+
+export type ShopUpsertWithoutSalesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutSalesInput, Prisma.ShopUncheckedUpdateWithoutSalesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutSalesInput, Prisma.ShopUncheckedCreateWithoutSalesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutSalesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutSalesInput, Prisma.ShopUncheckedUpdateWithoutSalesInput>
+}
+
+export type ShopUpdateWithoutSalesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutSalesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutSaleReturnsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutSaleReturnsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutSaleReturnsInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutSaleReturnsInput, Prisma.ShopUncheckedCreateWithoutSaleReturnsInput>
+}
+
+export type ShopUpsertWithoutSaleReturnsInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutSaleReturnsInput, Prisma.ShopUncheckedUpdateWithoutSaleReturnsInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutSaleReturnsInput, Prisma.ShopUncheckedCreateWithoutSaleReturnsInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutSaleReturnsInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutSaleReturnsInput, Prisma.ShopUncheckedUpdateWithoutSaleReturnsInput>
+}
+
+export type ShopUpdateWithoutSaleReturnsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutSaleReturnsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutQuotationsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutQuotationsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutQuotationsInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutQuotationsInput, Prisma.ShopUncheckedCreateWithoutQuotationsInput>
+}
+
+export type ShopUpsertWithoutQuotationsInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutQuotationsInput, Prisma.ShopUncheckedUpdateWithoutQuotationsInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutQuotationsInput, Prisma.ShopUncheckedCreateWithoutQuotationsInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutQuotationsInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutQuotationsInput, Prisma.ShopUncheckedUpdateWithoutQuotationsInput>
+}
+
+export type ShopUpdateWithoutQuotationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutQuotationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutAccountsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutAccountsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutAccountsInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutAccountsInput, Prisma.ShopUncheckedCreateWithoutAccountsInput>
+}
+
+export type ShopUpsertWithoutAccountsInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutAccountsInput, Prisma.ShopUncheckedUpdateWithoutAccountsInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutAccountsInput, Prisma.ShopUncheckedCreateWithoutAccountsInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutAccountsInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutAccountsInput, Prisma.ShopUncheckedUpdateWithoutAccountsInput>
+}
+
+export type ShopUpdateWithoutAccountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutAccountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutBankChequesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutBankChequesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutBankChequesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutBankChequesInput, Prisma.ShopUncheckedCreateWithoutBankChequesInput>
+}
+
+export type ShopUpsertWithoutBankChequesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutBankChequesInput, Prisma.ShopUncheckedUpdateWithoutBankChequesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutBankChequesInput, Prisma.ShopUncheckedCreateWithoutBankChequesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutBankChequesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutBankChequesInput, Prisma.ShopUncheckedUpdateWithoutBankChequesInput>
+}
+
+export type ShopUpdateWithoutBankChequesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutBankChequesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutLoansInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutLoansInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutLoansInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutLoansInput, Prisma.ShopUncheckedCreateWithoutLoansInput>
+}
+
+export type ShopUpsertWithoutLoansInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutLoansInput, Prisma.ShopUncheckedUpdateWithoutLoansInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutLoansInput, Prisma.ShopUncheckedCreateWithoutLoansInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutLoansInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutLoansInput, Prisma.ShopUncheckedUpdateWithoutLoansInput>
+}
+
+export type ShopUpdateWithoutLoansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutLoansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutExpenseCategoriesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutExpenseCategoriesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutExpenseCategoriesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutExpenseCategoriesInput, Prisma.ShopUncheckedCreateWithoutExpenseCategoriesInput>
+}
+
+export type ShopUpsertWithoutExpenseCategoriesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutExpenseCategoriesInput, Prisma.ShopUncheckedUpdateWithoutExpenseCategoriesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutExpenseCategoriesInput, Prisma.ShopUncheckedCreateWithoutExpenseCategoriesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutExpenseCategoriesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutExpenseCategoriesInput, Prisma.ShopUncheckedUpdateWithoutExpenseCategoriesInput>
+}
+
+export type ShopUpdateWithoutExpenseCategoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutExpenseCategoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutExpensesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutExpensesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutExpensesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutExpensesInput, Prisma.ShopUncheckedCreateWithoutExpensesInput>
+}
+
+export type ShopUpsertWithoutExpensesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutExpensesInput, Prisma.ShopUncheckedUpdateWithoutExpensesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutExpensesInput, Prisma.ShopUncheckedCreateWithoutExpensesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutExpensesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutExpensesInput, Prisma.ShopUncheckedUpdateWithoutExpensesInput>
+}
+
+export type ShopUpdateWithoutExpensesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutExpensesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutOtherIncomesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutOtherIncomesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutOtherIncomesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutOtherIncomesInput, Prisma.ShopUncheckedCreateWithoutOtherIncomesInput>
+}
+
+export type ShopUpsertWithoutOtherIncomesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutOtherIncomesInput, Prisma.ShopUncheckedUpdateWithoutOtherIncomesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutOtherIncomesInput, Prisma.ShopUncheckedCreateWithoutOtherIncomesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutOtherIncomesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutOtherIncomesInput, Prisma.ShopUncheckedUpdateWithoutOtherIncomesInput>
+}
+
+export type ShopUpdateWithoutOtherIncomesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutOtherIncomesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutCompanyAssetsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutCompanyAssetsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutCompanyAssetsInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutCompanyAssetsInput, Prisma.ShopUncheckedCreateWithoutCompanyAssetsInput>
+}
+
+export type ShopUpsertWithoutCompanyAssetsInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutCompanyAssetsInput, Prisma.ShopUncheckedUpdateWithoutCompanyAssetsInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutCompanyAssetsInput, Prisma.ShopUncheckedCreateWithoutCompanyAssetsInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutCompanyAssetsInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutCompanyAssetsInput, Prisma.ShopUncheckedUpdateWithoutCompanyAssetsInput>
+}
+
+export type ShopUpdateWithoutCompanyAssetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutCompanyAssetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutOwnerTransactionsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutOwnerTransactionsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutOwnerTransactionsInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutOwnerTransactionsInput, Prisma.ShopUncheckedCreateWithoutOwnerTransactionsInput>
+}
+
+export type ShopUpsertWithoutOwnerTransactionsInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutOwnerTransactionsInput, Prisma.ShopUncheckedUpdateWithoutOwnerTransactionsInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutOwnerTransactionsInput, Prisma.ShopUncheckedCreateWithoutOwnerTransactionsInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutOwnerTransactionsInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutOwnerTransactionsInput, Prisma.ShopUncheckedUpdateWithoutOwnerTransactionsInput>
+}
+
+export type ShopUpdateWithoutOwnerTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutOwnerTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutDepartmentsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutDepartmentsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutDepartmentsInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutDepartmentsInput, Prisma.ShopUncheckedCreateWithoutDepartmentsInput>
+}
+
+export type ShopUpsertWithoutDepartmentsInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutDepartmentsInput, Prisma.ShopUncheckedUpdateWithoutDepartmentsInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutDepartmentsInput, Prisma.ShopUncheckedCreateWithoutDepartmentsInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutDepartmentsInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutDepartmentsInput, Prisma.ShopUncheckedUpdateWithoutDepartmentsInput>
+}
+
+export type ShopUpdateWithoutDepartmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutDepartmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutStaffProfilesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutStaffProfilesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutStaffProfilesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutStaffProfilesInput, Prisma.ShopUncheckedCreateWithoutStaffProfilesInput>
+}
+
+export type ShopUpsertWithoutStaffProfilesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutStaffProfilesInput, Prisma.ShopUncheckedUpdateWithoutStaffProfilesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutStaffProfilesInput, Prisma.ShopUncheckedCreateWithoutStaffProfilesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutStaffProfilesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutStaffProfilesInput, Prisma.ShopUncheckedUpdateWithoutStaffProfilesInput>
+}
+
+export type ShopUpdateWithoutStaffProfilesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutStaffProfilesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutSalaryAdvancesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutSalaryAdvancesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutSalaryAdvancesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutSalaryAdvancesInput, Prisma.ShopUncheckedCreateWithoutSalaryAdvancesInput>
+}
+
+export type ShopUpsertWithoutSalaryAdvancesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutSalaryAdvancesInput, Prisma.ShopUncheckedUpdateWithoutSalaryAdvancesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutSalaryAdvancesInput, Prisma.ShopUncheckedCreateWithoutSalaryAdvancesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutSalaryAdvancesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutSalaryAdvancesInput, Prisma.ShopUncheckedUpdateWithoutSalaryAdvancesInput>
+}
+
+export type ShopUpdateWithoutSalaryAdvancesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutSalaryAdvancesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutPayrollsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutPayrollsInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutPayrollsInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutPayrollsInput, Prisma.ShopUncheckedCreateWithoutPayrollsInput>
+}
+
+export type ShopUpsertWithoutPayrollsInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutPayrollsInput, Prisma.ShopUncheckedUpdateWithoutPayrollsInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutPayrollsInput, Prisma.ShopUncheckedCreateWithoutPayrollsInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutPayrollsInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutPayrollsInput, Prisma.ShopUncheckedUpdateWithoutPayrollsInput>
+}
+
+export type ShopUpdateWithoutPayrollsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutPayrollsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutCashRegistersInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutCashRegistersInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutCashRegistersInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutCashRegistersInput, Prisma.ShopUncheckedCreateWithoutCashRegistersInput>
+}
+
+export type ShopUpsertWithoutCashRegistersInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutCashRegistersInput, Prisma.ShopUncheckedUpdateWithoutCashRegistersInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutCashRegistersInput, Prisma.ShopUncheckedCreateWithoutCashRegistersInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutCashRegistersInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutCashRegistersInput, Prisma.ShopUncheckedUpdateWithoutCashRegistersInput>
+}
+
+export type ShopUpdateWithoutCashRegistersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutCashRegistersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
 }
 
 
@@ -1096,19 +6622,63 @@ export type ShopUncheckedUpdateWithoutCustomersInput = {
  */
 
 export type ShopCountOutputType = {
+  branches: number
   users: number
   categories: number
-  products: number
+  brands: number
+  sections: number
   units: number
+  products: number
   customers: number
+  suppliers: number
+  purchases: number
+  sales: number
+  saleReturns: number
+  quotations: number
+  accounts: number
+  expenses: number
+  expenseCategories: number
+  otherIncomes: number
+  departments: number
+  staffProfiles: number
+  payrolls: number
+  salaryAdvances: number
+  loans: number
+  bankCheques: number
+  companyAssets: number
+  ownerTransactions: number
+  cashRegisters: number
+  licenses: number
 }
 
 export type ShopCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  branches?: boolean | ShopCountOutputTypeCountBranchesArgs
   users?: boolean | ShopCountOutputTypeCountUsersArgs
   categories?: boolean | ShopCountOutputTypeCountCategoriesArgs
-  products?: boolean | ShopCountOutputTypeCountProductsArgs
+  brands?: boolean | ShopCountOutputTypeCountBrandsArgs
+  sections?: boolean | ShopCountOutputTypeCountSectionsArgs
   units?: boolean | ShopCountOutputTypeCountUnitsArgs
+  products?: boolean | ShopCountOutputTypeCountProductsArgs
   customers?: boolean | ShopCountOutputTypeCountCustomersArgs
+  suppliers?: boolean | ShopCountOutputTypeCountSuppliersArgs
+  purchases?: boolean | ShopCountOutputTypeCountPurchasesArgs
+  sales?: boolean | ShopCountOutputTypeCountSalesArgs
+  saleReturns?: boolean | ShopCountOutputTypeCountSaleReturnsArgs
+  quotations?: boolean | ShopCountOutputTypeCountQuotationsArgs
+  accounts?: boolean | ShopCountOutputTypeCountAccountsArgs
+  expenses?: boolean | ShopCountOutputTypeCountExpensesArgs
+  expenseCategories?: boolean | ShopCountOutputTypeCountExpenseCategoriesArgs
+  otherIncomes?: boolean | ShopCountOutputTypeCountOtherIncomesArgs
+  departments?: boolean | ShopCountOutputTypeCountDepartmentsArgs
+  staffProfiles?: boolean | ShopCountOutputTypeCountStaffProfilesArgs
+  payrolls?: boolean | ShopCountOutputTypeCountPayrollsArgs
+  salaryAdvances?: boolean | ShopCountOutputTypeCountSalaryAdvancesArgs
+  loans?: boolean | ShopCountOutputTypeCountLoansArgs
+  bankCheques?: boolean | ShopCountOutputTypeCountBankChequesArgs
+  companyAssets?: boolean | ShopCountOutputTypeCountCompanyAssetsArgs
+  ownerTransactions?: boolean | ShopCountOutputTypeCountOwnerTransactionsArgs
+  cashRegisters?: boolean | ShopCountOutputTypeCountCashRegistersArgs
+  licenses?: boolean | ShopCountOutputTypeCountLicensesArgs
 }
 
 /**
@@ -1119,6 +6689,13 @@ export type ShopCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Select specific fields to fetch from the ShopCountOutputType
    */
   select?: Prisma.ShopCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountBranchesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BranchWhereInput
 }
 
 /**
@@ -1138,8 +6715,15 @@ export type ShopCountOutputTypeCountCategoriesArgs<ExtArgs extends runtime.Types
 /**
  * ShopCountOutputType without action
  */
-export type ShopCountOutputTypeCountProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ProductWhereInput
+export type ShopCountOutputTypeCountBrandsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BrandWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountSectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProductSectionWhereInput
 }
 
 /**
@@ -1152,30 +6736,196 @@ export type ShopCountOutputTypeCountUnitsArgs<ExtArgs extends runtime.Types.Exte
 /**
  * ShopCountOutputType without action
  */
+export type ShopCountOutputTypeCountProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProductWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
 export type ShopCountOutputTypeCountCustomersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.CustomerWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountSuppliersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SupplierWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountPurchasesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PurchaseWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountSalesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SaleWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountSaleReturnsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SaleReturnWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountQuotationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.QuotationWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountAccountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AccountWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountExpensesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ExpenseWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountExpenseCategoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ExpenseCategoryWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountOtherIncomesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OtherIncomeWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountDepartmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DepartmentWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountStaffProfilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StaffProfileWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountPayrollsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PayrollWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountSalaryAdvancesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalaryAdvanceWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountLoansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LoanWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountBankChequesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BankChequeWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountCompanyAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyAssetWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountOwnerTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OwnerTransactionWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountCashRegistersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CashRegisterWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountLicensesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LicenseWhereInput
 }
 
 
 export type ShopSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  nameEn?: boolean
   phone?: boolean
   email?: boolean
-  currency?: boolean
+  address?: boolean
+  tradeLicense?: boolean
+  binVatNumber?: boolean
   currencySymbol?: boolean
-  village?: boolean
-  district?: boolean
-  addressLine?: boolean
-  receiptHeader?: boolean
-  receiptFooter?: boolean
+  vatPercent?: boolean
+  enableVat?: boolean
+  thermalWidth?: boolean
+  invoiceHeader?: boolean
+  invoiceFooter?: boolean
+  banglaReceipt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  branches?: boolean | Prisma.Shop$branchesArgs<ExtArgs>
   users?: boolean | Prisma.Shop$usersArgs<ExtArgs>
   categories?: boolean | Prisma.Shop$categoriesArgs<ExtArgs>
-  products?: boolean | Prisma.Shop$productsArgs<ExtArgs>
+  brands?: boolean | Prisma.Shop$brandsArgs<ExtArgs>
+  sections?: boolean | Prisma.Shop$sectionsArgs<ExtArgs>
   units?: boolean | Prisma.Shop$unitsArgs<ExtArgs>
+  products?: boolean | Prisma.Shop$productsArgs<ExtArgs>
   customers?: boolean | Prisma.Shop$customersArgs<ExtArgs>
+  suppliers?: boolean | Prisma.Shop$suppliersArgs<ExtArgs>
+  purchases?: boolean | Prisma.Shop$purchasesArgs<ExtArgs>
+  sales?: boolean | Prisma.Shop$salesArgs<ExtArgs>
+  saleReturns?: boolean | Prisma.Shop$saleReturnsArgs<ExtArgs>
+  quotations?: boolean | Prisma.Shop$quotationsArgs<ExtArgs>
+  accounts?: boolean | Prisma.Shop$accountsArgs<ExtArgs>
+  expenses?: boolean | Prisma.Shop$expensesArgs<ExtArgs>
+  expenseCategories?: boolean | Prisma.Shop$expenseCategoriesArgs<ExtArgs>
+  otherIncomes?: boolean | Prisma.Shop$otherIncomesArgs<ExtArgs>
+  departments?: boolean | Prisma.Shop$departmentsArgs<ExtArgs>
+  staffProfiles?: boolean | Prisma.Shop$staffProfilesArgs<ExtArgs>
+  payrolls?: boolean | Prisma.Shop$payrollsArgs<ExtArgs>
+  salaryAdvances?: boolean | Prisma.Shop$salaryAdvancesArgs<ExtArgs>
+  loans?: boolean | Prisma.Shop$loansArgs<ExtArgs>
+  bankCheques?: boolean | Prisma.Shop$bankChequesArgs<ExtArgs>
+  companyAssets?: boolean | Prisma.Shop$companyAssetsArgs<ExtArgs>
+  ownerTransactions?: boolean | Prisma.Shop$ownerTransactionsArgs<ExtArgs>
+  cashRegisters?: boolean | Prisma.Shop$cashRegistersArgs<ExtArgs>
+  licenses?: boolean | Prisma.Shop$licensesArgs<ExtArgs>
   _count?: boolean | Prisma.ShopCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["shop"]>
 
@@ -1184,50 +6934,102 @@ export type ShopSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
 export type ShopSelectScalar = {
   id?: boolean
   name?: boolean
+  nameEn?: boolean
   phone?: boolean
   email?: boolean
-  currency?: boolean
+  address?: boolean
+  tradeLicense?: boolean
+  binVatNumber?: boolean
   currencySymbol?: boolean
-  village?: boolean
-  district?: boolean
-  addressLine?: boolean
-  receiptHeader?: boolean
-  receiptFooter?: boolean
+  vatPercent?: boolean
+  enableVat?: boolean
+  thermalWidth?: boolean
+  invoiceHeader?: boolean
+  invoiceFooter?: boolean
+  banglaReceipt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ShopOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "phone" | "email" | "currency" | "currencySymbol" | "village" | "district" | "addressLine" | "receiptHeader" | "receiptFooter" | "createdAt" | "updatedAt", ExtArgs["result"]["shop"]>
+export type ShopOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "nameEn" | "phone" | "email" | "address" | "tradeLicense" | "binVatNumber" | "currencySymbol" | "vatPercent" | "enableVat" | "thermalWidth" | "invoiceHeader" | "invoiceFooter" | "banglaReceipt" | "createdAt" | "updatedAt", ExtArgs["result"]["shop"]>
 export type ShopInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  branches?: boolean | Prisma.Shop$branchesArgs<ExtArgs>
   users?: boolean | Prisma.Shop$usersArgs<ExtArgs>
   categories?: boolean | Prisma.Shop$categoriesArgs<ExtArgs>
-  products?: boolean | Prisma.Shop$productsArgs<ExtArgs>
+  brands?: boolean | Prisma.Shop$brandsArgs<ExtArgs>
+  sections?: boolean | Prisma.Shop$sectionsArgs<ExtArgs>
   units?: boolean | Prisma.Shop$unitsArgs<ExtArgs>
+  products?: boolean | Prisma.Shop$productsArgs<ExtArgs>
   customers?: boolean | Prisma.Shop$customersArgs<ExtArgs>
+  suppliers?: boolean | Prisma.Shop$suppliersArgs<ExtArgs>
+  purchases?: boolean | Prisma.Shop$purchasesArgs<ExtArgs>
+  sales?: boolean | Prisma.Shop$salesArgs<ExtArgs>
+  saleReturns?: boolean | Prisma.Shop$saleReturnsArgs<ExtArgs>
+  quotations?: boolean | Prisma.Shop$quotationsArgs<ExtArgs>
+  accounts?: boolean | Prisma.Shop$accountsArgs<ExtArgs>
+  expenses?: boolean | Prisma.Shop$expensesArgs<ExtArgs>
+  expenseCategories?: boolean | Prisma.Shop$expenseCategoriesArgs<ExtArgs>
+  otherIncomes?: boolean | Prisma.Shop$otherIncomesArgs<ExtArgs>
+  departments?: boolean | Prisma.Shop$departmentsArgs<ExtArgs>
+  staffProfiles?: boolean | Prisma.Shop$staffProfilesArgs<ExtArgs>
+  payrolls?: boolean | Prisma.Shop$payrollsArgs<ExtArgs>
+  salaryAdvances?: boolean | Prisma.Shop$salaryAdvancesArgs<ExtArgs>
+  loans?: boolean | Prisma.Shop$loansArgs<ExtArgs>
+  bankCheques?: boolean | Prisma.Shop$bankChequesArgs<ExtArgs>
+  companyAssets?: boolean | Prisma.Shop$companyAssetsArgs<ExtArgs>
+  ownerTransactions?: boolean | Prisma.Shop$ownerTransactionsArgs<ExtArgs>
+  cashRegisters?: boolean | Prisma.Shop$cashRegistersArgs<ExtArgs>
+  licenses?: boolean | Prisma.Shop$licensesArgs<ExtArgs>
   _count?: boolean | Prisma.ShopCountOutputTypeDefaultArgs<ExtArgs>
 }
 
 export type $ShopPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Shop"
   objects: {
+    branches: Prisma.$BranchPayload<ExtArgs>[]
     users: Prisma.$UserPayload<ExtArgs>[]
     categories: Prisma.$CategoryPayload<ExtArgs>[]
-    products: Prisma.$ProductPayload<ExtArgs>[]
+    brands: Prisma.$BrandPayload<ExtArgs>[]
+    sections: Prisma.$ProductSectionPayload<ExtArgs>[]
     units: Prisma.$UnitPayload<ExtArgs>[]
+    products: Prisma.$ProductPayload<ExtArgs>[]
     customers: Prisma.$CustomerPayload<ExtArgs>[]
+    suppliers: Prisma.$SupplierPayload<ExtArgs>[]
+    purchases: Prisma.$PurchasePayload<ExtArgs>[]
+    sales: Prisma.$SalePayload<ExtArgs>[]
+    saleReturns: Prisma.$SaleReturnPayload<ExtArgs>[]
+    quotations: Prisma.$QuotationPayload<ExtArgs>[]
+    accounts: Prisma.$AccountPayload<ExtArgs>[]
+    expenses: Prisma.$ExpensePayload<ExtArgs>[]
+    expenseCategories: Prisma.$ExpenseCategoryPayload<ExtArgs>[]
+    otherIncomes: Prisma.$OtherIncomePayload<ExtArgs>[]
+    departments: Prisma.$DepartmentPayload<ExtArgs>[]
+    staffProfiles: Prisma.$StaffProfilePayload<ExtArgs>[]
+    payrolls: Prisma.$PayrollPayload<ExtArgs>[]
+    salaryAdvances: Prisma.$SalaryAdvancePayload<ExtArgs>[]
+    loans: Prisma.$LoanPayload<ExtArgs>[]
+    bankCheques: Prisma.$BankChequePayload<ExtArgs>[]
+    companyAssets: Prisma.$CompanyAssetPayload<ExtArgs>[]
+    ownerTransactions: Prisma.$OwnerTransactionPayload<ExtArgs>[]
+    cashRegisters: Prisma.$CashRegisterPayload<ExtArgs>[]
+    licenses: Prisma.$LicensePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
+    nameEn: string | null
     phone: string
     email: string | null
-    currency: string
+    address: string | null
+    tradeLicense: string | null
+    binVatNumber: string | null
     currencySymbol: string
-    village: string | null
-    district: string | null
-    addressLine: string | null
-    receiptHeader: string | null
-    receiptFooter: string | null
+    vatPercent: runtime.Decimal
+    enableVat: boolean
+    thermalWidth: string
+    invoiceHeader: string | null
+    invoiceFooter: string | null
+    banglaReceipt: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["shop"]>
@@ -1570,11 +7372,33 @@ readonly fields: ShopFieldRefs;
  */
 export interface Prisma__ShopClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  branches<T extends Prisma.Shop$branchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$branchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   users<T extends Prisma.Shop$usersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$usersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   categories<T extends Prisma.Shop$categoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$categoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  products<T extends Prisma.Shop$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  brands<T extends Prisma.Shop$brandsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$brandsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BrandPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sections<T extends Prisma.Shop$sectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$sectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductSectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   units<T extends Prisma.Shop$unitsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$unitsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UnitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  products<T extends Prisma.Shop$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   customers<T extends Prisma.Shop$customersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$customersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  suppliers<T extends Prisma.Shop$suppliersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$suppliersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupplierPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  purchases<T extends Prisma.Shop$purchasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$purchasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PurchasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales<T extends Prisma.Shop$salesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$salesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  saleReturns<T extends Prisma.Shop$saleReturnsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$saleReturnsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SaleReturnPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  quotations<T extends Prisma.Shop$quotationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$quotationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  accounts<T extends Prisma.Shop$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  expenses<T extends Prisma.Shop$expensesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  expenseCategories<T extends Prisma.Shop$expenseCategoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$expenseCategoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpenseCategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  otherIncomes<T extends Prisma.Shop$otherIncomesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$otherIncomesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OtherIncomePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  departments<T extends Prisma.Shop$departmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$departmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DepartmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  staffProfiles<T extends Prisma.Shop$staffProfilesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$staffProfilesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  payrolls<T extends Prisma.Shop$payrollsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$payrollsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PayrollPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  salaryAdvances<T extends Prisma.Shop$salaryAdvancesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$salaryAdvancesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalaryAdvancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  loans<T extends Prisma.Shop$loansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$loansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bankCheques<T extends Prisma.Shop$bankChequesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$bankChequesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BankChequePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  companyAssets<T extends Prisma.Shop$companyAssetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$companyAssetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ownerTransactions<T extends Prisma.Shop$ownerTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$ownerTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OwnerTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  cashRegisters<T extends Prisma.Shop$cashRegistersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$cashRegistersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CashRegisterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  licenses<T extends Prisma.Shop$licensesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$licensesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LicensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1606,15 +7430,19 @@ export interface Prisma__ShopClient<T, Null = never, ExtArgs extends runtime.Typ
 export interface ShopFieldRefs {
   readonly id: Prisma.FieldRef<"Shop", 'String'>
   readonly name: Prisma.FieldRef<"Shop", 'String'>
+  readonly nameEn: Prisma.FieldRef<"Shop", 'String'>
   readonly phone: Prisma.FieldRef<"Shop", 'String'>
   readonly email: Prisma.FieldRef<"Shop", 'String'>
-  readonly currency: Prisma.FieldRef<"Shop", 'String'>
+  readonly address: Prisma.FieldRef<"Shop", 'String'>
+  readonly tradeLicense: Prisma.FieldRef<"Shop", 'String'>
+  readonly binVatNumber: Prisma.FieldRef<"Shop", 'String'>
   readonly currencySymbol: Prisma.FieldRef<"Shop", 'String'>
-  readonly village: Prisma.FieldRef<"Shop", 'String'>
-  readonly district: Prisma.FieldRef<"Shop", 'String'>
-  readonly addressLine: Prisma.FieldRef<"Shop", 'String'>
-  readonly receiptHeader: Prisma.FieldRef<"Shop", 'String'>
-  readonly receiptFooter: Prisma.FieldRef<"Shop", 'String'>
+  readonly vatPercent: Prisma.FieldRef<"Shop", 'Decimal'>
+  readonly enableVat: Prisma.FieldRef<"Shop", 'Boolean'>
+  readonly thermalWidth: Prisma.FieldRef<"Shop", 'String'>
+  readonly invoiceHeader: Prisma.FieldRef<"Shop", 'String'>
+  readonly invoiceFooter: Prisma.FieldRef<"Shop", 'String'>
+  readonly banglaReceipt: Prisma.FieldRef<"Shop", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Shop", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Shop", 'DateTime'>
 }
@@ -1965,6 +7793,30 @@ export type ShopDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
+ * Shop.branches
+ */
+export type Shop$branchesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Branch
+   */
+  select?: Prisma.BranchSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Branch
+   */
+  omit?: Prisma.BranchOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BranchInclude<ExtArgs> | null
+  where?: Prisma.BranchWhereInput
+  orderBy?: Prisma.BranchOrderByWithRelationInput | Prisma.BranchOrderByWithRelationInput[]
+  cursor?: Prisma.BranchWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BranchScalarFieldEnum | Prisma.BranchScalarFieldEnum[]
+}
+
+/**
  * Shop.users
  */
 export type Shop$usersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2013,27 +7865,51 @@ export type Shop$categoriesArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
- * Shop.products
+ * Shop.brands
  */
-export type Shop$productsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Shop$brandsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Product
+   * Select specific fields to fetch from the Brand
    */
-  select?: Prisma.ProductSelect<ExtArgs> | null
+  select?: Prisma.BrandSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Product
+   * Omit specific fields from the Brand
    */
-  omit?: Prisma.ProductOmit<ExtArgs> | null
+  omit?: Prisma.BrandOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.ProductInclude<ExtArgs> | null
-  where?: Prisma.ProductWhereInput
-  orderBy?: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[]
-  cursor?: Prisma.ProductWhereUniqueInput
+  include?: Prisma.BrandInclude<ExtArgs> | null
+  where?: Prisma.BrandWhereInput
+  orderBy?: Prisma.BrandOrderByWithRelationInput | Prisma.BrandOrderByWithRelationInput[]
+  cursor?: Prisma.BrandWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
+  distinct?: Prisma.BrandScalarFieldEnum | Prisma.BrandScalarFieldEnum[]
+}
+
+/**
+ * Shop.sections
+ */
+export type Shop$sectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProductSection
+   */
+  select?: Prisma.ProductSectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProductSection
+   */
+  omit?: Prisma.ProductSectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductSectionInclude<ExtArgs> | null
+  where?: Prisma.ProductSectionWhereInput
+  orderBy?: Prisma.ProductSectionOrderByWithRelationInput | Prisma.ProductSectionOrderByWithRelationInput[]
+  cursor?: Prisma.ProductSectionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProductSectionScalarFieldEnum | Prisma.ProductSectionScalarFieldEnum[]
 }
 
 /**
@@ -2061,6 +7937,30 @@ export type Shop$unitsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
 }
 
 /**
+ * Shop.products
+ */
+export type Shop$productsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Product
+   */
+  select?: Prisma.ProductSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Product
+   */
+  omit?: Prisma.ProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductInclude<ExtArgs> | null
+  where?: Prisma.ProductWhereInput
+  orderBy?: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[]
+  cursor?: Prisma.ProductWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
+}
+
+/**
  * Shop.customers
  */
 export type Shop$customersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2082,6 +7982,462 @@ export type Shop$customersArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.CustomerScalarFieldEnum | Prisma.CustomerScalarFieldEnum[]
+}
+
+/**
+ * Shop.suppliers
+ */
+export type Shop$suppliersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Supplier
+   */
+  select?: Prisma.SupplierSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Supplier
+   */
+  omit?: Prisma.SupplierOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SupplierInclude<ExtArgs> | null
+  where?: Prisma.SupplierWhereInput
+  orderBy?: Prisma.SupplierOrderByWithRelationInput | Prisma.SupplierOrderByWithRelationInput[]
+  cursor?: Prisma.SupplierWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SupplierScalarFieldEnum | Prisma.SupplierScalarFieldEnum[]
+}
+
+/**
+ * Shop.purchases
+ */
+export type Shop$purchasesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Purchase
+   */
+  select?: Prisma.PurchaseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Purchase
+   */
+  omit?: Prisma.PurchaseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PurchaseInclude<ExtArgs> | null
+  where?: Prisma.PurchaseWhereInput
+  orderBy?: Prisma.PurchaseOrderByWithRelationInput | Prisma.PurchaseOrderByWithRelationInput[]
+  cursor?: Prisma.PurchaseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PurchaseScalarFieldEnum | Prisma.PurchaseScalarFieldEnum[]
+}
+
+/**
+ * Shop.sales
+ */
+export type Shop$salesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Sale
+   */
+  select?: Prisma.SaleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Sale
+   */
+  omit?: Prisma.SaleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SaleInclude<ExtArgs> | null
+  where?: Prisma.SaleWhereInput
+  orderBy?: Prisma.SaleOrderByWithRelationInput | Prisma.SaleOrderByWithRelationInput[]
+  cursor?: Prisma.SaleWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SaleScalarFieldEnum | Prisma.SaleScalarFieldEnum[]
+}
+
+/**
+ * Shop.saleReturns
+ */
+export type Shop$saleReturnsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SaleReturn
+   */
+  select?: Prisma.SaleReturnSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SaleReturn
+   */
+  omit?: Prisma.SaleReturnOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SaleReturnInclude<ExtArgs> | null
+  where?: Prisma.SaleReturnWhereInput
+  orderBy?: Prisma.SaleReturnOrderByWithRelationInput | Prisma.SaleReturnOrderByWithRelationInput[]
+  cursor?: Prisma.SaleReturnWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SaleReturnScalarFieldEnum | Prisma.SaleReturnScalarFieldEnum[]
+}
+
+/**
+ * Shop.quotations
+ */
+export type Shop$quotationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Quotation
+   */
+  select?: Prisma.QuotationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Quotation
+   */
+  omit?: Prisma.QuotationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuotationInclude<ExtArgs> | null
+  where?: Prisma.QuotationWhereInput
+  orderBy?: Prisma.QuotationOrderByWithRelationInput | Prisma.QuotationOrderByWithRelationInput[]
+  cursor?: Prisma.QuotationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.QuotationScalarFieldEnum | Prisma.QuotationScalarFieldEnum[]
+}
+
+/**
+ * Shop.accounts
+ */
+export type Shop$accountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Account
+   */
+  select?: Prisma.AccountSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Account
+   */
+  omit?: Prisma.AccountOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AccountInclude<ExtArgs> | null
+  where?: Prisma.AccountWhereInput
+  orderBy?: Prisma.AccountOrderByWithRelationInput | Prisma.AccountOrderByWithRelationInput[]
+  cursor?: Prisma.AccountWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AccountScalarFieldEnum | Prisma.AccountScalarFieldEnum[]
+}
+
+/**
+ * Shop.expenses
+ */
+export type Shop$expensesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Expense
+   */
+  select?: Prisma.ExpenseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Expense
+   */
+  omit?: Prisma.ExpenseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ExpenseInclude<ExtArgs> | null
+  where?: Prisma.ExpenseWhereInput
+  orderBy?: Prisma.ExpenseOrderByWithRelationInput | Prisma.ExpenseOrderByWithRelationInput[]
+  cursor?: Prisma.ExpenseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ExpenseScalarFieldEnum | Prisma.ExpenseScalarFieldEnum[]
+}
+
+/**
+ * Shop.expenseCategories
+ */
+export type Shop$expenseCategoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ExpenseCategory
+   */
+  select?: Prisma.ExpenseCategorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ExpenseCategory
+   */
+  omit?: Prisma.ExpenseCategoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ExpenseCategoryInclude<ExtArgs> | null
+  where?: Prisma.ExpenseCategoryWhereInput
+  orderBy?: Prisma.ExpenseCategoryOrderByWithRelationInput | Prisma.ExpenseCategoryOrderByWithRelationInput[]
+  cursor?: Prisma.ExpenseCategoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ExpenseCategoryScalarFieldEnum | Prisma.ExpenseCategoryScalarFieldEnum[]
+}
+
+/**
+ * Shop.otherIncomes
+ */
+export type Shop$otherIncomesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OtherIncome
+   */
+  select?: Prisma.OtherIncomeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OtherIncome
+   */
+  omit?: Prisma.OtherIncomeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OtherIncomeInclude<ExtArgs> | null
+  where?: Prisma.OtherIncomeWhereInput
+  orderBy?: Prisma.OtherIncomeOrderByWithRelationInput | Prisma.OtherIncomeOrderByWithRelationInput[]
+  cursor?: Prisma.OtherIncomeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OtherIncomeScalarFieldEnum | Prisma.OtherIncomeScalarFieldEnum[]
+}
+
+/**
+ * Shop.departments
+ */
+export type Shop$departmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Department
+   */
+  select?: Prisma.DepartmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Department
+   */
+  omit?: Prisma.DepartmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DepartmentInclude<ExtArgs> | null
+  where?: Prisma.DepartmentWhereInput
+  orderBy?: Prisma.DepartmentOrderByWithRelationInput | Prisma.DepartmentOrderByWithRelationInput[]
+  cursor?: Prisma.DepartmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DepartmentScalarFieldEnum | Prisma.DepartmentScalarFieldEnum[]
+}
+
+/**
+ * Shop.staffProfiles
+ */
+export type Shop$staffProfilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StaffProfile
+   */
+  select?: Prisma.StaffProfileSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StaffProfile
+   */
+  omit?: Prisma.StaffProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StaffProfileInclude<ExtArgs> | null
+  where?: Prisma.StaffProfileWhereInput
+  orderBy?: Prisma.StaffProfileOrderByWithRelationInput | Prisma.StaffProfileOrderByWithRelationInput[]
+  cursor?: Prisma.StaffProfileWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StaffProfileScalarFieldEnum | Prisma.StaffProfileScalarFieldEnum[]
+}
+
+/**
+ * Shop.payrolls
+ */
+export type Shop$payrollsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Payroll
+   */
+  select?: Prisma.PayrollSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Payroll
+   */
+  omit?: Prisma.PayrollOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PayrollInclude<ExtArgs> | null
+  where?: Prisma.PayrollWhereInput
+  orderBy?: Prisma.PayrollOrderByWithRelationInput | Prisma.PayrollOrderByWithRelationInput[]
+  cursor?: Prisma.PayrollWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PayrollScalarFieldEnum | Prisma.PayrollScalarFieldEnum[]
+}
+
+/**
+ * Shop.salaryAdvances
+ */
+export type Shop$salaryAdvancesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalaryAdvance
+   */
+  select?: Prisma.SalaryAdvanceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalaryAdvance
+   */
+  omit?: Prisma.SalaryAdvanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalaryAdvanceInclude<ExtArgs> | null
+  where?: Prisma.SalaryAdvanceWhereInput
+  orderBy?: Prisma.SalaryAdvanceOrderByWithRelationInput | Prisma.SalaryAdvanceOrderByWithRelationInput[]
+  cursor?: Prisma.SalaryAdvanceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalaryAdvanceScalarFieldEnum | Prisma.SalaryAdvanceScalarFieldEnum[]
+}
+
+/**
+ * Shop.loans
+ */
+export type Shop$loansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Loan
+   */
+  select?: Prisma.LoanSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Loan
+   */
+  omit?: Prisma.LoanOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoanInclude<ExtArgs> | null
+  where?: Prisma.LoanWhereInput
+  orderBy?: Prisma.LoanOrderByWithRelationInput | Prisma.LoanOrderByWithRelationInput[]
+  cursor?: Prisma.LoanWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LoanScalarFieldEnum | Prisma.LoanScalarFieldEnum[]
+}
+
+/**
+ * Shop.bankCheques
+ */
+export type Shop$bankChequesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BankCheque
+   */
+  select?: Prisma.BankChequeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BankCheque
+   */
+  omit?: Prisma.BankChequeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BankChequeInclude<ExtArgs> | null
+  where?: Prisma.BankChequeWhereInput
+  orderBy?: Prisma.BankChequeOrderByWithRelationInput | Prisma.BankChequeOrderByWithRelationInput[]
+  cursor?: Prisma.BankChequeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BankChequeScalarFieldEnum | Prisma.BankChequeScalarFieldEnum[]
+}
+
+/**
+ * Shop.companyAssets
+ */
+export type Shop$companyAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAsset
+   */
+  select?: Prisma.CompanyAssetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAsset
+   */
+  omit?: Prisma.CompanyAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAssetInclude<ExtArgs> | null
+  where?: Prisma.CompanyAssetWhereInput
+  orderBy?: Prisma.CompanyAssetOrderByWithRelationInput | Prisma.CompanyAssetOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyAssetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyAssetScalarFieldEnum | Prisma.CompanyAssetScalarFieldEnum[]
+}
+
+/**
+ * Shop.ownerTransactions
+ */
+export type Shop$ownerTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OwnerTransaction
+   */
+  select?: Prisma.OwnerTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OwnerTransaction
+   */
+  omit?: Prisma.OwnerTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OwnerTransactionInclude<ExtArgs> | null
+  where?: Prisma.OwnerTransactionWhereInput
+  orderBy?: Prisma.OwnerTransactionOrderByWithRelationInput | Prisma.OwnerTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.OwnerTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OwnerTransactionScalarFieldEnum | Prisma.OwnerTransactionScalarFieldEnum[]
+}
+
+/**
+ * Shop.cashRegisters
+ */
+export type Shop$cashRegistersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CashRegister
+   */
+  select?: Prisma.CashRegisterSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CashRegister
+   */
+  omit?: Prisma.CashRegisterOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CashRegisterInclude<ExtArgs> | null
+  where?: Prisma.CashRegisterWhereInput
+  orderBy?: Prisma.CashRegisterOrderByWithRelationInput | Prisma.CashRegisterOrderByWithRelationInput[]
+  cursor?: Prisma.CashRegisterWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CashRegisterScalarFieldEnum | Prisma.CashRegisterScalarFieldEnum[]
+}
+
+/**
+ * Shop.licenses
+ */
+export type Shop$licensesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the License
+   */
+  select?: Prisma.LicenseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the License
+   */
+  omit?: Prisma.LicenseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LicenseInclude<ExtArgs> | null
+  where?: Prisma.LicenseWhereInput
+  orderBy?: Prisma.LicenseOrderByWithRelationInput | Prisma.LicenseOrderByWithRelationInput[]
+  cursor?: Prisma.LicenseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LicenseScalarFieldEnum | Prisma.LicenseScalarFieldEnum[]
 }
 
 /**

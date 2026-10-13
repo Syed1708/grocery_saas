@@ -1,17 +1,22 @@
-import { Types } from "mongoose";
-
-export type UserRole = "OWNER" | "MANAGER" | "CASHIER";
+export type UserRole =
+  | "SUPER_ADMIN"
+  | "ADMIN"
+  | "OWNER"
+  | "MANAGER"
+  | "CASHIER"
+  | "VENDOR";
 
 export interface IUser {
-  _id?: string | Types.ObjectId;
+  id: string;
   name: string;
   email: string;
-  password?: string;
-  phone?: string;
+  phone?: string | null;
   role: UserRole;
-  shopId: Types.ObjectId | string; // Allows Mongoose ObjectId and string IDs
-  profileImage?: string;
+  profileImage?: string | null;
   isActive: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
+  branchId?: string | null;
+  branchName?: string | null;
+  shopId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

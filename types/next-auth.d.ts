@@ -1,6 +1,6 @@
 import { DefaultSession, DefaultUser } from "next-auth";
 import { JWT as DefaultJWT } from "next-auth/jwt";
-import { UserRole } from "./user";
+import { UserRole } from "./user"; // 👈 Imports from our clean types, NOT generated prisma!
 
 declare module "next-auth" {
   interface Session {
@@ -9,6 +9,8 @@ declare module "next-auth" {
       role: UserRole;
       shopId: string;
       shopName?: string;
+      branchId?: string | null;
+      branchName?: string | null;
     } & DefaultSession["user"];
   }
 
@@ -16,6 +18,8 @@ declare module "next-auth" {
     role: UserRole;
     shopId: string;
     shopName?: string;
+    branchId?: string | null;
+    branchName?: string | null;
   }
 }
 
@@ -25,5 +29,7 @@ declare module "next-auth/jwt" {
     role: UserRole;
     shopId: string;
     shopName?: string;
+    branchId?: string | null;
+    branchName?: string | null;
   }
 }

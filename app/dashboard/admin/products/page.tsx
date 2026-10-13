@@ -16,11 +16,11 @@ export default async function ProductsPage() {
     redirect("/login");
   }
 
-  const { shopId } = session.user;
+  const { shopId, branchId } = session.user;
 
-  // Parallel server queries for fast page loading
+  // Parallel server queries - passes branchId for accurate branch stock!
   const [products, categories, units, shop] = await Promise.all([
-    getProducts(shopId),
+    getProducts(shopId, branchId), // 👈 Accurately loads stock for active branch
     getCategoriesForSelect(shopId),
     getUnitsForSelect(shopId),
     prisma.shop.findUnique({
@@ -35,7 +35,7 @@ export default async function ProductsPage() {
         data={products}
         categories={categories}
         units={units}
-        currencySymbol={shop?.currencySymbol || "$"}
+        currencySymbol={shop?.currencySymbol || "৳"}
       />
     </div>
   );

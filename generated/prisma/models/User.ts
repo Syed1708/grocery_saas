@@ -28,11 +28,12 @@ export type UserMinAggregateOutputType = {
   id: string | null
   name: string | null
   email: string | null
-  password: string | null
   phone: string | null
+  password: string | null
   role: $Enums.UserRole | null
   profileImage: string | null
   isActive: boolean | null
+  branchId: string | null
   shopId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -42,11 +43,12 @@ export type UserMaxAggregateOutputType = {
   id: string | null
   name: string | null
   email: string | null
-  password: string | null
   phone: string | null
+  password: string | null
   role: $Enums.UserRole | null
   profileImage: string | null
   isActive: boolean | null
+  branchId: string | null
   shopId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -56,11 +58,12 @@ export type UserCountAggregateOutputType = {
   id: number
   name: number
   email: number
-  password: number
   phone: number
+  password: number
   role: number
   profileImage: number
   isActive: number
+  branchId: number
   shopId: number
   createdAt: number
   updatedAt: number
@@ -72,11 +75,12 @@ export type UserMinAggregateInputType = {
   id?: true
   name?: true
   email?: true
-  password?: true
   phone?: true
+  password?: true
   role?: true
   profileImage?: true
   isActive?: true
+  branchId?: true
   shopId?: true
   createdAt?: true
   updatedAt?: true
@@ -86,11 +90,12 @@ export type UserMaxAggregateInputType = {
   id?: true
   name?: true
   email?: true
-  password?: true
   phone?: true
+  password?: true
   role?: true
   profileImage?: true
   isActive?: true
+  branchId?: true
   shopId?: true
   createdAt?: true
   updatedAt?: true
@@ -100,11 +105,12 @@ export type UserCountAggregateInputType = {
   id?: true
   name?: true
   email?: true
-  password?: true
   phone?: true
+  password?: true
   role?: true
   profileImage?: true
   isActive?: true
+  branchId?: true
   shopId?: true
   createdAt?: true
   updatedAt?: true
@@ -187,11 +193,12 @@ export type UserGroupByOutputType = {
   id: string
   name: string
   email: string
-  password: string
   phone: string | null
+  password: string
   role: $Enums.UserRole
   profileImage: string | null
   isActive: boolean
+  branchId: string | null
   shopId: string
   createdAt: Date
   updatedAt: Date
@@ -222,30 +229,52 @@ export type UserWhereInput = {
   id?: Prisma.StringFilter<"User"> | string
   name?: Prisma.StringFilter<"User"> | string
   email?: Prisma.StringFilter<"User"> | string
-  password?: Prisma.StringFilter<"User"> | string
   phone?: Prisma.StringNullableFilter<"User"> | string | null
+  password?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   profileImage?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  branchId?: Prisma.StringNullableFilter<"User"> | string | null
   shopId?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  branch?: Prisma.XOR<Prisma.BranchNullableScalarRelationFilter, Prisma.BranchWhereInput> | null
   shop?: Prisma.XOR<Prisma.ShopScalarRelationFilter, Prisma.ShopWhereInput>
+  staffProfile?: Prisma.XOR<Prisma.StaffProfileNullableScalarRelationFilter, Prisma.StaffProfileWhereInput> | null
+  sales?: Prisma.SaleListRelationFilter
+  saleReturns?: Prisma.SaleReturnListRelationFilter
+  expenses?: Prisma.ExpenseListRelationFilter
+  otherIncomes?: Prisma.OtherIncomeListRelationFilter
+  cashRegisters?: Prisma.CashRegisterListRelationFilter
+  accountTransactions?: Prisma.AccountTransactionListRelationFilter
+  bankCheques?: Prisma.BankChequeListRelationFilter
+  loanInstallments?: Prisma.LoanInstallmentListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  password?: Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   profileImage?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  branchId?: Prisma.SortOrderInput | Prisma.SortOrder
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  branch?: Prisma.BranchOrderByWithRelationInput
   shop?: Prisma.ShopOrderByWithRelationInput
+  staffProfile?: Prisma.StaffProfileOrderByWithRelationInput
+  sales?: Prisma.SaleOrderByRelationAggregateInput
+  saleReturns?: Prisma.SaleReturnOrderByRelationAggregateInput
+  expenses?: Prisma.ExpenseOrderByRelationAggregateInput
+  otherIncomes?: Prisma.OtherIncomeOrderByRelationAggregateInput
+  cashRegisters?: Prisma.CashRegisterOrderByRelationAggregateInput
+  accountTransactions?: Prisma.AccountTransactionOrderByRelationAggregateInput
+  bankCheques?: Prisma.BankChequeOrderByRelationAggregateInput
+  loanInstallments?: Prisma.LoanInstallmentOrderByRelationAggregateInput
   _relevance?: Prisma.UserOrderByRelevanceInput
 }
 
@@ -256,26 +285,38 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   name?: Prisma.StringFilter<"User"> | string
-  password?: Prisma.StringFilter<"User"> | string
   phone?: Prisma.StringNullableFilter<"User"> | string | null
+  password?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   profileImage?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  branchId?: Prisma.StringNullableFilter<"User"> | string | null
   shopId?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  branch?: Prisma.XOR<Prisma.BranchNullableScalarRelationFilter, Prisma.BranchWhereInput> | null
   shop?: Prisma.XOR<Prisma.ShopScalarRelationFilter, Prisma.ShopWhereInput>
+  staffProfile?: Prisma.XOR<Prisma.StaffProfileNullableScalarRelationFilter, Prisma.StaffProfileWhereInput> | null
+  sales?: Prisma.SaleListRelationFilter
+  saleReturns?: Prisma.SaleReturnListRelationFilter
+  expenses?: Prisma.ExpenseListRelationFilter
+  otherIncomes?: Prisma.OtherIncomeListRelationFilter
+  cashRegisters?: Prisma.CashRegisterListRelationFilter
+  accountTransactions?: Prisma.AccountTransactionListRelationFilter
+  bankCheques?: Prisma.BankChequeListRelationFilter
+  loanInstallments?: Prisma.LoanInstallmentListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  password?: Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   profileImage?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  branchId?: Prisma.SortOrderInput | Prisma.SortOrder
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -291,11 +332,12 @@ export type UserScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"User"> | string
   name?: Prisma.StringWithAggregatesFilter<"User"> | string
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
-  password?: Prisma.StringWithAggregatesFilter<"User"> | string
   phone?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  password?: Prisma.StringWithAggregatesFilter<"User"> | string
   role?: Prisma.EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
   profileImage?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  branchId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   shopId?: Prisma.StringWithAggregatesFilter<"User"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -305,67 +347,108 @@ export type UserCreateInput = {
   id?: string
   name: string
   email: string
-  password: string
   phone?: string | null
+  password: string
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   shop: Prisma.ShopCreateNestedOneWithoutUsersInput
+  staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
   id?: string
   name: string
   email: string
-  password: string
   phone?: string | null
+  password: string
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  branchId?: string | null
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
+  staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
   id?: string
   name: string
   email: string
-  password: string
   phone?: string | null
+  password: string
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  branchId?: string | null
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -375,8 +458,8 @@ export type UserUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -388,11 +471,12 @@ export type UserUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -418,11 +502,12 @@ export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  password?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   profileImage?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  branchId?: Prisma.SortOrder
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -432,11 +517,12 @@ export type UserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  password?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   profileImage?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  branchId?: Prisma.SortOrder
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -446,14 +532,20 @@ export type UserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  password?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   profileImage?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  branchId?: Prisma.SortOrder
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
 }
 
 export type UserCreateNestedManyWithoutShopInput = {
@@ -498,38 +590,240 @@ export type UserUncheckedUpdateManyWithoutShopNestedInput = {
   deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
 }
 
+export type UserCreateNestedManyWithoutBranchInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBranchInput, Prisma.UserUncheckedCreateWithoutBranchInput> | Prisma.UserCreateWithoutBranchInput[] | Prisma.UserUncheckedCreateWithoutBranchInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBranchInput | Prisma.UserCreateOrConnectWithoutBranchInput[]
+  createMany?: Prisma.UserCreateManyBranchInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUncheckedCreateNestedManyWithoutBranchInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBranchInput, Prisma.UserUncheckedCreateWithoutBranchInput> | Prisma.UserCreateWithoutBranchInput[] | Prisma.UserUncheckedCreateWithoutBranchInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBranchInput | Prisma.UserCreateOrConnectWithoutBranchInput[]
+  createMany?: Prisma.UserCreateManyBranchInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUpdateManyWithoutBranchNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBranchInput, Prisma.UserUncheckedCreateWithoutBranchInput> | Prisma.UserCreateWithoutBranchInput[] | Prisma.UserUncheckedCreateWithoutBranchInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBranchInput | Prisma.UserCreateOrConnectWithoutBranchInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutBranchInput | Prisma.UserUpsertWithWhereUniqueWithoutBranchInput[]
+  createMany?: Prisma.UserCreateManyBranchInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutBranchInput | Prisma.UserUpdateWithWhereUniqueWithoutBranchInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutBranchInput | Prisma.UserUpdateManyWithWhereWithoutBranchInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
+export type UserUncheckedUpdateManyWithoutBranchNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBranchInput, Prisma.UserUncheckedCreateWithoutBranchInput> | Prisma.UserCreateWithoutBranchInput[] | Prisma.UserUncheckedCreateWithoutBranchInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBranchInput | Prisma.UserCreateOrConnectWithoutBranchInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutBranchInput | Prisma.UserUpsertWithWhereUniqueWithoutBranchInput[]
+  createMany?: Prisma.UserCreateManyBranchInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutBranchInput | Prisma.UserUpdateWithWhereUniqueWithoutBranchInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutBranchInput | Prisma.UserUpdateManyWithWhereWithoutBranchInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
 export type EnumUserRoleFieldUpdateOperationsInput = {
   set?: $Enums.UserRole
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
+export type UserCreateNestedOneWithoutSalesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSalesInput, Prisma.UserUncheckedCreateWithoutSalesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSalesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutSalesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSalesInput, Prisma.UserUncheckedCreateWithoutSalesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSalesInput
+  upsert?: Prisma.UserUpsertWithoutSalesInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSalesInput, Prisma.UserUpdateWithoutSalesInput>, Prisma.UserUncheckedUpdateWithoutSalesInput>
+}
+
+export type UserCreateNestedOneWithoutSaleReturnsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSaleReturnsInput, Prisma.UserUncheckedCreateWithoutSaleReturnsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSaleReturnsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutSaleReturnsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSaleReturnsInput, Prisma.UserUncheckedCreateWithoutSaleReturnsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSaleReturnsInput
+  upsert?: Prisma.UserUpsertWithoutSaleReturnsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSaleReturnsInput, Prisma.UserUpdateWithoutSaleReturnsInput>, Prisma.UserUncheckedUpdateWithoutSaleReturnsInput>
+}
+
+export type UserCreateNestedOneWithoutAccountTransactionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAccountTransactionsInput, Prisma.UserUncheckedCreateWithoutAccountTransactionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAccountTransactionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutAccountTransactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAccountTransactionsInput, Prisma.UserUncheckedCreateWithoutAccountTransactionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAccountTransactionsInput
+  upsert?: Prisma.UserUpsertWithoutAccountTransactionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAccountTransactionsInput, Prisma.UserUpdateWithoutAccountTransactionsInput>, Prisma.UserUncheckedUpdateWithoutAccountTransactionsInput>
+}
+
+export type UserCreateNestedOneWithoutBankChequesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBankChequesInput, Prisma.UserUncheckedCreateWithoutBankChequesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBankChequesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutBankChequesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBankChequesInput, Prisma.UserUncheckedCreateWithoutBankChequesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBankChequesInput
+  upsert?: Prisma.UserUpsertWithoutBankChequesInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBankChequesInput, Prisma.UserUpdateWithoutBankChequesInput>, Prisma.UserUncheckedUpdateWithoutBankChequesInput>
+}
+
+export type UserCreateNestedOneWithoutLoanInstallmentsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLoanInstallmentsInput, Prisma.UserUncheckedCreateWithoutLoanInstallmentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLoanInstallmentsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutLoanInstallmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLoanInstallmentsInput, Prisma.UserUncheckedCreateWithoutLoanInstallmentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLoanInstallmentsInput
+  upsert?: Prisma.UserUpsertWithoutLoanInstallmentsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLoanInstallmentsInput, Prisma.UserUpdateWithoutLoanInstallmentsInput>, Prisma.UserUncheckedUpdateWithoutLoanInstallmentsInput>
+}
+
+export type UserCreateNestedOneWithoutExpensesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutExpensesInput, Prisma.UserUncheckedCreateWithoutExpensesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutExpensesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutExpensesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutExpensesInput, Prisma.UserUncheckedCreateWithoutExpensesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutExpensesInput
+  upsert?: Prisma.UserUpsertWithoutExpensesInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutExpensesInput, Prisma.UserUpdateWithoutExpensesInput>, Prisma.UserUncheckedUpdateWithoutExpensesInput>
+}
+
+export type UserCreateNestedOneWithoutOtherIncomesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOtherIncomesInput, Prisma.UserUncheckedCreateWithoutOtherIncomesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOtherIncomesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutOtherIncomesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOtherIncomesInput, Prisma.UserUncheckedCreateWithoutOtherIncomesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOtherIncomesInput
+  upsert?: Prisma.UserUpsertWithoutOtherIncomesInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOtherIncomesInput, Prisma.UserUpdateWithoutOtherIncomesInput>, Prisma.UserUncheckedUpdateWithoutOtherIncomesInput>
+}
+
+export type UserCreateNestedOneWithoutStaffProfileInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStaffProfileInput, Prisma.UserUncheckedCreateWithoutStaffProfileInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStaffProfileInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutStaffProfileNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStaffProfileInput, Prisma.UserUncheckedCreateWithoutStaffProfileInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStaffProfileInput
+  upsert?: Prisma.UserUpsertWithoutStaffProfileInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStaffProfileInput, Prisma.UserUpdateWithoutStaffProfileInput>, Prisma.UserUncheckedUpdateWithoutStaffProfileInput>
+}
+
+export type UserCreateNestedOneWithoutCashRegistersInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCashRegistersInput, Prisma.UserUncheckedCreateWithoutCashRegistersInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCashRegistersInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutCashRegistersNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCashRegistersInput, Prisma.UserUncheckedCreateWithoutCashRegistersInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCashRegistersInput
+  upsert?: Prisma.UserUpsertWithoutCashRegistersInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCashRegistersInput, Prisma.UserUpdateWithoutCashRegistersInput>, Prisma.UserUncheckedUpdateWithoutCashRegistersInput>
 }
 
 export type UserCreateWithoutShopInput = {
   id?: string
   name: string
   email: string
-  password: string
   phone?: string | null
+  password: string
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
+  staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutShopInput = {
   id?: string
   name: string
   email: string
-  password: string
   phone?: string | null
+  password: string
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  branchId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutShopInput = {
@@ -565,25 +859,1071 @@ export type UserScalarWhereInput = {
   id?: Prisma.StringFilter<"User"> | string
   name?: Prisma.StringFilter<"User"> | string
   email?: Prisma.StringFilter<"User"> | string
-  password?: Prisma.StringFilter<"User"> | string
   phone?: Prisma.StringNullableFilter<"User"> | string | null
+  password?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   profileImage?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  branchId?: Prisma.StringNullableFilter<"User"> | string | null
   shopId?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+}
+
+export type UserCreateWithoutBranchInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  shop: Prisma.ShopCreateNestedOneWithoutUsersInput
+  staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutBranchInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutBranchInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBranchInput, Prisma.UserUncheckedCreateWithoutBranchInput>
+}
+
+export type UserCreateManyBranchInputEnvelope = {
+  data: Prisma.UserCreateManyBranchInput | Prisma.UserCreateManyBranchInput[]
+  skipDuplicates?: boolean
+}
+
+export type UserUpsertWithWhereUniqueWithoutBranchInput = {
+  where: Prisma.UserWhereUniqueInput
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBranchInput, Prisma.UserUncheckedUpdateWithoutBranchInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBranchInput, Prisma.UserUncheckedCreateWithoutBranchInput>
+}
+
+export type UserUpdateWithWhereUniqueWithoutBranchInput = {
+  where: Prisma.UserWhereUniqueInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBranchInput, Prisma.UserUncheckedUpdateWithoutBranchInput>
+}
+
+export type UserUpdateManyWithWhereWithoutBranchInput = {
+  where: Prisma.UserScalarWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutBranchInput>
+}
+
+export type UserCreateWithoutSalesInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
+  shop: Prisma.ShopCreateNestedOneWithoutUsersInput
+  staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSalesInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  branchId?: string | null
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSalesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSalesInput, Prisma.UserUncheckedCreateWithoutSalesInput>
+}
+
+export type UserUpsertWithoutSalesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSalesInput, Prisma.UserUncheckedUpdateWithoutSalesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSalesInput, Prisma.UserUncheckedCreateWithoutSalesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSalesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSalesInput, Prisma.UserUncheckedUpdateWithoutSalesInput>
+}
+
+export type UserUpdateWithoutSalesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
+  shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
+  staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSalesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSaleReturnsInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
+  shop: Prisma.ShopCreateNestedOneWithoutUsersInput
+  staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSaleReturnsInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  branchId?: string | null
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSaleReturnsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSaleReturnsInput, Prisma.UserUncheckedCreateWithoutSaleReturnsInput>
+}
+
+export type UserUpsertWithoutSaleReturnsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSaleReturnsInput, Prisma.UserUncheckedUpdateWithoutSaleReturnsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSaleReturnsInput, Prisma.UserUncheckedCreateWithoutSaleReturnsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSaleReturnsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSaleReturnsInput, Prisma.UserUncheckedUpdateWithoutSaleReturnsInput>
+}
+
+export type UserUpdateWithoutSaleReturnsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
+  shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
+  staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSaleReturnsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAccountTransactionsInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
+  shop: Prisma.ShopCreateNestedOneWithoutUsersInput
+  staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAccountTransactionsInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  branchId?: string | null
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAccountTransactionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAccountTransactionsInput, Prisma.UserUncheckedCreateWithoutAccountTransactionsInput>
+}
+
+export type UserUpsertWithoutAccountTransactionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAccountTransactionsInput, Prisma.UserUncheckedUpdateWithoutAccountTransactionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAccountTransactionsInput, Prisma.UserUncheckedCreateWithoutAccountTransactionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAccountTransactionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAccountTransactionsInput, Prisma.UserUncheckedUpdateWithoutAccountTransactionsInput>
+}
+
+export type UserUpdateWithoutAccountTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
+  shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
+  staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAccountTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutBankChequesInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
+  shop: Prisma.ShopCreateNestedOneWithoutUsersInput
+  staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutBankChequesInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  branchId?: string | null
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutBankChequesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBankChequesInput, Prisma.UserUncheckedCreateWithoutBankChequesInput>
+}
+
+export type UserUpsertWithoutBankChequesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBankChequesInput, Prisma.UserUncheckedUpdateWithoutBankChequesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBankChequesInput, Prisma.UserUncheckedCreateWithoutBankChequesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBankChequesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBankChequesInput, Prisma.UserUncheckedUpdateWithoutBankChequesInput>
+}
+
+export type UserUpdateWithoutBankChequesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
+  shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
+  staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutBankChequesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutLoanInstallmentsInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
+  shop: Prisma.ShopCreateNestedOneWithoutUsersInput
+  staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutLoanInstallmentsInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  branchId?: string | null
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutLoanInstallmentsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutLoanInstallmentsInput, Prisma.UserUncheckedCreateWithoutLoanInstallmentsInput>
+}
+
+export type UserUpsertWithoutLoanInstallmentsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutLoanInstallmentsInput, Prisma.UserUncheckedUpdateWithoutLoanInstallmentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutLoanInstallmentsInput, Prisma.UserUncheckedCreateWithoutLoanInstallmentsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutLoanInstallmentsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutLoanInstallmentsInput, Prisma.UserUncheckedUpdateWithoutLoanInstallmentsInput>
+}
+
+export type UserUpdateWithoutLoanInstallmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
+  shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
+  staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutLoanInstallmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutExpensesInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
+  shop: Prisma.ShopCreateNestedOneWithoutUsersInput
+  staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutCashierInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutExpensesInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  branchId?: string | null
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutExpensesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutExpensesInput, Prisma.UserUncheckedCreateWithoutExpensesInput>
+}
+
+export type UserUpsertWithoutExpensesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutExpensesInput, Prisma.UserUncheckedUpdateWithoutExpensesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutExpensesInput, Prisma.UserUncheckedCreateWithoutExpensesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutExpensesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutExpensesInput, Prisma.UserUncheckedUpdateWithoutExpensesInput>
+}
+
+export type UserUpdateWithoutExpensesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
+  shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
+  staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutCashierNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutExpensesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutOtherIncomesInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
+  shop: Prisma.ShopCreateNestedOneWithoutUsersInput
+  staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutOtherIncomesInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  branchId?: string | null
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutOtherIncomesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOtherIncomesInput, Prisma.UserUncheckedCreateWithoutOtherIncomesInput>
+}
+
+export type UserUpsertWithoutOtherIncomesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOtherIncomesInput, Prisma.UserUncheckedUpdateWithoutOtherIncomesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOtherIncomesInput, Prisma.UserUncheckedCreateWithoutOtherIncomesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOtherIncomesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOtherIncomesInput, Prisma.UserUncheckedUpdateWithoutOtherIncomesInput>
+}
+
+export type UserUpdateWithoutOtherIncomesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
+  shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
+  staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOtherIncomesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutStaffProfileInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
+  shop: Prisma.ShopCreateNestedOneWithoutUsersInput
+  sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutStaffProfileInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  branchId?: string | null
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutUserInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutStaffProfileInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStaffProfileInput, Prisma.UserUncheckedCreateWithoutStaffProfileInput>
+}
+
+export type UserUpsertWithoutStaffProfileInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStaffProfileInput, Prisma.UserUncheckedUpdateWithoutStaffProfileInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStaffProfileInput, Prisma.UserUncheckedCreateWithoutStaffProfileInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutStaffProfileInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStaffProfileInput, Prisma.UserUncheckedUpdateWithoutStaffProfileInput>
+}
+
+export type UserUpdateWithoutStaffProfileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
+  shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStaffProfileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCashRegistersInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
+  shop: Prisma.ShopCreateNestedOneWithoutUsersInput
+  staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCashRegistersInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  branchId?: string | null
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutUserInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedCreateNestedManyWithoutUserInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutUserInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCashRegistersInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCashRegistersInput, Prisma.UserUncheckedCreateWithoutCashRegistersInput>
+}
+
+export type UserUpsertWithoutCashRegistersInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCashRegistersInput, Prisma.UserUncheckedUpdateWithoutCashRegistersInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCashRegistersInput, Prisma.UserUncheckedCreateWithoutCashRegistersInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCashRegistersInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCashRegistersInput, Prisma.UserUncheckedUpdateWithoutCashRegistersInput>
+}
+
+export type UserUpdateWithoutCashRegistersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
+  shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
+  staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCashRegistersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyShopInput = {
   id?: string
   name: string
   email: string
-  password: string
   phone?: string | null
+  password: string
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  branchId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -592,56 +1932,255 @@ export type UserUpdateWithoutShopInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
+  staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutShopInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutShopInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UserCreateManyBranchInput = {
+  id?: string
+  name: string
+  email: string
+  phone?: string | null
+  password: string
+  role?: $Enums.UserRole
+  profileImage?: string | null
+  isActive?: boolean
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UserUpdateWithoutBranchInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
+  staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUpdateManyWithoutUserNestedInput
 }
 
+export type UserUncheckedUpdateWithoutBranchInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutUserNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutUserNestedInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedUpdateManyWithoutUserNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutUserNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateManyWithoutBranchInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type UserCountOutputType
+ */
+
+export type UserCountOutputType = {
+  sales: number
+  saleReturns: number
+  expenses: number
+  otherIncomes: number
+  cashRegisters: number
+  accountTransactions: number
+  bankCheques: number
+  loanInstallments: number
+}
+
+export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  sales?: boolean | UserCountOutputTypeCountSalesArgs
+  saleReturns?: boolean | UserCountOutputTypeCountSaleReturnsArgs
+  expenses?: boolean | UserCountOutputTypeCountExpensesArgs
+  otherIncomes?: boolean | UserCountOutputTypeCountOtherIncomesArgs
+  cashRegisters?: boolean | UserCountOutputTypeCountCashRegistersArgs
+  accountTransactions?: boolean | UserCountOutputTypeCountAccountTransactionsArgs
+  bankCheques?: boolean | UserCountOutputTypeCountBankChequesArgs
+  loanInstallments?: boolean | UserCountOutputTypeCountLoanInstallmentsArgs
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserCountOutputType
+   */
+  select?: Prisma.UserCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSalesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SaleWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSaleReturnsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SaleReturnWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountExpensesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ExpenseWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountOtherIncomesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OtherIncomeWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCashRegistersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CashRegisterWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAccountTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AccountTransactionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountBankChequesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BankChequeWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountLoanInstallmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LoanInstallmentWhereInput
+}
 
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
   email?: boolean
-  password?: boolean
   phone?: boolean
+  password?: boolean
   role?: boolean
   profileImage?: boolean
   isActive?: boolean
+  branchId?: boolean
   shopId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  branch?: boolean | Prisma.User$branchArgs<ExtArgs>
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
+  staffProfile?: boolean | Prisma.User$staffProfileArgs<ExtArgs>
+  sales?: boolean | Prisma.User$salesArgs<ExtArgs>
+  saleReturns?: boolean | Prisma.User$saleReturnsArgs<ExtArgs>
+  expenses?: boolean | Prisma.User$expensesArgs<ExtArgs>
+  otherIncomes?: boolean | Prisma.User$otherIncomesArgs<ExtArgs>
+  cashRegisters?: boolean | Prisma.User$cashRegistersArgs<ExtArgs>
+  accountTransactions?: boolean | Prisma.User$accountTransactionsArgs<ExtArgs>
+  bankCheques?: boolean | Prisma.User$bankChequesArgs<ExtArgs>
+  loanInstallments?: boolean | Prisma.User$loanInstallmentsArgs<ExtArgs>
+  _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 
@@ -650,35 +2189,58 @@ export type UserSelectScalar = {
   id?: boolean
   name?: boolean
   email?: boolean
-  password?: boolean
   phone?: boolean
+  password?: boolean
   role?: boolean
   profileImage?: boolean
   isActive?: boolean
+  branchId?: boolean
   shopId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "phone" | "role" | "profileImage" | "isActive" | "shopId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phone" | "password" | "role" | "profileImage" | "isActive" | "branchId" | "shopId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  branch?: boolean | Prisma.User$branchArgs<ExtArgs>
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
+  staffProfile?: boolean | Prisma.User$staffProfileArgs<ExtArgs>
+  sales?: boolean | Prisma.User$salesArgs<ExtArgs>
+  saleReturns?: boolean | Prisma.User$saleReturnsArgs<ExtArgs>
+  expenses?: boolean | Prisma.User$expensesArgs<ExtArgs>
+  otherIncomes?: boolean | Prisma.User$otherIncomesArgs<ExtArgs>
+  cashRegisters?: boolean | Prisma.User$cashRegistersArgs<ExtArgs>
+  accountTransactions?: boolean | Prisma.User$accountTransactionsArgs<ExtArgs>
+  bankCheques?: boolean | Prisma.User$bankChequesArgs<ExtArgs>
+  loanInstallments?: boolean | Prisma.User$loanInstallmentsArgs<ExtArgs>
+  _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
+    branch: Prisma.$BranchPayload<ExtArgs> | null
     shop: Prisma.$ShopPayload<ExtArgs>
+    staffProfile: Prisma.$StaffProfilePayload<ExtArgs> | null
+    sales: Prisma.$SalePayload<ExtArgs>[]
+    saleReturns: Prisma.$SaleReturnPayload<ExtArgs>[]
+    expenses: Prisma.$ExpensePayload<ExtArgs>[]
+    otherIncomes: Prisma.$OtherIncomePayload<ExtArgs>[]
+    cashRegisters: Prisma.$CashRegisterPayload<ExtArgs>[]
+    accountTransactions: Prisma.$AccountTransactionPayload<ExtArgs>[]
+    bankCheques: Prisma.$BankChequePayload<ExtArgs>[]
+    loanInstallments: Prisma.$LoanInstallmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
     email: string
-    password: string
     phone: string | null
+    password: string
     role: $Enums.UserRole
     profileImage: string | null
     isActive: boolean
+    branchId: string | null
     shopId: string
     createdAt: Date
     updatedAt: Date
@@ -1022,7 +2584,17 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  branch<T extends Prisma.User$branchArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$branchArgs<ExtArgs>>): Prisma.Prisma__BranchClient<runtime.Types.Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   shop<T extends Prisma.ShopDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ShopDefaultArgs<ExtArgs>>): Prisma.Prisma__ShopClient<runtime.Types.Result.GetResult<Prisma.$ShopPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  staffProfile<T extends Prisma.User$staffProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$staffProfileArgs<ExtArgs>>): Prisma.Prisma__StaffProfileClient<runtime.Types.Result.GetResult<Prisma.$StaffProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  sales<T extends Prisma.User$salesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$salesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  saleReturns<T extends Prisma.User$saleReturnsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$saleReturnsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SaleReturnPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  expenses<T extends Prisma.User$expensesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  otherIncomes<T extends Prisma.User$otherIncomesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$otherIncomesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OtherIncomePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  cashRegisters<T extends Prisma.User$cashRegistersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cashRegistersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CashRegisterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  accountTransactions<T extends Prisma.User$accountTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bankCheques<T extends Prisma.User$bankChequesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bankChequesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BankChequePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  loanInstallments<T extends Prisma.User$loanInstallmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$loanInstallmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoanInstallmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1055,11 +2627,12 @@ export interface UserFieldRefs {
   readonly id: Prisma.FieldRef<"User", 'String'>
   readonly name: Prisma.FieldRef<"User", 'String'>
   readonly email: Prisma.FieldRef<"User", 'String'>
-  readonly password: Prisma.FieldRef<"User", 'String'>
   readonly phone: Prisma.FieldRef<"User", 'String'>
+  readonly password: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'UserRole'>
   readonly profileImage: Prisma.FieldRef<"User", 'String'>
   readonly isActive: Prisma.FieldRef<"User", 'Boolean'>
+  readonly branchId: Prisma.FieldRef<"User", 'String'>
   readonly shopId: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
@@ -1408,6 +2981,236 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Limit how many Users to delete.
    */
   limit?: number
+}
+
+/**
+ * User.branch
+ */
+export type User$branchArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Branch
+   */
+  select?: Prisma.BranchSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Branch
+   */
+  omit?: Prisma.BranchOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BranchInclude<ExtArgs> | null
+  where?: Prisma.BranchWhereInput
+}
+
+/**
+ * User.staffProfile
+ */
+export type User$staffProfileArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StaffProfile
+   */
+  select?: Prisma.StaffProfileSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StaffProfile
+   */
+  omit?: Prisma.StaffProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StaffProfileInclude<ExtArgs> | null
+  where?: Prisma.StaffProfileWhereInput
+}
+
+/**
+ * User.sales
+ */
+export type User$salesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Sale
+   */
+  select?: Prisma.SaleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Sale
+   */
+  omit?: Prisma.SaleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SaleInclude<ExtArgs> | null
+  where?: Prisma.SaleWhereInput
+  orderBy?: Prisma.SaleOrderByWithRelationInput | Prisma.SaleOrderByWithRelationInput[]
+  cursor?: Prisma.SaleWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SaleScalarFieldEnum | Prisma.SaleScalarFieldEnum[]
+}
+
+/**
+ * User.saleReturns
+ */
+export type User$saleReturnsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SaleReturn
+   */
+  select?: Prisma.SaleReturnSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SaleReturn
+   */
+  omit?: Prisma.SaleReturnOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SaleReturnInclude<ExtArgs> | null
+  where?: Prisma.SaleReturnWhereInput
+  orderBy?: Prisma.SaleReturnOrderByWithRelationInput | Prisma.SaleReturnOrderByWithRelationInput[]
+  cursor?: Prisma.SaleReturnWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SaleReturnScalarFieldEnum | Prisma.SaleReturnScalarFieldEnum[]
+}
+
+/**
+ * User.expenses
+ */
+export type User$expensesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Expense
+   */
+  select?: Prisma.ExpenseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Expense
+   */
+  omit?: Prisma.ExpenseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ExpenseInclude<ExtArgs> | null
+  where?: Prisma.ExpenseWhereInput
+  orderBy?: Prisma.ExpenseOrderByWithRelationInput | Prisma.ExpenseOrderByWithRelationInput[]
+  cursor?: Prisma.ExpenseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ExpenseScalarFieldEnum | Prisma.ExpenseScalarFieldEnum[]
+}
+
+/**
+ * User.otherIncomes
+ */
+export type User$otherIncomesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OtherIncome
+   */
+  select?: Prisma.OtherIncomeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OtherIncome
+   */
+  omit?: Prisma.OtherIncomeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OtherIncomeInclude<ExtArgs> | null
+  where?: Prisma.OtherIncomeWhereInput
+  orderBy?: Prisma.OtherIncomeOrderByWithRelationInput | Prisma.OtherIncomeOrderByWithRelationInput[]
+  cursor?: Prisma.OtherIncomeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OtherIncomeScalarFieldEnum | Prisma.OtherIncomeScalarFieldEnum[]
+}
+
+/**
+ * User.cashRegisters
+ */
+export type User$cashRegistersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CashRegister
+   */
+  select?: Prisma.CashRegisterSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CashRegister
+   */
+  omit?: Prisma.CashRegisterOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CashRegisterInclude<ExtArgs> | null
+  where?: Prisma.CashRegisterWhereInput
+  orderBy?: Prisma.CashRegisterOrderByWithRelationInput | Prisma.CashRegisterOrderByWithRelationInput[]
+  cursor?: Prisma.CashRegisterWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CashRegisterScalarFieldEnum | Prisma.CashRegisterScalarFieldEnum[]
+}
+
+/**
+ * User.accountTransactions
+ */
+export type User$accountTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AccountTransaction
+   */
+  select?: Prisma.AccountTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AccountTransaction
+   */
+  omit?: Prisma.AccountTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AccountTransactionInclude<ExtArgs> | null
+  where?: Prisma.AccountTransactionWhereInput
+  orderBy?: Prisma.AccountTransactionOrderByWithRelationInput | Prisma.AccountTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.AccountTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AccountTransactionScalarFieldEnum | Prisma.AccountTransactionScalarFieldEnum[]
+}
+
+/**
+ * User.bankCheques
+ */
+export type User$bankChequesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BankCheque
+   */
+  select?: Prisma.BankChequeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BankCheque
+   */
+  omit?: Prisma.BankChequeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BankChequeInclude<ExtArgs> | null
+  where?: Prisma.BankChequeWhereInput
+  orderBy?: Prisma.BankChequeOrderByWithRelationInput | Prisma.BankChequeOrderByWithRelationInput[]
+  cursor?: Prisma.BankChequeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BankChequeScalarFieldEnum | Prisma.BankChequeScalarFieldEnum[]
+}
+
+/**
+ * User.loanInstallments
+ */
+export type User$loanInstallmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LoanInstallment
+   */
+  select?: Prisma.LoanInstallmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LoanInstallment
+   */
+  omit?: Prisma.LoanInstallmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoanInstallmentInclude<ExtArgs> | null
+  where?: Prisma.LoanInstallmentWhereInput
+  orderBy?: Prisma.LoanInstallmentOrderByWithRelationInput | Prisma.LoanInstallmentOrderByWithRelationInput[]
+  cursor?: Prisma.LoanInstallmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LoanInstallmentScalarFieldEnum | Prisma.LoanInstallmentScalarFieldEnum[]
 }
 
 /**

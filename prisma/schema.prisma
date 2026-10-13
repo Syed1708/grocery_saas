@@ -7,63 +7,293 @@ datasource db {
   provider = "mysql"
 }
 
-enum UserRole {
-  OWNER
-  MANAGER
-  CASHIER
-}
+// ==========================================
+// ENUMS
+// ==========================================
+// 👈 Add this enum right here:
 enum CustomerType {
   WALK_IN
   PERMANENT
 }
 
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  OWNER
+  MANAGER
+  CASHIER
+  VENDOR
+}
+
+enum AccountType {
+  CASH
+  BANK
+  BKASH
+  NAGAD
+  ROCKET
+  OTHER
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAW
+  TRANSFER_IN
+  TRANSFER_OUT
+  SALE
+  PURCHASE
+  EXPENSE
+  INCOME
+  PAYROLL
+  LOAN
+}
+
+enum ChequeType {
+  RECEIVED
+  ISSUED
+}
+
+enum ChequePartyType {
+  CUSTOMER
+  SUPPLIER
+  OTHER
+}
+
+enum ChequeStatus {
+  PENDING
+  CLEARED
+  BOUNCED
+  CANCELLED
+}
+
+enum LoanType {
+  TAKEN
+  GIVEN
+}
+
+enum LoanStatus {
+  ACTIVE
+  PAID
+}
+
+enum PaymentStatus {
+  PAID
+  PARTIAL
+  DUE
+}
+
+enum QuotationStatus {
+  PENDING
+  CONVERTED
+  EXPIRED
+}
+
+enum ItemCondition {
+  RESTOCK
+  DAMAGED
+}
+
+enum AssetCondition {
+  GOOD
+  MAINTENANCE
+  DAMAGED
+  DISPOSED
+}
+
+enum EquityType {
+  CAPITAL
+  DRAWING
+}
+
+enum StaffStatus {
+  ACTIVE
+  INACTIVE
+  TERMINATED
+}
+
+// ==========================================
+// 1. STORE, BRANCHES & LICENSE
+// ==========================================
+
 model Shop {
-  id             String     @id @default(cuid())
+  id             String    @id @default(cuid())
   name           String
+  nameEn         String?
   phone          String
   email          String?
-  currency       String     @default("USD")
-  currencySymbol String     @default("$")
-  village        String?
-  district       String?
-  addressLine    String?
-  receiptHeader  String?    @default("Thank you for shopping with us!")
-  receiptFooter  String?    @default("Goods sold are eligible for return within 7 days.")
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  address        String?   @db.Text
+  tradeLicense   String?
+  binVatNumber   String?
+  currencySymbol String    @default("৳")
+  vatPercent     Decimal   @default(0.00) @db.Decimal(5, 2)
+  enableVat      Boolean   @default(false)
+  thermalWidth   String    @default("80mm") // 58mm or 80mm
+  invoiceHeader  String?   @db.Text
+  invoiceFooter  String?   @db.Text
+  banglaReceipt  Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
+  branches       Branch[]
   users          User[]
   categories     Category[]
+  brands         Brand[]
+  sections       ProductSection[]
+  units          Unit[]
   products       Product[]
-  units          Unit[]     
   customers      Customer[]
+  suppliers      Supplier[]
+  purchases      Purchase[]
+  sales          Sale[]
+  saleReturns    SaleReturn[]
+  quotations     Quotation[]
+  accounts       Account[]
+  expenses       Expense[]
+  expenseCategories ExpenseCategory[]
+  otherIncomes   OtherIncome[]
+  departments    Department[]
+  staffProfiles  StaffProfile[]
+  payrolls       Payroll[]
+  salaryAdvances SalaryAdvance[]
+  loans          Loan[]
+  bankCheques    BankCheque[]
+  companyAssets  CompanyAsset[]
+  ownerTransactions OwnerTransaction[]
+  cashRegisters  CashRegister[]
+  licenses       License[]
 
   @@map("shops")
+}
+
+model Branch {
+  id             String    @id @default(cuid())
+  name           String
+  code           String
+  phone          String?
+  email          String?
+  address        String?   @db.Text
+  isMain         Boolean   @default(false)
+  status         String    @default("active") // active, inactive
+  shopId         String
+  shop           Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  users          User[]
+  productStocks  ProductStock[]
+  purchases      Purchase[]
+  sales          Sale[]
+  saleReturns    SaleReturn[]
+  quotations     Quotation[]
+  accounts       Account[]
+  accountTransactions AccountTransaction[]
+  expenses       Expense[]
+  otherIncomes   OtherIncome[]
+  staffProfiles  StaffProfile[]
+  payrolls       Payroll[]
+  salaryAdvances SalaryAdvance[]
+  loans          Loan[]
+  loanInstallments LoanInstallment[]
+  bankCheques    BankCheque[]
+  companyAssets  CompanyAsset[]
+  ownerTransactions OwnerTransaction[]
+  cashRegisters  CashRegister[]
+  customerPayments CustomerPayment[]
+  supplierPayments SupplierPayment[]
+
+  @@unique([shopId, code])
+  @@index([shopId])
+  @@map("branches")
+}
+
+model License {
+  id              String    @id @default(cuid())
+  licenseKey      String    @unique
+  clientName      String
+  clientPhone     String
+  monthlyFee      Decimal   @default(0.00) @db.Decimal(10, 2)
+  expiresAt       DateTime
+  gracePeriodDays Int       @default(3)
+  bkashNumber     String?
+  nagadNumber     String?
+  supportPhone    String?
+  status          String    @default("active") // active, suspended, expired
+  lastTrxId       String?
+  shopId          String
+  shop            Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([shopId])
+  @@map("licenses")
 }
 
 model User {
   id           String    @id @default(cuid())
   name         String
   email        String    @unique
-  password     String
   phone        String?
+  password     String
   role         UserRole  @default(CASHIER)
   profileImage String?
   isActive     Boolean   @default(true)
+  branchId     String?
+  branch       Branch?   @relation(fields: [branchId], references: [id], onDelete: SetNull)
   shopId       String
   shop         Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
+  staffProfile StaffProfile?
+  sales        Sale[]
+  saleReturns  SaleReturn[]
+  expenses     Expense[]
+  otherIncomes OtherIncome[]
+  cashRegisters CashRegister[]
+  accountTransactions AccountTransaction[]
+  bankCheques  BankCheque[]
+  loanInstallments LoanInstallment[]
+
   @@index([shopId])
+  @@index([branchId])
   @@map("users")
 }
 
-model Category {
+// ==========================================
+// 2. PRODUCT CATALOG & UNITS
+// ==========================================
+
+model Unit {
+  id             String    @id @default(cuid())
+  name           String
+  shortCode      String    // 👈 shortCode (not code)
+  allowDecimal   Boolean   @default(false)
+  baseUnitId     String?
+  baseUnit       Unit?     @relation("UnitSubUnits", fields: [baseUnitId], references: [id], onDelete: Restrict)
+  subUnits       Unit[]    @relation("UnitSubUnits")
+  conversionRate Decimal?  @db.Decimal(10, 4)
+  status         String    @default("active")
+  shopId         String
+  shop           Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  products       Product[]
+  purchaseItems  PurchaseItem[]
+  saleItems      SaleItem[]
+  saleReturnItems SaleReturnItem[]
+  quotationItems QuotationItem[]
+
+  @@unique([shopId, shortCode]) // 👈 shopId_shortCode
+  @@index([shopId])
+  @@map("units")
+}
+
+model ProductSection {
   id          String    @id @default(cuid())
-  name        String
+  name        String    // e.g. তাক নং ০১, র্যাক-বি
+  code        String?
   description String?   @db.Text
-  image       String?
+  status      String    @default("active")
   shopId      String
   shop        Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
@@ -71,87 +301,852 @@ model Category {
 
   products    Product[]
 
-  @@unique([shopId, name])
+  @@index([shopId])
+  @@map("product_sections")
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String
+  description String?    @db.Text
+  status      String     @default("active")
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Category[] @relation("CategoryHierarchy")
+  shopId      String
+  shop        Shop       @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  products    Product[]
+
+  @@unique([shopId, slug])
   @@index([shopId])
   @@map("categories")
 }
 
-// 👈 Dynamic Unit Model (Shop owners can create ANY unit)
-model Unit {
-  id          String    @id @default(cuid())
-  name        String    // e.g. "Kilogram", "Piece", "Carton", "Bag", "Bottle"
-  code        String    // e.g. "kg", "pcs", "ctn", "bag", "btl"
-  shopId      String
-  shop        Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  
-  products    Product[] @relation("BaseUnit")
+model Brand {
+  id            String    @id @default(cuid())
+  name          String
+  companyName   String?
+  contactPerson String?
+  phone         String?
+  status        String    @default("active")
+  shopId        String
+  shop          Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  products      Product[]
 
-  @@unique([shopId, code]) // Each shop has unique unit codes
   @@index([shopId])
-  @@map("units")
+  @@map("brands")
 }
 
 model Product {
-  id               String   @id @default(cuid())
+  id               String          @id @default(cuid())
   name             String
+  nameEn           String?
   barcode          String
-  description      String?  @db.Text
-  costPrice        Decimal  @default(0.00) @db.Decimal(10, 2)
-  sellingPrice     Decimal  @default(0.00) @db.Decimal(10, 2)
-  stockQuantity    Decimal  @default(0.00) @db.Decimal(10, 2)
-  minStockAlert    Decimal  @default(5.00) @db.Decimal(10, 2)
+  sku              String
+  description      String?         @db.Text // 👈 Added
+  purchasePrice    Decimal         @default(0.00) @db.Decimal(10, 2)
+  sellingPrice     Decimal         @default(0.00) @db.Decimal(10, 2)
+  wholesalePrice   Decimal?        @db.Decimal(10, 2)
+  vatPercent       Decimal?        @default(0.00) @db.Decimal(5, 2)
+  expiryDate       DateTime?
+  alertQuantity    Decimal         @default(5.00) @db.Decimal(10, 2)
+  bulkUnitName     String?         // 👈 Added
+  conversionFactor Decimal?        @default(1.00) @db.Decimal(10, 2) // 👈 Added
   image            String?
+  status           String          @default("active")
 
-  // Base Unit (The unit inventory is stored in: e.g. PCS or KG)
-  unitId           String
-  unit             Unit     @relation("BaseUnit", fields: [unitId], references: [id], onDelete: Restrict)
-
-  // Bulk / Packaging Unit Conversion (Optional)
-  // e.g., If unit is PCS, but bought/sold in Cartons: conversionFactor = 24
-  bulkUnitName     String?  // e.g., "Carton", "Box", "Bag"
-  conversionFactor Decimal? @default(1.00) @db.Decimal(10, 2) // 1 Carton = 24 PCS
-
+  sectionId        String?
+  section          ProductSection? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
   categoryId       String
-  category         Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-
+  category         Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  brandId          String?
+  brand            Brand?          @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  unitId           String
+  unit             Unit            @relation(fields: [unitId], references: [id], onDelete: Restrict)
   shopId           String
-  shop             Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shop             Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  stocks           ProductStock[]
+  purchaseItems    PurchaseItem[]
+  saleItems        SaleItem[]
+  saleReturnItems  SaleReturnItem[]
+  quotationItems   QuotationItem[]
 
   @@unique([shopId, barcode])
+  @@unique([shopId, sku])
   @@index([shopId])
   @@index([categoryId])
+  @@index([brandId])
   @@index([unitId])
-  @@index([shopId, name])
   @@map("products")
 }
 
-model Customer {
-  id             String       @id @default(cuid())
-  name           String
-  phone          String?
-  email          String?
-  type           CustomerType @default(PERMANENT)
-  village        String?
-  district       String?
-  addressLine    String?
-  creditLimit    Decimal      @default(0.00) @db.Decimal(10, 2)
-  currentBalance Decimal      @default(0.00) @db.Decimal(10, 2) // > 0 means customer owes store
+model ProductStock {
+  id        String   @id @default(cuid())
+  quantity  Decimal  @default(0.00) @db.Decimal(10, 2)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branchId  String
+  branch    Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
 
-  shopId         String
-  shop           Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  @@unique([productId, branchId])
+  @@index([productId])
+  @@index([branchId])
+  @@map("product_stocks")
+}
+
+// ==========================================
+// 3. PURCHASES & SUPPLIERS
+// ==========================================
+
+model Supplier {
+  id            String    @id @default(cuid())
+  name          String
+  companyName   String?
+  phone         String
+  email         String?
+  village       String?   // 👈 Added
+  district      String?   // 👈 Added
+  address       String?   @db.Text
+  contactPerson String?
+  openingDue    Decimal   @default(0.00) @db.Decimal(10, 2)
+  currentDue    Decimal   @default(0.00) @db.Decimal(10, 2) // 👈 currentDue
+  status        String    @default("active")
+  shopId        String
+  shop          Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  purchases     Purchase[]
+  payments      SupplierPayment[]
 
   @@index([shopId])
   @@index([shopId, phone])
-  @@index([shopId, village])
-  @@index([shopId, district])
+  @@map("suppliers")
+}
+
+model Purchase {
+  id            String         @id @default(cuid())
+  chalanNo      String
+  purchaseDate  DateTime       @default(now())
+  subtotal      Decimal        @db.Decimal(10, 2)
+  totalQuantity Decimal        @default(0.00) @db.Decimal(10, 2)
+  discount      Decimal        @default(0.00) @db.Decimal(10, 2)
+  transportCost Decimal        @default(0.00) @db.Decimal(10, 2)
+  vatPercent    Decimal        @default(0.00) @db.Decimal(5, 2)
+  vatAmount     Decimal        @default(0.00) @db.Decimal(10, 2)
+  grandTotal    Decimal        @db.Decimal(10, 2)
+  previousDue   Decimal        @default(0.00) @db.Decimal(10, 2)
+  paidAmount    Decimal        @default(0.00) @db.Decimal(10, 2)
+  dueAmount     Decimal        @default(0.00) @db.Decimal(10, 2)
+  paymentMethod String         @default("cash") // cash, bank, bkash, nagad
+  paymentStatus PaymentStatus  @default(PAID)
+  notes         String?        @db.Text
+
+  branchId      String
+  branch        Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  supplierId    String
+  supplier      Supplier       @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  shopId        String
+  shop          Shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  items         PurchaseItem[]
+  payments      SupplierPayment[]
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@unique([shopId, chalanNo])
+  @@index([shopId])
+  @@index([branchId])
+  @@index([supplierId])
+  @@map("purchases")
+}
+
+model PurchaseItem {
+  id         String   @id @default(cuid())
+  quantity   Decimal  @db.Decimal(10, 2)
+  unitCost   Decimal  @db.Decimal(10, 2)
+  commission Decimal  @default(0.00) @db.Decimal(10, 2)
+  lineTotal  Decimal  @db.Decimal(10, 2)
+
+  purchaseId String
+  purchase   Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  unitId     String?
+  unit       Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
+
+  createdAt  DateTime @default(now())
+
+  @@index([purchaseId])
+  @@index([productId])
+  @@map("purchase_items")
+}
+
+model SupplierPayment {
+  id            String    @id @default(cuid())
+  paymentDate   DateTime  @default(now())
+  amount        Decimal   @db.Decimal(10, 2)
+  paymentMethod String    // cash, bank, bkash, nagad
+  voucherNo     String
+  reference     String?
+  note          String?   @db.Text
+
+  branchId      String
+  branch        Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  supplierId    String
+  supplier      Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  purchaseId    String?
+  purchase      Purchase? @relation(fields: [purchaseId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime  @default(now())
+
+  @@index([branchId])
+  @@index([supplierId])
+  @@map("supplier_payments")
+}
+
+// ==========================================
+// 4. SALES, POS, QUOTATIONS & RETURNS
+// ==========================================
+
+
+model Customer {
+  id          String        @id @default(cuid())
+  name        String
+  phone       String?       // 👈 Optional for walk-in
+  email       String?
+  type        CustomerType  @default(PERMANENT) // 👈 CustomerType
+  village     String?       // 👈 Added
+  district    String?       // 👈 Added
+  address     String?       @db.Text
+  creditLimit Decimal       @default(10000.00) @db.Decimal(10, 2)
+  openingDue  Decimal       @default(0.00) @db.Decimal(10, 2)
+  currentDue  Decimal       @default(0.00) @db.Decimal(10, 2) // 👈 currentDue
+  status      String        @default("active")
+  shopId      String
+  shop        Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  sales       Sale[]
+  payments    CustomerPayment[]
+  returns     SaleReturn[]
+  quotations  Quotation[]
+
+  @@index([shopId])
+  @@index([shopId, phone])
   @@map("customers")
+}
+
+model Sale {
+  id            String        @id @default(cuid())
+  invoiceNo     String
+  saleDate      DateTime      @default(now())
+  subtotal      Decimal       @db.Decimal(10, 2)
+  discount      Decimal       @default(0.00) @db.Decimal(10, 2)
+  vatPercent    Decimal       @default(0.00) @db.Decimal(5, 2)
+  vatAmount     Decimal       @default(0.00) @db.Decimal(10, 2)
+  grandTotal    Decimal       @db.Decimal(10, 2)
+  paidAmount    Decimal       @default(0.00) @db.Decimal(10, 2)
+  dueAmount     Decimal       @default(0.00) @db.Decimal(10, 2)
+  changeAmount  Decimal       @default(0.00) @db.Decimal(10, 2)
+  paymentMethod String        @default("cash") // cash, card, bkash, nagad, rocket, bank, mixed, due
+  paymentStatus String        @default("paid") // paid, partial, due
+  offlineUuid   String?       @unique          // For offline sync
+  isSynced      Boolean       @default(true)
+  notes         String?       @db.Text
+
+  branchId      String
+  branch        Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  customerId    String?
+  customer      Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  userId        String?
+  cashier       User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  shopId        String
+  shop          Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  items         SaleItem[]
+  returns       SaleReturn[]
+  payments      CustomerPayment[]
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([shopId, invoiceNo])
+  @@index([shopId])
+  @@index([branchId])
+  @@index([customerId])
+  @@map("sales")
+}
+
+model SaleItem {
+  id           String   @id @default(cuid())
+  quantity     Decimal  @db.Decimal(10, 2)
+  unitPrice    Decimal  @db.Decimal(10, 2)
+  purchaseCost Decimal  @default(0.00) @db.Decimal(10, 2)
+  discount     Decimal  @default(0.00) @db.Decimal(10, 2)
+  lineTotal    Decimal  @db.Decimal(10, 2)
+
+  saleId       String
+  sale         Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  unitId       String?
+  unit         Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
+
+  createdAt    DateTime @default(now())
+
+  @@index([saleId])
+  @@index([productId])
+  @@map("sale_items")
+}
+
+model CustomerPayment {
+  id            String    @id @default(cuid())
+  paymentDate   DateTime  @default(now())
+  amount        Decimal   @db.Decimal(10, 2)
+  paymentMethod String    // cash, bank, bkash, nagad
+  receiptNo     String
+  reference     String?
+  note          String?   @db.Text
+
+  branchId      String
+  branch        Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  customerId    String
+  customer      Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  saleId        String?
+  sale          Sale?     @relation(fields: [saleId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime  @default(now())
+
+  @@index([branchId])
+  @@index([customerId])
+  @@map("customer_payments")
+}
+
+model SaleReturn {
+  id           String           @id @default(cuid())
+  returnNo     String
+  returnDate   DateTime         @default(now())
+  totalRefund  Decimal          @db.Decimal(10, 2)
+  refundMethod String           @default("cash") // cash, balance
+  notes        String?          @db.Text
+
+  branchId     String
+  branch       Branch           @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  saleId       String
+  sale         Sale             @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  customerId   String?
+  customer     Customer?        @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  userId       String?
+  cashier      User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  shopId       String
+  shop         Shop             @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  items        SaleReturnItem[]
+
+  createdAt    DateTime         @default(now())
+
+  @@unique([shopId, returnNo])
+  @@index([branchId])
+  @@index([saleId])
+  @@map("sale_returns")
+}
+
+model SaleReturnItem {
+  id            String        @id @default(cuid())
+  quantity      Decimal       @db.Decimal(10, 2)
+  refundPrice   Decimal       @db.Decimal(10, 2)
+  itemCondition ItemCondition @default(RESTOCK)
+
+  saleReturnId  String
+  returnRecord  SaleReturn    @relation(fields: [saleReturnId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+  unitId        String?
+  unit          Unit?         @relation(fields: [unitId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime      @default(now())
+
+  @@index([saleReturnId])
+  @@index([productId])
+  @@map("sale_return_items")
+}
+
+model Quotation {
+  id            String          @id @default(cuid())
+  quotationNo   String
+  quotationDate DateTime        @default(now())
+  expiryDate    DateTime?
+  subtotal      Decimal         @db.Decimal(10, 2)
+  discount      Decimal         @default(0.00) @db.Decimal(10, 2)
+  grandTotal    Decimal         @db.Decimal(10, 2)
+  status        QuotationStatus @default(PENDING) // PENDING, CONVERTED, EXPIRED
+  notes         String?         @db.Text
+
+  branchId      String
+  branch        Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  customerId    String?
+  customer      Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  shopId        String
+  shop          Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  items         QuotationItem[]
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@unique([shopId, quotationNo])
+  @@index([shopId])
+  @@index([branchId])
+  @@map("quotations")
+}
+
+model QuotationItem {
+  id          String    @id @default(cuid())
+  quantity    Decimal   @db.Decimal(10, 2)
+  unitPrice   Decimal   @db.Decimal(10, 2)
+  lineTotal   Decimal   @db.Decimal(10, 2)
+
+  quotationId String
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  unitId      String?
+  unit        Unit?     @relation(fields: [unitId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime  @default(now())
+
+  @@index([quotationId])
+  @@index([productId])
+  @@map("quotation_items")
+}
+
+// ==========================================
+// 5. ACCOUNTS, TRANSACTIONS & CHEQUES
+// ==========================================
+
+model Account {
+  id             String      @id @default(cuid())
+  name           String      // e.g. ক্যাশ ড্রয়ার, ডাচ-বাংলা ব্যাংক, বিকাশ মার্চেন্ট
+  type           AccountType @default(CASH)
+  accountNumber  String?
+  bankName       String?
+  branchName     String?
+  openingBalance Decimal     @default(0.00) @db.Decimal(10, 2)
+  currentBalance Decimal     @default(0.00) @db.Decimal(10, 2)
+  status         String      @default("active")
+  notes          String?     @db.Text
+
+  branchId       String
+  branch         Branch      @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  shopId         String
+  shop           Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  transactions   AccountTransaction[]
+  cheques        BankCheque[]
+  loanInstallments LoanInstallment[]
+  loans          Loan[]
+
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([shopId])
+  @@index([branchId])
+  @@map("accounts")
+}
+
+model AccountTransaction {
+  id              String          @id @default(cuid())
+  type            TransactionType
+  amount          Decimal         @db.Decimal(10, 2)
+  balanceAfter    Decimal         @db.Decimal(10, 2)
+  transactionDate DateTime        @default(now())
+  referenceType   String?
+  referenceId     String?
+  voucherNo       String?
+  trxCode         String?
+  note            String?         @db.Text
+
+  branchId        String
+  branch          Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  accountId       String
+  account         Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  userId          String?
+  user            User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime        @default(now())
+
+  @@index([branchId])
+  @@index([accountId])
+  @@map("account_transactions")
+}
+
+model BankCheque {
+  id           String          @id @default(cuid())
+  type         ChequeType      @default(RECEIVED)
+  partyType    ChequePartyType @default(CUSTOMER)
+  partyName    String
+  bankName     String
+  chequeNumber String
+  chequeDate   DateTime
+  clearingDate DateTime?
+  amount       Decimal         @db.Decimal(10, 2)
+  status       ChequeStatus    @default(PENDING)
+  note         String?         @db.Text
+
+  branchId     String
+  branch       Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  accountId    String?
+  account      Account?        @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  userId       String?
+  user         User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  shopId       String
+  shop         Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([shopId])
+  @@index([branchId])
+  @@index([chequeNumber])
+  @@map("bank_cheques")
+}
+
+model Loan {
+  id              String       @id @default(cuid())
+  type            LoanType     @default(TAKEN)
+  loanNo          String?
+  personName      String
+  phone           String?
+  amount          Decimal      @db.Decimal(10, 2)
+  totalPaid       Decimal      @default(0.00) @db.Decimal(10, 2)
+  remainingAmount Decimal      @db.Decimal(10, 2)
+  loanDate        DateTime     @default(now())
+  dueDate         DateTime?
+  status          LoanStatus   @default(ACTIVE)
+  notes           String?      @db.Text
+
+  branchId        String
+  branch          Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  accountId       String?
+  account         Account?     @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  shopId          String
+  shop            Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  installments    LoanInstallment[]
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([shopId])
+  @@index([branchId])
+  @@map("loans")
+}
+
+model LoanInstallment {
+  id            String    @id @default(cuid())
+  voucherNo     String?
+  paymentDate   DateTime  @default(now())
+  amount        Decimal   @db.Decimal(10, 2)
+  paymentMethod String    @default("cash")
+  note          String?   @db.Text
+
+  branchId      String
+  branch        Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  loanId        String
+  loan          Loan      @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  accountId     String
+  account       Account   @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime  @default(now())
+
+  @@index([branchId])
+  @@index([loanId])
+  @@map("loan_installments")
+}
+
+// ==========================================
+// 6. EXPENSES, INCOME & ASSETS
+// ==========================================
+
+model ExpenseCategory {
+  id          String    @id @default(cuid())
+  name        String
+  code        String
+  description String?   @db.Text
+  status      String    @default("active")
+  shopId      String
+  shop        Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  expenses    Expense[]
+
+  @@unique([shopId, code])
+  @@index([shopId])
+  @@map("expense_categories")
+}
+
+model Expense {
+  id            String          @id @default(cuid())
+  voucherNo     String
+  expenseDate   DateTime        @default(now())
+  amount        Decimal         @db.Decimal(10, 2)
+  paymentMethod String          @default("cash")
+  reference     String?
+  note          String?         @db.Text
+  receiptImage  String?
+
+  branchId      String
+  branch        Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  categoryId    String
+  category      ExpenseCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  userId        String?
+  user          User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  shopId        String
+  shop          Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@unique([shopId, voucherNo])
+  @@index([shopId])
+  @@index([branchId])
+  @@map("expenses")
+}
+
+model OtherIncome {
+  id            String    @id @default(cuid())
+  incomeSource  String
+  receiptNo     String
+  incomeDate    DateTime  @default(now())
+  amount        Decimal   @db.Decimal(10, 2)
+  paymentMethod String    @default("cash")
+  reference     String?
+  note          String?   @db.Text
+
+  branchId      String
+  branch        Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  shopId        String
+  shop          Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime  @default(now())
+
+  @@unique([shopId, receiptNo])
+  @@index([shopId])
+  @@index([branchId])
+  @@map("other_incomes")
+}
+
+model CompanyAsset {
+  id           String         @id @default(cuid())
+  name         String
+  assetCode    String
+  serialNumber String?
+  purchaseDate DateTime
+  purchaseCost Decimal        @db.Decimal(10, 2)
+  currentValue Decimal        @db.Decimal(10, 2)
+  condition    AssetCondition @default(GOOD)
+  notes        String?        @db.Text
+
+  branchId     String?
+  branch       Branch?        @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  shopId       String
+  shop         Shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([shopId, assetCode])
+  @@index([shopId])
+  @@map("company_assets")
+}
+
+model OwnerTransaction {
+  id              String     @id @default(cuid())
+  type            EquityType @default(CAPITAL) // CAPITAL, DRAWING
+  transactionDate DateTime   @default(now())
+  amount          Decimal    @db.Decimal(10, 2)
+  paymentMethod   String     @default("cash")
+  reference       String?
+  purpose         String?
+  notes           String?    @db.Text
+
+  branchId        String?
+  branch          Branch?    @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  shopId          String
+  shop            Shop       @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime   @default(now())
+
+  @@index([shopId])
+  @@map("owner_transactions")
+}
+
+// ==========================================
+// 7. STAFF, DEPARTMENTS & PAYROLL
+// ==========================================
+
+model Department {
+  id          String         @id @default(cuid())
+  name        String
+  code        String
+  description String?        @db.Text
+  status      String         @default("active")
+  shopId      String
+  shop        Shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  staff       StaffProfile[]
+
+  @@unique([shopId, code])
+  @@index([shopId])
+  @@map("departments")
+}
+
+model StaffProfile {
+  id             String          @id @default(cuid())
+  name           String
+  phone          String
+  emergencyPhone String?
+  nidNumber      String?
+  designation    String
+  joiningDate    DateTime
+  basicSalary    Decimal         @db.Decimal(10, 2)
+  dailyAllowance Decimal         @default(0.00) @db.Decimal(10, 2)
+  overtimeRate   Decimal         @default(0.00) @db.Decimal(10, 2)
+  address        String?         @db.Text
+  status         StaffStatus     @default(ACTIVE)
+
+  branchId       String
+  branch         Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  departmentId   String
+  department     Department      @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  userId         String?         @unique
+  user           User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  shopId         String
+  shop           Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  advances       SalaryAdvance[]
+  payrolls       Payroll[]
+
+  @@unique([shopId, phone])
+  @@index([shopId])
+  @@index([branchId])
+  @@map("staff_profiles")
+}
+
+model SalaryAdvance {
+  id            String       @id @default(cuid())
+  advanceDate   DateTime     @default(now())
+  amount        Decimal      @db.Decimal(10, 2)
+  paymentMethod String       @default("cash")
+  purpose       String?
+  isDeducted    Boolean      @default(false) // Marked true when deducted from payroll
+  notes         String?      @db.Text
+
+  branchId      String
+  branch        Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  staffId       String
+  staff         StaffProfile @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  shopId        String
+  shop          Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime     @default(now())
+
+  @@index([branchId])
+  @@index([staffId])
+  @@map("salary_advances")
+}
+
+model Payroll {
+  id               String       @id @default(cuid())
+  payslipNo        String
+  month            String       // e.g. October
+  year             Int          // e.g. 2026
+  salaryDate       DateTime     @default(now())
+  basicSalary      Decimal      @db.Decimal(10, 2)
+  allowance        Decimal      @default(0.00) @db.Decimal(10, 2)
+  overtimeAmount   Decimal      @default(0.00) @db.Decimal(10, 2)
+  advanceDeduction Decimal      @default(0.00) @db.Decimal(10, 2)
+  penaltyDeduction Decimal      @default(0.00) @db.Decimal(10, 2)
+  netSalary        Decimal      @db.Decimal(10, 2)
+  paymentMethod    String       @default("cash")
+  paymentStatus    String       @default("paid")
+  notes            String?      @db.Text
+
+  branchId         String
+  branch           Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  staffId          String
+  staff            StaffProfile @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  shopId           String
+  shop             Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime     @default(now())
+
+  @@unique([shopId, payslipNo])
+  @@index([branchId])
+  @@index([staffId])
+  @@map("payrolls")
+}
+
+// ==========================================
+// 8. CASH REGISTER Z-REPORT (DAY CLOSING)
+// ==========================================
+
+model CashRegister {
+  id               String    @id @default(cuid())
+  closingDate      DateTime  @default(now())
+  openingTime      String    @default("08:00:00")
+  closingTime      String?
+  openingCash      Decimal   @default(0.00) @db.Decimal(10, 2)
+  cashSales        Decimal   @default(0.00) @db.Decimal(10, 2)
+  cashDueCollected Decimal   @default(0.00) @db.Decimal(10, 2)
+  cashOtherIncome  Decimal   @default(0.00) @db.Decimal(10, 2)
+  cashExpenses     Decimal   @default(0.00) @db.Decimal(10, 2)
+  cashSupplierPaid Decimal   @default(0.00) @db.Decimal(10, 2)
+  cashRefunds      Decimal   @default(0.00) @db.Decimal(10, 2)
+  expectedCash     Decimal   @default(0.00) @db.Decimal(10, 2)
+  countedCash      Decimal   @default(0.00) @db.Decimal(10, 2)
+  difference       Decimal   @default(0.00) @db.Decimal(10, 2) // Discrepancy
+  totalInvoices    Int       @default(0)
+  notes            String?   @db.Text
+  status           String    @default("closed") // open, closed
+
+  branchId         String
+  branch           Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  userId           String?
+  user             User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  shopId           String
+  shop             Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime  @default(now())
+
+  @@index([shopId])
+  @@index([branchId])
+  @@map("cash_registers")
 }

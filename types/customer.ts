@@ -5,13 +5,16 @@ export interface ICustomer {
   name: string;
   phone: string | null;
   email: string | null;
+  address: string | null;
   type: CustomerType;
-  village: string | null;
-  district: string | null;
-  addressLine: string | null;
+  village?: string | null;
+  district?: string | null;
+  addressLine?: string | null;
   creditLimit: number;
-  currentBalance: number;
+  openingDue?: number;
+  currentDue?: number;
+  currentBalance: number; // Matches UI
+  status?: string;
   shopId: string;
   createdAt: Date;
-  updatedAt: Date;
 }

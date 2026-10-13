@@ -3,13 +3,23 @@
 import { useState } from "react";
 import Sidebar from "@/components/dashboard/Sidebar";
 import Topbar from "@/components/dashboard/Topbar";
-import { UserRole } from "@/types/user";
+import { UserRole } from "@/types";
+
+interface BranchOption {
+  id: string;
+  name: string;
+  code: string;
+  isMain: boolean;
+}
 
 interface DashboardShellProps {
   children: React.ReactNode;
   role: UserRole;
   userName: string;
   shopName: string;
+  branches: BranchOption[];
+  currentBranchId?: string | null;
+  currentBranchName?: string | null;
 }
 
 export default function DashboardShell({
@@ -17,16 +27,17 @@ export default function DashboardShell({
   role,
   userName,
   shopName,
+  branches,
+  currentBranchId,
+  currentBranchName,
 }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopOpen, setDesktopOpen] = useState(true);
 
   function handleToggleSidebar() {
-    // If on mobile (less than 768px), toggle mobile overlay
     if (typeof window !== "undefined" && window.innerWidth < 768) {
       setMobileOpen((prev) => !prev);
     } else {
-      // On desktop, collapse/expand the sidebar
       setDesktopOpen((prev) => !prev);
     }
   }
@@ -45,6 +56,9 @@ export default function DashboardShell({
           role={role}
           userName={userName}
           shopName={shopName}
+          branches={branches}
+          currentBranchId={currentBranchId}
+          currentBranchName={currentBranchName}
           onToggleSidebar={handleToggleSidebar}
         />
 

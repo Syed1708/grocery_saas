@@ -18,7 +18,6 @@ export async function createCustomerAction(formData: FormData) {
   try {
     const user = await getAuthenticatedUser();
 
-    // 1. Zod Validation
     const validated = customerSchema.safeParse({
       name: formData.get("name")?.toString().trim(),
       phone: formData.get("phone")?.toString().trim() || null,
@@ -37,7 +36,6 @@ export async function createCustomerAction(formData: FormData) {
 
     const data = validated.data;
 
-    // 2. Save Customer to MySQL
     await prisma.customer.create({
       data: {
         name: data.name,
@@ -46,9 +44,10 @@ export async function createCustomerAction(formData: FormData) {
         type: data.type,
         village: data.village,
         district: data.district,
-        addressLine: data.addressLine,
+        address: data.addressLine,
         creditLimit: data.creditLimit,
-        currentBalance: data.openingBalance, // Initial balance if customer already owed money
+        openingDue: data.openingBalance,
+        currentDue: data.openingBalance, // 👈 Saved as currentDue in MySQL
         shopId: user.shopId,
       },
     });
@@ -86,7 +85,7 @@ export async function updateCustomerAction(formData: FormData) {
     const data = validated.data;
 
     await prisma.customer.update({
-      where: { id, shopId: user.shopId },
+      where: { id },
       data: {
         name: data.name,
         phone: data.phone,
@@ -94,7 +93,7 @@ export async function updateCustomerAction(formData: FormData) {
         type: data.type,
         village: data.village,
         district: data.district,
-        addressLine: data.addressLine,
+        address: data.addressLine,
         creditLimit: data.creditLimit,
       },
     });
@@ -106,7 +105,6 @@ export async function updateCustomerAction(formData: FormData) {
   }
 }
 
-// Record a Khata Repayment (Customer pays back owed money)
 export async function recordCustomerPaymentAction(customerId: string, amount: number) {
   try {
     const user = await getAuthenticatedUser();
@@ -120,11 +118,10 @@ export async function recordCustomerPaymentAction(customerId: string, amount: nu
     });
     if (!customer) return { success: false, error: "Customer not found." };
 
-    // Deduct paid amount from current owed balance
     await prisma.customer.update({
       where: { id: customerId },
       data: {
-        currentBalance: { decrement: amount },
+        currentDue: { decrement: amount }, // 👈 Decrements currentDue
       },
     });
 
@@ -144,11 +141,10 @@ export async function deleteCustomerAction(id: string) {
     });
     if (!customer) return { success: false, error: "Customer not found." };
 
-    // Protect against deleting customers with unpaid debts
-    if (Number(customer.currentBalance) > 0) {
+    if (Number(customer.currentDue) > 0) {
       return {
         success: false,
-        error: `Cannot delete: ${customer.name} owes ${customer.currentBalance} in unpaid credit. Settle the balance first.`,
+        error: `Cannot delete: ${customer.name} owes ${customer.currentDue} in unpaid credit. Settle the balance first.`,
       };
     }
 

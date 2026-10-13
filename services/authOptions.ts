@@ -16,10 +16,12 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Please enter both email and password.");
         }
 
-        // Query MySQL via Prisma
         const user = await prisma.user.findUnique({
           where: { email: credentials.email.toLowerCase().trim() },
-          include: { shop: { select: { name: true } } },
+          include: {
+            shop: { select: { name: true } },
+            branch: { select: { id: true, name: true } }, // 👈 Include branch
+          },
         });
 
         if (!user) {
@@ -27,10 +29,15 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (!user.isActive) {
-          throw new Error("Your account has been deactivated. Contact your administrator.");
+          throw new Error(
+            "Your account has been deactivated. Contact your administrator.",
+          );
         }
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
+        const isValid = await bcrypt.compare(
+          credentials.password,
+          user.password,
+        );
         if (!isValid) {
           throw new Error("Invalid password.");
         }
@@ -42,27 +49,42 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           shopId: user.shopId,
           shopName: user.shop.name,
+          branchId: user.branchId || null,
+          branchName: user.branch?.name || null,
         };
       },
     }),
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.shopId = user.shopId;
         token.shopName = user.shopName;
+        token.branchId = user.branchId;
+        token.branchName = user.branchName;
       }
+
+      // 👈 Updates session immediately when switching branches!
+      if (trigger === "update" && session) {
+        if (session.branchId !== undefined) token.branchId = session.branchId;
+        if (session.branchName !== undefined)
+          token.branchName = session.branchName;
+      }
+
       return token;
     },
+
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.shopId = token.shopId;
         session.user.shopName = token.shopName;
+        session.user.branchId = token.branchId;
+        session.user.branchName = token.branchName;
       }
       return session;
     },

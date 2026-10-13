@@ -15,11 +15,10 @@ export async function getCustomers(shopId: string): Promise<ICustomer[]> {
     type: c.type,
     village: c.village,
     district: c.district,
-    addressLine: c.addressLine,
+    address: c.address,
     creditLimit: Number(c.creditLimit),
-    currentBalance: Number(c.currentBalance),
+    currentBalance: Number(c.currentDue), // 👈 Maps currentDue to currentBalance for the UI
     shopId: c.shopId,
     createdAt: c.createdAt,
-    updatedAt: c.updatedAt,
   }));
 }

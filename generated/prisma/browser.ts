@@ -23,27 +23,182 @@ export * from './enums';
  */
 export type Shop = Prisma.ShopModel
 /**
+ * Model Branch
+ * 
+ */
+export type Branch = Prisma.BranchModel
+/**
+ * Model License
+ * 
+ */
+export type License = Prisma.LicenseModel
+/**
  * Model User
  * 
  */
 export type User = Prisma.UserModel
-/**
- * Model Category
- * 
- */
-export type Category = Prisma.CategoryModel
 /**
  * Model Unit
  * 
  */
 export type Unit = Prisma.UnitModel
 /**
+ * Model ProductSection
+ * 
+ */
+export type ProductSection = Prisma.ProductSectionModel
+/**
+ * Model Category
+ * 
+ */
+export type Category = Prisma.CategoryModel
+/**
+ * Model Brand
+ * 
+ */
+export type Brand = Prisma.BrandModel
+/**
  * Model Product
  * 
  */
 export type Product = Prisma.ProductModel
 /**
+ * Model ProductStock
+ * 
+ */
+export type ProductStock = Prisma.ProductStockModel
+/**
+ * Model Supplier
+ * 
+ */
+export type Supplier = Prisma.SupplierModel
+/**
+ * Model Purchase
+ * 
+ */
+export type Purchase = Prisma.PurchaseModel
+/**
+ * Model PurchaseItem
+ * 
+ */
+export type PurchaseItem = Prisma.PurchaseItemModel
+/**
+ * Model SupplierPayment
+ * 
+ */
+export type SupplierPayment = Prisma.SupplierPaymentModel
+/**
  * Model Customer
  * 
  */
 export type Customer = Prisma.CustomerModel
+/**
+ * Model Sale
+ * 
+ */
+export type Sale = Prisma.SaleModel
+/**
+ * Model SaleItem
+ * 
+ */
+export type SaleItem = Prisma.SaleItemModel
+/**
+ * Model CustomerPayment
+ * 
+ */
+export type CustomerPayment = Prisma.CustomerPaymentModel
+/**
+ * Model SaleReturn
+ * 
+ */
+export type SaleReturn = Prisma.SaleReturnModel
+/**
+ * Model SaleReturnItem
+ * 
+ */
+export type SaleReturnItem = Prisma.SaleReturnItemModel
+/**
+ * Model Quotation
+ * 
+ */
+export type Quotation = Prisma.QuotationModel
+/**
+ * Model QuotationItem
+ * 
+ */
+export type QuotationItem = Prisma.QuotationItemModel
+/**
+ * Model Account
+ * 
+ */
+export type Account = Prisma.AccountModel
+/**
+ * Model AccountTransaction
+ * 
+ */
+export type AccountTransaction = Prisma.AccountTransactionModel
+/**
+ * Model BankCheque
+ * 
+ */
+export type BankCheque = Prisma.BankChequeModel
+/**
+ * Model Loan
+ * 
+ */
+export type Loan = Prisma.LoanModel
+/**
+ * Model LoanInstallment
+ * 
+ */
+export type LoanInstallment = Prisma.LoanInstallmentModel
+/**
+ * Model ExpenseCategory
+ * 
+ */
+export type ExpenseCategory = Prisma.ExpenseCategoryModel
+/**
+ * Model Expense
+ * 
+ */
+export type Expense = Prisma.ExpenseModel
+/**
+ * Model OtherIncome
+ * 
+ */
+export type OtherIncome = Prisma.OtherIncomeModel
+/**
+ * Model CompanyAsset
+ * 
+ */
+export type CompanyAsset = Prisma.CompanyAssetModel
+/**
+ * Model OwnerTransaction
+ * 
+ */
+export type OwnerTransaction = Prisma.OwnerTransactionModel
+/**
+ * Model Department
+ * 
+ */
+export type Department = Prisma.DepartmentModel
+/**
+ * Model StaffProfile
+ * 
+ */
+export type StaffProfile = Prisma.StaffProfileModel
+/**
+ * Model SalaryAdvance
+ * 
+ */
+export type SalaryAdvance = Prisma.SalaryAdvanceModel
+/**
+ * Model Payroll
+ * 
+ */
+export type Payroll = Prisma.PayrollModel
+/**
+ * Model CashRegister
+ * 
+ */
+export type CashRegister = Prisma.CashRegisterModel

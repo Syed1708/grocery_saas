@@ -9,18 +9,145 @@
 * 🟢 You can import this file directly.
 */
 
-export const UserRole = {
-  OWNER: 'OWNER',
-  MANAGER: 'MANAGER',
-  CASHIER: 'CASHIER'
-} as const
-
-export type UserRole = (typeof UserRole)[keyof typeof UserRole]
-
-
 export const CustomerType = {
   WALK_IN: 'WALK_IN',
   PERMANENT: 'PERMANENT'
 } as const
 
 export type CustomerType = (typeof CustomerType)[keyof typeof CustomerType]
+
+
+export const UserRole = {
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  ADMIN: 'ADMIN',
+  OWNER: 'OWNER',
+  MANAGER: 'MANAGER',
+  CASHIER: 'CASHIER',
+  VENDOR: 'VENDOR'
+} as const
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
+
+export const AccountType = {
+  CASH: 'CASH',
+  BANK: 'BANK',
+  BKASH: 'BKASH',
+  NAGAD: 'NAGAD',
+  ROCKET: 'ROCKET',
+  OTHER: 'OTHER'
+} as const
+
+export type AccountType = (typeof AccountType)[keyof typeof AccountType]
+
+
+export const TransactionType = {
+  DEPOSIT: 'DEPOSIT',
+  WITHDRAW: 'WITHDRAW',
+  TRANSFER_IN: 'TRANSFER_IN',
+  TRANSFER_OUT: 'TRANSFER_OUT',
+  SALE: 'SALE',
+  PURCHASE: 'PURCHASE',
+  EXPENSE: 'EXPENSE',
+  INCOME: 'INCOME',
+  PAYROLL: 'PAYROLL',
+  LOAN: 'LOAN'
+} as const
+
+export type TransactionType = (typeof TransactionType)[keyof typeof TransactionType]
+
+
+export const ChequeType = {
+  RECEIVED: 'RECEIVED',
+  ISSUED: 'ISSUED'
+} as const
+
+export type ChequeType = (typeof ChequeType)[keyof typeof ChequeType]
+
+
+export const ChequePartyType = {
+  CUSTOMER: 'CUSTOMER',
+  SUPPLIER: 'SUPPLIER',
+  OTHER: 'OTHER'
+} as const
+
+export type ChequePartyType = (typeof ChequePartyType)[keyof typeof ChequePartyType]
+
+
+export const ChequeStatus = {
+  PENDING: 'PENDING',
+  CLEARED: 'CLEARED',
+  BOUNCED: 'BOUNCED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type ChequeStatus = (typeof ChequeStatus)[keyof typeof ChequeStatus]
+
+
+export const LoanType = {
+  TAKEN: 'TAKEN',
+  GIVEN: 'GIVEN'
+} as const
+
+export type LoanType = (typeof LoanType)[keyof typeof LoanType]
+
+
+export const LoanStatus = {
+  ACTIVE: 'ACTIVE',
+  PAID: 'PAID'
+} as const
+
+export type LoanStatus = (typeof LoanStatus)[keyof typeof LoanStatus]
+
+
+export const PaymentStatus = {
+  PAID: 'PAID',
+  PARTIAL: 'PARTIAL',
+  DUE: 'DUE'
+} as const
+
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
+
+
+export const QuotationStatus = {
+  PENDING: 'PENDING',
+  CONVERTED: 'CONVERTED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type QuotationStatus = (typeof QuotationStatus)[keyof typeof QuotationStatus]
+
+
+export const ItemCondition = {
+  RESTOCK: 'RESTOCK',
+  DAMAGED: 'DAMAGED'
+} as const
+
+export type ItemCondition = (typeof ItemCondition)[keyof typeof ItemCondition]
+
+
+export const AssetCondition = {
+  GOOD: 'GOOD',
+  MAINTENANCE: 'MAINTENANCE',
+  DAMAGED: 'DAMAGED',
+  DISPOSED: 'DISPOSED'
+} as const
+
+export type AssetCondition = (typeof AssetCondition)[keyof typeof AssetCondition]
+
+
+export const EquityType = {
+  CAPITAL: 'CAPITAL',
+  DRAWING: 'DRAWING'
+} as const
+
+export type EquityType = (typeof EquityType)[keyof typeof EquityType]
+
+
+export const StaffStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  TERMINATED: 'TERMINATED'
+} as const
+
+export type StaffStatus = (typeof StaffStatus)[keyof typeof StaffStatus]
