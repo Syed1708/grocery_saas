@@ -12,6 +12,10 @@ enum UserRole {
   MANAGER
   CASHIER
 }
+enum CustomerType {
+  WALK_IN
+  PERMANENT
+}
 
 model Shop {
   id             String     @id @default(cuid())
@@ -31,7 +35,8 @@ model Shop {
   users          User[]
   categories     Category[]
   products       Product[]
-  units          Unit[]     // 👈 Multi-tenant Units
+  units          Unit[]     
+  customers      Customer[]
 
   @@map("shops")
 }
@@ -124,4 +129,29 @@ model Product {
   @@index([unitId])
   @@index([shopId, name])
   @@map("products")
+}
+
+model Customer {
+  id             String       @id @default(cuid())
+  name           String
+  phone          String?
+  email          String?
+  type           CustomerType @default(PERMANENT)
+  village        String?
+  district       String?
+  addressLine    String?
+  creditLimit    Decimal      @default(0.00) @db.Decimal(10, 2)
+  currentBalance Decimal      @default(0.00) @db.Decimal(10, 2) // > 0 means customer owes store
+
+  shopId         String
+  shop           Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([shopId])
+  @@index([shopId, phone])
+  @@index([shopId, village])
+  @@index([shopId, district])
+  @@map("customers")
 }

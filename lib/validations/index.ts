@@ -34,6 +34,21 @@ export const productSchema = z.object({
   conversionFactor: z.coerce.number().min(1, "Conversion factor must be at least 1").default(1),
 });
 
+export const customerSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "Customer name must be at least 2 characters").max(70),
+  phone: z.string().min(5, "Phone number is too short").max(20).optional().nullable(),
+  email: z.string().email("Invalid email").optional().nullable().or(z.literal("")),
+  type: z.enum(["WALK_IN", "PERMANENT"]).default("PERMANENT"),
+  village: z.string().max(50).optional().nullable(),
+  district: z.string().max(50).optional().nullable(),
+  addressLine: z.string().max(150).optional().nullable(),
+  creditLimit: z.coerce.number().min(0, "Credit limit cannot be negative").default(0),
+  openingBalance: z.coerce.number().default(0),
+});
+
+export type CustomerInput = z.infer<typeof customerSchema>;
+
 export type CategoryInput = z.infer<typeof categorySchema>;
 export type UnitInput = z.infer<typeof unitSchema>;
 export type ProductInput = z.infer<typeof productSchema>;

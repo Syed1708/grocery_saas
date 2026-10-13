@@ -42,3 +42,8 @@ export type Unit = Prisma.UnitModel
  * 
  */
 export type Product = Prisma.ProductModel
+/**
+ * Model Customer
+ * 
+ */
+export type Customer = Prisma.CustomerModel

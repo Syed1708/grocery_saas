@@ -16,3 +16,11 @@ export const UserRole = {
 } as const
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
+
+export const CustomerType = {
+  WALK_IN: 'WALK_IN',
+  PERMANENT: 'PERMANENT'
+} as const
+
+export type CustomerType = (typeof CustomerType)[keyof typeof CustomerType]

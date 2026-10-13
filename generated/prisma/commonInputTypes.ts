@@ -194,6 +194,23 @@ export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
 }
 
+export type EnumCustomerTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.CustomerType | Prisma.EnumCustomerTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.CustomerType[]
+  notIn?: $Enums.CustomerType[]
+  not?: Prisma.NestedEnumCustomerTypeFilter<$PrismaModel> | $Enums.CustomerType
+}
+
+export type EnumCustomerTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CustomerType | Prisma.EnumCustomerTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.CustomerType[]
+  notIn?: $Enums.CustomerType[]
+  not?: Prisma.NestedEnumCustomerTypeWithAggregatesFilter<$PrismaModel> | $Enums.CustomerType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCustomerTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCustomerTypeFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[]
@@ -389,6 +406,23 @@ export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
   _min?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
   _max?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumCustomerTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.CustomerType | Prisma.EnumCustomerTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.CustomerType[]
+  notIn?: $Enums.CustomerType[]
+  not?: Prisma.NestedEnumCustomerTypeFilter<$PrismaModel> | $Enums.CustomerType
+}
+
+export type NestedEnumCustomerTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CustomerType | Prisma.EnumCustomerTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.CustomerType[]
+  notIn?: $Enums.CustomerType[]
+  not?: Prisma.NestedEnumCustomerTypeWithAggregatesFilter<$PrismaModel> | $Enums.CustomerType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCustomerTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCustomerTypeFilter<$PrismaModel>
 }
 
 
