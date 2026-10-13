@@ -90,7 +90,7 @@ export default function ProductsClient({
   currencySymbol?: string;
   shopName?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<"products" | "brands" | "sections" | "units">("products");
+  const [activeTab, setActiveTab] = useState<"products" | "categories" | "brands" | "sections" | "units">("products");
 
   // Product Modals
   const [productModalOpen, setProductModalOpen] = useState(false);
@@ -678,6 +678,17 @@ function triggerPrint() {
             }`}
           >
             <Package size={14} /> Products Catalog ({data.length})
+          </button>
+          
+          <button
+            onClick={() => setActiveTab("categories")}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${
+              activeTab === "categories"
+                ? "bg-blue-600 text-white shadow-xs"
+                : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+            }`}
+          >
+            <Package size={14} /> Categories ({categories.length})
           </button>
 
           <button

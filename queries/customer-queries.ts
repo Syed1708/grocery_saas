@@ -7,6 +7,7 @@ export async function getCustomers(shopId: string): Promise<ICustomer[]> {
     orderBy: { createdAt: "desc" },
   });
 
+  // 👈 Ensure plain numbers instead of Prisma Decimals
   return customers.map((c) => ({
     id: c.id,
     name: c.name,
@@ -16,8 +17,8 @@ export async function getCustomers(shopId: string): Promise<ICustomer[]> {
     village: c.village,
     district: c.district,
     address: c.address,
-    creditLimit: Number(c.creditLimit),
-    currentBalance: Number(c.currentDue), // 👈 Maps currentDue to currentBalance for the UI
+    creditLimit: Number(c.creditLimit || 0),
+    currentBalance: Number(c.currentDue || 0),
     shopId: c.shopId,
     createdAt: c.createdAt,
   }));
