@@ -11,7 +11,6 @@ export default async function CategoriesPage() {
     redirect("/login");
   }
 
-  // Fast direct server query via Prisma
   const categories = await getCategories(session.user.shopId);
 
   return (

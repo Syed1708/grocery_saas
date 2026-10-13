@@ -32,3 +32,13 @@ export type User = Prisma.UserModel
  * 
  */
 export type Category = Prisma.CategoryModel
+/**
+ * Model Unit
+ * 
+ */
+export type Unit = Prisma.UnitModel
+/**
+ * Model Product
+ * 
+ */
+export type Product = Prisma.ProductModel

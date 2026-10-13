@@ -14,22 +14,24 @@ enum UserRole {
 }
 
 model Shop {
-  id             String    @id @default(cuid())
+  id             String     @id @default(cuid())
   name           String
   phone          String
   email          String?
-  currency       String    @default("USD")
-  currencySymbol String    @default("$")
+  currency       String     @default("USD")
+  currencySymbol String     @default("$")
   village        String?
   district       String?
   addressLine    String?
-  receiptHeader  String?   @default("Thank you for shopping with us!")
-  receiptFooter  String?   @default("Goods sold are eligible for return within 7 days.")
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  receiptHeader  String?    @default("Thank you for shopping with us!")
+  receiptFooter  String?    @default("Goods sold are eligible for return within 7 days.")
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   users          User[]
   categories     Category[]
+  products       Product[]
+  units          Unit[]     // 👈 Multi-tenant Units
 
   @@map("shops")
 }
@@ -53,16 +55,73 @@ model User {
 }
 
 model Category {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  description String?  @db.Text
+  description String?   @db.Text
   image       String?
   shopId      String
-  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  shop        Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
 
   @@unique([shopId, name])
   @@index([shopId])
   @@map("categories")
+}
+
+// 👈 Dynamic Unit Model (Shop owners can create ANY unit)
+model Unit {
+  id          String    @id @default(cuid())
+  name        String    // e.g. "Kilogram", "Piece", "Carton", "Bag", "Bottle"
+  code        String    // e.g. "kg", "pcs", "ctn", "bag", "btl"
+  shopId      String
+  shop        Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  
+  products    Product[] @relation("BaseUnit")
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([shopId, code]) // Each shop has unique unit codes
+  @@index([shopId])
+  @@map("units")
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  name             String
+  barcode          String
+  description      String?  @db.Text
+  costPrice        Decimal  @default(0.00) @db.Decimal(10, 2)
+  sellingPrice     Decimal  @default(0.00) @db.Decimal(10, 2)
+  stockQuantity    Decimal  @default(0.00) @db.Decimal(10, 2)
+  minStockAlert    Decimal  @default(5.00) @db.Decimal(10, 2)
+  image            String?
+
+  // Base Unit (The unit inventory is stored in: e.g. PCS or KG)
+  unitId           String
+  unit             Unit     @relation("BaseUnit", fields: [unitId], references: [id], onDelete: Restrict)
+
+  // Bulk / Packaging Unit Conversion (Optional)
+  // e.g., If unit is PCS, but bought/sold in Cartons: conversionFactor = 24
+  bulkUnitName     String?  // e.g., "Carton", "Box", "Bag"
+  conversionFactor Decimal? @default(1.00) @db.Decimal(10, 2) // 1 Carton = 24 PCS
+
+  categoryId       String
+  category         Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  shopId           String
+  shop             Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([shopId, barcode])
+  @@index([shopId])
+  @@index([categoryId])
+  @@index([unitId])
+  @@index([shopId, name])
+  @@map("products")
 }

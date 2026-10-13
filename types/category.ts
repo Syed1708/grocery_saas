@@ -1,11 +1,14 @@
-import { Types } from "mongoose";
-
 export interface ICategory {
-  _id?: string | Types.ObjectId;
+  id: string;
   name: string;
-  description?: string;
-  image?: string;
-  shopId: Types.ObjectId | string;
-  createdAt?: Date;
+  description: string | null;
+  image: string | null;
+  shopId: string;
+  createdAt: Date;
   updatedAt?: Date;
+}
+
+export interface ICategoryOption {
+  id: string;
+  name: string;
 }

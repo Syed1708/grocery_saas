@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { UploadCloud, X, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
 
 interface ImageUploadProps {
   name: string;
@@ -42,11 +43,14 @@ export default function ImageUpload({
 
       {preview ? (
         <div className="relative w-full h-40 rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 group">
-          <img
+          <Image
             src={preview}
             alt="Preview"
             className="w-full h-full object-cover"
+            width={160}
+            height={160}
           />
+          
           <button
             type="button"
             onClick={handleRemove}

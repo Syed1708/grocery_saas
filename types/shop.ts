@@ -1,7 +1,6 @@
-import { Types } from "mongoose";
 
 export interface IShop {
-  _id?: string | Types.ObjectId;
+  id: string;
   name: string;
   phone: string;
   email?: string;
@@ -12,7 +11,7 @@ export interface IShop {
   addressLine?: string;
   receiptHeader?: string;
   receiptFooter?: string;
-  ownerId?: Types.ObjectId | string;
+  ownerId?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

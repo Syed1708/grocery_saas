@@ -53,7 +53,9 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Shop: 'Shop',
   User: 'User',
-  Category: 'Category'
+  Category: 'Category',
+  Unit: 'Unit',
+  Product: 'Product'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -121,6 +123,40 @@ export const CategoryScalarFieldEnum = {
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
 
 
+export const UnitScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  shopId: 'shopId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UnitScalarFieldEnum = (typeof UnitScalarFieldEnum)[keyof typeof UnitScalarFieldEnum]
+
+
+export const ProductScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  barcode: 'barcode',
+  description: 'description',
+  costPrice: 'costPrice',
+  sellingPrice: 'sellingPrice',
+  stockQuantity: 'stockQuantity',
+  minStockAlert: 'minStockAlert',
+  image: 'image',
+  unitId: 'unitId',
+  bulkUnitName: 'bulkUnitName',
+  conversionFactor: 'conversionFactor',
+  categoryId: 'categoryId',
+  shopId: 'shopId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -176,4 +212,29 @@ export const CategoryOrderByRelevanceFieldEnum = {
 } as const
 
 export type CategoryOrderByRelevanceFieldEnum = (typeof CategoryOrderByRelevanceFieldEnum)[keyof typeof CategoryOrderByRelevanceFieldEnum]
+
+
+export const UnitOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  shopId: 'shopId'
+} as const
+
+export type UnitOrderByRelevanceFieldEnum = (typeof UnitOrderByRelevanceFieldEnum)[keyof typeof UnitOrderByRelevanceFieldEnum]
+
+
+export const ProductOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  barcode: 'barcode',
+  description: 'description',
+  image: 'image',
+  unitId: 'unitId',
+  bulkUnitName: 'bulkUnitName',
+  categoryId: 'categoryId',
+  shopId: 'shopId'
+} as const
+
+export type ProductOrderByRelevanceFieldEnum = (typeof ProductOrderByRelevanceFieldEnum)[keyof typeof ProductOrderByRelevanceFieldEnum]
 

@@ -1,10 +1,19 @@
 "use client";
+"use no memo";
 
 import { useState } from "react";
-import { ColumnDef } from "@tanstack/react-table";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import {
+  ColumnDef,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getFilteredRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { Plus, Edit2, Trash2, Search, Tag } from "lucide-react";
+import { toast } from "sonner";
 import { DataTable } from "@/components/common/data-table/DataTable";
-import Modal from "@/components/common/Modal";
+import { DataTableViewOptions } from "@/components/common/data-table/DataTableViewOptions";
+import FormModal from "@/components/common/FormModal";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import ImageUpload from "@/components/common/ImageUpload";
 import {
@@ -12,38 +21,32 @@ import {
   updateCategoryAction,
   deleteCategoryAction,
 } from "@/app/actions/category-actions";
+import { ICategory } from "@/types";
+import Image from "next/image";
 
-interface CategoryData {
-  id: string;
-  name: string;
-  description: string | null;
-  image: string | null;
-  createdAt: Date;
-}
-
-export default function CategoriesClient({ data }: { data: CategoryData[] }) {
+export default function CategoriesClient({ data }: { data: ICategory[] }) {
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<CategoryData | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<CategoryData | null>(null);
+  const [editingCategory, setEditingCategory] = useState<ICategory | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ICategory | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+
+  // Filter States
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [columnVisibility, setColumnVisibility] = useState({});
 
   function openCreate() {
     setEditingCategory(null);
-    setError("");
     setModalOpen(true);
   }
 
-  function openEdit(category: CategoryData) {
+  function openEdit(category: ICategory) {
     setEditingCategory(category);
-    setError("");
     setModalOpen(true);
   }
 
   async function handleFormSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
     const formData = new FormData(e.currentTarget);
     if (editingCategory) {
@@ -55,27 +58,35 @@ export default function CategoriesClient({ data }: { data: CategoryData[] }) {
       : await createCategoryAction(formData);
 
     setLoading(false);
+
     if (res.success) {
+      toast.success(
+        editingCategory
+          ? "Category updated successfully!"
+          : "Category created successfully!"
+      );
       setModalOpen(false);
     } else {
-      setError(res.error || "Operation failed.");
+      toast.error(res.error || "Operation failed.");
     }
   }
 
   async function handleDeleteConfirm() {
     if (!deleteTarget) return;
     setLoading(true);
+
     const res = await deleteCategoryAction(deleteTarget.id);
     setLoading(false);
+
     if (res.success) {
+      toast.success(`"${deleteTarget.name}" deleted successfully!`);
       setDeleteTarget(null);
     } else {
-      alert(res.error || "Failed to delete.");
+      toast.error(res.error || "Failed to delete category.");
     }
   }
 
-  // Define Table Columns
-  const columns: ColumnDef<CategoryData>[] = [
+  const columns: ColumnDef<ICategory>[] = [
     {
       accessorKey: "image",
       header: "Photo",
@@ -85,9 +96,9 @@ export default function CategoriesClient({ data }: { data: CategoryData[] }) {
         return (
           <div className="w-10 h-10 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center">
             {image ? (
-              <img src={image} alt="Cat" className="w-full h-full object-cover" />
+              <Image src={image} alt="Category" width={40} height={40} className="w-full h-full object-cover" />
             ) : (
-              <span className="text-sm">🏷️</span>
+              <Tag size={16} className="text-neutral-400" />
             )}
           </div>
         );
@@ -139,100 +150,105 @@ export default function CategoriesClient({ data }: { data: CategoryData[] }) {
     },
   ];
 
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      globalFilter,
+      columnVisibility,
+    },
+    onGlobalFilterChange: setGlobalFilter,
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
+
   return (
-    <>
-      <div className="flex justify-between items-center mb-6">
+    <div className="space-y-4">
+      {/* Top Header */}
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">
             Categories
           </h1>
           <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-            Organize products with images and fast POS lookups
+            Organize products with photos for rapid barcode scanning and POS lookups
           </p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer"
-        >
-          <Plus size={16} /> Add Category
-        </button>
+        <div className="flex items-center gap-2">
+          <DataTableViewOptions table={table} />
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer"
+          >
+            <Plus size={16} /> Add Category
+          </button>
+        </div>
       </div>
 
-      {/* Generic Data Table */}
-      <DataTable
-        columns={columns}
-        data={data}
-        searchPlaceholder="Search categories..."
-      />
+      {/* Search Input Bar */}
+      <div className="flex items-center bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-3 rounded-2xl shadow-xs">
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-2.5 text-neutral-400" size={16} />
+          <input
+            type="text"
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Search categories by name..."
+            className="w-full pl-9 pr-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-neutral-900 dark:text-neutral-100"
+          />
+        </div>
+      </div>
 
-      {/* Create / Edit Modal */}
-      <Modal
+      {/* Pure Modular DataTable */}
+      <DataTable table={table} columns={columns} />
+
+      {/* Reusable FormModal (Zero Boilerplate!) */}
+      <FormModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
+        onSubmit={handleFormSubmit}
         title={editingCategory ? "Edit Category" : "New Category"}
         description="Categories group products together on the POS cash register."
+        isEditing={Boolean(editingCategory)}
+        loading={loading}
       >
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 text-red-700 text-xs rounded-xl border border-red-200">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleFormSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Category Name *
-            </label>
-            <input
-              type="text"
-              name="name"
-              required
-              defaultValue={editingCategory?.name || ""}
-              placeholder="e.g. Dairy & Eggs"
-              className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Description (Optional)
-            </label>
-            <textarea
-              name="description"
-              rows={2}
-              defaultValue={editingCategory?.description || ""}
-              placeholder="Short description..."
-              className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          {/* Generic Image Upload with Live Preview */}
-          <ImageUpload
-            name="image"
-            defaultImage={editingCategory?.image}
-            label="Category Thumbnail"
+        <div>
+          <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            Category Name *
+          </label>
+          <input
+            type="text"
+            name="name"
+            required
+            defaultValue={editingCategory?.name || ""}
+            placeholder="e.g. Dairy & Eggs, Bakery, Beverages"
+            className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
           />
+        </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={() => setModalOpen(false)}
-              className="px-4 py-2 text-xs font-semibold rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 text-xs font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition disabled:opacity-50 cursor-pointer"
-            >
-              {loading ? "Saving..." : editingCategory ? "Update" : "Create"}
-            </button>
-          </div>
-        </form>
-      </Modal>
+        <div>
+          <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            Description (Optional)
+          </label>
+          <textarea
+            name="description"
+            rows={2}
+            defaultValue={editingCategory?.description || ""}
+            placeholder="Short details about this item group..."
+            className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-      {/* Generic Confirmation Dialog for Deletion */}
+        <ImageUpload
+          name="image"
+          defaultImage={editingCategory?.image}
+          label="Category Thumbnail Photo"
+        />
+      </FormModal>
+
+      {/* Deletion Confirmation Dialog */}
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
@@ -242,6 +258,6 @@ export default function CategoriesClient({ data }: { data: CategoryData[] }) {
         confirmLabel="Delete Category"
         loading={loading}
       />
-    </>
+    </div>
   );
 }

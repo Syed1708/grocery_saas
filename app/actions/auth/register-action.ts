@@ -8,7 +8,8 @@ export async function registerStoreAction(formData: FormData) {
     const shopName = formData.get("shopName")?.toString().trim();
     const phone = formData.get("phone")?.toString().trim();
     const currency = formData.get("currency")?.toString().trim() || "USD";
-    const currencySymbol = formData.get("currencySymbol")?.toString().trim() || "$";
+    const currencySymbol =
+      formData.get("currencySymbol")?.toString().trim() || "$";
     const village = formData.get("village")?.toString().trim() || "";
     const district = formData.get("district")?.toString().trim() || "";
 
@@ -21,7 +22,10 @@ export async function registerStoreAction(formData: FormData) {
     }
 
     if (password.length < 6) {
-      return { success: false, error: "Password must be at least 6 characters." };
+      return {
+        success: false,
+        error: "Password must be at least 6 characters.",
+      };
     }
 
     // Check if email already exists in MySQL
@@ -30,12 +34,15 @@ export async function registerStoreAction(formData: FormData) {
     });
 
     if (existing) {
-      return { success: false, error: "An account with this email already exists." };
+      return {
+        success: false,
+        error: "An account with this email already exists.",
+      };
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Single Atomic SQL Transaction in MySQL
+    // Inside registerStoreAction, inside the prisma.$transaction block:
     await prisma.$transaction(async (tx) => {
       const shop = await tx.shop.create({
         data: {
@@ -59,11 +66,36 @@ export async function registerStoreAction(formData: FormData) {
           isActive: true,
         },
       });
+
+      // 👈 Automatically seed the 10 units for this brand-new store:
+      const defaultUnits = [
+        { name: "Piece", code: "pcs" },
+        { name: "Kilogram", code: "kg" },
+        { name: "Gram", code: "gm" },
+        { name: "Packet", code: "pkt" },
+        { name: "Liter", code: "ltr" },
+        { name: "Milliliter", code: "ml" },
+        { name: "Dozen", code: "dzn" },
+        { name: "Carton", code: "ctn" },
+        { name: "Box", code: "box" },
+        { name: "Bag", code: "bag" },
+      ];
+
+      await tx.unit.createMany({
+        data: defaultUnits.map((u) => ({
+          name: u.name,
+          code: u.code,
+          shopId: shop.id,
+        })),
+      });
     });
 
     return { success: true };
   } catch (error: any) {
     console.error("Store registration failed:", error);
-    return { success: false, error: error.message || "Failed to register store." };
+    return {
+      success: false,
+      error: error.message || "Failed to register store.",
+    };
   }
 }
