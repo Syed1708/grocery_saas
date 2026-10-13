@@ -1,18 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import { IProduct, ICategoryOption, IUnitOption } from "@/types";
 
-interface ExtraOption {
+export interface ItemWithCount {
   id: string;
   name: string;
+  code?: string | null;
+  companyName?: string | null;
+  phone?: string | null;
+  _count: { products: number };
 }
 
-/**
- * GET PRODUCTS QUERY (Server Component)
- * - Reads all products belonging to the store
- * - Joins Category, Unit, Brand, and Section
- * - Calculates accurate stock for the active branch (or sums all branches)
- * - Serializes Prisma Decimal objects to plain JavaScript numbers
- */
 export async function getProducts(
   shopId: string,
   branchId?: string | null
@@ -24,75 +21,14 @@ export async function getProducts(
       unit: { select: { id: true, name: true, shortCode: true } },
       brand: { select: { id: true, name: true } },
       section: { select: { id: true, name: true } },
-      stocks: branchId
-        ? { where: { branchId } }
-        : true, // If branchId provided, filters to branch; otherwise loads all
+      stocks: branchId ? { where: { branchId } } : true,
     },
     orderBy: { createdAt: "desc" },
   });
 
-  return products.map((p) => {
-    // Calculate stock quantity: branch-specific if branchId provided, or total across all branches
-    const currentStock = p.stocks.reduce(
-      (sum, s) => sum + Number(s.quantity || 0),
-      0
-    );
-
-    return {
-      id: p.id,
-      name: p.name,
-      nameEn: p.nameEn || null,
-      barcode: p.barcode,
-      sku: p.sku,
-      description: p.description,
-      costPrice: Number(p.purchasePrice),
-      sellingPrice: Number(p.sellingPrice),
-      wholesalePrice: p.wholesalePrice ? Number(p.wholesalePrice) : null,
-      stockQuantity: currentStock, // 👈 Real branch stock from ProductStock!
-      minStockAlert: Number(p.alertQuantity),
-      unitId: p.unitId,
-      unitName: p.unit.name,
-      unitCode: p.unit.shortCode,
-      bulkUnitName: null,
-      conversionFactor: 1,
-      image: p.image,
-      categoryId: p.categoryId,
-      categoryName: p.category.name,
-      brandId: p.brandId || null,
-      brandName: p.brand?.name || null,
-      sectionId: p.sectionId || null,
-      sectionName: p.section?.name || null,
-      status: p.status,
-      createdAt: p.createdAt,
-    };
-  });
-}
-
-/**
- * GET SINGLE PRODUCT BY ID
- */
-export async function getProductById(
-  id: string,
-  shopId: string,
-  branchId?: string | null
-): Promise<IProduct | null> {
-  const p = await prisma.product.findFirst({
-    where: { id, shopId },
-    include: {
-      category: { select: { id: true, name: true } },
-      unit: { select: { id: true, name: true, shortCode: true } },
-      brand: { select: { id: true, name: true } },
-      section: { select: { id: true, name: true } },
-      stocks: branchId ? { where: { branchId } } : true,
-    },
-  });
-
-  if (!p) return null;
-
-  const currentStock = p.stocks.reduce(
-    (sum, s) => sum + Number(s.quantity || 0),
-    0
-  );
+// Inside getProducts:
+return products.map((p) => {
+  const currentStock = p.stocks.reduce((sum, s) => sum + Number(s.quantity || 0), 0);
 
   return {
     id: p.id,
@@ -104,13 +40,15 @@ export async function getProductById(
     costPrice: Number(p.purchasePrice),
     sellingPrice: Number(p.sellingPrice),
     wholesalePrice: p.wholesalePrice ? Number(p.wholesalePrice) : null,
+    vatPercent: p.vatPercent ? Number(p.vatPercent) : 0, // 👈
+    expiryDate: p.expiryDate ? p.expiryDate.toISOString().split("T")[0] : null, // 👈
     stockQuantity: currentStock,
     minStockAlert: Number(p.alertQuantity),
     unitId: p.unitId,
     unitName: p.unit.name,
     unitCode: p.unit.shortCode,
-    bulkUnitName: null,
-    conversionFactor: 1,
+    bulkUnitName: p.bulkUnitName,
+    conversionFactor: Number(p.conversionFactor || 1),
     image: p.image,
     categoryId: p.categoryId,
     categoryName: p.category.name,
@@ -118,17 +56,13 @@ export async function getProductById(
     brandName: p.brand?.name || null,
     sectionId: p.sectionId || null,
     sectionName: p.section?.name || null,
-    status: p.status,
+    status: p.status as IProduct["status"], // 👈
     createdAt: p.createdAt,
   };
+});
 }
 
-/**
- * DROPDOWN HELPER: CATEGORIES
- */
-export async function getCategoriesForSelect(
-  shopId: string
-): Promise<ICategoryOption[]> {
+export async function getCategoriesForSelect(shopId: string): Promise<ICategoryOption[]> {
   return await prisma.category.findMany({
     where: { shopId, status: "active" },
     select: { id: true, name: true },
@@ -136,12 +70,7 @@ export async function getCategoriesForSelect(
   });
 }
 
-/**
- * DROPDOWN HELPER: UNITS (UOM)
- */
-export async function getUnitsForSelect(
-  shopId: string
-): Promise<IUnitOption[]> {
+export async function getUnitsForSelect(shopId: string): Promise<IUnitOption[]> {
   const units = await prisma.unit.findMany({
     where: { shopId, status: "active" },
     select: {
@@ -161,28 +90,29 @@ export async function getUnitsForSelect(
   }));
 }
 
-/**
- * DROPDOWN HELPER: BRANDS / COMPANIES
- */
-export async function getBrandsForSelect(
-  shopId: string
-): Promise<ExtraOption[]> {
+export async function getBrandsForSelect(shopId: string): Promise<ItemWithCount[]> {
   return await prisma.brand.findMany({
     where: { shopId, status: "active" },
-    select: { id: true, name: true },
+    select: {
+      id: true,
+      name: true,
+      companyName: true,
+      phone: true,
+      _count: { select: { products: true } },
+    },
     orderBy: { name: "asc" },
   });
 }
 
-/**
- * DROPDOWN HELPER: PRODUCT SECTIONS (তাক ও র্যাক)
- */
-export async function getSectionsForSelect(
-  shopId: string
-): Promise<ExtraOption[]> {
+export async function getSectionsForSelect(shopId: string): Promise<ItemWithCount[]> {
   return await prisma.productSection.findMany({
     where: { shopId, status: "active" },
-    select: { id: true, name: true },
+    select: {
+      id: true,
+      name: true,
+      code: true,
+      _count: { select: { products: true } },
+    },
     orderBy: { name: "asc" },
   });
 }

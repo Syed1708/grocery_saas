@@ -38,16 +38,24 @@ export const unitSchema = z.object({
 export const productSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(2, "Product name must be at least 2 characters").max(100),
+  nameEn: z.string().max(100).optional().nullable(),
   barcode: z.string().min(3, "Barcode must be at least 3 characters"),
+  sku: z.string().optional().nullable(),
   description: z.string().max(500).optional().nullable(),
-  costPrice: z.coerce.number().min(0, "Cost price cannot be negative"),
+  costPrice: z.coerce.number().min(0, "Cost price cannot be negative").default(0),
   sellingPrice: z.coerce.number().min(0.01, "Selling price must be greater than 0"),
-  stockQuantity: z.coerce.number().min(0, "Stock cannot be negative").default(0),
-  minStockAlert: z.coerce.number().min(0, "Alert level cannot be negative").default(5),
+  wholesalePrice: z.coerce.number().min(0).optional().nullable(),
+  vatPercent: z.coerce.number().min(0).max(100).default(0), // 👈 Added
+  expiryDate: z.string().optional().nullable(), // 👈 Added
+  stockQuantity: z.coerce.number().min(0).default(0),
+  minStockAlert: z.coerce.number().min(0).default(5),
   unitId: z.string().min(1, "Please select a measurement unit"),
   categoryId: z.string().min(1, "Please select a category"),
+  brandId: z.string().optional().nullable(),
+  sectionId: z.string().optional().nullable(),
   bulkUnitName: z.string().optional().nullable(),
-  conversionFactor: z.coerce.number().min(1, "Conversion factor must be at least 1").default(1),
+  conversionFactor: z.coerce.number().min(1).default(1),
+  status: z.enum(["active", "inactive"]).default("active"), // 👈 Added
 });
 
 export const customerSchema = z.object({

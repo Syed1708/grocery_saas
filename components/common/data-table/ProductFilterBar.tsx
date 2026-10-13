@@ -4,7 +4,7 @@ import { Search, X, Filter } from "lucide-react";
 
 export type StockStatusFilter = "ALL" | "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK";
 
-interface CategoryOption {
+interface FilterOption {
   id: string;
   name: string;
 }
@@ -13,10 +13,16 @@ interface ProductFilterBarProps {
   searchQuery: string;
   onSearchChange: (val: string) => void;
   selectedCategory: string;
-  onCategoryChange: (catId: string) => void;
+  onCategoryChange: (id: string) => void;
+  selectedBrand: string;
+  onBrandChange: (id: string) => void;
+  selectedSection: string;
+  onSectionChange: (id: string) => void;
   stockStatus: StockStatusFilter;
   onStockStatusChange: (status: StockStatusFilter) => void;
-  categories: CategoryOption[];
+  categories: FilterOption[];
+  brands: FilterOption[];
+  sections: FilterOption[];
   onReset: () => void;
   isFiltered: boolean;
 }
@@ -26,9 +32,15 @@ export function ProductFilterBar({
   onSearchChange,
   selectedCategory,
   onCategoryChange,
+  selectedBrand,
+  onBrandChange,
+  selectedSection,
+  onSectionChange,
   stockStatus,
   onStockStatusChange,
   categories,
+  brands,
+  sections,
   onReset,
   isFiltered,
 }: ProductFilterBarProps) {
@@ -41,50 +53,78 @@ export function ProductFilterBar({
 
   return (
     <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-4 rounded-2xl space-y-3 shadow-xs">
-      {/* Top Row: Search Input + Category Selector */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        {/* Search by Name or Barcode */}
-        <div className="relative flex-1">
+      {/* Row 1: Search + Category + Brand + Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        {/* Search */}
+        <div className="relative lg:col-span-2">
           <Search className="absolute left-3 top-2.5 text-neutral-400" size={16} />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search product name or scan barcode..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition text-neutral-900 dark:text-neutral-100"
+            placeholder="Search by name, English name, or scan barcode..."
+            className="w-full pl-9 pr-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-neutral-900 dark:text-neutral-100"
           />
         </div>
 
-        {/* Category Dropdown */}
-        <div className="w-full sm:w-56">
+        {/* Category Filter */}
+        <select
+          value={selectedCategory}
+          onChange={(e) => onCategoryChange(e.target.value)}
+          className="w-full px-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-800 dark:text-neutral-200 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        >
+          <option value="">All Categories</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+
+        {/* Brand Filter */}
+        <select
+          value={selectedBrand}
+          onChange={(e) => onBrandChange(e.target.value)}
+          className="w-full px-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-800 dark:text-neutral-200 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        >
+          <option value="">All Brands / Co.</option>
+          {brands.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.name}
+            </option>
+          ))}
+        </select>
+
+        {/* Section / Shelf Filter */}
+        <div className="flex items-center gap-2">
           <select
-            value={selectedCategory}
-            onChange={(e) => onCategoryChange(e.target.value)}
+            value={selectedSection}
+            onChange={(e) => onSectionChange(e.target.value)}
             className="w-full px-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-800 dark:text-neutral-200 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
           >
-            <option value="">All Categories</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
+            <option value="">All Shelves / তাক</option>
+            {sections.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
               </option>
             ))}
           </select>
-        </div>
 
-        {/* Reset Filters Button (appears when filters are active) */}
-        {isFiltered && (
-          <button
-            type="button"
-            onClick={onReset}
-            className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition cursor-pointer shrink-0"
-          >
-            <X size={14} /> Reset Filters
-          </button>
-        )}
+          {isFiltered && (
+            <button
+              type="button"
+              onClick={onReset}
+              className="px-2.5 py-2 text-neutral-500 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition cursor-pointer shrink-0"
+              title="Reset All Filters"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Bottom Row: Stock Status Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pt-1 pb-0.5">
+      {/* Row 2: Stock Status Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto pt-1">
         <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1 shrink-0 mr-1">
           <Filter size={12} /> Stock Status:
         </span>

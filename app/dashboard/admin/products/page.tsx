@@ -5,6 +5,8 @@ import {
   getProducts,
   getCategoriesForSelect,
   getUnitsForSelect,
+  getBrandsForSelect,
+  getSectionsForSelect,
 } from "@/queries/product-queries";
 import ProductsClient from "./_components/ProductsClient";
 import { prisma } from "@/lib/prisma";
@@ -18,14 +20,16 @@ export default async function ProductsPage() {
 
   const { shopId, branchId } = session.user;
 
-  // Parallel server queries - passes branchId for accurate branch stock!
-  const [products, categories, units, shop] = await Promise.all([
-    getProducts(shopId, branchId), // 👈 Accurately loads stock for active branch
+  // 🚀 Fast parallel queries for all catalog elements
+  const [products, categories, units, brands, sections, shop] = await Promise.all([
+    getProducts(shopId, branchId),
     getCategoriesForSelect(shopId),
     getUnitsForSelect(shopId),
+    getBrandsForSelect(shopId),
+    getSectionsForSelect(shopId),
     prisma.shop.findUnique({
       where: { id: shopId },
-      select: { currencySymbol: true },
+            select: { currencySymbol: true, name: true }, // 👈 Include store name
     }),
   ]);
 
@@ -34,8 +38,11 @@ export default async function ProductsPage() {
       <ProductsClient
         data={products}
         categories={categories}
+        brands={brands as any}
+        sections={sections as any}
         units={units}
         currencySymbol={shop?.currencySymbol || "৳"}
+        shopName={shop?.name || "Grocery Store"} 
       />
     </div>
   );

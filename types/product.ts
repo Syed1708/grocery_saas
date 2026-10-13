@@ -8,7 +8,9 @@ export interface IProduct {
   costPrice: number;
   sellingPrice: number;
   wholesalePrice?: number | null;
-  stockQuantity: number; // Branch-specific stock
+  vatPercent: number; // 👈 VAT / Tax %
+  expiryDate?: string | null; // 👈 Expiry Date
+  stockQuantity: number;
   minStockAlert: number;
   unitId: string;
   unitName: string;
@@ -20,9 +22,9 @@ export interface IProduct {
   sectionId?: string | null;
   sectionName?: string | null;
   bulkUnitName?: string | null;
-  conversionFactor?: number;
+  conversionFactor: number;
   image?: string | null;
-  status?: string;
+  status: "active" | "inactive"; // 👈 "active" | "inactive"
   createdAt: Date;
 }
 

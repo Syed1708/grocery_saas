@@ -5,6 +5,7 @@ import { Menu, LogOut, Store } from "lucide-react";
 import { UserRole } from "@/types";
 import ThemeToggle from "./ThemeToggle";
 import BranchSwitcher from "./BranchSwitcher"; // 👈 Import BranchSwitcher
+import Link from "next/link";
 
 interface BranchOption {
   id: string;
@@ -49,7 +50,7 @@ export default function Topbar({
         {/* Shop Name */}
         <div className="flex items-center gap-2">
           <Store size={18} className="text-neutral-400 hidden sm:block" />
-          <span className="font-semibold text-neutral-800 dark:text-neutral-200 text-sm md:text-base tracking-tight truncate max-w-[150px] sm:max-w-xs">
+          <span className="font-semibold text-neutral-800 dark:text-neutral-200 text-sm md:text-base tracking-tight truncate max-w-37.5 sm:max-w-xs">
             {shopName}
           </span>
         </div>
@@ -69,15 +70,20 @@ export default function Topbar({
         {/* Night / Light Mode Toggle */}
         <ThemeToggle />
 
-        {/* User Badge */}
-        <div className="flex items-center gap-2 bg-neutral-50 dark:bg-neutral-800/80 border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 rounded-full">
+        {/* User Badge - Links to /dashboard/profile */}
+
+        <Link
+          href="/dashboard/profile"
+          className="flex items-center gap-2 bg-neutral-50 dark:bg-neutral-800/80 border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 rounded-full hover:border-blue-500 transition cursor-pointer"
+          title="Manage My Profile"
+        >
           <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
             {userName.charAt(0).toUpperCase()}
           </div>
           <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300 hidden sm:inline">
             {userName}
           </span>
-        </div>
+        </Link>
 
         {/* Logout Button */}
         <button

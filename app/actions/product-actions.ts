@@ -22,7 +22,9 @@ async function getAuthenticatedUser() {
 
   const allowedRoles = ["OWNER", "ADMIN", "SUPER_ADMIN", "MANAGER"];
   if (!allowedRoles.includes(role)) {
-    throw new Error("Forbidden: You do not have permission to manage products.");
+    throw new Error(
+      "Forbidden: You do not have permission to manage products.",
+    );
   }
 
   // Resolve the active branch (either from session or fallback to store's Main Branch)
@@ -69,11 +71,15 @@ export async function createProductAction(formData: FormData) {
     // 1. Zod Validation
     const validated = productSchema.safeParse({
       name: formData.get("name")?.toString().trim(),
+      nameEn: formData.get("nameEn")?.toString().trim() || null,
       barcode,
       sku,
       description: formData.get("description")?.toString().trim() || null,
       costPrice: formData.get("costPrice"),
       sellingPrice: formData.get("sellingPrice"),
+      wholesalePrice: formData.get("wholesalePrice") || null,
+      vatPercent: formData.get("vatPercent") || 0, // 👈
+      expiryDate: formData.get("expiryDate")?.toString() || null, // 👈
       stockQuantity: formData.get("stockQuantity") || 0,
       minStockAlert: formData.get("minStockAlert") || 5,
       unitId: formData.get("unitId")?.toString().trim(),
@@ -82,6 +88,7 @@ export async function createProductAction(formData: FormData) {
       sectionId: formData.get("sectionId")?.toString().trim() || null,
       bulkUnitName: formData.get("bulkUnitName")?.toString().trim() || null,
       conversionFactor: formData.get("conversionFactor") || 1,
+      status: formData.get("status")?.toString() || "active", // 👈
     });
 
     if (!validated.success) {
@@ -123,18 +130,24 @@ export async function createProductAction(formData: FormData) {
       const product = await tx.product.create({
         data: {
           name: data.name,
+          nameEn: data.nameEn,
           barcode: data.barcode,
           sku: data.sku || sku,
           description: data.description,
           purchasePrice: data.costPrice,
           sellingPrice: data.sellingPrice,
+          wholesalePrice: data.wholesalePrice,
+          vatPercent: data.vatPercent,
+          expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
           alertQuantity: data.minStockAlert,
+          bulkUnitName: data.bulkUnitName,
+          conversionFactor: data.conversionFactor,
           unitId: data.unitId,
           categoryId: data.categoryId,
           brandId: data.brandId || null,
           sectionId: data.sectionId || null,
           image: imageUrl || null,
-          status: "active",
+          status: data.status,
           shopId: user.shopId,
         },
       });
@@ -156,7 +169,10 @@ export async function createProductAction(formData: FormData) {
     return { success: true };
   } catch (error: any) {
     console.error("Create product failed:", error);
-    return { success: false, error: error.message || "Failed to create product." };
+    return {
+      success: false,
+      error: error.message || "Failed to create product.",
+    };
   }
 }
 
@@ -208,7 +224,9 @@ export async function updateProductAction(formData: FormData) {
     // 3. Conflict Checks for Barcode
     if (data.barcode !== currentProduct.barcode) {
       const conflict = await prisma.product.findUnique({
-        where: { shopId_barcode: { shopId: user.shopId, barcode: data.barcode } },
+        where: {
+          shopId_barcode: { shopId: user.shopId, barcode: data.barcode },
+        },
       });
       if (conflict) {
         return {
@@ -235,17 +253,24 @@ export async function updateProductAction(formData: FormData) {
         where: { id },
         data: {
           name: data.name,
+          nameEn: data.nameEn,
           barcode: data.barcode,
           sku: data.sku || currentProduct.sku,
           description: data.description,
           purchasePrice: data.costPrice,
           sellingPrice: data.sellingPrice,
+          wholesalePrice: data.wholesalePrice,
+          vatPercent: data.vatPercent,
+          expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
           alertQuantity: data.minStockAlert,
+          bulkUnitName: data.bulkUnitName,
+          conversionFactor: data.conversionFactor,
           unitId: data.unitId,
           categoryId: data.categoryId,
           brandId: data.brandId || null,
           sectionId: data.sectionId || null,
           image: imageUrl,
+          status: data.status,
         },
       });
 
@@ -275,7 +300,10 @@ export async function updateProductAction(formData: FormData) {
     return { success: true };
   } catch (error: any) {
     console.error("Update product failed:", error);
-    return { success: false, error: error.message || "Failed to update product." };
+    return {
+      success: false,
+      error: error.message || "Failed to update product.",
+    };
   }
 }
 
@@ -328,6 +356,9 @@ export async function deleteProductAction(id: string) {
     return { success: true };
   } catch (error: any) {
     console.error("Delete product failed:", error);
-    return { success: false, error: error.message || "Failed to delete product." };
+    return {
+      success: false,
+      error: error.message || "Failed to delete product.",
+    };
   }
 }
