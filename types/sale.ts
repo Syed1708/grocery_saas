@@ -47,3 +47,14 @@ export interface ISale {
   items: ISaleItem[];
   createdAt: Date;
 }
+export interface ISaleReturn {
+  id: string;
+  returnNo: string;
+  returnDate: Date;
+  totalRefund: number;
+  refundMethod: string;
+  notes?: string | null;
+  invoiceNo: string;
+  customerName: string;
+  createdAt: Date;
+}

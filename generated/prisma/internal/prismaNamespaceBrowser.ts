@@ -220,6 +220,7 @@ export const CategoryScalarFieldEnum = {
   name: 'name',
   slug: 'slug',
   description: 'description',
+  image: 'image',
   status: 'status',
   parentId: 'parentId',
   shopId: 'shopId',
@@ -918,6 +919,7 @@ export const CategoryOrderByRelevanceFieldEnum = {
   name: 'name',
   slug: 'slug',
   description: 'description',
+  image: 'image',
   status: 'status',
   parentId: 'parentId',
   shopId: 'shopId'

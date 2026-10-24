@@ -310,6 +310,7 @@ model Category {
   name        String
   slug        String
   description String?    @db.Text
+  image       String?    // 👈 Add this line right here!
   status      String     @default("active")
   parentId    String?
   parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)

@@ -1,42 +1,36 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { saveUploadedFile, deleteUploadedFile } from "@/lib/file-storage";
 import { categorySchema } from "@/lib/validations";
+import { requireAuth } from "@/lib/auth-guard";
 
-async function getAuthenticatedUser() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.shopId) {
-    throw new Error("Unauthorized: Please log in.");
-  }
-  if (session.user.role !== "OWNER" && session.user.role !== "MANAGER") {
-    throw new Error("Forbidden: Only Owners and Managers can manage categories.");
-  }
-  return session.user;
-}
+
 
 export async function createCategoryAction(formData: FormData) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
 
-    // 1. Zod Validation
+    // 1. Zod Validation (Includes status)
     const validated = categorySchema.safeParse({
       name: formData.get("name")?.toString().trim(),
       description: formData.get("description")?.toString().trim() || null,
+      status: formData.get("status")?.toString() || "active",
     });
 
     if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
     }
 
-    const { name, description } = validated.data;
+    const { name, description, status } = validated.data;
+
+    // Generate clean unique slug
+    const slug = `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now().toString().slice(-4)}`;
 
     // 2. Prevent Duplicate Name within the same store
-    const existing = await prisma.category.findUnique({
-      where: { shopId_name: { shopId: user.shopId, name } },
+    const existing = await prisma.category.findFirst({
+      where: { shopId: user.shopId, name },
     });
     if (existing) {
       return { success: false, error: "A category with this name already exists in your store." };
@@ -53,8 +47,10 @@ export async function createCategoryAction(formData: FormData) {
     await prisma.category.create({
       data: {
         name,
+        slug,
         description,
         image: imageUrl,
+        status,
         shopId: user.shopId,
       },
     });
@@ -63,13 +59,14 @@ export async function createCategoryAction(formData: FormData) {
     revalidatePath("/dashboard/admin/products");
     return { success: true };
   } catch (error: any) {
+    console.error("Create category error:", error);
     return { success: false, error: error.message || "Failed to create category." };
   }
 }
 
 export async function updateCategoryAction(formData: FormData) {
   try {
-    const user = await getAuthenticatedUser();
+       const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
 
     const id = formData.get("id")?.toString();
     if (!id) return { success: false, error: "Missing category ID." };
@@ -79,13 +76,14 @@ export async function updateCategoryAction(formData: FormData) {
       id,
       name: formData.get("name")?.toString().trim(),
       description: formData.get("description")?.toString().trim() || null,
+      status: formData.get("status")?.toString() || "active",
     });
 
     if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
     }
 
-    const { name, description } = validated.data;
+    const { name, description, status } = validated.data;
 
     const currentCategory = await prisma.category.findFirst({
       where: { id, shopId: user.shopId },
@@ -110,6 +108,7 @@ export async function updateCategoryAction(formData: FormData) {
         name,
         description,
         image: imageUrl,
+        status,
       },
     });
 
@@ -117,13 +116,14 @@ export async function updateCategoryAction(formData: FormData) {
     revalidatePath("/dashboard/admin/products");
     return { success: true };
   } catch (error: any) {
+    console.error("Update category error:", error);
     return { success: false, error: error.message || "Failed to update category." };
   }
 }
 
 export async function deleteCategoryAction(id: string) {
   try {
-    const user = await getAuthenticatedUser();
+        const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
 
     // Verify category belongs to user's shop
     const category = await prisma.category.findFirst({
@@ -152,6 +152,7 @@ export async function deleteCategoryAction(id: string) {
     revalidatePath("/dashboard/admin/products");
     return { success: true };
   } catch (error: any) {
+    console.error("Delete category error:", error);
     return { success: false, error: error.message || "Failed to delete category." };
   }
 }

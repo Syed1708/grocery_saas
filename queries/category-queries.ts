@@ -11,6 +11,7 @@ export async function getCategories(shopId: string): Promise<ICategory[]> {
     id: c.id,
     name: c.name,
     description: c.description,
+    status: c.status,
     image: c.image,
     shopId: c.shopId,
     createdAt: c.createdAt,

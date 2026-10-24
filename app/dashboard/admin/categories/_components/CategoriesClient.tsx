@@ -15,7 +15,7 @@ import { DataTable } from "@/components/common/data-table/DataTable";
 import { DataTableViewOptions } from "@/components/common/data-table/DataTableViewOptions";
 import FormModal from "@/components/common/FormModal";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
-import ImageUpload from "@/components/common/ImageUpload";
+import CategoryForm from "./CategoryForm"; // 👈 Clean extracted form
 import {
   createCategoryAction,
   updateCategoryAction,
@@ -30,7 +30,7 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
   const [deleteTarget, setDeleteTarget] = useState<ICategory | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Filter States
+  // Table Filter States
   const [globalFilter, setGlobalFilter] = useState("");
   const [columnVisibility, setColumnVisibility] = useState({});
 
@@ -96,7 +96,13 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
         return (
           <div className="w-10 h-10 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center">
             {image ? (
-              <Image src={image} alt="Category" width={40} height={40} className="w-full h-full object-cover" />
+              <Image 
+                src={image}
+                alt="Category"
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+              />
             ) : (
               <Tag size={16} className="text-neutral-400" />
             )}
@@ -123,6 +129,15 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
       ),
     },
     {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <span className="text-neutral-500 dark:text-neutral-400 truncate max-w-xs block">
+          {row.getValue("status") || "—"}
+        </span>
+      ),
+    },
+    {
       id: "actions",
       header: "Actions",
       enableHiding: false,
@@ -131,6 +146,7 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
         return (
           <div className="flex items-center gap-1.5">
             <button
+              type="button"
               onClick={() => openEdit(cat)}
               className="p-1.5 rounded-lg text-neutral-500 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
               title="Edit"
@@ -138,6 +154,7 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
               <Edit2 size={15} />
             </button>
             <button
+              type="button"
               onClick={() => setDeleteTarget(cat)}
               className="p-1.5 rounded-lg text-neutral-500 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
               title="Delete"
@@ -179,6 +196,7 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
         <div className="flex items-center gap-2">
           <DataTableViewOptions table={table} />
           <button
+            type="button"
             onClick={openCreate}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer"
           >
@@ -187,7 +205,7 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
         </div>
       </div>
 
-      {/* Search Input Bar */}
+      {/* Search Bar */}
       <div className="flex items-center bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-3 rounded-2xl shadow-xs">
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-2.5 text-neutral-400" size={16} />
@@ -201,10 +219,9 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
         </div>
       </div>
 
-      {/* Pure Modular DataTable */}
       <DataTable table={table} columns={columns} />
 
-      {/* Reusable FormModal (Zero Boilerplate!) */}
+      {/* Reusable FormModal with Clean Form Component */}
       <FormModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -214,41 +231,9 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
         isEditing={Boolean(editingCategory)}
         loading={loading}
       >
-        <div>
-          <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-            Category Name *
-          </label>
-          <input
-            type="text"
-            name="name"
-            required
-            defaultValue={editingCategory?.name || ""}
-            placeholder="e.g. Dairy & Eggs, Bakery, Beverages"
-            className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-            Description (Optional)
-          </label>
-          <textarea
-            name="description"
-            rows={2}
-            defaultValue={editingCategory?.description || ""}
-            placeholder="Short details about this item group..."
-            className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <ImageUpload
-          name="image"
-          defaultImage={editingCategory?.image}
-          label="Category Thumbnail Photo"
-        />
+        <CategoryForm editingCategory={editingCategory} />
       </FormModal>
 
-      {/* Deletion Confirmation Dialog */}
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
