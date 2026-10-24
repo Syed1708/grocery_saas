@@ -95,7 +95,7 @@ export default function ReportsOverviewClient({ stats, currencySymbol }: Props) 
             title="মজুদ পণ্য ও মেয়াদ রিপোর্ট"
             subtitleEn="Stock Valuation & Expiry"
             description="Current stock on hand, valuation at cost vs retail, perishable expiry warnings, and slow items."
-            href="/dashboard/admin/reports/stock"
+            href="/dashboard/admin/reports/stocks"
             badge="Inventory"
             metricLabel="Low Stock Alerts"
             metricValue={`${stats.lowStockItemsCount} Products`}

@@ -13,3 +13,5 @@ export * from "./finance"; // 👈 Add export
 export * from "./staff"; // 👈 Add export
 export * from "./report"; // 👈 Add export
 export * from "./closing"; // 👈 Add export
+export * from "./customer-due"; // 👈 Add export
+export * from "./stock";

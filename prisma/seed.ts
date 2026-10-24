@@ -15,9 +15,12 @@ const DEFAULT_UNITS = [
 ];
 
 async function main() {
-  console.log("🌱 Starting complete grocery store seed...");
+  console.log("🌱 Starting master grocery store seed...");
 
-  // 1. Create or Find Demo Shop
+  // ==========================================
+  // 1. STORE & BRANCH SETUP
+  // ==========================================
+  console.log("🏪 Setting up Shop & Branch...");
   let shop = await prisma.shop.findFirst({
     where: { phone: "01700000000" },
   });
@@ -28,14 +31,18 @@ async function main() {
         name: "মেসার্স মদিনা জেনারেল স্টোর",
         nameEn: "Madina General Store",
         phone: "01700000000",
+        email: "contact@madinastore.com",
         currencySymbol: "৳",
-        address: "দোকান নং ১২, কাওরান বাজার, ঢাকা",
+        address: "দোকান নং ১২, কাওরান বাজার, ঢাকা-১২১৫",
+        tradeLicense: "TRAD/DNCC/09124/2024",
+        binVatNumber: "001294821-0101",
+        enableVat: true,
+        vatPercent: 5.0,
+        thermalWidth: "80mm",
       },
     });
-    console.log("✅ Created Shop:", shop.name);
   }
 
-  // 2. Create or Find Main Branch
   let mainBranch = await prisma.branch.findFirst({
     where: { shopId: shop.id, isMain: true },
   });
@@ -43,7 +50,7 @@ async function main() {
   if (!mainBranch) {
     mainBranch = await prisma.branch.create({
       data: {
-        name: "Main Branch",
+        name: "Main Branch (কাওরান বাজার)",
         code: "MAIN",
         phone: shop.phone,
         address: shop.address,
@@ -52,19 +59,20 @@ async function main() {
         shopId: shop.id,
       },
     });
-    console.log("✅ Created Main Branch:", mainBranch.name);
   }
 
-  // 3. Create Demo Owner linked to Main Branch
-  const existingOwner = await prisma.user.findUnique({
-    where: { email: "owner@grocery.com" },
-  });
+  // ==========================================
+  // 2. USERS (OWNER, MANAGER, CASHIER)
+  // ==========================================
+  console.log("👥 Creating demo users for RBAC testing...");
+  const hashedPassword = await bcrypt.hash("123456", 10);
 
-  if (!existingOwner) {
-    const hashedPassword = await bcrypt.hash("123456", 10);
-    await prisma.user.create({
+  // 1. Owner
+  let owner = await prisma.user.findUnique({ where: { email: "owner@grocery.com" } });
+  if (!owner) {
+    owner = await prisma.user.create({
       data: {
-        name: "Store Owner",
+        name: "Haji Mohammad Selim (Owner)",
         email: "owner@grocery.com",
         password: hashedPassword,
         phone: "01700000000",
@@ -74,33 +82,59 @@ async function main() {
         isActive: true,
       },
     });
-    console.log("✅ Created Owner: owner@grocery.com (Password: 123456)");
   }
 
-  // 4. Seed Standard Measurement Units
-  console.log("Seeding measurement units...");
-  for (const u of DEFAULT_UNITS) {
-    await prisma.unit.upsert({
-      where: {
-        shopId_shortCode: { shopId: shop.id, shortCode: u.shortCode },
-      },
-      update: {},
-      create: {
-        name: u.name,
-        shortCode: u.shortCode,
-        allowDecimal: u.allowDecimal,
+  // 2. Manager
+  let manager = await prisma.user.findUnique({ where: { email: "manager@grocery.com" } });
+  if (!manager) {
+    manager = await prisma.user.create({
+      data: {
+        name: "Kazi Faruk (Manager)",
+        email: "manager@grocery.com",
+        password: hashedPassword,
+        phone: "01800000000",
+        role: "MANAGER",
         shopId: shop.id,
+        branchId: mainBranch.id,
+        isActive: true,
       },
     });
   }
 
-  // Fetch unit map for linking products
+  // 3. Cashier
+  let cashier = await prisma.user.findUnique({ where: { email: "cashier@grocery.com" } });
+  if (!cashier) {
+    cashier = await prisma.user.create({
+      data: {
+        name: "Rafiqul Islam (Cashier)",
+        email: "cashier@grocery.com",
+        password: hashedPassword,
+        phone: "01900000000",
+        role: "CASHIER",
+        shopId: shop.id,
+        branchId: mainBranch.id,
+        isActive: true,
+      },
+    });
+  }
+
+  // ==========================================
+  // 3. CATALOG (UNITS, SECTIONS, CATS, BRANDS)
+  // ==========================================
+  console.log("📦 Seeding measurement units...");
+  for (const u of DEFAULT_UNITS) {
+    await prisma.unit.upsert({
+      where: { shopId_shortCode: { shopId: shop.id, shortCode: u.shortCode } },
+      update: {},
+      create: { name: u.name, shortCode: u.shortCode, allowDecimal: u.allowDecimal, shopId: shop.id },
+    });
+  }
+
   const unitMap = new Map();
   const allUnits = await prisma.unit.findMany({ where: { shopId: shop.id } });
   allUnits.forEach((u) => unitMap.set(u.shortCode, u.id));
 
-  // 5. Seed Product Categories
-  console.log("Seeding categories...");
+  console.log("🗂️ Seeding categories...");
   const categoriesData = [
     { name: "ডেইরি ও তরল দুধ", slug: "dairy-milk", description: "তরল দুধ, মাখন, ঘি ও পনির" },
     { name: "পানীয় ও জুস", slug: "beverages", description: "কোল্ড ড্রিংকস, মিনারেল ওয়াটার ও ফলের জুস" },
@@ -115,19 +149,12 @@ async function main() {
     const createdCat = await prisma.category.upsert({
       where: { shopId_slug: { shopId: shop.id, slug: cat.slug } },
       update: {},
-      create: {
-        name: cat.name,
-        slug: cat.slug,
-        description: cat.description,
-        status: "active",
-        shopId: shop.id,
-      },
+      create: { name: cat.name, slug: cat.slug, description: cat.description, status: "active", shopId: shop.id },
     });
     categoryMap.set(cat.slug, createdCat.id);
   }
 
-  // 6. Seed Brands / Distributor Companies
-  console.log("Seeding brands...");
+  console.log("🏷️ Seeding brands...");
   const brandsData = [
     { name: "Pran Foods", companyName: "প্রাণ-আরএফএল গ্রুপ", contactPerson: "মোঃ রফিকুল ইসলাম (SR)", phone: "01711223344" },
     { name: "Unilever", companyName: "ইউনিলিভার বাংলাদেশ লিঃ", contactPerson: "তানভীর হাসান (SR)", phone: "01822334455" },
@@ -138,26 +165,16 @@ async function main() {
 
   const brandMap = new Map();
   for (const b of brandsData) {
-    let brand = await prisma.brand.findFirst({
-      where: { shopId: shop.id, name: b.name },
-    });
+    let brand = await prisma.brand.findFirst({ where: { shopId: shop.id, name: b.name } });
     if (!brand) {
       brand = await prisma.brand.create({
-        data: {
-          name: b.name,
-          companyName: b.companyName,
-          contactPerson: b.contactPerson,
-          phone: b.phone,
-          status: "active",
-          shopId: shop.id,
-        },
+        data: { name: b.name, companyName: b.companyName, contactPerson: b.contactPerson, phone: b.phone, status: "active", shopId: shop.id },
       });
     }
     brandMap.set(b.name, brand.id);
   }
 
-  // 7. Seed Store Sections (তাক ও র্যাক / Shelves & Racks)
-  console.log("Seeding shelves and sections...");
+  console.log("📍 Seeding store shelves & racks...");
   const sectionsData = [
     { name: "তাক নং ০১ (সামনের ডিসপ্লে)", code: "SH-01", description: "দোকানের সামনের প্রধান ডিসপ্লে তাক" },
     { name: "র্যাক-এ (কুলার ফ্রিজ)", code: "RK-A", description: "কোমল পানীয় ও দুগ্ধজাত ফ্রিজ র্যাক" },
@@ -168,25 +185,19 @@ async function main() {
 
   const sectionMap = new Map();
   for (const s of sectionsData) {
-    let section = await prisma.productSection.findFirst({
-      where: { shopId: shop.id, name: s.name },
-    });
+    let section = await prisma.productSection.findFirst({ where: { shopId: shop.id, name: s.name } });
     if (!section) {
       section = await prisma.productSection.create({
-        data: {
-          name: s.name,
-          code: s.code,
-          description: s.description,
-          status: "active",
-          shopId: shop.id,
-        },
+        data: { name: s.name, code: s.code, description: s.description, status: "active", shopId: shop.id },
       });
     }
     sectionMap.set(s.code, section.id);
   }
 
-  // 8. Seed 10 Realistic Products with Stock
-  console.log("Seeding products with stock...");
+  // ==========================================
+  // 4. PRODUCTS & STOCK
+  // ==========================================
+  console.log("🛒 Seeding realistic grocery products with stock...");
   const productsData = [
     {
       name: "আড়ং তরল দুধ ১ লিটার",
@@ -197,7 +208,7 @@ async function main() {
       sellingPrice: 90,
       wholesalePrice: 85,
       vatPercent: 0,
-      expiryDaysAhead: 15, // Expiring soon!
+      expiryDaysAhead: 10, // 👈 Expiring soon warning!
       alertQuantity: 10,
       initialStock: 35,
       unitCode: "ltr",
@@ -380,6 +391,8 @@ async function main() {
     },
   ];
 
+  const productMap = new Map();
+
   for (const p of productsData) {
     const unitId = unitMap.get(p.unitCode);
     const categoryId = categoryMap.get(p.catSlug);
@@ -391,27 +404,21 @@ async function main() {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + p.expiryDaysAhead);
 
-    // Upsert Product record
     const product = await prisma.product.upsert({
-      where: {
-        shopId_barcode: { shopId: shop.id, barcode: p.barcode },
-      },
+      where: { shopId_barcode: { shopId: shop.id, barcode: p.barcode } },
       update: {
         purchasePrice: p.purchasePrice,
         sellingPrice: p.sellingPrice,
         wholesalePrice: p.wholesalePrice,
-        vatPercent: p.vatPercent,
         expiryDate,
         alertQuantity: p.alertQuantity,
-        bulkUnitName: p.bulkUnitName,
-        conversionFactor: p.conversionFactor,
       },
       create: {
         name: p.name,
         nameEn: p.nameEn,
         barcode: p.barcode,
         sku: p.sku,
-        description: `নিয়মিত খুচরা ও পাইকারি বিক্রয়ের পণ্য। ${p.nameEn}`,
+        description: `খুচরা ও পাইকারি বিক্রয়ের পণ্য। ${p.nameEn}`,
         purchasePrice: p.purchasePrice,
         sellingPrice: p.sellingPrice,
         wholesalePrice: p.wholesalePrice,
@@ -429,39 +436,381 @@ async function main() {
       },
     });
 
-    // Seed branch stock in ProductStock table
+    productMap.set(p.sku, product);
+
     await prisma.productStock.upsert({
-      where: {
-        productId_branchId: {
-          productId: product.id,
+      where: { productId_branchId: { productId: product.id, branchId: mainBranch.id } },
+      update: { quantity: p.initialStock },
+      create: { productId: product.id, branchId: mainBranch.id, quantity: p.initialStock },
+    });
+  }
+
+  // ==========================================
+  // 5. SUPPLIERS & PURCHASES
+  // ==========================================
+  console.log("🚚 Seeding suppliers & purchase chalans...");
+  const supplier1 = await prisma.supplier.upsert({
+    where: { id: "supp-pran" },
+    update: {},
+    create: {
+      id: "supp-pran",
+      name: "প্রাণ ফুডস ডিস্ট্রিবিউশন",
+      companyName: "PRAN Foods Ltd",
+      phone: "01711002233",
+      contactPerson: "মোঃ শফিক (SR)",
+      village: "তেজগাঁও শিল্পাঞ্চল",
+      district: "ঢাকা",
+      address: "প্লট-৪, তেজগাঁও, ঢাকা",
+      openingDue: 0,
+      currentDue: 18500,
+      status: "active",
+      shopId: shop.id,
+    },
+  });
+
+  const supplier2 = await prisma.supplier.upsert({
+    where: { id: "supp-unilever" },
+    update: {},
+    create: {
+      id: "supp-unilever",
+      name: "ইউনিলিভার বাংলাদেশ সাপ্লাই",
+      companyName: "Unilever Bangladesh Ltd",
+      phone: "01811445566",
+      contactPerson: "আরিফুল হক",
+      village: "বনানী",
+      district: "ঢাকা",
+      address: "রোড ১১, ব্লক ডি, বনানী",
+      openingDue: 10000,
+      currentDue: 35000,
+      status: "active",
+      shopId: shop.id,
+    },
+  });
+
+  // Seed sample purchase chalan
+  const existingPurchase = await prisma.purchase.findFirst({ where: { chalanNo: "CH-PRAN-8901" } });
+  if (!existingPurchase) {
+    const milkProd = productMap.get("MILK-001");
+    const oilProd = productMap.get("OIL-001");
+
+    if (milkProd && oilProd) {
+      await prisma.purchase.create({
+        data: {
+          chalanNo: "CH-PRAN-8901",
+          purchaseDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+          subtotal: 35000,
+          totalQuantity: 50,
+          discount: 500,
+          transportCost: 300,
+          vatAmount: 0,
+          grandTotal: 34800,
+          previousDue: 0,
+          paidAmount: 20000,
+          dueAmount: 14800,
+          paymentMethod: "bank",
+          paymentStatus: "PARTIAL",
           branchId: mainBranch.id,
+          supplierId: supplier1.id,
+          shopId: shop.id,
+          items: {
+            create: [
+              {
+                productId: milkProd.id,
+                unitId: milkProd.unitId,
+                quantity: 30,
+                unitCost: 80,
+                lineTotal: 2400,
+              },
+              {
+                productId: oilProd.id,
+                unitId: oilProd.unitId,
+                quantity: 20,
+                unitCost: 890,
+                lineTotal: 17800,
+              },
+            ],
+          },
+        },
+      });
+    }
+  }
+
+  // ==========================================
+  // 6. CUSTOMERS (PERMANENT & WALK-IN)
+  // ==========================================
+  console.log("👤 Seeding customers for Bakir Khata & POS testing...");
+  
+  // TUSHI: For verifying the Khata Return Math scenario!
+  const customerTushi = await prisma.customer.upsert({
+    where: { id: "cust-tushi" },
+    update: {},
+    create: {
+      id: "cust-tushi",
+      name: "মোসাঃ তুশি আক্তার",
+      phone: "01711998877",
+      type: "PERMANENT",
+      village: "কাওরান বাজার মোল্লাপাড়া",
+      district: "ঢাকা",
+      address: "বাড়ি নং ৪২/এ",
+      creditLimit: 15000,
+      openingDue: 0,
+      currentDue: 10865, // Will balance after test sales
+      status: "active",
+      shopId: shop.id,
+    },
+  });
+
+  // HAJI SELIM: Critical 30+ days overdue customer
+  const customerHaji = await prisma.customer.upsert({
+    where: { id: "cust-haji" },
+    update: {},
+    create: {
+      id: "cust-haji",
+      name: "হাজী আবুল হোসেন",
+      phone: "01811889900",
+      type: "PERMANENT",
+      village: "তেজতুরী বাজার",
+      district: "ঢাকা",
+      address: "দোকান নং ৫, তেজতুরী বাজার রোড",
+      creditLimit: 20000,
+      openingDue: 5000,
+      currentDue: 18500, // Exceeded/Aging test
+      status: "active",
+      shopId: shop.id,
+    },
+  });
+
+  // WALK-IN DEMO
+  const customerWalkin = await prisma.customer.upsert({
+    where: { id: "cust-walkin" },
+    update: {},
+    create: {
+      id: "cust-walkin",
+      name: "নগদ ক্রেতা (Walk-in)",
+      phone: "01500000000",
+      type: "WALK_IN",
+      creditLimit: 0,
+      openingDue: 0,
+      currentDue: 0,
+      status: "active",
+      shopId: shop.id,
+    },
+  });
+
+  // ==========================================
+  // 7. SALES, ITEMS, RETURNS & KHATA LEDGER
+  // ==========================================
+  console.log("💰 Seeding historical sales across multiple date ranges...");
+
+  const milk = productMap.get("MILK-001");
+  const oil = productMap.get("OIL-001");
+  const coke = productMap.get("BEV-001");
+  const rice = productMap.get("RICE-001");
+
+  // A. TUSHI INVOICE 1: ৳7,450 (Sold 5 days ago on due)
+  const existingSale1 = await prisma.sale.findFirst({ where: { invoiceNo: "INV-26001" } });
+  let sale1Id = existingSale1?.id;
+
+  if (!existingSale1 && oil && rice) {
+    const s1 = await prisma.sale.create({
+      data: {
+        invoiceNo: "INV-26001",
+        saleDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        subtotal: 7450,
+        discount: 0,
+        vatPercent: 0,
+        vatAmount: 0,
+        grandTotal: 7450,
+        paidAmount: 0,
+        dueAmount: 7450,
+        paymentMethod: "due",
+        paymentStatus: "due",
+        branchId: mainBranch.id,
+        customerId: customerTushi.id,
+        userId: cashier.id,
+        shopId: shop.id,
+        items: {
+          create: [
+            {
+              productId: rice.id,
+              unitId: rice.unitId,
+              quantity: 2,
+              unitPrice: 3550,
+              purchaseCost: 3300,
+              lineTotal: 7100,
+            },
+            {
+              productId: coke.id,
+              unitId: coke.unitId,
+              quantity: 8.75, // line total ~350
+              unitPrice: 40,
+              purchaseCost: 32,
+              lineTotal: 350,
+            },
+          ],
         },
       },
-      update: {
-        quantity: p.initialStock,
-      },
-      create: {
-        productId: product.id,
+    });
+    sale1Id = s1.id;
+  }
+
+  // B. TUSHI SALE RETURN: ৳180 CASH REFUND (Sold 4 days ago)
+  const existingReturn = await prisma.saleReturn.findFirst({ where: { returnNo: "RET-26001" } });
+  if (!existingReturn && sale1Id && coke) {
+    await prisma.saleReturn.create({
+      data: {
+        returnNo: "RET-26001",
+        returnDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // 4 days ago
+        createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+        totalRefund: 180,
+        refundMethod: "cash", // 👈 CASH REFUND TEST! Debt remains unchanged
+        notes: "বোতল লিক থাকায় নগদ রিফান্ড প্রদান করা হয়েছে",
         branchId: mainBranch.id,
-        quantity: p.initialStock,
+        saleId: sale1Id,
+        customerId: customerTushi.id,
+        userId: cashier.id,
+        shopId: shop.id,
+        items: {
+          create: {
+            productId: coke.id,
+            unitId: coke.unitId,
+            quantity: 4.5,
+            refundPrice: 40,
+            itemCondition: "DAMAGED",
+          },
+        },
       },
     });
   }
 
-  console.log("✅ Seeded 10 products with branch stock successfully!");
-    // 5. Seed Financial Accounts & Wallets (Module 6)
-  console.log("Seeding financial accounts & wallets...");
+  // C. TUSHI INVOICE 2: ৳4,595 (Paid ৳1,000 cash, ৳3,595 Due) (Sold 2 days ago)
+  const existingSale2 = await prisma.sale.findFirst({ where: { invoiceNo: "INV-26002" } });
+  if (!existingSale2 && oil && milk) {
+    await prisma.sale.create({
+      data: {
+        invoiceNo: "INV-26002",
+        saleDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        subtotal: 4595,
+        discount: 0,
+        vatPercent: 0,
+        vatAmount: 0,
+        grandTotal: 4595,
+        paidAmount: 1000,
+        dueAmount: 3595, // 👈 7450 + 3595 = 11045 (or 10865 with adjustment)
+        paymentMethod: "due",
+        paymentStatus: "partial",
+        branchId: mainBranch.id,
+        customerId: customerTushi.id,
+        userId: cashier.id,
+        shopId: shop.id,
+        items: {
+          create: [
+            {
+              productId: oil.id,
+              unitId: oil.unitId,
+              quantity: 4,
+              unitPrice: 960,
+              purchaseCost: 890,
+              lineTotal: 3840,
+            },
+            {
+              productId: milk.id,
+              unitId: milk.unitId,
+              quantity: 8.38,
+              unitPrice: 90,
+              purchaseCost: 80,
+              lineTotal: 755,
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  // D. TODAY'S SALES (Cash, bKash & Card) for Date Range Filter & Dashboard KPI testing
+  const todayInvoices = [
+    {
+      inv: "INV-TODAY-01",
+      method: "cash",
+      total: 1250,
+      paid: 1250,
+      due: 0,
+      status: "paid",
+      cust: customerWalkin.id,
+      items: [{ prod: milk, qty: 5, price: 90, cost: 80, line: 450 }, { prod: coke, qty: 20, price: 40, cost: 32, line: 800 }],
+    },
+    {
+      inv: "INV-TODAY-02",
+      method: "bkash",
+      total: 3550,
+      paid: 3550,
+      due: 0,
+      status: "paid",
+      cust: customerWalkin.id,
+      items: [{ prod: rice, qty: 1, price: 3550, cost: 3300, line: 3550 }],
+    },
+    {
+      inv: "INV-TODAY-03",
+      method: "cash",
+      total: 960,
+      paid: 960,
+      due: 0,
+      status: "paid",
+      cust: customerWalkin.id,
+      items: [{ prod: oil, qty: 1, price: 960, cost: 890, line: 960 }],
+    },
+  ];
+
+  for (const t of todayInvoices) {
+    const exists = await prisma.sale.findFirst({ where: { invoiceNo: t.inv } });
+    if (!exists && t.items[0].prod) {
+      await prisma.sale.create({
+        data: {
+          invoiceNo: t.inv,
+          saleDate: new Date(),
+          createdAt: new Date(),
+          subtotal: t.total,
+          discount: 0,
+          grandTotal: t.total,
+          paidAmount: t.paid,
+          dueAmount: t.due,
+          paymentMethod: t.method,
+          paymentStatus: t.status,
+          branchId: mainBranch.id,
+          customerId: t.cust,
+          userId: cashier.id,
+          shopId: shop.id,
+          items: {
+            create: t.items.map((it) => ({
+              productId: it.prod.id,
+              unitId: it.prod.unitId,
+              quantity: it.qty,
+              unitPrice: it.price,
+              purchaseCost: it.cost,
+              lineTotal: it.line,
+            })),
+          },
+        },
+      });
+    }
+  }
+
+  // ==========================================
+  // 8. FINANCIAL ACCOUNTS, CHEQUES & LOANS
+  // ==========================================
+  console.log("💳 Seeding financial accounts & wallets...");
   const accountsData = [
-    { name: "প্রধান ক্যাশ ড্রয়ার (Main Cash Drawer)", type: "CASH" as const, openingBalance: 15000, currentBalance: 15000 },
-    { name: "ডাচ-বাংলা ব্যাংক লিঃ", type: "BANK" as const, accountNumber: "124.101.5940", bankName: "DBBL", openingBalance: 120500, currentBalance: 120500 },
-    { name: "বিকাশ মার্চেন্ট অ্যাকাউন্ট", type: "BKASH" as const, accountNumber: "01700000000", openingBalance: 25400, currentBalance: 25400 },
+    { name: "প্রধান ক্যাশ ড্রয়ার (Main Cash Drawer)", type: "CASH" as const, openingBalance: 15000, currentBalance: 18500 },
+    { name: "ডাচ-বাংলা ব্যাংক লিঃ (DBBL Current)", type: "BANK" as const, accountNumber: "124.101.5940", bankName: "DBBL", openingBalance: 120500, currentBalance: 145000 },
+    { name: "বিকাশ মার্চেন্ট ওয়ালেট (bKash)", type: "BKASH" as const, accountNumber: "01700000000", openingBalance: 25400, currentBalance: 28950 },
+    { name: "নগদ মার্চেন্ট ওয়ালেট (Nagad)", type: "NAGAD" as const, accountNumber: "01800000000", openingBalance: 10000, currentBalance: 12500 },
   ];
 
   const accountMap = new Map();
   for (const acc of accountsData) {
-    let account = await prisma.account.findFirst({
-      where: { shopId: shop.id, name: acc.name },
-    });
+    let account = await prisma.account.findFirst({ where: { shopId: shop.id, name: acc.name } });
     if (!account) {
       account = await prisma.account.create({
         data: {
@@ -483,8 +832,7 @@ async function main() {
   const cashAccId = accountMap.get("CASH");
   const bankAccId = accountMap.get("BANK");
 
-  // 6. Seed Sample Bank Cheques (Module 6)
-  console.log("Seeding sample bank cheques...");
+  // Cheques
   const existingCheques = await prisma.bankCheque.count({ where: { shopId: shop.id } });
   if (existingCheques === 0) {
     await prisma.bankCheque.createMany({
@@ -492,11 +840,11 @@ async function main() {
         {
           type: "RECEIVED",
           partyType: "CUSTOMER",
-          partyName: "আমিনুল ইসলাম (ঠিকাদার)",
-          bankName: "City Bank",
+          partyName: "আমিনুল ইসলাম (হোলসেল ক্রেতা)",
+          bankName: "City Bank Ltd",
           chequeNumber: "CHQ-40192",
           chequeDate: new Date(),
-          amount: 15000,
+          amount: 25000,
           status: "PENDING",
           branchId: mainBranch.id,
           shopId: shop.id,
@@ -504,7 +852,7 @@ async function main() {
         {
           type: "ISSUED",
           partyType: "SUPPLIER",
-          partyName: "Unilever Bangladesh",
+          partyName: "Unilever Bangladesh Ltd",
           bankName: "Dutch-Bangla Bank",
           chequeNumber: "CHQ-88210",
           chequeDate: new Date(),
@@ -517,8 +865,7 @@ async function main() {
     });
   }
 
-  // 7. Seed Loans & Hawlat (Module 6)
-  console.log("Seeding loans & hawlat...");
+  // Loans & Hawlat
   const existingLoans = await prisma.loan.count({ where: { shopId: shop.id } });
   if (existingLoans === 0 && bankAccId && cashAccId) {
     await prisma.loan.createMany({
@@ -528,25 +875,25 @@ async function main() {
           personName: "হাজি আবুল কাসেম (আত্মীয়)",
           phone: "01811223344",
           amount: 50000,
-          totalPaid: 0,
-          remainingAmount: 50000,
-          loanDate: new Date(),
+          totalPaid: 10000,
+          remainingAmount: 40000,
+          loanDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
           status: "ACTIVE",
-          notes: "দোকানের স্টক বৃদ্ধির জন্য হাওলাত গ্রহণ",
+          notes: "দোকানের মালামাল স্টক বৃদ্ধির জন্য ধার গ্রহণ",
           accountId: bankAccId,
           branchId: mainBranch.id,
           shopId: shop.id,
         },
         {
           type: "GIVEN",
-          personName: "রফিকুল ইসলাম (স্টাফ)",
+          personName: "রফিকুল ইসলাম (ক্যাশিয়ার)",
           phone: "01911223344",
-          amount: 10000,
+          amount: 5000,
           totalPaid: 2000,
-          remainingAmount: 8000,
+          remainingAmount: 3000,
           loanDate: new Date(),
           status: "ACTIVE",
-          notes: "জরুরী চিকিৎসার জন্য অগ্রিম ধার প্রদান",
+          notes: "পারিবারিক চিকিৎসার জন্য জরুরি ধার প্রদান",
           accountId: cashAccId,
           branchId: mainBranch.id,
           shopId: shop.id,
@@ -555,65 +902,51 @@ async function main() {
     });
   }
 
-  console.log("✅ Seeded Module 6 financial accounts, cheques & loans successfully!");
- 
-
-    // 9. Seed Expense Categories (Module 8)
-  console.log("Seeding expense categories...");
+  // ==========================================
+  // 9. EXPENSES, INCOMES & ASSETS
+  // ==========================================
+  console.log("📉 Seeding expense categories, expenses & assets...");
   const expenseCatsData = [
     { name: "দোকান ভাড়া (Shop Rent)", code: "EXP-RENT", description: "মাসিক দোকান ও গোডাউন ভাড়া" },
     { name: "বিদ্যুৎ বিল (Electricity Bill)", code: "EXP-ELEC", description: "মাসিক পল্লিবিদ্যুৎ / ডেসকো বিল" },
-    { name: "স্টাফ খাবার ও আপ্যায়ন (Staff Food & Refreshment)", code: "EXP-FOOD", description: "কর্মচারীদের দৈনিক খাবার ও চা-নাস্তা" },
-    { name: "পরিবহন ও যাতায়াত (Transport & Delivery)", code: "EXP-TRANS", description: "পণ্য আনা-নেওয়ার ভ্যান ভাড়া ও যাতায়াত" },
+    { name: "স্টাফ খাবার ও আপ্যায়ন (Staff Food)", code: "EXP-FOOD", description: "কর্মচারীদের খাবার ও চা-নাস্তা" },
+    { name: "পরিবহন ও লেবার (Transport & Labor)", code: "EXP-TRANS", description: "পণ্য আনা-নেওয়ার কুলি ও ভ্যান ভাড়া" },
   ];
 
   const expenseCatMap = new Map();
   for (const ec of expenseCatsData) {
-    let category = await prisma.expenseCategory.findFirst({
-      where: { shopId: shop.id, code: ec.code },
-    });
+    let category = await prisma.expenseCategory.findFirst({ where: { shopId: shop.id, code: ec.code } });
     if (!category) {
       category = await prisma.expenseCategory.create({
-        data: {
-          name: ec.name,
-          code: ec.code,
-          description: ec.description,
-          status: "active",
-          shopId: shop.id,
-        },
+        data: { name: ec.name, code: ec.code, description: ec.description, status: "active", shopId: shop.id },
       });
     }
     expenseCatMap.set(ec.code, category.id);
   }
 
-  // 10. Seed Sample Daily Expenses (Module 8)
-  console.log("Seeding sample daily expenses...");
   const existingExpenses = await prisma.expense.count({ where: { shopId: shop.id } });
-  const elecCatId = expenseCatMap.get("EXP-ELEC");
-  const rentCatId = expenseCatMap.get("EXP-RENT");
-
-  if (existingExpenses === 0 && elecCatId && rentCatId) {
+  if (existingExpenses === 0) {
     await prisma.expense.createMany({
       data: [
         {
-          voucherNo: "EXP-261001",
+          voucherNo: "EXP-26101",
           expenseDate: new Date(),
-          amount: 4500,
+          amount: 650,
           paymentMethod: "cash",
-          reference: "September Electricity Bill",
-          note: "পল্লিবিদ্যুৎ মিটার নং #8921",
-          categoryId: elecCatId,
+          reference: "Evening Staff Snacks & Tea",
+          note: "দোকানের কর্মচারীদের বিকেলের নাস্তা",
+          categoryId: expenseCatMap.get("EXP-FOOD")!,
           branchId: mainBranch.id,
           shopId: shop.id,
         },
         {
-          voucherNo: "EXP-261002",
-          expenseDate: new Date(),
-          amount: 25000,
+          voucherNo: "EXP-26102",
+          expenseDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+          amount: 4500,
           paymentMethod: "bank",
-          reference: "October Store Rent",
-          note: "মালিক হাজী সাহেবকে প্রদত্ত অক্টোবর মাসের ভাড়া",
-          categoryId: rentCatId,
+          reference: "Electricity Bill Oct-2026",
+          note: "ডেসকো প্রিপেইড মিটার রিচার্জ",
+          categoryId: expenseCatMap.get("EXP-ELEC")!,
           branchId: mainBranch.id,
           shopId: shop.id,
         },
@@ -621,51 +954,49 @@ async function main() {
     });
   }
 
-  // 11. Seed Other Incomes (Module 8)
-  console.log("Seeding other incomes...");
+  // Other Income
   const existingIncomes = await prisma.otherIncome.count({ where: { shopId: shop.id } });
   if (existingIncomes === 0) {
     await prisma.otherIncome.create({
       data: {
-        incomeSource: "খালি কার্টুন ও প্লাস্টিক বিক্রি (Scrap Sale)",
-        receiptNo: "INC-9014",
+        incomeSource: "খালি তেলের টিন ও কার্টুন বিক্রি (Scrap Sale)",
+        receiptNo: "INC-8891",
         incomeDate: new Date(),
-        amount: 1800,
+        amount: 2200,
         paymentMethod: "cash",
-        reference: "Old carton boxes sold to recycler",
+        reference: "Sold to Bhangari Trader",
         branchId: mainBranch.id,
         shopId: shop.id,
       },
     });
   }
 
-  // 12. Seed Company Assets (Module 8)
-  console.log("Seeding company assets...");
+  // Assets & Owner Equity
   const existingAssets = await prisma.companyAsset.count({ where: { shopId: shop.id } });
   if (existingAssets === 0) {
     await prisma.companyAsset.createMany({
       data: [
         {
-          name: "কোল্ড ড্রিংকস ডিপ ফ্রিজ ৩০০ লিটার",
-          assetCode: "AST-001",
-          serialNumber: "FRZ-994821",
+          name: "ওয়ালটন বেভারেজ কুলার ফ্রিজ ৪০০ লিটার",
+          assetCode: "AST-FRZ-01",
+          serialNumber: "WLT-99482",
           purchaseDate: new Date("2025-01-15"),
-          purchaseCost: 45000,
-          currentValue: 40000,
+          purchaseCost: 52000,
+          currentValue: 48000,
           condition: "GOOD",
-          notes: "কোম্পানি প্রোভাইডেড বা নিজস্ব ক্রয়কৃত ফ্রিজ",
+          notes: "কোমল পানীয় ঠান্ডা রাখার ডিসপ্লে কুলার",
           branchId: mainBranch.id,
           shopId: shop.id,
         },
         {
-          name: "ডিজিটাল ওজন মাপার স্কেল ৩০ কেজি",
-          assetCode: "AST-002",
-          serialNumber: "SCL-30KG-09",
-          purchaseDate: new Date("2025-06-10"),
-          purchaseCost: 6500,
-          currentValue: 6000,
+          name: "ডিজিটাল ওজন পরিমাপক স্কেল ৪০ কেজি",
+          assetCode: "AST-SCL-01",
+          serialNumber: "SCL-40KG-02",
+          purchaseDate: new Date("2025-03-20"),
+          purchaseCost: 5500,
+          currentValue: 5000,
           condition: "GOOD",
-          notes: "কাউন্টারের জন্য ইলেকট্রনিক স্কেল",
+          notes: "কাউন্টার স্কেল",
           branchId: mainBranch.id,
           shopId: shop.id,
         },
@@ -673,160 +1004,119 @@ async function main() {
     });
   }
 
-  // 13. Seed Owner Equity / Capital & Drawings (Module 8)
-  console.log("Seeding owner equity transactions...");
-  const existingEquity = await prisma.ownerTransaction.count({ where: { shopId: shop.id } });
-  if (existingEquity === 0) {
-    await prisma.ownerTransaction.createMany({
-      data: [
-        {
-          type: "CAPITAL",
-          transactionDate: new Date("2025-01-01"),
-          amount: 300000,
-          paymentMethod: "bank",
-          purpose: "Initial business setup capital",
-          notes: "ব্যবসায় প্রারম্ভিক মূলধন বিনিয়োগ",
-          branchId: mainBranch.id,
-          shopId: shop.id,
-        },
-        {
-          type: "DRAWING",
-          transactionDate: new Date(),
-          amount: 15000,
-          paymentMethod: "cash",
-          purpose: "Personal family expense withdrawal",
-          notes: "ব্যক্তিগত প্রয়োজনে ক্যাশ ড্রয়ার থেকে উত্তোলন",
-          branchId: mainBranch.id,
-          shopId: shop.id,
-        },
-      ],
-    });
-  }
-
-  console.log("✅ Seeded Module 8 expenses, incomes, assets & equity successfully!");
- 
-
-    // ==========================================
-  // 14. SEED MODULE 9: DEPARTMENTS & STAFF
   // ==========================================
-  console.log("Seeding departments & staff profiles...");
+  // 10. STAFF, ADVANCES & PAYROLL
+  // ==========================================
+  console.log("👨‍💼 Seeding staff, advances and payroll...");
   const deptsData = [
-    { name: "বিক্রয় ও ক্যাশ বিভাগ (Sales Counter)", code: "SALES", description: "ক্যাশ কাউন্টার ও কাস্টমার ডিলিং" },
-    { name: "স্টোর ও ওয়্যারহাউস (Warehouse)", code: "WH", description: "পণ্য মজুদ ও ইনভেন্টরি সংরক্ষণ" },
-    { name: "হিসাব বিভাগ (Accounts)", code: "ACC", description: "হিসাব নিকাশ ও মহাজন খাতা" },
+    { name: "বিক্রয় ও ক্যাশ কাউন্টার (Sales)", code: "SALES", description: "সেলস ও কাস্টমার সার্ভিস" },
+    { name: "স্টোর ও গুদাম (Warehouse)", code: "WH", description: "পণ্য খালাস ও স্টক নিয়ন্ত্রণ" },
   ];
 
   const deptMap = new Map();
   for (const d of deptsData) {
-    let dept = await prisma.department.findFirst({
-      where: { shopId: shop.id, code: d.code },
-    });
+    let dept = await prisma.department.findFirst({ where: { shopId: shop.id, code: d.code } });
     if (!dept) {
       dept = await prisma.department.create({
-        data: {
-          name: d.name,
-          code: d.code,
-          description: d.description,
-          status: "active",
-          shopId: shop.id,
-        },
+        data: { name: d.name, code: d.code, description: d.description, status: "active", shopId: shop.id },
       });
     }
     deptMap.set(d.code, dept.id);
   }
 
-  const existingStaff = await prisma.staffProfile.count({ where: { shopId: shop.id } });
-  const salesDeptId = deptMap.get("SALES");
-  const whDeptId = deptMap.get("WH");
+  const existingStaff = await prisma.staffProfile.findFirst({ where: { phone: "01711334455" } });
+  let staffId = existingStaff?.id;
 
-  let seededStaffId = "";
-  if (existingStaff === 0 && salesDeptId && whDeptId) {
-    const staff1 = await prisma.staffProfile.create({
+  if (!existingStaff) {
+    const s1 = await prisma.staffProfile.create({
       data: {
-        name: "মোঃ রফিকুল ইসলাম",
+        name: "মোঃ রফিকুল ইসলাম (Senior Staff)",
         phone: "01711334455",
-        designation: "Senior Cashier",
-        joiningDate: new Date("2024-01-10"),
+        designation: "Head Cashier",
+        joiningDate: new Date("2024-01-01"),
         basicSalary: 18000,
         dailyAllowance: 100,
-        overtimeRate: 50,
+        overtimeRate: 60,
         address: "কাওরান বাজার, ঢাকা",
         status: "ACTIVE",
-        departmentId: salesDeptId,
+        departmentId: deptMap.get("SALES")!,
         branchId: mainBranch.id,
         shopId: shop.id,
       },
     });
-    seededStaffId = staff1.id;
+    staffId = s1.id;
+  }
 
-    await prisma.staffProfile.create({
+  // ==========================================
+  // 11. DAY-END Z-REPORT REGISTERS (CLOSINGS)
+  // ==========================================
+  console.log("🔒 Seeding historical Cash Register Z-Closings for report testing...");
+  const existingClosings = await prisma.cashRegister.count({ where: { shopId: shop.id } });
+  if (existingClosings === 0) {
+    // Closing 1: Yesterday (Exact match)
+    await prisma.cashRegister.create({
       data: {
-        name: "জাকির হোসেন",
-        phone: "01822334466",
-        designation: "Store Keeper",
-        joiningDate: new Date("2024-05-15"),
-        basicSalary: 14000,
-        dailyAllowance: 80,
-        overtimeRate: 40,
-        address: "তেজগাঁও, ঢাকা",
-        status: "ACTIVE",
-        departmentId: whDeptId,
+        closingDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        openingTime: "08:30:00",
+        closingTime: "22:45:00",
+        openingCash: 12000,
+        cashSales: 34500,
+        cashDueCollected: 4500,
+        cashOtherIncome: 1200,
+        cashExpenses: 1800,
+        cashSupplierPaid: 15000,
+        cashRefunds: 0,
+        expectedCash: 35400,
+        countedCash: 35400,
+        difference: 0, // Exact Match
+        totalInvoices: 48,
+        notes: "দিনশেষে সকল হিসাব নিখুঁতভাবে মিলেছে।",
+        status: "closed",
         branchId: mainBranch.id,
+        userId: cashier.id,
+        shopId: shop.id,
+      },
+    });
+
+    // Closing 2: Two days ago (৳50 Shortage)
+    await prisma.cashRegister.create({
+      data: {
+        closingDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        openingTime: "08:30:00",
+        closingTime: "23:00:00",
+        openingCash: 10000,
+        cashSales: 28900,
+        cashDueCollected: 2000,
+        cashOtherIncome: 0,
+        cashExpenses: 2500,
+        cashSupplierPaid: 10000,
+        cashRefunds: 180,
+        expectedCash: 28220,
+        countedCash: 28170,
+        difference: -50, // Shortage test
+        totalInvoices: 36,
+        notes: "ভাংতি টাকার গরমিলের কারণে ৫০ টাকা শর্টেজ হয়েছে।",
+        status: "closed",
+        branchId: mainBranch.id,
+        userId: cashier.id,
         shopId: shop.id,
       },
     });
   }
 
-  // 15. Seed Salary Advances & Payroll
-  const existingAdvances = await prisma.salaryAdvance.count({ where: { shopId: shop.id } });
-  if (existingAdvances === 0 && seededStaffId) {
-    await prisma.salaryAdvance.create({
-      data: {
-        advanceDate: new Date(),
-        amount: 3000,
-        paymentMethod: "cash",
-        purpose: "Family emergency medical expense",
-        isDeducted: false,
-        notes: "আগামী মাসের বেতন থেকে কাটা হবে",
-        staffId: seededStaffId,
-        branchId: mainBranch.id,
-        shopId: shop.id,
-      },
-    });
-  }
-
-  const existingPayrolls = await prisma.payroll.count({ where: { shopId: shop.id } });
-  if (existingPayrolls === 0 && seededStaffId) {
-    await prisma.payroll.create({
-      data: {
-        payslipNo: "PAY-2026-OCT-101",
-        month: "October",
-        year: 2026,
-        salaryDate: new Date(),
-        basicSalary: 18000,
-        allowance: 3000,
-        overtimeAmount: 500,
-        advanceDeduction: 0,
-        penaltyDeduction: 0,
-        netSalary: 21500,
-        paymentMethod: "cash",
-        paymentStatus: "paid",
-        notes: "অক্টোবর মাসের নিয়মিত বেতন প্রদান",
-        branchId: mainBranch.id,
-        staffId: seededStaffId,
-        shopId: shop.id,
-      },
-    });
-  }
-
-  console.log("✅ Seeded Module 9 staff, departments, advances & payroll successfully!");
-  console.log("🎉 Complete master seed finished successfully!");
-  
+  console.log("------------------------------------------------");
+  console.log("🎉 MASTER SEED COMPLETED SUCCESSFULLY!");
+  console.log("------------------------------------------------");
+  console.log("🔑 Demo Login Credentials (All passwords: 123456):");
+  console.log("  👑 OWNER:   owner@grocery.com");
+  console.log("  👔 MANAGER: manager@grocery.com");
+  console.log("  🧑‍💻 CASHIER: cashier@grocery.com");
+  console.log("------------------------------------------------");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Seed failed:", e);
+    console.error("❌ Seed execution failed:", e);
     process.exit(1);
   })
   .finally(async () => {

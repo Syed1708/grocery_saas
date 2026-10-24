@@ -26,7 +26,6 @@ export default async function ReturnsPage() {
     <div className="max-w-7xl mx-auto">
       <ReturnsClient
         data={returns}
-        shopId={shopId}
         currencySymbol={shop?.currencySymbol || "৳"}
       />
     </div>

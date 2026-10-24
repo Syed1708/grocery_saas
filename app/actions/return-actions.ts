@@ -5,29 +5,16 @@ import { authOptions } from "@/services/authOptions";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-async function getAuthenticatedUser() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.shopId) throw new Error("Unauthorized");
 
-  let activeBranchId = session.user.branchId;
-  if (!activeBranchId) {
-    const mainBranch = await prisma.branch.findFirst({
-      where: { shopId: session.user.shopId, isMain: true },
-      select: { id: true },
-    });
-    activeBranchId = mainBranch?.id || null;
-  }
-
-  return {
-    userId: session.user.id,
-    shopId: session.user.shopId,
-    activeBranchId: activeBranchId || "",
-  };
-}
 
 export async function createSaleReturnAction(formData: FormData) {
   try {
-    const user = await getAuthenticatedUser();
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.shopId || !session?.user?.branchId) {
+      return { success: false, error: "Unauthorized access: Active branch session required." };
+    }
+
+    const { shopId, branchId, id: userId } = session.user;
 
     const saleId = formData.get("saleId")?.toString();
     const refundMethod = formData.get("refundMethod")?.toString() || "cash";
@@ -35,12 +22,28 @@ export async function createSaleReturnAction(formData: FormData) {
 
     if (!saleId) return { success: false, error: "Sale invoice ID is required." };
 
+    // 1. Fetch Sale with prior returns to prevent double-returns
     const sale = await prisma.sale.findFirst({
-      where: { id: saleId, shopId: user.shopId },
-      include: { items: true, customer: true },
+      where: { id: saleId, shopId, branchId },
+      include: {
+        items: true,
+        customer: true,
+        returns: {
+          include: { items: true },
+        },
+      },
     });
 
-    if (!sale) return { success: false, error: "Sale invoice not found." };
+    if (!sale) return { success: false, error: "Sale invoice not found in this branch." };
+
+    // Map already returned quantities per sale item
+    const alreadyReturnedMap = new Map<string, number>();
+    for (const priorReturn of sale.returns) {
+      for (const rItem of priorReturn.items) {
+        const cur = alreadyReturnedMap.get(rItem.productId) || 0;
+        alreadyReturnedMap.set(rItem.productId, cur + Number(rItem.quantity));
+      }
+    }
 
     const returnItemsData: {
       productId: string;
@@ -58,46 +61,64 @@ export async function createSaleReturnAction(formData: FormData) {
       const qty = parseFloat(qtyStr || "0");
 
       if (qty > 0) {
-        if (qty > Number(item.quantity)) {
-          return { success: false, error: "Return quantity cannot exceed sold quantity." };
+        const alreadyReturned = alreadyReturnedMap.get(item.productId) || 0;
+        const availableQtyToReturn = Number(item.quantity) - alreadyReturned;
+
+        if (qty > availableQtyToReturn) {
+          return {
+            success: false,
+            error: `Cannot return ${qty} units. Only ${availableQtyToReturn} units remain eligible for return.`,
+          };
         }
-        const lineRefund = qty * Number(item.unitPrice);
+
+        // Use actual selling price per item
+        const unitPrice = Number(item.unitPrice);
+        const lineRefund = qty * unitPrice;
         totalRefund += lineRefund;
 
         returnItemsData.push({
           productId: item.productId,
           unitId: item.unitId,
           quantity: qty,
-          refundPrice: Number(item.unitPrice),
+          refundPrice: unitPrice,
           condition: conditionStr,
         });
       }
     }
 
     if (returnItemsData.length === 0 || totalRefund <= 0) {
-      return { success: false, error: "Please specify quantities to return for at least one item." };
+      return { success: false, error: "Please specify valid return quantities." };
+    }
+
+    // 2. CRITICAL BUSINESS GUARD: Prevent Cash Leakage on Unpaid Sales
+    const salePaid = Number(sale.paidAmount);
+    if (refundMethod === "cash" && salePaid < totalRefund) {
+      return {
+        success: false,
+        error: `Cannot refund ৳${totalRefund.toFixed(2)} in cash. Customer only paid ৳${salePaid.toFixed(2)} on this invoice. Use 'balance' (Adjust from Khata) instead.`,
+      };
     }
 
     const returnNo = `RET-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
 
-    // 👈 ATOMIC DATABASE TRANSACTION
+    // 3. ATOMIC TRANSACTION
     await prisma.$transaction(async (tx) => {
-      // 1. Create Sale Return Header
+      // A. Create the Sale Return Record
       const saleReturn = await tx.saleReturn.create({
         data: {
           returnNo,
           totalRefund,
           refundMethod,
           notes,
-          branchId: user.activeBranchId,
+          branchId,
           saleId: sale.id,
           customerId: sale.customerId,
-          userId: user.userId,
-          shopId: user.shopId,
+          userId: userId ?? null,
+          shopId,
         },
       });
 
-      // 2. Process Return Items & Restock if condition is RESTOCK
+      // B. Process Items & Restock inventory
       for (const rItem of returnItemsData) {
         await tx.saleReturnItem.create({
           data: {
@@ -110,36 +131,63 @@ export async function createSaleReturnAction(formData: FormData) {
           },
         });
 
-        if (rItem.condition === "RESTOCK" && user.activeBranchId) {
+        if (rItem.condition === "RESTOCK") {
           await tx.productStock.upsert({
             where: {
               productId_branchId: {
                 productId: rItem.productId,
-                branchId: user.activeBranchId,
+                branchId,
               },
             },
             update: { quantity: { increment: rItem.quantity } },
-            create: { productId: rItem.productId, branchId: user.activeBranchId, quantity: rItem.quantity },
+            create: { productId: rItem.productId, branchId, quantity: rItem.quantity },
           });
         }
       }
 
-      // 3. If refundMethod is balance, deduct from customer currentDue
-      if (sale.customerId && refundMethod === "balance") {
-        await tx.customer.update({
-          where: { id: sale.customerId },
-          data: { currentDue: { decrement: Math.min(Number(sale.customer?.currentDue || 0), totalRefund) } },
+      // C. Update the Original Sale Invoice Values
+      if (refundMethod === "balance") {
+        // Reduce the due amount on this specific invoice
+        const currentSaleDue = Number(sale.dueAmount);
+        const dueDeduction = Math.min(currentSaleDue, totalRefund);
+
+        await tx.sale.update({
+          where: { id: sale.id },
+          data: {
+            dueAmount: { decrement: dueDeduction },
+            grandTotal: { decrement: totalRefund },
+            paymentStatus: currentSaleDue - dueDeduction <= 0 ? "paid" : "partial",
+          },
+        });
+
+        // D. Deduct from Customer's overall Bakir Khata
+        if (sale.customerId) {
+          await tx.customer.update({
+            where: { id: sale.customerId },
+            data: {
+              currentDue: { decrement: dueDeduction },
+            },
+          });
+        }
+      } else {
+        // Cash Refund: Invoice grand total reflects return, paid amount drops by cash returned
+        await tx.sale.update({
+          where: { id: sale.id },
+          data: {
+            grandTotal: { decrement: totalRefund },
+            paidAmount: { decrement: totalRefund },
+          },
         });
       }
     });
 
+    revalidatePath("/reports/sales");
+    revalidatePath("/reports/customers-due");
     revalidatePath("/dashboard/admin/returns");
-    revalidatePath("/dashboard/admin/sales");
-    revalidatePath("/dashboard/admin/products");
     return { success: true };
   } catch (error: any) {
     console.error("Sale return error:", error);
-    return { success: false, error: error.message || "Failed to process return." };
+    return { success: false, error: error.message || "Failed to process sale return." };
   }
 }
 
@@ -147,45 +195,92 @@ export async function createSaleReturnAction(formData: FormData) {
 export async function searchSaleForReturnAction(invoiceNo: string) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.shopId) throw new Error("Unauthorized");
+    if (!session?.user?.shopId) {
+      return { success: false, error: "Unauthorized access." };
+    }
 
-    const cleanNo = invoiceNo.replace("#", "").trim();
+    const { shopId, branchId } = session.user;
+
     const sale = await prisma.sale.findFirst({
-      where: { shopId: session.user.shopId, invoiceNo: cleanNo },
+      where: {
+        invoiceNo: invoiceNo.trim(),
+        shopId,
+        branchId,
+      },
       include: {
-        customer: { select: { id: true, name: true, phone: true, currentDue: true } },
+        customer: { select: { name: true, phone: true } },
         items: {
           include: {
-            product: { select: { name: true } },
+            product: { select: { name: true, barcode: true } },
             unit: { select: { shortCode: true } },
+          },
+        },
+        returns: {
+          include: {
+            items: true,
           },
         },
       },
     });
 
-    if (!sale) return { success: false, error: "Invoice not found." };
+    if (!sale) {
+      return { success: false, error: `Invoice #${invoiceNo} not found in this branch.` };
+    }
+
+    // 1. Calculate cumulative returned quantity per product on this invoice
+    const returnedQtyMap = new Map<string, number>();
+    for (const ret of sale.returns) {
+      for (const rItem of ret.items) {
+        const cur = returnedQtyMap.get(rItem.productId) || 0;
+        returnedQtyMap.set(rItem.productId, cur + Number(rItem.quantity));
+      }
+    }
+
+    // 2. Compute remaining returnable quantity for each item
+    const eligibleItems = [];
+    for (const item of sale.items) {
+      const totalSold = Number(item.quantity);
+      const alreadyReturned = returnedQtyMap.get(item.productId) || 0;
+      const remainingQty = Math.max(0, totalSold - alreadyReturned);
+
+      // Only include items that have remaining returnable stock!
+      if (remainingQty > 0) {
+        eligibleItems.push({
+          id: item.id,
+          productId: item.productId,
+          productName: item.product.name,
+          barcode: item.product.barcode,
+          unitCode: item.unit?.shortCode || "pcs",
+          unitPrice: Number(item.unitPrice),
+          totalSoldQty: totalSold,
+          alreadyReturnedQty: alreadyReturned,
+          remainingQty: remainingQty,
+        });
+      }
+    }
+
+    // 3. If every single item has already been returned
+    if (eligibleItems.length === 0) {
+      return {
+        success: false,
+        error: `এই ইনভয়েসের (${sale.invoiceNo}) সকল পণ্য ইতোমধ্যে ফেরত নেওয়া হয়েছে। (All items already returned).`,
+      };
+    }
 
     return {
       success: true,
       sale: {
         id: sale.id,
         invoiceNo: sale.invoiceNo,
-        saleDate: sale.saleDate,
-        grandTotal: Number(sale.grandTotal),
         customerName: sale.customer?.name || "Walk-in Customer",
-        customerDue: Number(sale.customer?.currentDue || 0),
-        items: sale.items.map((it) => ({
-          id: it.id,
-          productId: it.productId,
-          productName: it.product.name,
-          unitCode: it.unit?.shortCode || "pcs",
-          quantity: Number(it.quantity),
-          unitPrice: Number(it.unitPrice),
-          lineTotal: Number(it.lineTotal),
-        })),
+        grandTotal: Number(sale.grandTotal),
+        paidAmount: Number(sale.paidAmount),
+        dueAmount: Number(sale.dueAmount),
+        items: eligibleItems, // Only returnable items sent to the modal!
       },
     };
   } catch (error: any) {
-    return { success: false, error: error.message || "Search failed." };
+    console.error("searchSaleForReturnAction error:", error);
+    return { success: false, error: "Failed to search invoice for return." };
   }
 }
