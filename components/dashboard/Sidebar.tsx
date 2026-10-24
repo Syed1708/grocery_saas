@@ -39,12 +39,13 @@ export default function Sidebar({
     { label: "Categories", href: "/dashboard/admin/categories", icon: Tags, roles: ["OWNER", "MANAGER"] },
     { label: "Products", href: "/dashboard/admin/products", icon: Package, roles: ["OWNER", "MANAGER"] },
     { label: "Sales & Invoices", href: "/dashboard/admin/sales", icon: Receipt, roles: ["OWNER", "MANAGER", "CASHIER"] },
+    { label: "Sales Returns", href: "/dashboard/admin/returns", icon: RotateCcw, roles: ["OWNER", "MANAGER"] },
     { label: "Branches & Outlets", href: "/dashboard/admin/branches", icon: GitBranch, roles: ["OWNER"] },
     { label: "Customers", href: "/dashboard/admin/customers", icon: Users, roles: ["OWNER", "MANAGER", "CASHIER"] },
     { label: "Suppliers", href: "/dashboard/admin/suppliers", icon: Truck, roles: ["OWNER", "MANAGER"] },
     { label: "Purchases", href: "/dashboard/admin/purchases", icon: TrendingDown, roles: ["OWNER", "MANAGER"] },
-    
-    { label: "Returns", href: "/dashboard/admin/returns", icon: RotateCcw, roles: ["OWNER", "MANAGER"] },
+    { label: "Accounts", href: "/dashboard/admin/accounts", icon: TrendingDown, roles: ["OWNER", "MANAGER"] },
+
     { label: "Expenses", href: "/dashboard/admin/expenses", icon: TrendingDown, roles: ["OWNER", "MANAGER"] },
     { label: "Store Settings", href: "/dashboard/settings", icon: Settings, roles: ["OWNER"] },
   ];
@@ -102,8 +103,8 @@ export default function Sidebar({
                 href={item.href}
                 onClick={onCloseMobile}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition whitespace-nowrap ${isActive
-                    ? "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 font-semibold shadow-xs"
-                    : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800/60 dark:hover:text-neutral-200"
+                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 font-semibold shadow-xs"
+                  : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800/60 dark:hover:text-neutral-200"
                   }`}
               >
                 <Icon size={18} className={isActive ? "text-blue-600 dark:text-blue-400" : "text-neutral-400"} />

@@ -167,6 +167,71 @@ export const loanSchema = z.object({
   notes: z.string().max(255).optional().nullable(),
 });
 
+
+// 12. Expense Category Schema
+export const expenseCategorySchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "Category name is required").max(100),
+  code: z.string().min(1, "Code is required").max(30),
+  description: z.string().max(255).optional().nullable(),
+  status: z.enum(["active", "inactive"]).default("active"),
+});
+
+// 13. Expense Schema
+export const expenseSchema = z.object({
+  id: z.string().optional(),
+  categoryId: z.string().min(1, "Expense category is required"),
+  voucherNo: z.string().min(2, "Voucher number is required").max(50),
+  expenseDate: z.string().min(1, "Date is required"),
+  amount: z.coerce.number().gt(0, "Amount must be greater than 0"),
+  paymentMethod: z.string().default("cash"),
+  reference: z.string().max(100).optional().nullable(),
+  note: z.string().max(255).optional().nullable(),
+});
+
+// 14. Other Income Schema
+export const otherIncomeSchema = z.object({
+  id: z.string().optional(),
+  incomeSource: z.string().min(2, "Income source is required").max(100),
+  receiptNo: z.string().min(2, "Receipt number is required").max(50),
+  incomeDate: z.string().min(1, "Date is required"),
+  amount: z.coerce.number().gt(0, "Amount must be greater than 0"),
+  paymentMethod: z.string().default("cash"),
+  reference: z.string().max(100).optional().nullable(),
+  note: z.string().max(255).optional().nullable(),
+});
+
+// 15. Company Asset Schema
+export const companyAssetSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "Asset name is required").max(100),
+  assetCode: z.string().min(2, "Asset code is required").max(50),
+  serialNumber: z.string().max(100).optional().nullable(),
+  purchaseDate: z.string().min(1, "Purchase date is required"),
+  purchaseCost: z.coerce.number().min(0).default(0),
+  currentValue: z.coerce.number().min(0).default(0),
+  condition: z.enum(["GOOD", "MAINTENANCE", "DAMAGED", "DISPOSED"]).default("GOOD"),
+  notes: z.string().max(255).optional().nullable(),
+});
+
+// 16. Owner Equity Schema (Capital vs Drawing)
+export const ownerTransactionSchema = z.object({
+  id: z.string().optional(),
+  type: z.enum(["CAPITAL", "DRAWING"]).default("CAPITAL"),
+  transactionDate: z.string().min(1, "Date is required"),
+  amount: z.coerce.number().gt(0, "Amount must be greater than 0"),
+  paymentMethod: z.string().default("cash"),
+  reference: z.string().max(100).optional().nullable(),
+  purpose: z.string().max(150).optional().nullable(),
+  notes: z.string().max(255).optional().nullable(),
+});
+
+export type ExpenseCategoryInput = z.infer<typeof expenseCategorySchema>;
+export type ExpenseInput = z.infer<typeof expenseSchema>;
+export type OtherIncomeInput = z.infer<typeof otherIncomeSchema>;
+export type CompanyAssetInput = z.infer<typeof companyAssetSchema>;
+export type OwnerTransactionInput = z.infer<typeof ownerTransactionSchema>;
+
 export type AccountInput = z.infer<typeof accountSchema>;
 export type TransferInput = z.infer<typeof transferSchema>;
 export type ChequeInput = z.infer<typeof chequeSchema>;

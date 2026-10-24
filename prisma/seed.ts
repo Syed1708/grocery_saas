@@ -556,7 +556,155 @@ async function main() {
   }
 
   console.log("✅ Seeded Module 6 financial accounts, cheques & loans successfully!");
-  console.log("🎉 Complete seed finished successfully!");
+ 
+
+    // 9. Seed Expense Categories (Module 8)
+  console.log("Seeding expense categories...");
+  const expenseCatsData = [
+    { name: "দোকান ভাড়া (Shop Rent)", code: "EXP-RENT", description: "মাসিক দোকান ও গোডাউন ভাড়া" },
+    { name: "বিদ্যুৎ বিল (Electricity Bill)", code: "EXP-ELEC", description: "মাসিক পল্লিবিদ্যুৎ / ডেসকো বিল" },
+    { name: "স্টাফ খাবার ও আপ্যায়ন (Staff Food & Refreshment)", code: "EXP-FOOD", description: "কর্মচারীদের দৈনিক খাবার ও চা-নাস্তা" },
+    { name: "পরিবহন ও যাতায়াত (Transport & Delivery)", code: "EXP-TRANS", description: "পণ্য আনা-নেওয়ার ভ্যান ভাড়া ও যাতায়াত" },
+  ];
+
+  const expenseCatMap = new Map();
+  for (const ec of expenseCatsData) {
+    let category = await prisma.expenseCategory.findFirst({
+      where: { shopId: shop.id, code: ec.code },
+    });
+    if (!category) {
+      category = await prisma.expenseCategory.create({
+        data: {
+          name: ec.name,
+          code: ec.code,
+          description: ec.description,
+          status: "active",
+          shopId: shop.id,
+        },
+      });
+    }
+    expenseCatMap.set(ec.code, category.id);
+  }
+
+  // 10. Seed Sample Daily Expenses (Module 8)
+  console.log("Seeding sample daily expenses...");
+  const existingExpenses = await prisma.expense.count({ where: { shopId: shop.id } });
+  const elecCatId = expenseCatMap.get("EXP-ELEC");
+  const rentCatId = expenseCatMap.get("EXP-RENT");
+
+  if (existingExpenses === 0 && elecCatId && rentCatId) {
+    await prisma.expense.createMany({
+      data: [
+        {
+          voucherNo: "EXP-261001",
+          expenseDate: new Date(),
+          amount: 4500,
+          paymentMethod: "cash",
+          reference: "September Electricity Bill",
+          note: "পল্লিবিদ্যুৎ মিটার নং #8921",
+          categoryId: elecCatId,
+          branchId: mainBranch.id,
+          shopId: shop.id,
+        },
+        {
+          voucherNo: "EXP-261002",
+          expenseDate: new Date(),
+          amount: 25000,
+          paymentMethod: "bank",
+          reference: "October Store Rent",
+          note: "মালিক হাজী সাহেবকে প্রদত্ত অক্টোবর মাসের ভাড়া",
+          categoryId: rentCatId,
+          branchId: mainBranch.id,
+          shopId: shop.id,
+        },
+      ],
+    });
+  }
+
+  // 11. Seed Other Incomes (Module 8)
+  console.log("Seeding other incomes...");
+  const existingIncomes = await prisma.otherIncome.count({ where: { shopId: shop.id } });
+  if (existingIncomes === 0) {
+    await prisma.otherIncome.create({
+      data: {
+        incomeSource: "খালি কার্টুন ও প্লাস্টিক বিক্রি (Scrap Sale)",
+        receiptNo: "INC-9014",
+        incomeDate: new Date(),
+        amount: 1800,
+        paymentMethod: "cash",
+        reference: "Old carton boxes sold to recycler",
+        branchId: mainBranch.id,
+        shopId: shop.id,
+      },
+    });
+  }
+
+  // 12. Seed Company Assets (Module 8)
+  console.log("Seeding company assets...");
+  const existingAssets = await prisma.companyAsset.count({ where: { shopId: shop.id } });
+  if (existingAssets === 0) {
+    await prisma.companyAsset.createMany({
+      data: [
+        {
+          name: "কোল্ড ড্রিংকস ডিপ ফ্রিজ ৩০০ লিটার",
+          assetCode: "AST-001",
+          serialNumber: "FRZ-994821",
+          purchaseDate: new Date("2025-01-15"),
+          purchaseCost: 45000,
+          currentValue: 40000,
+          condition: "GOOD",
+          notes: "কোম্পানি প্রোভাইডেড বা নিজস্ব ক্রয়কৃত ফ্রিজ",
+          branchId: mainBranch.id,
+          shopId: shop.id,
+        },
+        {
+          name: "ডিজিটাল ওজন মাপার স্কেল ৩০ কেজি",
+          assetCode: "AST-002",
+          serialNumber: "SCL-30KG-09",
+          purchaseDate: new Date("2025-06-10"),
+          purchaseCost: 6500,
+          currentValue: 6000,
+          condition: "GOOD",
+          notes: "কাউন্টারের জন্য ইলেকট্রনিক স্কেল",
+          branchId: mainBranch.id,
+          shopId: shop.id,
+        },
+      ],
+    });
+  }
+
+  // 13. Seed Owner Equity / Capital & Drawings (Module 8)
+  console.log("Seeding owner equity transactions...");
+  const existingEquity = await prisma.ownerTransaction.count({ where: { shopId: shop.id } });
+  if (existingEquity === 0) {
+    await prisma.ownerTransaction.createMany({
+      data: [
+        {
+          type: "CAPITAL",
+          transactionDate: new Date("2025-01-01"),
+          amount: 300000,
+          paymentMethod: "bank",
+          purpose: "Initial business setup capital",
+          notes: "ব্যবসায় প্রারম্ভিক মূলধন বিনিয়োগ",
+          branchId: mainBranch.id,
+          shopId: shop.id,
+        },
+        {
+          type: "DRAWING",
+          transactionDate: new Date(),
+          amount: 15000,
+          paymentMethod: "cash",
+          purpose: "Personal family expense withdrawal",
+          notes: "ব্যক্তিগত প্রয়োজনে ক্যাশ ড্রয়ার থেকে উত্তোলন",
+          branchId: mainBranch.id,
+          shopId: shop.id,
+        },
+      ],
+    });
+  }
+
+  console.log("✅ Seeded Module 8 expenses, incomes, assets & equity successfully!");
+  console.log("🎉 Complete master seed finished successfully!");
   
 }
 
