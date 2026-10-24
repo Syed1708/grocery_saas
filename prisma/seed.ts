@@ -704,6 +704,122 @@ async function main() {
   }
 
   console.log("✅ Seeded Module 8 expenses, incomes, assets & equity successfully!");
+ 
+
+    // ==========================================
+  // 14. SEED MODULE 9: DEPARTMENTS & STAFF
+  // ==========================================
+  console.log("Seeding departments & staff profiles...");
+  const deptsData = [
+    { name: "বিক্রয় ও ক্যাশ বিভাগ (Sales Counter)", code: "SALES", description: "ক্যাশ কাউন্টার ও কাস্টমার ডিলিং" },
+    { name: "স্টোর ও ওয়্যারহাউস (Warehouse)", code: "WH", description: "পণ্য মজুদ ও ইনভেন্টরি সংরক্ষণ" },
+    { name: "হিসাব বিভাগ (Accounts)", code: "ACC", description: "হিসাব নিকাশ ও মহাজন খাতা" },
+  ];
+
+  const deptMap = new Map();
+  for (const d of deptsData) {
+    let dept = await prisma.department.findFirst({
+      where: { shopId: shop.id, code: d.code },
+    });
+    if (!dept) {
+      dept = await prisma.department.create({
+        data: {
+          name: d.name,
+          code: d.code,
+          description: d.description,
+          status: "active",
+          shopId: shop.id,
+        },
+      });
+    }
+    deptMap.set(d.code, dept.id);
+  }
+
+  const existingStaff = await prisma.staffProfile.count({ where: { shopId: shop.id } });
+  const salesDeptId = deptMap.get("SALES");
+  const whDeptId = deptMap.get("WH");
+
+  let seededStaffId = "";
+  if (existingStaff === 0 && salesDeptId && whDeptId) {
+    const staff1 = await prisma.staffProfile.create({
+      data: {
+        name: "মোঃ রফিকুল ইসলাম",
+        phone: "01711334455",
+        designation: "Senior Cashier",
+        joiningDate: new Date("2024-01-10"),
+        basicSalary: 18000,
+        dailyAllowance: 100,
+        overtimeRate: 50,
+        address: "কাওরান বাজার, ঢাকা",
+        status: "ACTIVE",
+        departmentId: salesDeptId,
+        branchId: mainBranch.id,
+        shopId: shop.id,
+      },
+    });
+    seededStaffId = staff1.id;
+
+    await prisma.staffProfile.create({
+      data: {
+        name: "জাকির হোসেন",
+        phone: "01822334466",
+        designation: "Store Keeper",
+        joiningDate: new Date("2024-05-15"),
+        basicSalary: 14000,
+        dailyAllowance: 80,
+        overtimeRate: 40,
+        address: "তেজগাঁও, ঢাকা",
+        status: "ACTIVE",
+        departmentId: whDeptId,
+        branchId: mainBranch.id,
+        shopId: shop.id,
+      },
+    });
+  }
+
+  // 15. Seed Salary Advances & Payroll
+  const existingAdvances = await prisma.salaryAdvance.count({ where: { shopId: shop.id } });
+  if (existingAdvances === 0 && seededStaffId) {
+    await prisma.salaryAdvance.create({
+      data: {
+        advanceDate: new Date(),
+        amount: 3000,
+        paymentMethod: "cash",
+        purpose: "Family emergency medical expense",
+        isDeducted: false,
+        notes: "আগামী মাসের বেতন থেকে কাটা হবে",
+        staffId: seededStaffId,
+        branchId: mainBranch.id,
+        shopId: shop.id,
+      },
+    });
+  }
+
+  const existingPayrolls = await prisma.payroll.count({ where: { shopId: shop.id } });
+  if (existingPayrolls === 0 && seededStaffId) {
+    await prisma.payroll.create({
+      data: {
+        payslipNo: "PAY-2026-OCT-101",
+        month: "October",
+        year: 2026,
+        salaryDate: new Date(),
+        basicSalary: 18000,
+        allowance: 3000,
+        overtimeAmount: 500,
+        advanceDeduction: 0,
+        penaltyDeduction: 0,
+        netSalary: 21500,
+        paymentMethod: "cash",
+        paymentStatus: "paid",
+        notes: "অক্টোবর মাসের নিয়মিত বেতন প্রদান",
+        branchId: mainBranch.id,
+        staffId: seededStaffId,
+        shopId: shop.id,
+      },
+    });
+  }
+
+  console.log("✅ Seeded Module 9 staff, departments, advances & payroll successfully!");
   console.log("🎉 Complete master seed finished successfully!");
   
 }

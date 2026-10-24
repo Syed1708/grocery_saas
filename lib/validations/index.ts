@@ -226,6 +226,63 @@ export const ownerTransactionSchema = z.object({
   notes: z.string().max(255).optional().nullable(),
 });
 
+
+// 17. Department Schema
+export const departmentSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "Department name is required").max(100),
+  code: z.string().min(1, "Code is required").max(30),
+  description: z.string().max(255).optional().nullable(),
+  status: z.enum(["active", "inactive"]).default("active"),
+});
+
+// 18. Staff Profile Schema
+export const staffSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "Staff name is required").max(100),
+  phone: z.string().min(5, "Phone number is required").max(20),
+  emergencyPhone: z.string().max(20).optional().nullable(),
+  nidNumber: z.string().max(50).optional().nullable(),
+  departmentId: z.string().min(1, "Department is required"),
+  designation: z.string().min(2, "Designation is required").max(100),
+  joiningDate: z.string().min(1, "Joining date is required"),
+  basicSalary: z.coerce.number().min(0, "Salary cannot be negative"),
+  dailyAllowance: z.coerce.number().min(0).default(0),
+  overtimeRate: z.coerce.number().min(0).default(0),
+  address: z.string().max(255).optional().nullable(),
+  status: z.enum(["ACTIVE", "INACTIVE", "TERMINATED"]).default("ACTIVE"),
+});
+
+// 19. Salary Advance Schema
+export const advanceSchema = z.object({
+  staffId: z.string().min(1, "Staff member is required"),
+  advanceDate: z.string().min(1, "Date is required"),
+  amount: z.coerce.number().gt(0, "Amount must be greater than 0"),
+  paymentMethod: z.string().default("cash"),
+  purpose: z.string().max(150).optional().nullable(),
+  notes: z.string().max(255).optional().nullable(),
+});
+
+// 20. Payroll Schema
+export const payrollSchema = z.object({
+  staffId: z.string().min(1, "Staff member is required"),
+  month: z.string().min(1, "Month is required"),
+  year: z.coerce.number().int(),
+  salaryDate: z.string().min(1, "Date is required"),
+  basicSalary: z.coerce.number().min(0),
+  allowance: z.coerce.number().min(0).default(0),
+  overtimeAmount: z.coerce.number().min(0).default(0),
+  advanceDeduction: z.coerce.number().min(0).default(0),
+  penaltyDeduction: z.coerce.number().min(0).default(0),
+  paymentMethod: z.string().default("cash"),
+  notes: z.string().max(255).optional().nullable(),
+});
+
+export type DepartmentInput = z.infer<typeof departmentSchema>;
+export type StaffInput = z.infer<typeof staffSchema>;
+export type AdvanceInput = z.infer<typeof advanceSchema>;
+export type PayrollInput = z.infer<typeof payrollSchema>;
+
 export type ExpenseCategoryInput = z.infer<typeof expenseCategorySchema>;
 export type ExpenseInput = z.infer<typeof expenseSchema>;
 export type OtherIncomeInput = z.infer<typeof otherIncomeSchema>;

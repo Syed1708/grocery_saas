@@ -10,3 +10,4 @@ export * from "./purchase";
 export * from "./sale";
 export * from "./account"; // 👈 Add export
 export * from "./finance"; // 👈 Add export
+export * from "./staff"; // 👈 Add export
