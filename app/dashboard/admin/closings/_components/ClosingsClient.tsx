@@ -46,7 +46,7 @@ export default function ClosingsClient({
   return (
     <div className="space-y-4">
       <div className="space-y-4 print:hidden">
-        <Breadcrumbs items={[{ label: "Reports" }, { label: "Day-End Z-Report" }]} />
+        <Breadcrumbs items={[{ label: "Reports" }, { label: "Day-End Closings" }]} />
 
         <div className="flex justify-between items-center">
           <div>

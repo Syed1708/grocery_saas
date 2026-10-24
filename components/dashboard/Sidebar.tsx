@@ -44,9 +44,11 @@ export default function Sidebar({
     { label: "Customers", href: "/dashboard/admin/customers", icon: Users, roles: ["OWNER", "MANAGER", "CASHIER"] },
     { label: "Suppliers", href: "/dashboard/admin/suppliers", icon: Truck, roles: ["OWNER", "MANAGER"] },
     { label: "Purchases", href: "/dashboard/admin/purchases", icon: TrendingDown, roles: ["OWNER", "MANAGER"] },
-    { label: "Accounts", href: "/dashboard/admin/accounts", icon: TrendingDown, roles: ["OWNER", "MANAGER"] },
+    { label: "Accounts", href: "/dashboard/admin/accounts", icon: Settings, roles: ["OWNER", "MANAGER"] },
 
     { label: "Expenses", href: "/dashboard/admin/expenses", icon: TrendingDown, roles: ["OWNER", "MANAGER"] },
+    { label: "Day-End Closings", href: "/dashboard/admin/closings", icon: Receipt, roles: ["OWNER", "MANAGER"] },
+    { label: "Reports", href: "/dashboard/admin/reports", icon: Receipt, roles: ["OWNER", "MANAGER"] },
     { label: "Store Settings", href: "/dashboard/settings", icon: Settings, roles: ["OWNER"] },
   ];
 

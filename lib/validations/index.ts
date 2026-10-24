@@ -295,6 +295,17 @@ export const closingSchema = z.object({
   notes: z.string().max(500).optional(),
 });
 
+
+export const salesReportFilterSchema = z.object({
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  paymentMethod: z.string().optional(),
+  paymentStatus: z.string().optional(),
+  search: z.string().optional(),
+});
+
+export type SalesReportFilterInput = z.infer<typeof salesReportFilterSchema>;
+
 export type ClosingInput = z.infer<typeof closingSchema>;
 
 export type DepartmentInput = z.infer<typeof departmentSchema>;
