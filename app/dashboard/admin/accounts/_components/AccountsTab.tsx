@@ -2,15 +2,20 @@
 "use no memo";
 
 import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { Edit2, Trash2 } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { IAccount } from "@/types";
 
 export default function AccountsTab({
   accounts,
   currencySymbol,
+  onEdit,
+  onDelete,
 }: {
   accounts: IAccount[];
   currencySymbol: string;
+  onEdit: (a: IAccount) => void;
+  onDelete: (a: IAccount) => void;
 }) {
   const columns: ColumnDef<IAccount>[] = [
     {
@@ -49,6 +54,31 @@ export default function AccountsTab({
           {row.getValue("status")}
         </span>
       ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const acc = row.original;
+        return (
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => onEdit(acc)}
+              className="p-1.5 rounded-lg text-neutral-500 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
+              title="Edit Account"
+            >
+              <Edit2 size={15} />
+            </button>
+            <button
+              onClick={() => onDelete(acc)}
+              className="p-1.5 rounded-lg text-neutral-500 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
+              title="Delete Account"
+            >
+              <Trash2 size={15} />
+            </button>
+          </div>
+        );
+      },
     },
   ];
 

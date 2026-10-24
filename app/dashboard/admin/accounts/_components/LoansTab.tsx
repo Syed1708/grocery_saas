@@ -2,6 +2,7 @@
 "use no memo";
 
 import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { Edit2, Trash2 } from "lucide-react"; // 👈 Make sure Edit2 is imported
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { ILoan } from "@/types";
 
@@ -9,10 +10,14 @@ export default function LoansTab({
   loans,
   currencySymbol,
   onPayInstallment,
+  onEditLoan,   // 👈 Destructured prop
+  onDeleteLoan,
 }: {
   loans: ILoan[];
   currencySymbol: string;
   onPayInstallment: (l: ILoan) => void;
+  onEditLoan: (l: ILoan) => void; // 👈 Added to type
+  onDeleteLoan: (l: ILoan) => void;
 }) {
   const columns: ColumnDef<ILoan>[] = [
     {
@@ -83,17 +88,37 @@ export default function LoansTab({
       header: "Actions",
       cell: ({ row }) => {
         const loan = row.original;
-        if (loan.status === "ACTIVE") {
-          return (
-            <button
-              onClick={() => onPayInstallment(loan)}
-              className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg transition cursor-pointer"
-            >
-              + Pay Installment
-            </button>
-          );
-        }
-        return <span className="text-emerald-600 font-bold text-xs">Fully Paid ✓</span>;
+        return (
+          <div className="flex items-center gap-2">
+            {loan.status === "ACTIVE" && (
+              <button
+                onClick={() => onPayInstallment(loan)}
+                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg transition cursor-pointer"
+              >
+                + Pay Installment
+              </button>
+            )}
+            {loan.status === "ACTIVE" && (
+              <button
+                onClick={() => onEditLoan(loan)}
+                className="p-1.5 text-neutral-500 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition cursor-pointer"
+                title="Edit Loan Details"
+              >
+                <Edit2 size={15} />
+              </button>
+            )}
+            {Number(loan.totalPaid) === 0 && (
+              <button
+                onClick={() => onDeleteLoan(loan)}
+                className="p-1.5 text-neutral-400 hover:text-red-600 transition cursor-pointer"
+                title="Delete Loan"
+              >
+                <Trash2 size={15} />
+              </button>
+            )}
+            {loan.status === "PAID" && <span className="text-emerald-600 font-bold text-xs">Fully Paid ✓</span>}
+          </div>
+        );
       },
     },
   ];

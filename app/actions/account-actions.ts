@@ -258,3 +258,123 @@ export async function clearChequeAction(chequeId: string, accountId: string) {
     return { success: false, error: error.message || "Failed to clear cheque." };
   }
 }
+
+export async function updateAccountAction(formData: FormData) {
+  try {
+    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    const id = formData.get("id")?.toString();
+    if (!id) return { success: false, error: "Missing account ID." };
+
+    const name = formData.get("name")?.toString().trim();
+    const accountNumber = formData.get("accountNumber")?.toString().trim() || null;
+    const bankName = formData.get("bankName")?.toString().trim() || null;
+    const branchName = formData.get("branchName")?.toString().trim() || null;
+    const status = formData.get("status")?.toString() || "active";
+    const notes = formData.get("notes")?.toString().trim() || null;
+
+    if (!name) return { success: false, error: "Account name is required." };
+
+    await prisma.account.update({
+      where: { id, shopId: user.shopId },
+      data: { name, accountNumber, bankName, branchName, status, notes },
+    });
+
+    revalidatePath("/dashboard/admin/accounts");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to update account." };
+  }
+}
+
+export async function deleteAccountAction(id: string) {
+  try {
+    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    const account = await prisma.account.findFirst({
+      where: { id, shopId: user.shopId },
+    });
+
+    if (!account) return { success: false, error: "Account not found." };
+
+    if (Number(account.currentBalance) !== Number(account.openingBalance)) {
+      return {
+        success: false,
+        error: "Cannot delete account: Active transactions exist. Transfer funds out and set status to inactive instead.",
+      };
+    }
+
+    await prisma.account.delete({ where: { id } });
+    revalidatePath("/dashboard/admin/accounts");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to delete account." };
+  }
+}
+
+export async function deleteChequeAction(id: string) {
+  try {
+    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    const cheque = await prisma.bankCheque.findFirst({ where: { id, shopId: user.shopId } });
+
+    if (!cheque) return { success: false, error: "Cheque not found." };
+    if (cheque.status === "CLEARED") {
+      return { success: false, error: "Cannot delete a cleared cheque." };
+    }
+
+    await prisma.bankCheque.delete({ where: { id } });
+    revalidatePath("/dashboard/admin/accounts");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to delete cheque." };
+  }
+}
+
+export async function updateChequeAction(formData: FormData) {
+  try {
+    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    const id = formData.get("id")?.toString();
+    if (!id) return { success: false, error: "Missing cheque ID." };
+
+    const cheque = await prisma.bankCheque.findFirst({ where: { id, shopId: user.shopId } });
+    if (!cheque) return { success: false, error: "Cheque not found." };
+    if (cheque.status === "CLEARED") {
+      return { success: false, error: "Cannot edit a cleared cheque." };
+    }
+
+    const validated = chequeSchema.safeParse({
+      id,
+      type: formData.get("type")?.toString() || "RECEIVED",
+      partyType: formData.get("partyType")?.toString() || "CUSTOMER",
+      partyName: formData.get("partyName")?.toString().trim(),
+      bankName: formData.get("bankName")?.toString().trim(),
+      chequeNumber: formData.get("chequeNumber")?.toString().trim(),
+      chequeDate: formData.get("chequeDate")?.toString(),
+      amount: formData.get("amount"),
+      note: formData.get("note")?.toString().trim() || null,
+    });
+
+    if (!validated.success) {
+      return { success: false, error: validated.error.issues[0].message };
+    }
+
+    const data = validated.data;
+
+    await prisma.bankCheque.update({
+      where: { id },
+      data: {
+        type: data.type,
+        partyType: data.partyType,
+        partyName: data.partyName,
+        bankName: data.bankName,
+        chequeNumber: data.chequeNumber,
+        chequeDate: new Date(data.chequeDate),
+        amount: data.amount,
+        note: data.note,
+      },
+    });
+
+    revalidatePath("/dashboard/admin/accounts");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to update cheque." };
+  }
+}

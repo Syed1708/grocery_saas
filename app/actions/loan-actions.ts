@@ -184,3 +184,60 @@ export async function addLoanInstallmentAction(formData: FormData) {
     return { success: false, error: error.message || "Failed to record installment." };
   }
 }
+
+export async function deleteLoanAction(id: string) {
+  try {
+    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    const loan = await prisma.loan.findFirst({
+      where: { id, shopId: user.shopId },
+    });
+
+    if (!loan) return { success: false, error: "Loan record not found." };
+
+    if (Number(loan.totalPaid) > 0) {
+      return {
+        success: false,
+        error: "Cannot delete a loan that has recorded repayments.",
+      };
+    }
+
+    await prisma.loan.delete({ where: { id } });
+    revalidatePath("/dashboard/admin/accounts");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to delete loan record." };
+  }
+}
+
+export async function updateLoanAction(formData: FormData) {
+  try {
+    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    const id = formData.get("id")?.toString();
+    if (!id) return { success: false, error: "Missing loan ID." };
+
+    const loan = await prisma.loan.findFirst({ where: { id, shopId: user.shopId } });
+    if (!loan) return { success: false, error: "Loan not found." };
+
+    const personName = formData.get("personName")?.toString().trim();
+    const phone = formData.get("phone")?.toString().trim() || null;
+    const dueDate = formData.get("dueDate")?.toString() || null;
+    const notes = formData.get("notes")?.toString().trim() || null;
+
+    if (!personName) return { success: false, error: "Person name is required." };
+
+    await prisma.loan.update({
+      where: { id },
+      data: {
+        personName,
+        phone,
+        dueDate: dueDate ? new Date(dueDate) : null,
+        notes,
+      },
+    });
+
+    revalidatePath("/dashboard/admin/accounts");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to update loan." };
+  }
+}

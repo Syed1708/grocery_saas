@@ -13,13 +13,18 @@ import ChequeModal from "./modals/ChequeModal";
 import ClearChequeModal from "./modals/ClearChequeModal";
 import LoanModal from "./modals/LoanModal";
 import InstallmentModal from "./modals/InstallmentModal";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 import {
   createAccountAction,
+  updateAccountAction,
+  deleteAccountAction,
   transferFundsAction,
   createChequeAction,
   clearChequeAction,
+  deleteChequeAction,
+  updateChequeAction,
 } from "@/app/actions/account-actions";
-import { createLoanAction, addLoanInstallmentAction } from "@/app/actions/loan-actions";
+import { createLoanAction, addLoanInstallmentAction, deleteLoanAction, updateLoanAction } from "@/app/actions/loan-actions";
 import { IAccount, IBankCheque, ILoan } from "@/types";
 
 export default function AccountsClient({
@@ -39,9 +44,18 @@ export default function AccountsClient({
   const [transferModalOpen, setTransferModalOpen] = useState(false);
   const [chequeModalOpen, setChequeModalOpen] = useState(false);
   const [loanModalOpen, setLoanModalOpen] = useState(false);
+
+  const [editingAccount, setEditingAccount] = useState<IAccount | null>(null);
   const [clearingCheque, setClearingCheque] = useState<IBankCheque | null>(null);
   const [installmentsLoan, setInstallmentsLoan] = useState<ILoan | null>(null);
+
+  const [deleteAccountTarget, setDeleteAccountTarget] = useState<IAccount | null>(null);
+  const [deleteChequeTarget, setDeleteChequeTarget] = useState<IBankCheque | null>(null);
+  const [deleteLoanTarget, setDeleteLoanTarget] = useState<ILoan | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const [editingCheque, setEditingCheque] = useState<IBankCheque | null>(null);
+  const [editingLoan, setEditingLoan] = useState<ILoan | null>(null);
 
   // Summary balances
   const totalBalance = accounts.reduce((sum, a) => sum + a.currentBalance, 0);
@@ -53,13 +67,17 @@ export default function AccountsClient({
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    const res = await createAccountAction(formData);
+    const res = editingAccount
+      ? await updateAccountAction(formData)
+      : await createAccountAction(formData);
+
     setLoading(false);
     if (res.success) {
-      toast.success("Account created successfully!");
+      toast.success(editingAccount ? "Account updated successfully!" : "Account created successfully!");
       setAccountModalOpen(false);
+      setEditingAccount(null);
     } else {
-      toast.error(res.error || "Failed to create account.");
+      toast.error(res.error || "Operation failed.");
     }
   }
 
@@ -77,17 +95,20 @@ export default function AccountsClient({
     }
   }
 
+
+
   async function handleChequeSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    const res = await createChequeAction(formData);
+    const res = editingCheque ? await updateChequeAction(formData) : await createChequeAction(formData);
     setLoading(false);
     if (res.success) {
-      toast.success("Cheque logged successfully!");
+      toast.success(editingCheque ? "Cheque updated!" : "Cheque logged!");
       setChequeModalOpen(false);
+      setEditingCheque(null);
     } else {
-      toast.error(res.error || "Failed to log cheque.");
+      toast.error(res.error || "Operation failed.");
     }
   }
 
@@ -109,17 +130,20 @@ export default function AccountsClient({
     }
   }
 
+
+
   async function handleLoanSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    const res = await createLoanAction(formData);
+    const res = editingLoan ? await updateLoanAction(formData) : await createLoanAction(formData);
     setLoading(false);
     if (res.success) {
-      toast.success("Loan recorded successfully!");
+      toast.success(editingLoan ? "Loan updated!" : "Loan recorded!");
       setLoanModalOpen(false);
+      setEditingLoan(null);
     } else {
-      toast.error(res.error || "Failed to record loan.");
+      toast.error(res.error || "Operation failed.");
     }
   }
 
@@ -128,7 +152,6 @@ export default function AccountsClient({
     if (!installmentsLoan) return;
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    formData.append("loanId", installmentsLoan.id);
     const res = await addLoanInstallmentAction(formData);
     setLoading(false);
     if (res.success) {
@@ -136,6 +159,45 @@ export default function AccountsClient({
       setInstallmentsLoan(null);
     } else {
       toast.error(res.error || "Failed to record installment.");
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (!deleteAccountTarget) return;
+    setLoading(true);
+    const res = await deleteAccountAction(deleteAccountTarget.id);
+    setLoading(false);
+    if (res.success) {
+      toast.success("Account deleted.");
+      setDeleteAccountTarget(null);
+    } else {
+      toast.error(res.error || "Failed to delete account.");
+    }
+  }
+
+  async function handleDeleteCheque() {
+    if (!deleteChequeTarget) return;
+    setLoading(true);
+    const res = await deleteChequeAction(deleteChequeTarget.id);
+    setLoading(false);
+    if (res.success) {
+      toast.success("Cheque deleted.");
+      setDeleteChequeTarget(null);
+    } else {
+      toast.error(res.error || "Failed to delete cheque.");
+    }
+  }
+
+  async function handleDeleteLoan() {
+    if (!deleteLoanTarget) return;
+    setLoading(true);
+    const res = await deleteLoanAction(deleteLoanTarget.id);
+    setLoading(false);
+    if (res.success) {
+      toast.success("Loan record deleted.");
+      setDeleteLoanTarget(null);
+    } else {
+      toast.error(res.error || "Failed to delete loan.");
     }
   }
 
@@ -176,25 +238,22 @@ export default function AccountsClient({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveTab("accounts")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-              activeTab === "accounts" ? "bg-blue-600 text-white shadow-xs" : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600"
-            }`}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${activeTab === "accounts" ? "bg-blue-600 text-white shadow-xs" : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600"
+              }`}
           >
             🏦 Accounts ({accounts.length})
           </button>
           <button
             onClick={() => setActiveTab("cheques")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-              activeTab === "cheques" ? "bg-blue-600 text-white shadow-xs" : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600"
-            }`}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${activeTab === "cheques" ? "bg-blue-600 text-white shadow-xs" : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600"
+              }`}
           >
             📜 Cheques ({cheques.length})
           </button>
           <button
             onClick={() => setActiveTab("loans")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-              activeTab === "loans" ? "bg-blue-600 text-white shadow-xs" : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600"
-            }`}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${activeTab === "loans" ? "bg-blue-600 text-white shadow-xs" : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600"
+              }`}
           >
             🤝 Loans &amp; Hawlat ({loans.length})
           </button>
@@ -209,7 +268,7 @@ export default function AccountsClient({
           </button>
           {activeTab === "accounts" && (
             <button
-              onClick={() => setAccountModalOpen(true)}
+              onClick={() => { setEditingAccount(null); setAccountModalOpen(true); }}
               className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition cursor-pointer"
             >
               <Plus size={15} /> Add Account
@@ -235,17 +294,68 @@ export default function AccountsClient({
       </div>
 
       {/* RENDER ACTIVE TAB */}
-      {activeTab === "accounts" && <AccountsTab accounts={accounts} currencySymbol={currencySymbol} />}
-      {activeTab === "cheques" && <ChequesTab cheques={cheques} currencySymbol={currencySymbol} onClearCheque={setClearingCheque} />}
-      {activeTab === "loans" && <LoansTab loans={loans} currencySymbol={currencySymbol} onPayInstallment={setInstallmentsLoan} />}
+      {activeTab === "accounts" && (
+        <AccountsTab
+          accounts={accounts}
+          currencySymbol={currencySymbol}
+          onEdit={(a) => { setEditingAccount(a); setAccountModalOpen(true); }}
+          onDelete={setDeleteAccountTarget}
+        />
+      )}
+      {activeTab === "cheques" && (
+        <ChequesTab
+
+          cheques={cheques}
+          currencySymbol={currencySymbol}
+          onClearCheque={setClearingCheque}
+          onEditCheque={(c) => { setEditingCheque(c); setChequeModalOpen(true); }}
+          onDeleteCheque={setDeleteChequeTarget}
+        />
+      )}
+      {activeTab === "loans" && (
+        <LoansTab
+          loans={loans}
+          currencySymbol={currencySymbol}
+          onPayInstallment={setInstallmentsLoan}
+          onEditLoan={(l) => { setEditingLoan(l); setLoanModalOpen(true); }}
+          onDeleteLoan={setDeleteLoanTarget}
+        />
+      )}
 
       {/* MODALS */}
-      <AccountModal isOpen={accountModalOpen} onClose={() => setAccountModalOpen(false)} onSubmit={handleAccountSubmit} loading={loading} currencySymbol={currencySymbol} />
+      <AccountModal
+        isOpen={accountModalOpen}
+        onClose={() => { setAccountModalOpen(false); setEditingAccount(null); }}
+        onSubmit={handleAccountSubmit}
+        loading={loading}
+        account={editingAccount}
+        currencySymbol={currencySymbol}
+      />
       <TransferModal isOpen={transferModalOpen} onClose={() => setTransferModalOpen(false)} onSubmit={handleTransferSubmit} loading={loading} accounts={accounts} currencySymbol={currencySymbol} />
-      <ChequeModal isOpen={chequeModalOpen} onClose={() => setChequeModalOpen(false)} onSubmit={handleChequeSubmit} loading={loading} currencySymbol={currencySymbol} />
+      <ChequeModal
+        isOpen={chequeModalOpen}
+        onClose={() => { setChequeModalOpen(false); setEditingCheque(null); }}
+        onSubmit={handleChequeSubmit}
+        loading={loading}
+        cheque={editingCheque}
+        currencySymbol={currencySymbol}
+      />
       <ClearChequeModal cheque={clearingCheque} onClose={() => setClearingCheque(null)} onSubmit={handleClearChequeSubmit} loading={loading} accounts={accounts} currencySymbol={currencySymbol} />
-      <LoanModal isOpen={loanModalOpen} onClose={() => setLoanModalOpen(false)} onSubmit={handleLoanSubmit} loading={loading} accounts={accounts} currencySymbol={currencySymbol} />
+      <LoanModal
+        isOpen={loanModalOpen}
+        onClose={() => { setLoanModalOpen(false); setEditingLoan(null); }}
+        onSubmit={handleLoanSubmit}
+        loading={loading}
+        loan={editingLoan}
+        accounts={accounts}
+        currencySymbol={currencySymbol}
+      />
       <InstallmentModal loan={installmentsLoan} onClose={() => setInstallmentsLoan(null)} onSubmit={handleInstallmentSubmit} loading={loading} accounts={accounts} currencySymbol={currencySymbol} />
+
+      {/* CONFIRMATION DIALOGS */}
+      <ConfirmDialog isOpen={Boolean(deleteAccountTarget)} onClose={() => setDeleteAccountTarget(null)} onConfirm={handleDeleteAccount} title="Delete Account" message={`Are you sure you want to delete "${deleteAccountTarget?.name}"?`} loading={loading} />
+      <ConfirmDialog isOpen={Boolean(deleteChequeTarget)} onClose={() => setDeleteChequeTarget(null)} onConfirm={handleDeleteCheque} title="Delete Cheque" message={`Delete cheque #${deleteChequeTarget?.chequeNumber}?`} loading={loading} />
+      <ConfirmDialog isOpen={Boolean(deleteLoanTarget)} onClose={() => setDeleteLoanTarget(null)} onConfirm={handleDeleteLoan} title="Delete Loan" message={`Delete loan record for ${deleteLoanTarget?.personName}?`} loading={loading} />
     </div>
   );
 }

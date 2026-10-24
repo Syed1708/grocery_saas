@@ -449,7 +449,115 @@ async function main() {
   }
 
   console.log("✅ Seeded 10 products with branch stock successfully!");
+    // 5. Seed Financial Accounts & Wallets (Module 6)
+  console.log("Seeding financial accounts & wallets...");
+  const accountsData = [
+    { name: "প্রধান ক্যাশ ড্রয়ার (Main Cash Drawer)", type: "CASH" as const, openingBalance: 15000, currentBalance: 15000 },
+    { name: "ডাচ-বাংলা ব্যাংক লিঃ", type: "BANK" as const, accountNumber: "124.101.5940", bankName: "DBBL", openingBalance: 120500, currentBalance: 120500 },
+    { name: "বিকাশ মার্চেন্ট অ্যাকাউন্ট", type: "BKASH" as const, accountNumber: "01700000000", openingBalance: 25400, currentBalance: 25400 },
+  ];
+
+  const accountMap = new Map();
+  for (const acc of accountsData) {
+    let account = await prisma.account.findFirst({
+      where: { shopId: shop.id, name: acc.name },
+    });
+    if (!account) {
+      account = await prisma.account.create({
+        data: {
+          name: acc.name,
+          type: acc.type,
+          accountNumber: acc.accountNumber,
+          bankName: acc.bankName,
+          openingBalance: acc.openingBalance,
+          currentBalance: acc.currentBalance,
+          status: "active",
+          branchId: mainBranch.id,
+          shopId: shop.id,
+        },
+      });
+    }
+    accountMap.set(acc.type, account.id);
+  }
+
+  const cashAccId = accountMap.get("CASH");
+  const bankAccId = accountMap.get("BANK");
+
+  // 6. Seed Sample Bank Cheques (Module 6)
+  console.log("Seeding sample bank cheques...");
+  const existingCheques = await prisma.bankCheque.count({ where: { shopId: shop.id } });
+  if (existingCheques === 0) {
+    await prisma.bankCheque.createMany({
+      data: [
+        {
+          type: "RECEIVED",
+          partyType: "CUSTOMER",
+          partyName: "আমিনুল ইসলাম (ঠিকাদার)",
+          bankName: "City Bank",
+          chequeNumber: "CHQ-40192",
+          chequeDate: new Date(),
+          amount: 15000,
+          status: "PENDING",
+          branchId: mainBranch.id,
+          shopId: shop.id,
+        },
+        {
+          type: "ISSUED",
+          partyType: "SUPPLIER",
+          partyName: "Unilever Bangladesh",
+          bankName: "Dutch-Bangla Bank",
+          chequeNumber: "CHQ-88210",
+          chequeDate: new Date(),
+          amount: 35000,
+          status: "PENDING",
+          branchId: mainBranch.id,
+          shopId: shop.id,
+        },
+      ],
+    });
+  }
+
+  // 7. Seed Loans & Hawlat (Module 6)
+  console.log("Seeding loans & hawlat...");
+  const existingLoans = await prisma.loan.count({ where: { shopId: shop.id } });
+  if (existingLoans === 0 && bankAccId && cashAccId) {
+    await prisma.loan.createMany({
+      data: [
+        {
+          type: "TAKEN",
+          personName: "হাজি আবুল কাসেম (আত্মীয়)",
+          phone: "01811223344",
+          amount: 50000,
+          totalPaid: 0,
+          remainingAmount: 50000,
+          loanDate: new Date(),
+          status: "ACTIVE",
+          notes: "দোকানের স্টক বৃদ্ধির জন্য হাওলাত গ্রহণ",
+          accountId: bankAccId,
+          branchId: mainBranch.id,
+          shopId: shop.id,
+        },
+        {
+          type: "GIVEN",
+          personName: "রফিকুল ইসলাম (স্টাফ)",
+          phone: "01911223344",
+          amount: 10000,
+          totalPaid: 2000,
+          remainingAmount: 8000,
+          loanDate: new Date(),
+          status: "ACTIVE",
+          notes: "জরুরী চিকিৎসার জন্য অগ্রিম ধার প্রদান",
+          accountId: cashAccId,
+          branchId: mainBranch.id,
+          shopId: shop.id,
+        },
+      ],
+    });
+  }
+
+  console.log("✅ Seeded Module 6 financial accounts, cheques & loans successfully!");
   console.log("🎉 Complete seed finished successfully!");
+  
 }
 
 main()
