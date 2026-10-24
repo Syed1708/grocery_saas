@@ -278,6 +278,25 @@ export const payrollSchema = z.object({
   notes: z.string().max(255).optional().nullable(),
 });
 
+// 21. Cash Register Z-Report Closing Schema
+export const closingSchema = z.object({
+  closingDate: z.string().min(1, "Closing date is required"),
+  openingCash: z.coerce.number().min(0, "Opening cash cannot be negative"),
+  cashSales: z.coerce.number().min(0),
+  cashDueCollected: z.coerce.number().min(0),
+  cashOtherIncome: z.coerce.number().min(0),
+  cashExpenses: z.coerce.number().min(0),
+  cashSupplierPaid: z.coerce.number().min(0),
+  cashRefunds: z.coerce.number().min(0),
+  countedCash: z.coerce.number().min(0, "Physical counted cash is required"),
+  expectedCash: z.coerce.number(),
+  difference: z.coerce.number(),
+  totalInvoices: z.coerce.number().int().min(0),
+  notes: z.string().max(500).optional(),
+});
+
+export type ClosingInput = z.infer<typeof closingSchema>;
+
 export type DepartmentInput = z.infer<typeof departmentSchema>;
 export type StaffInput = z.infer<typeof staffSchema>;
 export type AdvanceInput = z.infer<typeof advanceSchema>;
