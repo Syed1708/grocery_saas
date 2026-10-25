@@ -15,3 +15,4 @@ export * from "./report"; // 👈 Add export
 export * from "./closing"; // 👈 Add export
 export * from "./customer-due"; // 👈 Add export
 export * from "./stock";
+export * from "./purchases";

@@ -76,6 +76,7 @@ export async function getSales(shopId: string, branchId?: string | null): Promis
     customerName: s.customer?.name || "Walk-in Customer",
     customerPhone: s.customer?.phone || null,
     cashierName: s.cashier?.name || "Cashier",
+    branchId: s.branchId,
     branchName: s.branch.name,
     items: s.items.map((it) => ({
       id: it.id,

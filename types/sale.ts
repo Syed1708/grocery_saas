@@ -38,7 +38,7 @@ export interface ISaleItem {
 }
 
 export interface ISale {
-  id: string;
+  id: string; 
   invoiceNo: string;
   saleDate: Date | string;
   subtotal: number;
