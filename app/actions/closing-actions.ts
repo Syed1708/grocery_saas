@@ -3,28 +3,29 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/services/authOptions";
 import { prisma } from "@/lib/prisma";
-import { closingSchema } from "@/lib/validations/index";
 import { revalidatePath } from "next/cache";
 
-export async function createClosingAction(rawInput: unknown) {
+export async function createClosingAction(payload: {
+  openingCash: number;
+  cashSales: number;
+  cashDueCollected: number;
+  cashOtherIncome: number;
+  cashExpenses: number;
+  cashSupplierPaid: number;
+  cashRefunds: number;
+  expectedCash: number;
+  countedCash: number;
+  difference: number;
+  totalInvoices: number;
+  notes?: string;
+}) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.shopId || !session?.user?.branchId) {
-    return { success: false, error: "Unauthorized access: Missing active branch session" };
+    return { success: false, error: "Unauthorized access: Active branch required." };
   }
 
   const { shopId, branchId, id: userId } = session.user;
-
-  const parsed = closingSchema.safeParse(rawInput);
-  if (!parsed.success) {
-    return {
-      success: false,
-      error: "Validation failed",
-      fieldErrors: parsed.error.flatten().fieldErrors,
-    };
-  }
-
-  const data = parsed.data;
 
   try {
     const now = new Date();
@@ -32,20 +33,20 @@ export async function createClosingAction(rawInput: unknown) {
 
     const record = await prisma.cashRegister.create({
       data: {
-        closingDate: new Date(data.closingDate),
+        closingDate: now,
         closingTime: timeString,
-        openingCash: data.openingCash,
-        cashSales: data.cashSales,
-        cashDueCollected: data.cashDueCollected,
-        cashOtherIncome: data.cashOtherIncome,
-        cashExpenses: data.cashExpenses,
-        cashSupplierPaid: data.cashSupplierPaid,
-        cashRefunds: data.cashRefunds,
-        expectedCash: data.expectedCash,
-        countedCash: data.countedCash,
-        difference: data.difference,
-        totalInvoices: data.totalInvoices,
-        notes: data.notes,
+        openingCash: payload.openingCash,
+        cashSales: payload.cashSales,
+        cashDueCollected: payload.cashDueCollected,
+        cashOtherIncome: payload.cashOtherIncome,
+        cashExpenses: payload.cashExpenses,
+        cashSupplierPaid: payload.cashSupplierPaid,
+        cashRefunds: payload.cashRefunds,
+        expectedCash: payload.expectedCash,
+        countedCash: payload.countedCash,
+        difference: payload.difference,
+        totalInvoices: payload.totalInvoices,
+        notes: payload.notes || null,
         status: "closed",
         shopId,
         branchId,
@@ -54,9 +55,11 @@ export async function createClosingAction(rawInput: unknown) {
     });
 
     revalidatePath("/reports/closings");
+    revalidatePath("/admin/reports/closings");
+    revalidatePath("/reports");
     return { success: true, data: record };
   } catch (error) {
-    console.error("Failed to commit register closing:", error);
-    return { success: false, error: "Database error saving cash register closing." };
+    console.error("Failed to save register closing:", error);
+    return { success: false, error: "Database error committing Z-Report closing." };
   }
 }
