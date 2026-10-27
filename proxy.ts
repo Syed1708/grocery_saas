@@ -1,35 +1,44 @@
-import { getToken } from "next-auth/jwt";
-import { NextResponse, NextRequest } from "next/server";
+// middleware.ts
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
-export async function proxy(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  const { pathname } = req.nextUrl;
+export default withAuth(
+  function middleware(req) {
+    const role = req.nextauth.token?.role;
+    const path = req.nextUrl.pathname;
 
-  const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/register");
-  const isDashboardRoute = pathname.startsWith("/dashboard");
-  const isPosRoute = pathname.startsWith("/pos");
-
-  if (!token && (isDashboardRoute || isPosRoute)) {
-    const callbackUrl = encodeURIComponent(pathname);
-    return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, req.url));
-  }
-
-  if (token && isAuthRoute) {
-    if (token.role === "CASHIER") {
-      return NextResponse.redirect(new URL("/pos", req.url));
+    // Cashier restrictions: Restricted to POS and Shift Closings
+    if (role === "CASHIER") {
+      const allowedPaths = ["/pos", "/closings", "/login"];
+      const isAllowed = allowedPaths.some((p) => path.startsWith(p));
+      if (!isAllowed) {
+        return NextResponse.redirect(new URL("/pos", req.url));
+      }
     }
-    return NextResponse.redirect(new URL("/dashboard", req.url));
-  }
 
-  if (pathname.startsWith("/dashboard/admin") || pathname.startsWith("/dashboard/settings")) {
-    if (token?.role !== "OWNER" && token?.role !== "MANAGER") {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
+    // Manager restrictions: Blocked from Store Settings & User Management
+    if (role === "MANAGER") {
+      if (path.startsWith("/settings/users")) {
+        return NextResponse.redirect(new URL("/pos", req.url));
+      }
     }
-  }
 
-  return NextResponse.next();
-}
+    return NextResponse.next();
+  },
+  {
+    callbacks: {
+      authorized: ({ token }) => Boolean(token),
+    },
+  }
+);
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/pos/:path*", "/login", "/register"],
+  matcher: [
+    "/pos/:path*",
+    "/reports/:path*",
+    "/settings/:path*",
+    "/catalog/:path*",
+    "/purchases/:path*",
+    "/banking/:path*",
+  ],
 };

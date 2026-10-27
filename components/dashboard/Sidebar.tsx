@@ -35,6 +35,7 @@ export default function Sidebar({
 
   const navItems = [
     { label: "Overview", href: "/dashboard", icon: LayoutDashboard, roles: ["OWNER", "MANAGER", "CASHIER"] },
+    { label: "Users", href: "/dashboard/admin/users", icon: Package, roles: ["OWNER", "MANAGER", "CASHIER"] },
     { label: "POS Terminal", href: "/dashboard/pos", icon: ShoppingCart, roles: ["OWNER", "MANAGER", "CASHIER"] },
     { label: "Categories", href: "/dashboard/admin/categories", icon: Tags, roles: ["OWNER", "MANAGER"] },
     { label: "Products", href: "/dashboard/admin/products", icon: Package, roles: ["OWNER", "MANAGER"] },

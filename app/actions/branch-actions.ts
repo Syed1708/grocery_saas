@@ -15,7 +15,7 @@ export async function switchBranchAction(branchId: string) {
     }
 
     const role = session.user.role;
-    const canSwitch = role === "OWNER" || role === "ADMIN" || role === "SUPER_ADMIN";
+    const canSwitch = role === "OWNER";
 
     // 🛑 BLOCK: Managers and Cashiers are locked to their assigned branch
     if (!canSwitch) {

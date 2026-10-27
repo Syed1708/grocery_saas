@@ -17,12 +17,9 @@ enum CustomerType {
 }
 
 enum UserRole {
-  SUPER_ADMIN
-  ADMIN
   OWNER
   MANAGER
   CASHIER
-  VENDOR
 }
 
 enum AccountType {
@@ -239,7 +236,7 @@ model User {
   password     String
   role         UserRole  @default(CASHIER)
   profileImage String?
-  isActive     Boolean   @default(true)
+  isActive     Boolean   @default(true) // ✅ Keep your boolean! It's simpler and cleaner than an enum.
   branchId     String?
   branch       Branch?   @relation(fields: [branchId], references: [id], onDelete: SetNull)
   shopId       String
@@ -247,15 +244,20 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  staffProfile StaffProfile?
-  sales        Sale[]
-  saleReturns  SaleReturn[]
-  expenses     Expense[]
-  otherIncomes OtherIncome[]
-  cashRegisters CashRegister[]
+  // ── ADD THESE 2 OPTIONAL FIELDS FOR MODULE 12 ───────────────────────────
+  supervisorPin     String?   // Hashed 4-digit PIN for POS counter overrides (discounts, void lines)
+  customPermissions Json?     // JSON array of string keys, e.g. ["pos.discount_override"]
+  // ────────────────────────────────────────────────────────────────────────
+
+  staffProfile        StaffProfile?
+  sales               Sale[]
+  saleReturns         SaleReturn[]
+  expenses            Expense[]
+  otherIncomes        OtherIncome[]
+  cashRegisters       CashRegister[]
   accountTransactions AccountTransaction[]
-  bankCheques  BankCheque[]
-  loanInstallments LoanInstallment[]
+  bankCheques         BankCheque[]
+  loanInstallments    LoanInstallment[]
 
   @@index([shopId])
   @@index([branchId])

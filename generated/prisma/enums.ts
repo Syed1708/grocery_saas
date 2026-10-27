@@ -18,12 +18,9 @@ export type CustomerType = (typeof CustomerType)[keyof typeof CustomerType]
 
 
 export const UserRole = {
-  SUPER_ADMIN: 'SUPER_ADMIN',
-  ADMIN: 'ADMIN',
   OWNER: 'OWNER',
   MANAGER: 'MANAGER',
-  CASHIER: 'CASHIER',
-  VENDOR: 'VENDOR'
+  CASHIER: 'CASHIER'
 } as const
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]

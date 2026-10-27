@@ -37,6 +37,7 @@ export type UserMinAggregateOutputType = {
   shopId: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  supervisorPin: string | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -52,6 +53,7 @@ export type UserMaxAggregateOutputType = {
   shopId: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  supervisorPin: string | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -67,6 +69,8 @@ export type UserCountAggregateOutputType = {
   shopId: number
   createdAt: number
   updatedAt: number
+  supervisorPin: number
+  customPermissions: number
   _all: number
 }
 
@@ -84,6 +88,7 @@ export type UserMinAggregateInputType = {
   shopId?: true
   createdAt?: true
   updatedAt?: true
+  supervisorPin?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -99,6 +104,7 @@ export type UserMaxAggregateInputType = {
   shopId?: true
   createdAt?: true
   updatedAt?: true
+  supervisorPin?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -114,6 +120,8 @@ export type UserCountAggregateInputType = {
   shopId?: true
   createdAt?: true
   updatedAt?: true
+  supervisorPin?: true
+  customPermissions?: true
   _all?: true
 }
 
@@ -202,6 +210,8 @@ export type UserGroupByOutputType = {
   shopId: string
   createdAt: Date
   updatedAt: Date
+  supervisorPin: string | null
+  customPermissions: runtime.JsonValue | null
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
@@ -238,6 +248,8 @@ export type UserWhereInput = {
   shopId?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  supervisorPin?: Prisma.StringNullableFilter<"User"> | string | null
+  customPermissions?: Prisma.JsonNullableFilter<"User">
   branch?: Prisma.XOR<Prisma.BranchNullableScalarRelationFilter, Prisma.BranchWhereInput> | null
   shop?: Prisma.XOR<Prisma.ShopScalarRelationFilter, Prisma.ShopWhereInput>
   staffProfile?: Prisma.XOR<Prisma.StaffProfileNullableScalarRelationFilter, Prisma.StaffProfileWhereInput> | null
@@ -264,6 +276,8 @@ export type UserOrderByWithRelationInput = {
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  supervisorPin?: Prisma.SortOrderInput | Prisma.SortOrder
+  customPermissions?: Prisma.SortOrderInput | Prisma.SortOrder
   branch?: Prisma.BranchOrderByWithRelationInput
   shop?: Prisma.ShopOrderByWithRelationInput
   staffProfile?: Prisma.StaffProfileOrderByWithRelationInput
@@ -294,6 +308,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   shopId?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  supervisorPin?: Prisma.StringNullableFilter<"User"> | string | null
+  customPermissions?: Prisma.JsonNullableFilter<"User">
   branch?: Prisma.XOR<Prisma.BranchNullableScalarRelationFilter, Prisma.BranchWhereInput> | null
   shop?: Prisma.XOR<Prisma.ShopScalarRelationFilter, Prisma.ShopWhereInput>
   staffProfile?: Prisma.XOR<Prisma.StaffProfileNullableScalarRelationFilter, Prisma.StaffProfileWhereInput> | null
@@ -320,6 +336,8 @@ export type UserOrderByWithAggregationInput = {
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  supervisorPin?: Prisma.SortOrderInput | Prisma.SortOrder
+  customPermissions?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
@@ -341,6 +359,8 @@ export type UserScalarWhereWithAggregatesInput = {
   shopId?: Prisma.StringWithAggregatesFilter<"User"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  supervisorPin?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  customPermissions?: Prisma.JsonNullableWithAggregatesFilter<"User">
 }
 
 export type UserCreateInput = {
@@ -354,6 +374,8 @@ export type UserCreateInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   shop: Prisma.ShopCreateNestedOneWithoutUsersInput
   staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
@@ -380,6 +402,8 @@ export type UserUncheckedCreateInput = {
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
   sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
   saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
@@ -402,6 +426,8 @@ export type UserUpdateInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
   staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
@@ -428,6 +454,8 @@ export type UserUncheckedUpdateInput = {
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
   sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
   saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
@@ -452,6 +480,8 @@ export type UserCreateManyInput = {
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserUpdateManyMutationInput = {
@@ -465,6 +495,8 @@ export type UserUpdateManyMutationInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -480,6 +512,8 @@ export type UserUncheckedUpdateManyInput = {
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserListRelationFilter = {
@@ -511,6 +545,8 @@ export type UserCountOrderByAggregateInput = {
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  supervisorPin?: Prisma.SortOrder
+  customPermissions?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -526,6 +562,7 @@ export type UserMaxOrderByAggregateInput = {
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  supervisorPin?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -541,6 +578,7 @@ export type UserMinOrderByAggregateInput = {
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  supervisorPin?: Prisma.SortOrder
 }
 
 export type UserNullableScalarRelationFilter = {
@@ -791,6 +829,8 @@ export type UserCreateWithoutShopInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
   sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
@@ -815,6 +855,8 @@ export type UserUncheckedCreateWithoutShopInput = {
   branchId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
   sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
   saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
@@ -868,6 +910,8 @@ export type UserScalarWhereInput = {
   shopId?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  supervisorPin?: Prisma.StringNullableFilter<"User"> | string | null
+  customPermissions?: Prisma.JsonNullableFilter<"User">
 }
 
 export type UserCreateWithoutBranchInput = {
@@ -881,6 +925,8 @@ export type UserCreateWithoutBranchInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shop: Prisma.ShopCreateNestedOneWithoutUsersInput
   staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
   sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
@@ -905,6 +951,8 @@ export type UserUncheckedCreateWithoutBranchInput = {
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
   sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
   saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
@@ -953,6 +1001,8 @@ export type UserCreateWithoutSalesInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   shop: Prisma.ShopCreateNestedOneWithoutUsersInput
   staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
@@ -978,6 +1028,8 @@ export type UserUncheckedCreateWithoutSalesInput = {
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
   saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
@@ -1015,6 +1067,8 @@ export type UserUpdateWithoutSalesInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
   staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
@@ -1040,6 +1094,8 @@ export type UserUncheckedUpdateWithoutSalesInput = {
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
   saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
@@ -1061,6 +1117,8 @@ export type UserCreateWithoutSaleReturnsInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   shop: Prisma.ShopCreateNestedOneWithoutUsersInput
   staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
@@ -1086,6 +1144,8 @@ export type UserUncheckedCreateWithoutSaleReturnsInput = {
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
   sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
@@ -1123,6 +1183,8 @@ export type UserUpdateWithoutSaleReturnsInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
   staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
@@ -1148,6 +1210,8 @@ export type UserUncheckedUpdateWithoutSaleReturnsInput = {
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
   sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
@@ -1169,6 +1233,8 @@ export type UserCreateWithoutAccountTransactionsInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   shop: Prisma.ShopCreateNestedOneWithoutUsersInput
   staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
@@ -1194,6 +1260,8 @@ export type UserUncheckedCreateWithoutAccountTransactionsInput = {
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
   sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
   saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
@@ -1231,6 +1299,8 @@ export type UserUpdateWithoutAccountTransactionsInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
   staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
@@ -1256,6 +1326,8 @@ export type UserUncheckedUpdateWithoutAccountTransactionsInput = {
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
   sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
   saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
@@ -1277,6 +1349,8 @@ export type UserCreateWithoutBankChequesInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   shop: Prisma.ShopCreateNestedOneWithoutUsersInput
   staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
@@ -1302,6 +1376,8 @@ export type UserUncheckedCreateWithoutBankChequesInput = {
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
   sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
   saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
@@ -1339,6 +1415,8 @@ export type UserUpdateWithoutBankChequesInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
   staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
@@ -1364,6 +1442,8 @@ export type UserUncheckedUpdateWithoutBankChequesInput = {
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
   sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
   saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
@@ -1385,6 +1465,8 @@ export type UserCreateWithoutLoanInstallmentsInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   shop: Prisma.ShopCreateNestedOneWithoutUsersInput
   staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
@@ -1410,6 +1492,8 @@ export type UserUncheckedCreateWithoutLoanInstallmentsInput = {
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
   sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
   saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
@@ -1447,6 +1531,8 @@ export type UserUpdateWithoutLoanInstallmentsInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
   staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
@@ -1472,6 +1558,8 @@ export type UserUncheckedUpdateWithoutLoanInstallmentsInput = {
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
   sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
   saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
@@ -1493,6 +1581,8 @@ export type UserCreateWithoutExpensesInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   shop: Prisma.ShopCreateNestedOneWithoutUsersInput
   staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
@@ -1518,6 +1608,8 @@ export type UserUncheckedCreateWithoutExpensesInput = {
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
   sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
   saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
@@ -1555,6 +1647,8 @@ export type UserUpdateWithoutExpensesInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
   staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
@@ -1580,6 +1674,8 @@ export type UserUncheckedUpdateWithoutExpensesInput = {
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
   sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
   saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
@@ -1601,6 +1697,8 @@ export type UserCreateWithoutOtherIncomesInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   shop: Prisma.ShopCreateNestedOneWithoutUsersInput
   staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
@@ -1626,6 +1724,8 @@ export type UserUncheckedCreateWithoutOtherIncomesInput = {
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
   sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
   saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
@@ -1663,6 +1763,8 @@ export type UserUpdateWithoutOtherIncomesInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
   staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
@@ -1688,6 +1790,8 @@ export type UserUncheckedUpdateWithoutOtherIncomesInput = {
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
   sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
   saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
@@ -1709,6 +1813,8 @@ export type UserCreateWithoutStaffProfileInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   shop: Prisma.ShopCreateNestedOneWithoutUsersInput
   sales?: Prisma.SaleCreateNestedManyWithoutCashierInput
@@ -1734,6 +1840,8 @@ export type UserUncheckedCreateWithoutStaffProfileInput = {
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
   saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
@@ -1771,6 +1879,8 @@ export type UserUpdateWithoutStaffProfileInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
   sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
@@ -1796,6 +1906,8 @@ export type UserUncheckedUpdateWithoutStaffProfileInput = {
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
   saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
@@ -1817,6 +1929,8 @@ export type UserCreateWithoutCashRegistersInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   shop: Prisma.ShopCreateNestedOneWithoutUsersInput
   staffProfile?: Prisma.StaffProfileCreateNestedOneWithoutUserInput
@@ -1842,6 +1956,8 @@ export type UserUncheckedCreateWithoutCashRegistersInput = {
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedCreateNestedOneWithoutUserInput
   sales?: Prisma.SaleUncheckedCreateNestedManyWithoutCashierInput
   saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutCashierInput
@@ -1879,6 +1995,8 @@ export type UserUpdateWithoutCashRegistersInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
   staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
@@ -1904,6 +2022,8 @@ export type UserUncheckedUpdateWithoutCashRegistersInput = {
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
   sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
   saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
@@ -1926,6 +2046,8 @@ export type UserCreateManyShopInput = {
   branchId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserUpdateWithoutShopInput = {
@@ -1939,6 +2061,8 @@ export type UserUpdateWithoutShopInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
   sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
@@ -1963,6 +2087,8 @@ export type UserUncheckedUpdateWithoutShopInput = {
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
   sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
   saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
@@ -1986,6 +2112,8 @@ export type UserUncheckedUpdateManyWithoutShopInput = {
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserCreateManyBranchInput = {
@@ -2000,6 +2128,8 @@ export type UserCreateManyBranchInput = {
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supervisorPin?: string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserUpdateWithoutBranchInput = {
@@ -2013,6 +2143,8 @@ export type UserUpdateWithoutBranchInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   shop?: Prisma.ShopUpdateOneRequiredWithoutUsersNestedInput
   staffProfile?: Prisma.StaffProfileUpdateOneWithoutUserNestedInput
   sales?: Prisma.SaleUpdateManyWithoutCashierNestedInput
@@ -2037,6 +2169,8 @@ export type UserUncheckedUpdateWithoutBranchInput = {
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   staffProfile?: Prisma.StaffProfileUncheckedUpdateOneWithoutUserNestedInput
   sales?: Prisma.SaleUncheckedUpdateManyWithoutCashierNestedInput
   saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutCashierNestedInput
@@ -2060,6 +2194,8 @@ export type UserUncheckedUpdateManyWithoutBranchInput = {
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customPermissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 
@@ -2169,6 +2305,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   shopId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  supervisorPin?: boolean
+  customPermissions?: boolean
   branch?: boolean | Prisma.User$branchArgs<ExtArgs>
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
   staffProfile?: boolean | Prisma.User$staffProfileArgs<ExtArgs>
@@ -2198,9 +2336,11 @@ export type UserSelectScalar = {
   shopId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  supervisorPin?: boolean
+  customPermissions?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phone" | "password" | "role" | "profileImage" | "isActive" | "branchId" | "shopId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phone" | "password" | "role" | "profileImage" | "isActive" | "branchId" | "shopId" | "createdAt" | "updatedAt" | "supervisorPin" | "customPermissions", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   branch?: boolean | Prisma.User$branchArgs<ExtArgs>
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
@@ -2244,6 +2384,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     shopId: string
     createdAt: Date
     updatedAt: Date
+    supervisorPin: string | null
+    customPermissions: runtime.JsonValue | null
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -2636,6 +2778,8 @@ export interface UserFieldRefs {
   readonly shopId: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly supervisorPin: Prisma.FieldRef<"User", 'String'>
+  readonly customPermissions: Prisma.FieldRef<"User", 'Json'>
 }
     
 
