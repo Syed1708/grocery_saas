@@ -1,14 +1,26 @@
 export interface ISupplier {
   id: string;
   name: string;
-  companyName: string;
+  companyName?: string | null;
   phone: string;
-  email: string | null;
+  email?: string | null;
   village?: string | null;
   district?: string | null;
-  addressLine?: string | null;
   address?: string | null;
-  payableBalance: number;
+  contactPerson?: string | null;
+  openingDue: number;
+  currentDue: number;
+  status: string;
   shopId: string;
+
+  // 👈 Add these fields:
+  branchId?: string | null;
+  branch?: {
+    id?: string;
+    name: string;
+    code?: string;
+  } | null;
+  branchName?: string | null;
+
   createdAt: Date;
 }

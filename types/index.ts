@@ -1,4 +1,4 @@
-export * from "./shop";
+
 export * from "./user";
 export * from "./branch";
 export * from "./unit";
@@ -18,3 +18,4 @@ export * from "./stock";
 export * from "./purchases";
 export * from "./profit-loss";
 export * from "./expenses";
+export * from "./settings";

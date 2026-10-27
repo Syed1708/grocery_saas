@@ -68,11 +68,11 @@ export const authOptions: NextAuthOptions = {
       }
 
       // 👈 Updates session immediately when switching branches!
-      if (trigger === "update" && session) {
-        if (session.branchId !== undefined) token.branchId = session.branchId;
-        if (session.branchName !== undefined)
-          token.branchName = session.branchName;
-      }
+
+          if (trigger === "update" && session?.branchId) {
+      token.branchId = session.branchId;
+      token.branchName = session.branchName;
+    }
 
       return token;
     },

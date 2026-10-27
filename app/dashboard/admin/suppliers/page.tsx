@@ -12,10 +12,10 @@ export default async function SuppliersPage() {
     redirect("/login");
   }
 
-  const { shopId } = session.user;
+  const { shopId, branchId } = session.user;
 
   const [suppliers, shop] = await Promise.all([
-    getSuppliers(shopId),
+    getSuppliers(shopId, branchId),
     prisma.shop.findUnique({
       where: { id: shopId },
       select: { currencySymbol: true },

@@ -10,7 +10,7 @@ export default async function BranchesPage() {
   if (!session?.user?.shopId) {
     redirect("/login");
   }
-
+ 
   const branches = await prisma.branch.findMany({
     where: { shopId: session.user.shopId },
     include: {

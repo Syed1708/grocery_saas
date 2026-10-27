@@ -200,6 +200,10 @@ model Branch {
   customerPayments CustomerPayment[]
   supplierPayments SupplierPayment[]
 
+    // 👈 ADD THESE TWO LINES:
+  customers      Customer[]
+  suppliers      Supplier[]
+
   @@unique([shopId, code])
   @@index([shopId])
   @@map("branches")
@@ -428,6 +432,10 @@ model Supplier {
   status        String    @default("active")
   shopId        String
   shop          Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  
+    // 👈 ADD THIS: Link customer to specific branch (Optional so existing walk-ins don't break)
+  branchId    String?
+  branch      Branch?       @relation(fields: [branchId], references: [id], onDelete: SetNull)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -435,6 +443,7 @@ model Supplier {
   payments      SupplierPayment[]
 
   @@index([shopId])
+  @@index([branchId])
   @@index([shopId, phone])
   @@map("suppliers")
 }
@@ -541,6 +550,11 @@ model Customer {
   status      String        @default("active")
   shopId      String
   shop        Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  
+    // 👈 ADD THIS: Link customer to specific branch (Optional so existing walk-ins don't break)
+  branchId    String?
+  branch      Branch?       @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -550,6 +564,7 @@ model Customer {
   quotations  Quotation[]
 
   @@index([shopId])
+  @@index([branchId])
   @@index([shopId, phone])
   @@map("customers")
 }

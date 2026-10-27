@@ -50,6 +50,7 @@ export type SupplierMinAggregateOutputType = {
   currentDue: runtime.Decimal | null
   status: string | null
   shopId: string | null
+  branchId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -68,6 +69,7 @@ export type SupplierMaxAggregateOutputType = {
   currentDue: runtime.Decimal | null
   status: string | null
   shopId: string | null
+  branchId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -86,6 +88,7 @@ export type SupplierCountAggregateOutputType = {
   currentDue: number
   status: number
   shopId: number
+  branchId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -116,6 +119,7 @@ export type SupplierMinAggregateInputType = {
   currentDue?: true
   status?: true
   shopId?: true
+  branchId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -134,6 +138,7 @@ export type SupplierMaxAggregateInputType = {
   currentDue?: true
   status?: true
   shopId?: true
+  branchId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -152,6 +157,7 @@ export type SupplierCountAggregateInputType = {
   currentDue?: true
   status?: true
   shopId?: true
+  branchId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -257,6 +263,7 @@ export type SupplierGroupByOutputType = {
   currentDue: runtime.Decimal
   status: string
   shopId: string
+  branchId: string | null
   createdAt: Date
   updatedAt: Date
   _count: SupplierCountAggregateOutputType | null
@@ -298,9 +305,11 @@ export type SupplierWhereInput = {
   currentDue?: Prisma.DecimalFilter<"Supplier"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFilter<"Supplier"> | string
   shopId?: Prisma.StringFilter<"Supplier"> | string
+  branchId?: Prisma.StringNullableFilter<"Supplier"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Supplier"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Supplier"> | Date | string
   shop?: Prisma.XOR<Prisma.ShopScalarRelationFilter, Prisma.ShopWhereInput>
+  branch?: Prisma.XOR<Prisma.BranchNullableScalarRelationFilter, Prisma.BranchWhereInput> | null
   purchases?: Prisma.PurchaseListRelationFilter
   payments?: Prisma.SupplierPaymentListRelationFilter
 }
@@ -319,9 +328,11 @@ export type SupplierOrderByWithRelationInput = {
   currentDue?: Prisma.SortOrder
   status?: Prisma.SortOrder
   shopId?: Prisma.SortOrder
+  branchId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   shop?: Prisma.ShopOrderByWithRelationInput
+  branch?: Prisma.BranchOrderByWithRelationInput
   purchases?: Prisma.PurchaseOrderByRelationAggregateInput
   payments?: Prisma.SupplierPaymentOrderByRelationAggregateInput
   _relevance?: Prisma.SupplierOrderByRelevanceInput
@@ -344,9 +355,11 @@ export type SupplierWhereUniqueInput = Prisma.AtLeast<{
   currentDue?: Prisma.DecimalFilter<"Supplier"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFilter<"Supplier"> | string
   shopId?: Prisma.StringFilter<"Supplier"> | string
+  branchId?: Prisma.StringNullableFilter<"Supplier"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Supplier"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Supplier"> | Date | string
   shop?: Prisma.XOR<Prisma.ShopScalarRelationFilter, Prisma.ShopWhereInput>
+  branch?: Prisma.XOR<Prisma.BranchNullableScalarRelationFilter, Prisma.BranchWhereInput> | null
   purchases?: Prisma.PurchaseListRelationFilter
   payments?: Prisma.SupplierPaymentListRelationFilter
 }, "id">
@@ -365,6 +378,7 @@ export type SupplierOrderByWithAggregationInput = {
   currentDue?: Prisma.SortOrder
   status?: Prisma.SortOrder
   shopId?: Prisma.SortOrder
+  branchId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SupplierCountOrderByAggregateInput
@@ -391,6 +405,7 @@ export type SupplierScalarWhereWithAggregatesInput = {
   currentDue?: Prisma.DecimalWithAggregatesFilter<"Supplier"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringWithAggregatesFilter<"Supplier"> | string
   shopId?: Prisma.StringWithAggregatesFilter<"Supplier"> | string
+  branchId?: Prisma.StringNullableWithAggregatesFilter<"Supplier"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Supplier"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Supplier"> | Date | string
 }
@@ -411,6 +426,7 @@ export type SupplierCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   shop: Prisma.ShopCreateNestedOneWithoutSuppliersInput
+  branch?: Prisma.BranchCreateNestedOneWithoutSuppliersInput
   purchases?: Prisma.PurchaseCreateNestedManyWithoutSupplierInput
   payments?: Prisma.SupplierPaymentCreateNestedManyWithoutSupplierInput
 }
@@ -429,6 +445,7 @@ export type SupplierUncheckedCreateInput = {
   currentDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
   shopId: string
+  branchId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutSupplierInput
@@ -451,6 +468,7 @@ export type SupplierUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shop?: Prisma.ShopUpdateOneRequiredWithoutSuppliersNestedInput
+  branch?: Prisma.BranchUpdateOneWithoutSuppliersNestedInput
   purchases?: Prisma.PurchaseUpdateManyWithoutSupplierNestedInput
   payments?: Prisma.SupplierPaymentUpdateManyWithoutSupplierNestedInput
 }
@@ -469,6 +487,7 @@ export type SupplierUncheckedUpdateInput = {
   currentDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutSupplierNestedInput
@@ -489,6 +508,7 @@ export type SupplierCreateManyInput = {
   currentDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
   shopId: string
+  branchId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -524,6 +544,7 @@ export type SupplierUncheckedUpdateManyInput = {
   currentDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -558,6 +579,7 @@ export type SupplierCountOrderByAggregateInput = {
   currentDue?: Prisma.SortOrder
   status?: Prisma.SortOrder
   shopId?: Prisma.SortOrder
+  branchId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -581,6 +603,7 @@ export type SupplierMaxOrderByAggregateInput = {
   currentDue?: Prisma.SortOrder
   status?: Prisma.SortOrder
   shopId?: Prisma.SortOrder
+  branchId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -599,6 +622,7 @@ export type SupplierMinOrderByAggregateInput = {
   currentDue?: Prisma.SortOrder
   status?: Prisma.SortOrder
   shopId?: Prisma.SortOrder
+  branchId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -655,6 +679,48 @@ export type SupplierUncheckedUpdateManyWithoutShopNestedInput = {
   deleteMany?: Prisma.SupplierScalarWhereInput | Prisma.SupplierScalarWhereInput[]
 }
 
+export type SupplierCreateNestedManyWithoutBranchInput = {
+  create?: Prisma.XOR<Prisma.SupplierCreateWithoutBranchInput, Prisma.SupplierUncheckedCreateWithoutBranchInput> | Prisma.SupplierCreateWithoutBranchInput[] | Prisma.SupplierUncheckedCreateWithoutBranchInput[]
+  connectOrCreate?: Prisma.SupplierCreateOrConnectWithoutBranchInput | Prisma.SupplierCreateOrConnectWithoutBranchInput[]
+  createMany?: Prisma.SupplierCreateManyBranchInputEnvelope
+  connect?: Prisma.SupplierWhereUniqueInput | Prisma.SupplierWhereUniqueInput[]
+}
+
+export type SupplierUncheckedCreateNestedManyWithoutBranchInput = {
+  create?: Prisma.XOR<Prisma.SupplierCreateWithoutBranchInput, Prisma.SupplierUncheckedCreateWithoutBranchInput> | Prisma.SupplierCreateWithoutBranchInput[] | Prisma.SupplierUncheckedCreateWithoutBranchInput[]
+  connectOrCreate?: Prisma.SupplierCreateOrConnectWithoutBranchInput | Prisma.SupplierCreateOrConnectWithoutBranchInput[]
+  createMany?: Prisma.SupplierCreateManyBranchInputEnvelope
+  connect?: Prisma.SupplierWhereUniqueInput | Prisma.SupplierWhereUniqueInput[]
+}
+
+export type SupplierUpdateManyWithoutBranchNestedInput = {
+  create?: Prisma.XOR<Prisma.SupplierCreateWithoutBranchInput, Prisma.SupplierUncheckedCreateWithoutBranchInput> | Prisma.SupplierCreateWithoutBranchInput[] | Prisma.SupplierUncheckedCreateWithoutBranchInput[]
+  connectOrCreate?: Prisma.SupplierCreateOrConnectWithoutBranchInput | Prisma.SupplierCreateOrConnectWithoutBranchInput[]
+  upsert?: Prisma.SupplierUpsertWithWhereUniqueWithoutBranchInput | Prisma.SupplierUpsertWithWhereUniqueWithoutBranchInput[]
+  createMany?: Prisma.SupplierCreateManyBranchInputEnvelope
+  set?: Prisma.SupplierWhereUniqueInput | Prisma.SupplierWhereUniqueInput[]
+  disconnect?: Prisma.SupplierWhereUniqueInput | Prisma.SupplierWhereUniqueInput[]
+  delete?: Prisma.SupplierWhereUniqueInput | Prisma.SupplierWhereUniqueInput[]
+  connect?: Prisma.SupplierWhereUniqueInput | Prisma.SupplierWhereUniqueInput[]
+  update?: Prisma.SupplierUpdateWithWhereUniqueWithoutBranchInput | Prisma.SupplierUpdateWithWhereUniqueWithoutBranchInput[]
+  updateMany?: Prisma.SupplierUpdateManyWithWhereWithoutBranchInput | Prisma.SupplierUpdateManyWithWhereWithoutBranchInput[]
+  deleteMany?: Prisma.SupplierScalarWhereInput | Prisma.SupplierScalarWhereInput[]
+}
+
+export type SupplierUncheckedUpdateManyWithoutBranchNestedInput = {
+  create?: Prisma.XOR<Prisma.SupplierCreateWithoutBranchInput, Prisma.SupplierUncheckedCreateWithoutBranchInput> | Prisma.SupplierCreateWithoutBranchInput[] | Prisma.SupplierUncheckedCreateWithoutBranchInput[]
+  connectOrCreate?: Prisma.SupplierCreateOrConnectWithoutBranchInput | Prisma.SupplierCreateOrConnectWithoutBranchInput[]
+  upsert?: Prisma.SupplierUpsertWithWhereUniqueWithoutBranchInput | Prisma.SupplierUpsertWithWhereUniqueWithoutBranchInput[]
+  createMany?: Prisma.SupplierCreateManyBranchInputEnvelope
+  set?: Prisma.SupplierWhereUniqueInput | Prisma.SupplierWhereUniqueInput[]
+  disconnect?: Prisma.SupplierWhereUniqueInput | Prisma.SupplierWhereUniqueInput[]
+  delete?: Prisma.SupplierWhereUniqueInput | Prisma.SupplierWhereUniqueInput[]
+  connect?: Prisma.SupplierWhereUniqueInput | Prisma.SupplierWhereUniqueInput[]
+  update?: Prisma.SupplierUpdateWithWhereUniqueWithoutBranchInput | Prisma.SupplierUpdateWithWhereUniqueWithoutBranchInput[]
+  updateMany?: Prisma.SupplierUpdateManyWithWhereWithoutBranchInput | Prisma.SupplierUpdateManyWithWhereWithoutBranchInput[]
+  deleteMany?: Prisma.SupplierScalarWhereInput | Prisma.SupplierScalarWhereInput[]
+}
+
 export type SupplierCreateNestedOneWithoutPurchasesInput = {
   create?: Prisma.XOR<Prisma.SupplierCreateWithoutPurchasesInput, Prisma.SupplierUncheckedCreateWithoutPurchasesInput>
   connectOrCreate?: Prisma.SupplierCreateOrConnectWithoutPurchasesInput
@@ -698,6 +764,7 @@ export type SupplierCreateWithoutShopInput = {
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  branch?: Prisma.BranchCreateNestedOneWithoutSuppliersInput
   purchases?: Prisma.PurchaseCreateNestedManyWithoutSupplierInput
   payments?: Prisma.SupplierPaymentCreateNestedManyWithoutSupplierInput
 }
@@ -715,6 +782,7 @@ export type SupplierUncheckedCreateWithoutShopInput = {
   openingDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   currentDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
+  branchId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutSupplierInput
@@ -764,8 +832,75 @@ export type SupplierScalarWhereInput = {
   currentDue?: Prisma.DecimalFilter<"Supplier"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFilter<"Supplier"> | string
   shopId?: Prisma.StringFilter<"Supplier"> | string
+  branchId?: Prisma.StringNullableFilter<"Supplier"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Supplier"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Supplier"> | Date | string
+}
+
+export type SupplierCreateWithoutBranchInput = {
+  id?: string
+  name: string
+  companyName?: string | null
+  phone: string
+  email?: string | null
+  village?: string | null
+  district?: string | null
+  address?: string | null
+  contactPerson?: string | null
+  openingDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  shop: Prisma.ShopCreateNestedOneWithoutSuppliersInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutSupplierInput
+  payments?: Prisma.SupplierPaymentCreateNestedManyWithoutSupplierInput
+}
+
+export type SupplierUncheckedCreateWithoutBranchInput = {
+  id?: string
+  name: string
+  companyName?: string | null
+  phone: string
+  email?: string | null
+  village?: string | null
+  district?: string | null
+  address?: string | null
+  contactPerson?: string | null
+  openingDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: string
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutSupplierInput
+  payments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutSupplierInput
+}
+
+export type SupplierCreateOrConnectWithoutBranchInput = {
+  where: Prisma.SupplierWhereUniqueInput
+  create: Prisma.XOR<Prisma.SupplierCreateWithoutBranchInput, Prisma.SupplierUncheckedCreateWithoutBranchInput>
+}
+
+export type SupplierCreateManyBranchInputEnvelope = {
+  data: Prisma.SupplierCreateManyBranchInput | Prisma.SupplierCreateManyBranchInput[]
+  skipDuplicates?: boolean
+}
+
+export type SupplierUpsertWithWhereUniqueWithoutBranchInput = {
+  where: Prisma.SupplierWhereUniqueInput
+  update: Prisma.XOR<Prisma.SupplierUpdateWithoutBranchInput, Prisma.SupplierUncheckedUpdateWithoutBranchInput>
+  create: Prisma.XOR<Prisma.SupplierCreateWithoutBranchInput, Prisma.SupplierUncheckedCreateWithoutBranchInput>
+}
+
+export type SupplierUpdateWithWhereUniqueWithoutBranchInput = {
+  where: Prisma.SupplierWhereUniqueInput
+  data: Prisma.XOR<Prisma.SupplierUpdateWithoutBranchInput, Prisma.SupplierUncheckedUpdateWithoutBranchInput>
+}
+
+export type SupplierUpdateManyWithWhereWithoutBranchInput = {
+  where: Prisma.SupplierScalarWhereInput
+  data: Prisma.XOR<Prisma.SupplierUpdateManyMutationInput, Prisma.SupplierUncheckedUpdateManyWithoutBranchInput>
 }
 
 export type SupplierCreateWithoutPurchasesInput = {
@@ -784,6 +919,7 @@ export type SupplierCreateWithoutPurchasesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   shop: Prisma.ShopCreateNestedOneWithoutSuppliersInput
+  branch?: Prisma.BranchCreateNestedOneWithoutSuppliersInput
   payments?: Prisma.SupplierPaymentCreateNestedManyWithoutSupplierInput
 }
 
@@ -801,6 +937,7 @@ export type SupplierUncheckedCreateWithoutPurchasesInput = {
   currentDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
   shopId: string
+  branchId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   payments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutSupplierInput
@@ -838,6 +975,7 @@ export type SupplierUpdateWithoutPurchasesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shop?: Prisma.ShopUpdateOneRequiredWithoutSuppliersNestedInput
+  branch?: Prisma.BranchUpdateOneWithoutSuppliersNestedInput
   payments?: Prisma.SupplierPaymentUpdateManyWithoutSupplierNestedInput
 }
 
@@ -855,6 +993,7 @@ export type SupplierUncheckedUpdateWithoutPurchasesInput = {
   currentDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutSupplierNestedInput
@@ -876,6 +1015,7 @@ export type SupplierCreateWithoutPaymentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   shop: Prisma.ShopCreateNestedOneWithoutSuppliersInput
+  branch?: Prisma.BranchCreateNestedOneWithoutSuppliersInput
   purchases?: Prisma.PurchaseCreateNestedManyWithoutSupplierInput
 }
 
@@ -893,6 +1033,7 @@ export type SupplierUncheckedCreateWithoutPaymentsInput = {
   currentDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
   shopId: string
+  branchId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutSupplierInput
@@ -930,6 +1071,7 @@ export type SupplierUpdateWithoutPaymentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shop?: Prisma.ShopUpdateOneRequiredWithoutSuppliersNestedInput
+  branch?: Prisma.BranchUpdateOneWithoutSuppliersNestedInput
   purchases?: Prisma.PurchaseUpdateManyWithoutSupplierNestedInput
 }
 
@@ -947,6 +1089,7 @@ export type SupplierUncheckedUpdateWithoutPaymentsInput = {
   currentDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutSupplierNestedInput
@@ -965,6 +1108,7 @@ export type SupplierCreateManyShopInput = {
   openingDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   currentDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
+  branchId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -984,6 +1128,7 @@ export type SupplierUpdateWithoutShopInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branch?: Prisma.BranchUpdateOneWithoutSuppliersNestedInput
   purchases?: Prisma.PurchaseUpdateManyWithoutSupplierNestedInput
   payments?: Prisma.SupplierPaymentUpdateManyWithoutSupplierNestedInput
 }
@@ -1001,6 +1146,7 @@ export type SupplierUncheckedUpdateWithoutShopInput = {
   openingDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currentDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutSupplierNestedInput
@@ -1020,6 +1166,83 @@ export type SupplierUncheckedUpdateManyWithoutShopInput = {
   openingDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currentDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SupplierCreateManyBranchInput = {
+  id?: string
+  name: string
+  companyName?: string | null
+  phone: string
+  email?: string | null
+  village?: string | null
+  district?: string | null
+  address?: string | null
+  contactPerson?: string | null
+  openingDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentDue?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: string
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type SupplierUpdateWithoutBranchInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  openingDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shop?: Prisma.ShopUpdateOneRequiredWithoutSuppliersNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutSupplierNestedInput
+  payments?: Prisma.SupplierPaymentUpdateManyWithoutSupplierNestedInput
+}
+
+export type SupplierUncheckedUpdateWithoutBranchInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  openingDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutSupplierNestedInput
+  payments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutSupplierNestedInput
+}
+
+export type SupplierUncheckedUpdateManyWithoutBranchInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  village?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  openingDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentDue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1078,9 +1301,11 @@ export type SupplierSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   currentDue?: boolean
   status?: boolean
   shopId?: boolean
+  branchId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
+  branch?: boolean | Prisma.Supplier$branchArgs<ExtArgs>
   purchases?: boolean | Prisma.Supplier$purchasesArgs<ExtArgs>
   payments?: boolean | Prisma.Supplier$paymentsArgs<ExtArgs>
   _count?: boolean | Prisma.SupplierCountOutputTypeDefaultArgs<ExtArgs>
@@ -1102,13 +1327,15 @@ export type SupplierSelectScalar = {
   currentDue?: boolean
   status?: boolean
   shopId?: boolean
+  branchId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SupplierOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "companyName" | "phone" | "email" | "village" | "district" | "address" | "contactPerson" | "openingDue" | "currentDue" | "status" | "shopId" | "createdAt" | "updatedAt", ExtArgs["result"]["supplier"]>
+export type SupplierOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "companyName" | "phone" | "email" | "village" | "district" | "address" | "contactPerson" | "openingDue" | "currentDue" | "status" | "shopId" | "branchId" | "createdAt" | "updatedAt", ExtArgs["result"]["supplier"]>
 export type SupplierInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
+  branch?: boolean | Prisma.Supplier$branchArgs<ExtArgs>
   purchases?: boolean | Prisma.Supplier$purchasesArgs<ExtArgs>
   payments?: boolean | Prisma.Supplier$paymentsArgs<ExtArgs>
   _count?: boolean | Prisma.SupplierCountOutputTypeDefaultArgs<ExtArgs>
@@ -1118,6 +1345,7 @@ export type $SupplierPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   name: "Supplier"
   objects: {
     shop: Prisma.$ShopPayload<ExtArgs>
+    branch: Prisma.$BranchPayload<ExtArgs> | null
     purchases: Prisma.$PurchasePayload<ExtArgs>[]
     payments: Prisma.$SupplierPaymentPayload<ExtArgs>[]
   }
@@ -1135,6 +1363,7 @@ export type $SupplierPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     currentDue: runtime.Decimal
     status: string
     shopId: string
+    branchId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["supplier"]>
@@ -1478,6 +1707,7 @@ readonly fields: SupplierFieldRefs;
 export interface Prisma__SupplierClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   shop<T extends Prisma.ShopDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ShopDefaultArgs<ExtArgs>>): Prisma.Prisma__ShopClient<runtime.Types.Result.GetResult<Prisma.$ShopPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  branch<T extends Prisma.Supplier$branchArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Supplier$branchArgs<ExtArgs>>): Prisma.Prisma__BranchClient<runtime.Types.Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   purchases<T extends Prisma.Supplier$purchasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Supplier$purchasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PurchasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   payments<T extends Prisma.Supplier$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Supplier$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupplierPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1522,6 +1752,7 @@ export interface SupplierFieldRefs {
   readonly currentDue: Prisma.FieldRef<"Supplier", 'Decimal'>
   readonly status: Prisma.FieldRef<"Supplier", 'String'>
   readonly shopId: Prisma.FieldRef<"Supplier", 'String'>
+  readonly branchId: Prisma.FieldRef<"Supplier", 'String'>
   readonly createdAt: Prisma.FieldRef<"Supplier", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Supplier", 'DateTime'>
 }
@@ -1869,6 +2100,25 @@ export type SupplierDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many Suppliers to delete.
    */
   limit?: number
+}
+
+/**
+ * Supplier.branch
+ */
+export type Supplier$branchArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Branch
+   */
+  select?: Prisma.BranchSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Branch
+   */
+  omit?: Prisma.BranchOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BranchInclude<ExtArgs> | null
+  where?: Prisma.BranchWhereInput
 }
 
 /**

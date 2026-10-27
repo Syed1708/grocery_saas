@@ -9,11 +9,28 @@ import { supplierSchema } from "@/lib/validations";
 async function getAuthenticatedUser() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.shopId) {
-    throw new Error("Unauthorized");
+    throw new Error("Unauthorized: Please log in.");
   }
-  return session.user;
+
+  // Fail-safe: Ensure active branch is resolved
+  let branchId = session.user.branchId;
+  if (!branchId) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { branchId: true },
+    });
+    branchId = dbUser?.branchId || null;
+  }
+
+  return {
+    ...session.user,
+    branchId,
+  };
 }
 
+// ==========================================
+// 1. CREATE SUPPLIER (Tagged with branchId)
+// ==========================================
 export async function createSupplierAction(formData: FormData) {
   try {
     const user = await getAuthenticatedUser();
@@ -34,6 +51,9 @@ export async function createSupplierAction(formData: FormData) {
     }
 
     const data = validated.data;
+    
+    // Check if user toggled "Global Corporate Supplier" (e.g. Unilever, Pran)
+    const isGlobal = formData.get("isGlobal") === "true";
 
     await prisma.supplier.create({
       data: {
@@ -45,18 +65,25 @@ export async function createSupplierAction(formData: FormData) {
         district: data.district,
         address: data.addressLine,
         openingDue: data.openingBalance,
-        currentDue: data.openingBalance, // 👈 Saved as currentDue
+        currentDue: data.openingBalance,
         shopId: user.shopId,
+        // 👈 TAG WITH BRANCH: null if global distributor, otherwise active branch
+        branchId: isGlobal ? null : user.branchId,
       },
     });
 
     revalidatePath("/dashboard/admin/suppliers");
+    revalidatePath("/admin/suppliers");
     return { success: true };
   } catch (error: any) {
+    console.error("createSupplierAction error:", error);
     return { success: false, error: error.message || "Failed to create supplier." };
   }
 }
 
+// ==========================================
+// 2. UPDATE SUPPLIER (Multi-tenant guarded)
+// ==========================================
 export async function updateSupplierAction(formData: FormData) {
   try {
     const user = await getAuthenticatedUser();
@@ -81,8 +108,12 @@ export async function updateSupplierAction(formData: FormData) {
 
     const data = validated.data;
 
+    // 👈 Multi-tenant check: ID + shopId
     await prisma.supplier.update({
-      where: { id },
+      where: { 
+        id, 
+        shopId: user.shopId 
+      },
       data: {
         name: data.name,
         companyName: data.companyName,
@@ -95,40 +126,59 @@ export async function updateSupplierAction(formData: FormData) {
     });
 
     revalidatePath("/dashboard/admin/suppliers");
+    revalidatePath("/admin/suppliers");
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || "Failed to update supplier." };
   }
 }
 
-
+// ==========================================
+// 3. DELETE SUPPLIER (Safe guarded)
+// ==========================================
 export async function deleteSupplierAction(id: string) {
   try {
     const user = await getAuthenticatedUser();
 
     const supplier = await prisma.supplier.findFirst({
       where: { id, shopId: user.shopId },
+      include: {
+        _count: {
+          select: { purchases: true },
+        },
+      },
     });
+
     if (!supplier) return { success: false, error: "Supplier not found." };
 
     if (Number(supplier.currentDue) > 0) {
       return {
         success: false,
-        error: `Cannot delete: You owe ${supplier.companyName} an unpaid balance of ${supplier.currentDue}.`,
+        error: `Cannot delete: You owe ${supplier.companyName || supplier.name} an unpaid balance of ৳${Number(supplier.currentDue).toFixed(2)}. Settle the balance first.`,
+      };
+    }
+
+    if (supplier._count.purchases > 0) {
+      return {
+        success: false,
+        error: `Cannot delete: ${supplier.companyName || supplier.name} has ${supplier._count.purchases} purchase chalans in system. Mark supplier inactive instead.`,
       };
     }
 
     await prisma.supplier.delete({ where: { id } });
 
     revalidatePath("/dashboard/admin/suppliers");
+    revalidatePath("/admin/suppliers");
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || "Failed to delete supplier." };
   }
 }
 
-
-interface RecordSupplierPaymentPayload {
+// ==========================================
+// 4. RECORD PAYMENT (Supports both 1 object OR 3 arguments)
+// ==========================================
+export interface RecordSupplierPaymentPayload {
   supplierId: string;
   amount: number;
   paymentMethod?: string;
@@ -136,10 +186,24 @@ interface RecordSupplierPaymentPayload {
   note?: string;
 }
 
-// 👈 UPGRADED: Creates an audit record in SupplierPayment and decrements currentDue
-export async function recordSupplierPaymentAction(payload: RecordSupplierPaymentPayload) {
+export async function recordSupplierPaymentAction(
+  payloadOrId: RecordSupplierPaymentPayload | string,
+  amountArg?: number,
+  paymentMethodArg: string = "cash"
+) {
   try {
     const user = await getAuthenticatedUser();
+
+    // 👈 Polyfill: Supports both recordSupplierPaymentAction(id, amount, method) AND recordSupplierPaymentAction({ ... })
+    const payload: RecordSupplierPaymentPayload =
+      typeof payloadOrId === "string"
+        ? {
+            supplierId: payloadOrId,
+            amount: amountArg ?? 0,
+            paymentMethod: paymentMethodArg,
+          }
+        : payloadOrId;
+
     const { supplierId, amount, paymentMethod = "cash", reference, note } = payload;
 
     if (!amount || amount <= 0) {
@@ -151,6 +215,7 @@ export async function recordSupplierPaymentAction(payload: RecordSupplierPayment
     });
     if (!supplier) return { success: false, error: "Supplier not found." };
 
+    // Resolve branch for payment
     let activeBranchId = user.branchId;
     if (!activeBranchId) {
       const mainBranch = await prisma.branch.findFirst({
@@ -160,11 +225,15 @@ export async function recordSupplierPaymentAction(payload: RecordSupplierPayment
       activeBranchId = mainBranch?.id || null;
     }
 
+    if (!activeBranchId) {
+      return { success: false, error: "Active branch required to record cash payout." };
+    }
+
     const voucherNo = `PV-${Date.now().toString().slice(-6)}`;
     const previousDue = Number(supplier.currentDue);
     const remainingDue = Math.max(0, previousDue - amount);
 
-    // 👈 Atomic Transaction: Record payment voucher + update supplier debt
+    // Atomic Transaction: SupplierPayment voucher + decrement supplier debt
     const payment = await prisma.$transaction(async (tx) => {
       const p = await tx.supplierPayment.create({
         data: {
@@ -190,6 +259,9 @@ export async function recordSupplierPaymentAction(payload: RecordSupplierPayment
 
     revalidatePath("/dashboard/admin/purchases");
     revalidatePath("/dashboard/admin/suppliers");
+    revalidatePath("/reports/closings"); // 👈 Immediately updates Day-End Z-Report (cashSupplierPaid)!
+    revalidatePath("/reports/purchases");
+
     return {
       success: true,
       voucherNo,
@@ -209,7 +281,9 @@ export async function recordSupplierPaymentAction(payload: RecordSupplierPayment
   }
 }
 
-// 👈 Fetch full payment history / ledger for a supplier
+// ==========================================
+// 5. SUPPLIER PAYMENT HISTORY LEDGER
+// ==========================================
 export async function getSupplierPaymentHistoryAction(supplierId: string) {
   try {
     const user = await getAuthenticatedUser();

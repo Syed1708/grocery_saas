@@ -3129,6 +3129,7 @@ export const SupplierScalarFieldEnum = {
   currentDue: 'currentDue',
   status: 'status',
   shopId: 'shopId',
+  branchId: 'branchId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -3209,6 +3210,7 @@ export const CustomerScalarFieldEnum = {
   currentDue: 'currentDue',
   status: 'status',
   shopId: 'shopId',
+  branchId: 'branchId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -3809,7 +3811,8 @@ export const SupplierOrderByRelevanceFieldEnum = {
   address: 'address',
   contactPerson: 'contactPerson',
   status: 'status',
-  shopId: 'shopId'
+  shopId: 'shopId',
+  branchId: 'branchId'
 } as const
 
 export type SupplierOrderByRelevanceFieldEnum = (typeof SupplierOrderByRelevanceFieldEnum)[keyof typeof SupplierOrderByRelevanceFieldEnum]
@@ -3861,7 +3864,8 @@ export const CustomerOrderByRelevanceFieldEnum = {
   district: 'district',
   address: 'address',
   status: 'status',
-  shopId: 'shopId'
+  shopId: 'shopId',
+  branchId: 'branchId'
 } as const
 
 export type CustomerOrderByRelevanceFieldEnum = (typeof CustomerOrderByRelevanceFieldEnum)[keyof typeof CustomerOrderByRelevanceFieldEnum]

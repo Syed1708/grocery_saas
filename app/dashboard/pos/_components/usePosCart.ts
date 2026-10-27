@@ -69,11 +69,28 @@ export function usePosCart(
   const dueAmount = Math.max(0, grandTotal - totalPaid);
   const changeAmount = Math.max(0, totalPaid - grandTotal);
 
-  // Add Item to Cart
+  // 👈 1. ADD TO CART WITH STRICT STOCK PROTECTION
   function addToCart(product: PosProduct) {
+    const availableStock = Number(product.stockAvailable ?? 0);
+
+    // 🛑 GUARD: Reject if out of stock in this branch
+    if (availableStock <= 0) {
+      toast.error(`"${product.name}" এই শাখায় স্টক নেই! (Out of stock in this branch)`);
+      return;
+    }
+
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
+
       if (existing) {
+        // 🛑 GUARD: Reject if incrementing exceeds branch stock
+        if (existing.quantity + 1 > availableStock) {
+          toast.warning(
+            `স্টক সীমাবদ্ধ! "${product.name}" এর সর্বোচ্চ মজুদ মাত্র ${availableStock} ${product.unitCode}।`
+          );
+          return prev;
+        }
+
         return prev.map((item) =>
           item.id === product.id
             ? {
@@ -84,6 +101,7 @@ export function usePosCart(
             : item
         );
       }
+
       return [
         ...prev,
         {
@@ -95,17 +113,36 @@ export function usePosCart(
     });
   }
 
+  // 👈 2. UPDATE QUANTITY WITH STOCK CAP
   function updateQty(productId: string, newQty: number) {
     if (newQty <= 0) {
       removeFromCart(productId);
       return;
     }
+
     setCart((prev) =>
-      prev.map((item) =>
-        item.id === productId
-          ? { ...item, quantity: newQty, lineTotal: newQty * item.unitPrice }
-          : item
-      )
+      prev.map((item) => {
+        if (item.id === productId) {
+          const availableStock = Number(item.stockAvailable ?? 0);
+
+          // 🛑 GUARD: Cap manual quantity typing to available stock
+          if (newQty > availableStock) {
+            toast.warning(`স্টক পর্যাপ্ত নয়! সর্বোচ্চ মজুদ: ${availableStock} ${item.unitCode}`);
+            return {
+              ...item,
+              quantity: availableStock,
+              lineTotal: availableStock * item.unitPrice,
+            };
+          }
+
+          return {
+            ...item,
+            quantity: newQty,
+            lineTotal: newQty * item.unitPrice,
+          };
+        }
+        return item;
+      })
     );
   }
 
@@ -113,16 +150,22 @@ export function usePosCart(
     setCart((prev) => prev.filter((item) => item.id !== productId));
   }
 
-  function clearCart() {
-    setCart([]);
-    setDiscount(0);
-    setCashPaid(0);
-    setBkashPaid(0);
-    setBankPaid(0);
-    setShowSplitPay(false);
-  }
+function clearCart() {
+  setCart([]);
+  setSelectedCustomerId(""); // 👈 1. Resets customer to Walk-in (No customer)
+  setSearchQuery("");         // 👈 2. Clears barcode/search input
+  setDiscount(0);             // 👈 3. Resets discount
+  setCashPaid(0);
+  setBkashPaid(0);
+  setBankPaid(0);
+  setShowSplitPay(false);
 
-  // Quick Cash Handlers
+  // 👈 4. Automatically re-focus the barcode gun for the next customer
+  setTimeout(() => {
+    barcodeInputRef.current?.focus();
+  }, 100);
+}
+
   function setQuickCash(amount: number) {
     setCashPaid(amount);
   }
@@ -133,7 +176,7 @@ export function usePosCart(
     setBankPaid(0);
   }
 
-  // Barcode Gun Enter
+  // 👈 3. BARCODE SCANNER STOCK GUARD
   function handleBarcodeSubmit(e?: React.FormEvent) {
     if (e) e.preventDefault();
     if (!searchQuery.trim()) return;
@@ -147,6 +190,14 @@ export function usePosCart(
     );
 
     if (match) {
+      const stock = Number(match.stockAvailable ?? 0);
+      
+      // 🛑 BLOCK: Out of stock barcode scan
+      if (stock <= 0) {
+        toast.error(`বারকোড #${match.barcode}: "${match.name}" এই শাখায় স্টকে নেই!`);
+        return;
+      }
+
       addToCart(match);
       setSearchQuery("");
       toast.success(`যোগ করা হয়েছে: ${match.name}`);
@@ -211,7 +262,7 @@ export function usePosCart(
     }
   }
 
-  // Global Keyboard Shortcuts ([F2] Complete Sale, [/] Scan Barcode)
+  // Global Keyboard Shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "F2") {

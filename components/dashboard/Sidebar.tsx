@@ -49,7 +49,7 @@ export default function Sidebar({
     { label: "Expenses", href: "/dashboard/admin/expenses", icon: TrendingDown, roles: ["OWNER", "MANAGER"] },
     { label: "Day-End Closings", href: "/dashboard/admin/closings", icon: Receipt, roles: ["OWNER", "MANAGER"] },
     { label: "Reports", href: "/dashboard/admin/reports", icon: Receipt, roles: ["OWNER", "MANAGER"] },
-    { label: "Store Settings", href: "/dashboard/settings", icon: Settings, roles: ["OWNER"] },
+    { label: "Store Settings", href: "/dashboard/admin/settings", icon: Settings, roles: ["OWNER","MANAGER"] },
   ];
 
   const filteredNav = navItems.filter((item) => item.roles.includes(role));

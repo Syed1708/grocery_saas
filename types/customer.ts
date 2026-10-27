@@ -16,5 +16,16 @@ export interface ICustomer {
   currentBalance: number; // Matches UI
   status?: string;
   shopId: string;
+
+  // 👈 ADD THESE 3 FIELDS:
+  branchId?: string | null;
+  branch?: {
+    id?: string;
+    name: string;
+    code?: string;
+  } | null;
+  branchName?: string | null;
+
   createdAt: Date;
+  updatedAt?: Date;
 }

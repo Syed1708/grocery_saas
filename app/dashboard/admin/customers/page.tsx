@@ -12,10 +12,10 @@ export default async function CustomersPage() {
     redirect("/login");
   }
 
-  const { shopId } = session.user;
+  const { shopId, branchId } = session.user;
 
   const [customers, shop] = await Promise.all([
-    getCustomers(shopId),
+    getCustomers(shopId, branchId),
     prisma.shop.findUnique({
       where: { id: shopId },
       select: { currencySymbol: true },

@@ -1,52 +1,53 @@
-export type AccountType = "CASH" | "BANK" | "BKASH" | "NAGAD" | "ROCKET" | "OTHER";
-export type ChequeType = "RECEIVED" | "ISSUED";
-export type ChequeStatus = "PENDING" | "CLEARED" | "BOUNCED" | "CANCELLED";
-export type LoanType = "TAKEN" | "GIVEN";
-
 export interface IAccount {
   id: string;
   name: string;
-  type: AccountType;
-  accountNumber: string | null;
-  bankName: string | null;
-  branchName: string | null;
+  type: "CASH" | "BANK" | "BKASH" | "NAGAD" | "ROCKET" | "OTHER";
+  accountNumber?: string | null;
+  bankName?: string | null;
+  branchName?: string | null;       // Bank's branch (e.g. Motijheel Branch)
   openingBalance: number;
   currentBalance: number;
   status: string;
-  notes: string | null;
+  notes?: string | null;
   shopId: string;
+  branchId: string;                 // 👈 ERP Store Branch ID
+  storeBranchName?: string | null;  // 👈 ERP Store Branch Name
   createdAt: Date;
 }
 
 export interface IBankCheque {
   id: string;
-  type: ChequeType;
-  partyType: string;
+  type: "RECEIVED" | "ISSUED";
+  partyType: "CUSTOMER" | "SUPPLIER" | "OTHER";
   partyName: string;
   bankName: string;
   chequeNumber: string;
   chequeDate: Date;
-  clearingDate: Date | null;
+  clearingDate?: Date | null;
   amount: number;
-  status: ChequeStatus;
-  accountId: string | null;
+  status: "PENDING" | "CLEARED" | "BOUNCED" | "CANCELLED";
+  accountId?: string | null;
   accountName?: string | null;
-  note: string | null;
+  note?: string | null;
+  branchId: string;                 // 👈 ERP Store Branch ID
+  storeBranchName?: string | null;
   createdAt: Date;
 }
 
 export interface ILoan {
   id: string;
-  type: LoanType;
+  type: "TAKEN" | "GIVEN";
   personName: string;
-  phone: string | null;
+  phone?: string | null;
   amount: number;
   totalPaid: number;
   remainingAmount: number;
   loanDate: Date;
-  dueDate: Date | null;
-  status: string;
+  dueDate?: Date | null;
+  status: "ACTIVE" | "PAID";
   accountName?: string | null;
-  notes: string | null;
+  notes?: string | null;
+  branchId: string;                 // 👈 ERP Store Branch ID
+  storeBranchName?: string | null;
   createdAt: Date;
 }

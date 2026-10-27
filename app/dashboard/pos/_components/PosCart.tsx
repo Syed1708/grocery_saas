@@ -102,7 +102,7 @@ export default function PosCart({
                 <th className="p-2 text-center w-24">পরিমাণ (Qty)</th>
                 <th className="p-2 text-right w-20">মোট (Total)</th>
                 <th className="p-2 w-7"></th>
-              </tr>
+              </tr> 
             </thead>
             <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
               {cart.map((item) => (

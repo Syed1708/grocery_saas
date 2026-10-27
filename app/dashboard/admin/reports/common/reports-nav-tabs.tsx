@@ -17,7 +17,7 @@ export const reportTabs = [
   { label: "Overview", href: "/dashboard/admin/reports", icon: LayoutDashboard },
   { label: "Sales & Invoices", href: "/dashboard/admin/reports/sales", icon: TrendingUp },
   { label: "Customer Khata (বাকি)", href: "/dashboard/admin/reports/customers-due", icon: Users },
-  { label: "Stock & Expiry", href: "/dashboard/admin/reports/stock", icon: Boxes },
+  { label: "Stock & Expiry", href: "/dashboard/admin/reports/stocks", icon: Boxes },
   { label: "Purchases", href: "/dashboard/admin/reports/purchases", icon: Truck },
   { label: "Profit & Loss", href: "/dashboard/admin/reports/profit-loss", icon: PieChart },
   { label: "Expenses", href: "/dashboard/admin/reports/expenses", icon: ReceiptText },

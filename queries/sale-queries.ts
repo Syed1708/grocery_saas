@@ -12,6 +12,7 @@ export async function getPosCatalog(shopId: string, branchId?: string | null) {
       unit: { select: { id: true, name: true, shortCode: true } },
       stocks: branchId ? { where: { branchId } } : true,
     },
+    // need change here 
     orderBy: { name: "asc" },
   });
 

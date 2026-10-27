@@ -1,5 +1,4 @@
 "use client";
-"use no memo";
 
 import { useState, useMemo } from "react";
 import {
@@ -16,7 +15,8 @@ import {
   Phone,
   Building2,
   Search,
-  Filter,
+  Globe,
+  GitBranch,
 } from "lucide-react";
 import { toast } from "sonner";
 import { DataTable } from "@/components/common/data-table/DataTable";
@@ -34,7 +34,7 @@ import { ISupplier } from "@/types";
 
 export default function SuppliersClient({
   data,
-  currencySymbol = "$",
+  currencySymbol = "৳",
 }: {
   data: ISupplier[];
   currencySymbol?: string;
@@ -53,7 +53,7 @@ export default function SuppliersClient({
     return data.filter((s) => {
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        const matchesCompany = s.companyName.toLowerCase().includes(q);
+        const matchesCompany = s.companyName?.toLowerCase().includes(q);
         const matchesContact = s.name.toLowerCase().includes(q);
         const matchesPhone = s.phone.toLowerCase().includes(q);
         if (!matchesCompany && !matchesContact && !matchesPhone) return false;
@@ -111,8 +111,9 @@ export default function SuppliersClient({
     setLoading(true);
     const formData = new FormData(e.currentTarget);
     const amount = parseFloat(formData.get("amount")?.toString() || "0");
+    const paymentMethod = formData.get("paymentMethod")?.toString() || "cash";
 
-    const res = await recordSupplierPaymentAction(activeSupplierForPayment.id, amount);
+    const res = await recordSupplierPaymentAction(activeSupplierForPayment.id, amount, paymentMethod);
     setLoading(false);
 
     if (res.success) {
@@ -142,17 +143,36 @@ export default function SuppliersClient({
     {
       accessorKey: "companyName",
       header: "Distributor / Company",
-      cell: ({ row }) => (
-        <div>
-          <span className="font-semibold text-neutral-900 dark:text-neutral-100 flex items-center gap-1.5">
-            <Building2 size={14} className="text-neutral-400" />
-            {row.getValue("companyName")}
-          </span>
-          <span className="text-[11px] text-neutral-400">
-            Contact: {row.original.name}
-          </span>
-        </div>
-      ),
+      cell: ({ row }) => {
+        const isGlobal = !row.original.branchId;
+        const branchName = row.original.branch?.name || row.original.branchName;
+
+        return (
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-xs text-neutral-900 dark:text-neutral-100 flex items-center gap-1.5">
+                <Building2 size={13} className="text-neutral-400" />
+                {row.original.companyName || row.original.name}
+              </span>
+              
+              {/* 👈 Visual Branch Scope Badge */}
+              {isGlobal ? (
+                <span className="flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                  <Globe size={10} /> Global (সকল শাখা)
+                </span>
+              ) : (
+                <span className="flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                  <GitBranch size={10} /> {branchName || "Local"}
+                </span>
+              )}
+            </div>
+
+            <span className="text-[11px] text-neutral-400 block mt-0.5">
+              Contact: {row.original.contactPerson || row.original.name}
+            </span>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "phone",
@@ -165,16 +185,17 @@ export default function SuppliersClient({
       ),
     },
     {
-      accessorKey: "payableBalance",
-      header: "Payable Debt (Store Owes)",
+      accessorKey: "currentDue",
+      header: "Payable Debt (দোকানের দেনা)",
       cell: ({ row }) => {
-        const debt = Number(row.original.payableBalance);
+        // Safe access for currentDue or payableBalance
+        const debt = Number(row.original.currentDue ?? (row.original as any).payableBalance ?? 0);
         const hasDebt = debt > 0;
 
         return (
           <div className="flex items-center gap-2">
             <span
-              className={`px-2 py-0.5 text-xs font-bold rounded-lg ${
+              className={`px-2 py-0.5 text-xs font-mono font-bold rounded-lg ${
                 hasDebt
                   ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-400"
                   : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400"
@@ -184,6 +205,7 @@ export default function SuppliersClient({
             </span>
             {hasDebt && (
               <button
+                type="button"
                 onClick={() => openPaymentModal(row.original)}
                 className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
               >
@@ -202,18 +224,20 @@ export default function SuppliersClient({
         return (
           <div className="flex items-center gap-1.5">
             <button
+              type="button"
               onClick={() => openEdit(supplier)}
               className="p-1.5 rounded-lg text-neutral-500 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
               title="Edit Profile"
             >
-              <Edit2 size={15} />
+              <Edit2 size={14} />
             </button>
             <button
+              type="button"
               onClick={() => setDeleteTarget(supplier)}
               className="p-1.5 rounded-lg text-neutral-500 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
               title="Delete"
             >
-              <Trash2 size={15} />
+              <Trash2 size={14} />
             </button>
           </div>
         );
@@ -236,10 +260,10 @@ export default function SuppliersClient({
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">
-            Suppliers & Distributors
+            Suppliers &amp; Distributors (মহাজন ও ডিস্ট্রিবিউটর)
           </h1>
           <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-            Manage product vendors, distributor contacts, and payable balances
+            Manage product vendors, corporate distributors, and payable accounts
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -289,21 +313,21 @@ export default function SuppliersClient({
               name="companyName"
               required
               defaultValue={editingSupplier?.companyName || ""}
-              placeholder="e.g. Unilever Distributors Ltd."
+              placeholder="e.g. Unilever Bangladesh Ltd."
               className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
             <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Contact Person *
+              Contact Person / SR Name *
             </label>
             <input
               type="text"
               name="name"
               required
               defaultValue={editingSupplier?.name || ""}
-              placeholder="e.g. Tariqul Islam"
+              placeholder="e.g. Tariqul Islam (SR)"
               className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -348,10 +372,31 @@ export default function SuppliersClient({
           <input
             type="text"
             name="addressLine"
-            defaultValue={editingSupplier?.addressLine || ""}
+            defaultValue={editingSupplier?.address || ""}
             placeholder="Warehouse #14, Tejgaon Industrial Area..."
             className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
           />
+        </div>
+
+        {/* 👈 Multi-Branch Scope Toggle */}
+        <div className="pt-2 border-t border-neutral-100 dark:border-neutral-800">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              name="isGlobal"
+              value="true"
+              defaultChecked={editingSupplier ? !editingSupplier.branchId : false}
+              className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+            />
+            <div>
+              <span className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 block">
+                সকল শাখার জন্য প্রযোজ্য (Global Corporate Supplier)
+              </span>
+              <span className="text-[10px] text-neutral-400 block">
+                Enable for major brands (Unilever, Pran) so all branches can purchase from this vendor
+              </span>
+            </div>
+          </label>
         </div>
       </FormModal>
 
@@ -360,14 +405,14 @@ export default function SuppliersClient({
         isOpen={paymentModalOpen}
         onClose={() => setPaymentModalOpen(false)}
         title="Pay Supplier Balance"
-        description={`Record store payout to ${activeSupplierForPayment?.companyName}.`}
+        description={`Record store payout to ${activeSupplierForPayment?.companyName || activeSupplierForPayment?.name}.`}
         maxWidth="sm"
       >
         <form onSubmit={handlePaymentSubmit} className="space-y-4">
           <div className="p-3 bg-neutral-50 dark:bg-neutral-800/60 rounded-xl border border-neutral-200 dark:border-neutral-700 flex justify-between items-center text-xs">
             <span className="text-neutral-500 dark:text-neutral-400">Total Owed Debt:</span>
-            <span className="font-bold text-amber-600 dark:text-amber-400">
-              {currencySymbol}{activeSupplierForPayment?.payableBalance.toFixed(2)}
+            <span className="font-bold font-mono text-amber-600 dark:text-amber-400">
+              {currencySymbol}{Number(activeSupplierForPayment?.currentDue ?? (activeSupplierForPayment as any)?.payableBalance ?? 0).toFixed(2)}
             </span>
           </div>
 
@@ -380,11 +425,27 @@ export default function SuppliersClient({
               step="0.01"
               name="amount"
               required
-              max={activeSupplierForPayment?.payableBalance || undefined}
-              defaultValue={activeSupplierForPayment?.payableBalance || ""}
+              max={Number(activeSupplierForPayment?.currentDue ?? (activeSupplierForPayment as any)?.payableBalance ?? 0) || undefined}
+              defaultValue={Number(activeSupplierForPayment?.currentDue ?? (activeSupplierForPayment as any)?.payableBalance ?? 0) || ""}
               placeholder="0.00"
-              className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500 font-mono"
             />
+          </div>
+
+          {/* 👈 Payment Method Selector for Day-End Z-Report integration */}
+          <div>
+            <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+              Payment Method (টাকা পরিশোধের মাধ্যম) *
+            </label>
+            <select
+              name="paymentMethod"
+              className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none cursor-pointer"
+            >
+              <option value="cash">নগদ ক্যাশ ড্রয়ার (Cash Drawer)</option>
+              <option value="bank">ব্যাংক ট্রান্সফার (Bank Transfer)</option>
+              <option value="bkash">বিকাশ (bKash)</option>
+              <option value="nagad">নগদ (Nagad)</option>
+            </select>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
@@ -411,7 +472,7 @@ export default function SuppliersClient({
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
         title="Delete Supplier Profile"
-        message={`Are you sure you want to delete "${deleteTarget?.companyName}"?`}
+        message={`Are you sure you want to delete "${deleteTarget?.companyName || deleteTarget?.name}"?`}
         confirmLabel="Delete Supplier"
         loading={loading}
       />

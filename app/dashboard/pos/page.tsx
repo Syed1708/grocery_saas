@@ -19,7 +19,7 @@ export default async function PosPage() {
   // Fast parallel queries
   const [catalog, customers, categories, rawShop] = await Promise.all([
     getPosCatalog(shopId, branchId),
-    getCustomers(shopId),
+    getCustomers(shopId, branchId), // 👈 Updated: Pass branchId!
     getCategoriesForSelect(shopId),
     prisma.shop.findUnique({
       where: { id: shopId },
@@ -37,7 +37,6 @@ export default async function PosPage() {
     }),
   ]);
 
-  // 👈 Serialize Prisma Decimal objects to plain JSON numbers/strings
   const shop = rawShop ? JSON.parse(JSON.stringify(rawShop)) : null;
 
   return (
