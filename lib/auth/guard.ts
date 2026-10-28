@@ -4,7 +4,6 @@ import { authOptions } from "@/services/authOptions";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_ROLE_PERMISSIONS, PermissionKey, UserRole } from "@/types";
 
-
 interface AuthGuardOptions {
   allowedRoles?: UserRole[];
   requiredPermission?: PermissionKey;
@@ -22,12 +21,16 @@ export async function requireAuth(options: AuthGuardOptions = {}) {
 
   // 1. Ensure a branch context exists
   if (!activeBranchId) {
-    throw new Error("FORBIDDEN: No active branch associated with this session.");
+    throw new Error(
+      "FORBIDDEN: No active branch associated with this session.",
+    );
   }
 
   // 2. Coarse Role Check
   if (options.allowedRoles && !options.allowedRoles.includes(role)) {
-    throw new Error(`FORBIDDEN: Requires one of [${options.allowedRoles.join(", ")}].`);
+    throw new Error(
+      `FORBIDDEN: Requires one of [${options.allowedRoles.join(", ")}].`,
+    );
   }
 
   // 3. Fast DB verification for sensitive mutations / custom permissions
@@ -43,16 +46,21 @@ export async function requireAuth(options: AuthGuardOptions = {}) {
 
     if (options.requiredPermission && role !== "OWNER") {
       const basePermissions = DEFAULT_ROLE_PERMISSIONS[role] || [];
-      const customOverrides = Array.isArray(dbUser.customPermissions)
+      const storedPermissions = Array.isArray(dbUser.customPermissions)
         ? (dbUser.customPermissions as PermissionKey[])
-        : [];
+        : null;
 
-      const hasPermission =
-        basePermissions.includes(options.requiredPermission) ||
-        customOverrides.includes(options.requiredPermission);
+      // If explicit permissions are saved, use them. Otherwise use role defaults.
+      const activePermissions =
+        storedPermissions !== null ? storedPermissions : basePermissions;
+      const hasPermission = activePermissions.includes(
+        options.requiredPermission,
+      );
 
       if (!hasPermission) {
-        throw new Error(`FORBIDDEN: Missing permission [${options.requiredPermission}].`);
+        throw new Error(
+          `FORBIDDEN: Missing permission [${options.requiredPermission}].`,
+        );
       }
     }
   }

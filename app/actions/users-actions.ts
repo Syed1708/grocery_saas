@@ -7,6 +7,33 @@ import { requireAuth } from "@/lib/auth/guard";
 import { revalidatePath } from "next/cache";
 import { userSchema } from "@/lib/validations/user";
 import { ZodError } from "zod";
+import { DEFAULT_ROLE_PERMISSIONS, UserRole } from "@/types/rbac";
+import { authOptions } from "@/services/authOptions";
+import { getServerSession } from "next-auth";
+
+export async function getMyPermissionsAction() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, permissions: [] };
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true, customPermissions: true, isActive: true },
+    });
+
+    if (!user || !user.isActive) return { success: false, permissions: [] };
+
+    const base = DEFAULT_ROLE_PERMISSIONS[user.role as UserRole] || [];
+    const custom = Array.isArray(user.customPermissions) ? (user.customPermissions as string[]) : null;
+
+    return {
+      success: true,
+      permissions: custom !== null ? custom : base,
+    };
+  } catch {
+    return { success: false, permissions: [] };
+  }
+}
 
 export async function saveUserAction(input: any) {
   try {

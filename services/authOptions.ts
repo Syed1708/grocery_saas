@@ -73,6 +73,7 @@ export const authOptions: NextAuthOptions = {
           shopName: user.shop.name,
           branchId,
           branchName,
+          customPermissions: Array.isArray(user.customPermissions) ? (user.customPermissions as string[]) : [],
         };
       },
     }),
@@ -90,6 +91,7 @@ export const authOptions: NextAuthOptions = {
         token.shopName = user.shopName;
         token.branchId = user.branchId;
         token.branchName = user.branchName;
+        token.customPermissions = user.customPermissions; // 👈 Added
       }
 
       // 2. Dynamic Branch Switching (Only OWNER can switch branches)
@@ -116,6 +118,7 @@ export const authOptions: NextAuthOptions = {
         session.user.shopName = token.shopName as string;
         session.user.branchId = token.branchId as string | null;
         session.user.branchName = token.branchName as string | null;
+        session.user.customPermissions = (token.customPermissions as string[]) || []; 
       }
       return session;
     },

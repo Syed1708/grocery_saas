@@ -4,13 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { saveUploadedFile, deleteUploadedFile } from "@/lib/file-storage";
 import { categorySchema } from "@/lib/validations";
-import { requireAuth } from "@/lib/auth-guard";
-
-
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types/rbac";
 
 export async function createCategoryAction(formData: FormData) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    // 🛡️ Zero-Trust Guard: Enforce specific permission for Catalog Management
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
     // 1. Zod Validation (Includes status)
     const validated = categorySchema.safeParse({
@@ -66,7 +69,11 @@ export async function createCategoryAction(formData: FormData) {
 
 export async function updateCategoryAction(formData: FormData) {
   try {
-       const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    // 🛡️ Zero-Trust Guard: Enforce specific permission
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
     const id = formData.get("id")?.toString();
     if (!id) return { success: false, error: "Missing category ID." };
@@ -123,7 +130,11 @@ export async function updateCategoryAction(formData: FormData) {
 
 export async function deleteCategoryAction(id: string) {
   try {
-        const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    // 🛡️ Zero-Trust Guard: Enforce specific permission (Removed invalid "ADMIN" role string)
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
     // Verify category belongs to user's shop
     const category = await prisma.category.findFirst({

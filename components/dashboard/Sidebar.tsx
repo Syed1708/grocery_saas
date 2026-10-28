@@ -1,3 +1,4 @@
+// components/layout/Sidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -16,7 +17,9 @@ import {
   X,
   GitBranch,
 } from "lucide-react";
-import { UserRole } from "@/types/user";
+import { UserRole } from "@/types";
+import { usePermission } from "@/hooks/usePermission";
+import { PERMISSIONS, PermissionKey } from "@/types/rbac";
 
 interface SidebarProps {
   role: UserRole;
@@ -32,28 +35,41 @@ export default function Sidebar({
   onCloseMobile,
 }: SidebarProps) {
   const pathname = usePathname();
+  const { hasPermission, isOwner } = usePermission();
 
-  const navItems = [
+  const navItems: Array<{
+    label: string;
+    href: string;
+    icon: any;
+    roles: string[];
+    permission?: PermissionKey;
+  }> = [
     { label: "Overview", href: "/dashboard", icon: LayoutDashboard, roles: ["OWNER", "MANAGER", "CASHIER"] },
-    { label: "Users", href: "/dashboard/admin/users", icon: Package, roles: ["OWNER", "MANAGER", "CASHIER"] },
-    { label: "POS Terminal", href: "/dashboard/pos", icon: ShoppingCart, roles: ["OWNER", "MANAGER", "CASHIER"] },
-    { label: "Categories", href: "/dashboard/admin/categories", icon: Tags, roles: ["OWNER", "MANAGER"] },
-    { label: "Products", href: "/dashboard/admin/products", icon: Package, roles: ["OWNER", "MANAGER"] },
-    { label: "Sales & Invoices", href: "/dashboard/admin/sales", icon: Receipt, roles: ["OWNER", "MANAGER", "CASHIER"] },
-    { label: "Sales Returns", href: "/dashboard/admin/returns", icon: RotateCcw, roles: ["OWNER", "MANAGER"] },
-    { label: "Branches & Outlets", href: "/dashboard/admin/branches", icon: GitBranch, roles: ["OWNER"] },
-    { label: "Customers", href: "/dashboard/admin/customers", icon: Users, roles: ["OWNER", "MANAGER", "CASHIER"] },
-    { label: "Suppliers", href: "/dashboard/admin/suppliers", icon: Truck, roles: ["OWNER", "MANAGER"] },
-    { label: "Purchases", href: "/dashboard/admin/purchases", icon: TrendingDown, roles: ["OWNER", "MANAGER"] },
-    { label: "Accounts", href: "/dashboard/admin/accounts", icon: Settings, roles: ["OWNER", "MANAGER"] },
-
-    { label: "Expenses", href: "/dashboard/admin/expenses", icon: TrendingDown, roles: ["OWNER", "MANAGER"] },
-    { label: "Day-End Closings", href: "/dashboard/admin/closings", icon: Receipt, roles: ["OWNER", "MANAGER"] },
-    { label: "Reports", href: "/dashboard/admin/reports", icon: Receipt, roles: ["OWNER", "MANAGER"] },
-    { label: "Store Settings", href: "/dashboard/admin/settings", icon: Settings, roles: ["OWNER","MANAGER"] },
+    { label: "Users", href: "/dashboard/admin/users", icon: Package, roles: ["OWNER", "MANAGER", "CASHIER"], permission: PERMISSIONS.USERS_MANAGE },
+    { label: "POS Terminal", href: "/dashboard/pos", icon: ShoppingCart, roles: ["OWNER", "MANAGER", "CASHIER"], permission: PERMISSIONS.POS_ACCESS },
+    { label: "Categories", href: "/dashboard/admin/categories", icon: Tags, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.CATALOG_MANAGE },
+    { label: "Products", href: "/dashboard/admin/products", icon: Package, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.CATALOG_VIEW },
+    { label: "Sales & Invoices", href: "/dashboard/admin/sales", icon: Receipt, roles: ["OWNER", "MANAGER", "CASHIER"], permission: PERMISSIONS.REPORTS_SALES },
+    { label: "Sales Returns", href: "/dashboard/admin/returns", icon: RotateCcw, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.POS_REFUND_RETURN },
+    { label: "Branches & Outlets", href: "/dashboard/admin/branches", icon: GitBranch, roles: ["OWNER"], permission: PERMISSIONS.BRANCH_SWITCH },
+    { label: "Customers", href: "/dashboard/admin/customers", icon: Users, roles: ["OWNER", "MANAGER", "CASHIER"], permission: PERMISSIONS.CATALOG_VIEW },
+    { label: "Suppliers", href: "/dashboard/admin/suppliers", icon: Truck, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.PURCHASES_VIEW },
+    { label: "Purchases", href: "/dashboard/admin/purchases", icon: TrendingDown, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.PURCHASES_VIEW },
+    { label: "Accounts", href: "/dashboard/admin/accounts", icon: Settings, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.FINANCE_BANKING },
+    { label: "Expenses", href: "/dashboard/admin/expenses", icon: TrendingDown, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.FINANCE_EXPENSES },
+    { label: "Day-End Closings", href: "/dashboard/admin/closings", icon: Receipt, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.REPORTS_CLOSING_Z },
+    { label: "Reports", href: "/dashboard/admin/reports", icon: Receipt, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.REPORTS_SALES },
+    { label: "Store Settings", href: "/dashboard/admin/settings", icon: Settings, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.SETTINGS_STORE },
   ];
 
-  const filteredNav = navItems.filter((item) => item.roles.includes(role));
+  // 🛡️ Filter by base role AND active granular database permissions (respects custom additions/reductions)
+  const filteredNav = navItems.filter((item) => {
+    if (!item.roles.includes(role)) return false;
+    if (item.permission && !isOwner) {
+      return hasPermission(item.permission);
+    }
+    return true;
+  });
 
   return (
     <>

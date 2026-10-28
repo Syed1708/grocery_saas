@@ -21,8 +21,9 @@ import {
   updateCategoryAction,
   deleteCategoryAction,
 } from "@/app/actions/category-actions";
-import { ICategory } from "@/types";
+import { ICategory, PERMISSIONS } from "@/types";
 import Image from "next/image";
+import { PermissionGate } from "@/components/common/PermissionGate";
 
 export default function CategoriesClient({ data }: { data: ICategory[] }) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -144,6 +145,9 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
       cell: ({ row }) => {
         const cat = row.original;
         return (
+          <PermissionGate permission={PERMISSIONS.CATALOG_MANAGE}>
+
+          
           <div className="flex items-center gap-1.5">
             <button
               type="button"
@@ -162,6 +166,8 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
               <Trash2 size={15} />
             </button>
           </div>
+
+          </PermissionGate>
         );
       },
     },

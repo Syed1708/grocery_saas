@@ -1,4 +1,3 @@
-
 import { DefaultSession, DefaultUser } from "next-auth";
 import { JWT as DefaultJWT } from "next-auth/jwt";
 import { UserRole } from "./rbac";
@@ -12,6 +11,7 @@ declare module "next-auth" {
       role: UserRole;
       branchId: string | null;
       branchName: string | null;
+      customPermissions: string[]; // 👈 Added
     } & DefaultSession["user"];
   }
 
@@ -21,6 +21,7 @@ declare module "next-auth" {
     shopName: string;
     branchId: string | null;
     branchName: string | null;
+    customPermissions: string[]; // 👈 Added
   }
 }
 
@@ -32,5 +33,6 @@ declare module "next-auth/jwt" {
     shopName: string;
     branchId: string | null;
     branchName: string | null;
+    customPermissions: string[]; // 👈 Added
   }
 }
