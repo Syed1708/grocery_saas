@@ -1,9 +1,15 @@
 "use server";
 
-import { requireAuth } from "@/lib/auth-guard";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { departmentSchema, staffSchema, advanceSchema, payrollSchema } from "@/lib/validations";
+import {
+  departmentSchema,
+  staffSchema,
+  advanceSchema,
+  payrollSchema,
+} from "@/lib/validations";
+import { PERMISSIONS } from "@/types";
 
 // ==========================================
 // 1. DEPARTMENTS CRUD
@@ -11,7 +17,10 @@ import { departmentSchema, staffSchema, advanceSchema, payrollSchema } from "@/l
 
 export async function createOrUpdateDepartmentAction(formData: FormData) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
     const id = formData.get("id")?.toString();
 
     const validated = departmentSchema.safeParse({
@@ -21,7 +30,8 @@ export async function createOrUpdateDepartmentAction(formData: FormData) {
       status: formData.get("status")?.toString() || "active",
     });
 
-    if (!validated.success) return { success: false, error: validated.error.issues[0].message };
+    if (!validated.success)
+      return { success: false, error: validated.error.issues[0].message };
     const data = validated.data;
 
     if (id) {
@@ -38,27 +48,39 @@ export async function createOrUpdateDepartmentAction(formData: FormData) {
     revalidatePath("/dashboard/admin/staff");
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to save department." };
+    return {
+      success: false,
+      error: error.message || "Failed to save department.",
+    };
   }
 }
 
 export async function deleteDepartmentAction(id: string) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
     const dept = await prisma.department.findFirst({
       where: { id, shopId: user.shopId },
       include: { _count: { select: { staff: true } } },
     });
     if (!dept) return { success: false, error: "Department not found." };
     if (dept._count.staff > 0) {
-      return { success: false, error: `Cannot delete: ${dept._count.staff} staff members are assigned here.` };
+      return {
+        success: false,
+        error: `Cannot delete: ${dept._count.staff} staff members are assigned here.`,
+      };
     }
 
     await prisma.department.delete({ where: { id } });
     revalidatePath("/dashboard/admin/staff");
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to delete department." };
+    return {
+      success: false,
+      error: error.message || "Failed to delete department.",
+    };
   }
 }
 
@@ -68,7 +90,10 @@ export async function deleteDepartmentAction(id: string) {
 
 export async function createOrUpdateStaffAction(formData: FormData) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
     const id = formData.get("id")?.toString();
 
     const validated = staffSchema.safeParse({
@@ -86,7 +111,8 @@ export async function createOrUpdateStaffAction(formData: FormData) {
       status: formData.get("status")?.toString() || "ACTIVE",
     });
 
-    if (!validated.success) return { success: false, error: validated.error.issues[0].message };
+    if (!validated.success)
+      return { success: false, error: validated.error.issues[0].message };
     const data = validated.data;
 
     if (id) {
@@ -111,27 +137,40 @@ export async function createOrUpdateStaffAction(formData: FormData) {
     revalidatePath("/dashboard/admin/staff");
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to save staff profile." };
+    return {
+      success: false,
+      error: error.message || "Failed to save staff profile.",
+    };
   }
 }
 
 export async function deleteStaffAction(id: string) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
     const staff = await prisma.staffProfile.findFirst({
       where: { id, shopId: user.shopId },
       include: { _count: { select: { payrolls: true } } },
     });
     if (!staff) return { success: false, error: "Staff profile not found." };
     if (staff._count.payrolls > 0) {
-      return { success: false, error: "Cannot delete employee with payroll records. Set status to Inactive or Terminated instead." };
+      return {
+        success: false,
+        error:
+          "Cannot delete employee with payroll records. Set status to Inactive or Terminated instead.",
+      };
     }
 
     await prisma.staffProfile.delete({ where: { id } });
     revalidatePath("/dashboard/admin/staff");
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to delete staff profile." };
+    return {
+      success: false,
+      error: error.message || "Failed to delete staff profile.",
+    };
   }
 }
 
@@ -141,7 +180,10 @@ export async function deleteStaffAction(id: string) {
 
 export async function createAdvanceAction(formData: FormData) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
     const validated = advanceSchema.safeParse({
       staffId: formData.get("staffId")?.toString(),
       advanceDate: formData.get("advanceDate")?.toString(),
@@ -151,7 +193,8 @@ export async function createAdvanceAction(formData: FormData) {
       notes: formData.get("notes")?.toString().trim() || null,
     });
 
-    if (!validated.success) return { success: false, error: validated.error.issues[0].message };
+    if (!validated.success)
+      return { success: false, error: validated.error.issues[0].message };
     const data = validated.data;
 
     await prisma.$transaction(async (tx) => {
@@ -165,35 +208,57 @@ export async function createAdvanceAction(formData: FormData) {
       });
 
       const cashAcc = await tx.account.findFirst({
-        where: { shopId: user.shopId, branchId: user.activeBranchId!, type: "CASH" },
+        where: {
+          shopId: user.shopId,
+          branchId: user.activeBranchId!,
+          type: "CASH",
+        },
       });
       if (cashAcc) {
         const newBal = Number(cashAcc.currentBalance) - data.amount;
-        await tx.account.update({ where: { id: cashAcc.id }, data: { currentBalance: newBal } });
+        await tx.account.update({
+          where: { id: cashAcc.id },
+          data: { currentBalance: newBal },
+        });
       }
     });
 
     revalidatePath("/dashboard/admin/staff");
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to issue advance." };
+    return {
+      success: false,
+      error: error.message || "Failed to issue advance.",
+    };
   }
 }
 
 export async function deleteAdvanceAction(id: string) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
-    const adv = await prisma.salaryAdvance.findFirst({ where: { id, shopId: user.shopId } });
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
+    const adv = await prisma.salaryAdvance.findFirst({
+      where: { id, shopId: user.shopId },
+    });
     if (!adv) return { success: false, error: "Advance record not found." };
     if (adv.isDeducted) {
-      return { success: false, error: "Cannot delete an advance that has already been deducted from monthly payroll." };
+      return {
+        success: false,
+        error:
+          "Cannot delete an advance that has already been deducted from monthly payroll.",
+      };
     }
 
     await prisma.salaryAdvance.delete({ where: { id } });
     revalidatePath("/dashboard/admin/staff");
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to delete advance." };
+    return {
+      success: false,
+      error: error.message || "Failed to delete advance.",
+    };
   }
 }
 
@@ -203,7 +268,10 @@ export async function deleteAdvanceAction(id: string) {
 
 export async function createPayrollAction(formData: FormData) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
     const validated = payrollSchema.safeParse({
       staffId: formData.get("staffId")?.toString(),
       month: formData.get("month")?.toString(),
@@ -218,17 +286,32 @@ export async function createPayrollAction(formData: FormData) {
       notes: formData.get("notes")?.toString().trim() || null,
     });
 
-    if (!validated.success) return { success: false, error: validated.error.issues[0].message };
+    if (!validated.success)
+      return { success: false, error: validated.error.issues[0].message };
     const data = validated.data;
 
     const existing = await prisma.payroll.findFirst({
-      where: { shopId: user.shopId, staffId: data.staffId, month: data.month, year: data.year },
+      where: {
+        shopId: user.shopId,
+        staffId: data.staffId,
+        month: data.month,
+        year: data.year,
+      },
     });
     if (existing) {
-      return { success: false, error: `Salary for ${data.month} ${data.year} has already been paid.` };
+      return {
+        success: false,
+        error: `Salary for ${data.month} ${data.year} has already been paid.`,
+      };
     }
 
-    const netSalary = Math.max(0, (data.basicSalary + data.allowance + data.overtimeAmount) - (data.advanceDeduction + data.penaltyDeduction));
+    const netSalary = Math.max(
+      0,
+      data.basicSalary +
+        data.allowance +
+        data.overtimeAmount -
+        (data.advanceDeduction + data.penaltyDeduction),
+    );
     const payslipNo = `PAY-${data.year}-${data.month.slice(0, 3).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
 
     await prisma.$transaction(async (tx) => {
@@ -255,34 +338,54 @@ export async function createPayrollAction(formData: FormData) {
 
       if (data.advanceDeduction > 0) {
         await tx.salaryAdvance.updateMany({
-          where: { staffId: data.staffId, isDeducted: false, shopId: user.shopId },
+          where: {
+            staffId: data.staffId,
+            isDeducted: false,
+            shopId: user.shopId,
+          },
           data: { isDeducted: true },
         });
       }
 
       const cashAcc = await tx.account.findFirst({
-        where: { shopId: user.shopId, branchId: user.activeBranchId!, type: "CASH" },
+        where: {
+          shopId: user.shopId,
+          branchId: user.activeBranchId!,
+          type: "CASH",
+        },
       });
       if (cashAcc) {
         const newBal = Number(cashAcc.currentBalance) - netSalary;
-        await tx.account.update({ where: { id: cashAcc.id }, data: { currentBalance: newBal } });
+        await tx.account.update({
+          where: { id: cashAcc.id },
+          data: { currentBalance: newBal },
+        });
       }
     });
 
     revalidatePath("/dashboard/admin/staff");
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to generate payroll." };
+    return {
+      success: false,
+      error: error.message || "Failed to generate payroll.",
+    };
   }
 }
 
 export async function deletePayrollAction(id: string) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
     await prisma.payroll.delete({ where: { id, shopId: user.shopId } });
     revalidatePath("/dashboard/admin/staff");
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to delete payroll record." };
+    return {
+      success: false,
+      error: error.message || "Failed to delete payroll record.",
+    };
   }
 }

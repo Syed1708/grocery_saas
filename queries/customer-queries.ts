@@ -38,7 +38,7 @@ export async function getCustomers(
     shopId: c.shopId,
     branchId: c.branchId,
     branch: c.branch,
-    branchName: c.branch?.name || "Global (সকল শাখা)",
+    branchName: c.branch?.name || "N/A",
     createdAt: c.createdAt,
     updatedAt: c.updatedAt,
   }));

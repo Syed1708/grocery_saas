@@ -1,40 +1,25 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { customerSchema } from "@/lib/validations";
-
-// Helper: Extracts authenticated user and verifies active branch
-async function getAuthenticatedUser() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.shopId) {
-    throw new Error("Unauthorized: Please log in.");
-  }
-
-  // Fail-safe: If session branchId is missing, pull from DB
-  let branchId = session.user.branchId;
-  if (!branchId) {
-    const dbUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { branchId: true },
-    });
-    branchId = dbUser?.branchId || null;
-  }
-
-  return {
-    ...session.user,
-    branchId,
-  };
-}
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 
 // ==========================================
-// 1. CREATE CUSTOMER (Tagged with branchId)
+// 1. CREATE CUSTOMER (Strict Branch Locked)
 // ==========================================
 export async function createCustomerAction(formData: FormData) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
+
+    // Zero-Trust Guard: Customer MUST be linked to an active branch
+    if (!user.activeBranchId) {
+      return { success: false, error: "Active branch context is required to register a customer." };
+    }
 
     const validated = customerSchema.safeParse({
       name: formData.get("name")?.toString().trim(),
@@ -53,9 +38,20 @@ export async function createCustomerAction(formData: FormData) {
     }
 
     const data = validated.data;
-    
-    // Optional: Check if marked as global (e.g. from an isGlobal checkbox)
-    const isGlobal = formData.get("isGlobal") === "true";
+
+    // Optional: Check if phone already registered in this branch
+    if (data.phone) {
+      const existing = await prisma.customer.findFirst({
+        where: {
+          shopId: user.shopId,
+          branchId: user.activeBranchId,
+          phone: data.phone,
+        },
+      });
+      if (existing) {
+        return { success: false, error: `Customer with phone ${data.phone} already exists in this branch.` };
+      }
+    }
 
     await prisma.customer.create({
       data: {
@@ -70,8 +66,8 @@ export async function createCustomerAction(formData: FormData) {
         openingDue: data.openingBalance,
         currentDue: data.openingBalance,
         shopId: user.shopId,
-        // 👈 TAG WITH ACTIVE BRANCH: null if global, otherwise current branch
-        branchId: isGlobal ? null : user.branchId,
+        branchId: user.activeBranchId, // 👈 STRICT: Always tied to active branch
+        status: "active",
       },
     });
 
@@ -85,11 +81,14 @@ export async function createCustomerAction(formData: FormData) {
 }
 
 // ==========================================
-// 2. UPDATE CUSTOMER (Multi-tenant guarded)
+// 2. UPDATE CUSTOMER (Branch Isolated)
 // ==========================================
 export async function updateCustomerAction(formData: FormData) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
     const id = formData.get("id")?.toString();
     if (!id) return { success: false, error: "Missing customer ID." };
@@ -112,12 +111,21 @@ export async function updateCustomerAction(formData: FormData) {
 
     const data = validated.data;
 
-    // 👈 Multi-tenant check: ID + shopId
-    await prisma.customer.update({
-      where: { 
-        id, 
-        shopId: user.shopId 
+    // Zero-Trust Guard: Non-owners can only edit their own branch's customers
+    const existing = await prisma.customer.findFirst({
+      where: {
+        id,
+        shopId: user.shopId,
+        ...(user.role !== "OWNER" && user.activeBranchId ? { branchId: user.activeBranchId } : {}),
       },
+    });
+
+    if (!existing) {
+      return { success: false, error: "Customer not found or unauthorized for this branch." };
+    }
+
+    await prisma.customer.update({
+      where: { id },
       data: {
         name: data.name,
         phone: data.phone,
@@ -148,22 +156,33 @@ export async function recordCustomerPaymentAction(
   note?: string
 ) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
+
+    if (!user.activeBranchId) {
+      return { success: false, error: "Active branch context required." };
+    }
 
     if (!amount || amount <= 0) {
       return { success: false, error: "Please enter a valid payment amount." };
     }
 
+    // Verify customer belongs to this branch (or shop for Owner)
     const customer = await prisma.customer.findFirst({
-      where: { id: customerId, shopId: user.shopId },
+      where: { 
+        id: customerId, 
+        shopId: user.shopId,
+        ...(user.role !== "OWNER" ? { branchId: user.activeBranchId } : {}),
+      },
     });
-    if (!customer) return { success: false, error: "Customer not found." };
+    if (!customer) return { success: false, error: "Customer not found in this branch." };
 
     const receiptNo = `REC-${Date.now().toString().slice(-6)}`;
 
-    // 👈 ATOMIC TRANSACTION: Decrement Due + Create Payment Record
+    // ATOMIC TRANSACTION: Decrement Due + Create Payment Record in this branch
     await prisma.$transaction(async (tx) => {
-      // 1. Decrement Customer Due
       await tx.customer.update({
         where: { id: customerId },
         data: {
@@ -171,14 +190,13 @@ export async function recordCustomerPaymentAction(
         },
       });
 
-      // 2. Create CustomerPayment record linked to active branch
       await tx.customerPayment.create({
         data: {
           receiptNo,
           amount,
           paymentMethod,
           note: note || "কাস্টমার বকেয়া কালেকশন (Due Collection)",
-          branchId: user.branchId!, // 👈 Connects payment to active branch
+          branchId: user.activeBranchId!, // Payments enter this branch's drawer
           customerId: customer.id,
         },
       });
@@ -186,7 +204,7 @@ export async function recordCustomerPaymentAction(
 
     revalidatePath("/dashboard/admin/customers");
     revalidatePath("/reports/customers-due");
-    revalidatePath("/reports/closings"); // Updates Z-Report live cash collections!
+    revalidatePath("/reports/closings");
     return { success: true, receiptNo };
   } catch (error: any) {
     console.error("recordCustomerPaymentAction error:", error);
@@ -199,10 +217,17 @@ export async function recordCustomerPaymentAction(
 // ==========================================
 export async function deleteCustomerAction(id: string) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
     const customer = await prisma.customer.findFirst({
-      where: { id, shopId: user.shopId },
+      where: { 
+        id, 
+        shopId: user.shopId,
+        ...(user.role !== "OWNER" && user.activeBranchId ? { branchId: user.activeBranchId } : {}),
+      },
       include: {
         _count: {
           select: { sales: true },
@@ -210,7 +235,7 @@ export async function deleteCustomerAction(id: string) {
       },
     });
 
-    if (!customer) return { success: false, error: "Customer not found." };
+    if (!customer) return { success: false, error: "Customer not found or unauthorized for this branch." };
 
     if (Number(customer.currentDue) > 0) {
       return {

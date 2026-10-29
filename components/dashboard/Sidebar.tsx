@@ -57,6 +57,7 @@ export default function Sidebar({
     { label: "Purchases", href: "/dashboard/admin/purchases", icon: TrendingDown, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.PURCHASES_VIEW },
     { label: "Accounts", href: "/dashboard/admin/accounts", icon: Settings, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.FINANCE_BANKING },
     { label: "Expenses", href: "/dashboard/admin/expenses", icon: TrendingDown, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.FINANCE_EXPENSES },
+    { label: "Staffs", href: "/dashboard/admin/staff", icon: TrendingDown, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.FINANCE_EXPENSES },
     { label: "Day-End Closings", href: "/dashboard/admin/closings", icon: Receipt, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.REPORTS_CLOSING_Z },
     { label: "Reports", href: "/dashboard/admin/reports", icon: Receipt, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.REPORTS_SALES },
     { label: "Store Settings", href: "/dashboard/admin/settings", icon: Settings, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.SETTINGS_STORE },

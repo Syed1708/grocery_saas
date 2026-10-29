@@ -26,7 +26,7 @@ export default function FormModal({
   loading = false,
   submitLabel,
   isEditing = false,
-  maxWidth = "md",
+  maxWidth = "xl",
 }: FormModalProps) {
   const defaultLabel = isEditing ? "Update" : "Create";
 

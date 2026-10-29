@@ -1,13 +1,17 @@
 "use server";
 
-import { requireAuth } from "@/lib/auth-guard";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { loanSchema } from "@/lib/validations";
+import { PERMISSIONS } from "@/types";
 
 export async function createLoanAction(formData: FormData) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+            const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
     const validated = loanSchema.safeParse({
       type: formData.get("type")?.toString() || "TAKEN",
@@ -95,7 +99,10 @@ export async function createLoanAction(formData: FormData) {
 
 export async function addLoanInstallmentAction(formData: FormData) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+            const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
     const loanId = formData.get("loanId")?.toString();
     const accountId = formData.get("accountId")?.toString();
@@ -187,7 +194,10 @@ export async function addLoanInstallmentAction(formData: FormData) {
 
 export async function deleteLoanAction(id: string) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+            const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
     const loan = await prisma.loan.findFirst({
       where: { id, shopId: user.shopId },
     });
@@ -211,7 +221,10 @@ export async function deleteLoanAction(id: string) {
 
 export async function updateLoanAction(formData: FormData) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+            const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
     const id = formData.get("id")?.toString();
     if (!id) return { success: false, error: "Missing loan ID." };
 

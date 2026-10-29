@@ -1,14 +1,18 @@
 "use server";
 
-import { requireAuth } from "@/lib/auth-guard";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { accountSchema, transferSchema, chequeSchema, loanSchema } from "@/lib/validations";
+import { accountSchema, transferSchema, chequeSchema } from "@/lib/validations";
+import { PERMISSIONS } from "@/types";
 
 // --- 1. ACCOUNTS CRUD ---
 export async function createAccountAction(formData: FormData) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+            const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
     const validated = accountSchema.safeParse({
       name: formData.get("name")?.toString().trim(),
@@ -70,7 +74,10 @@ export async function createAccountAction(formData: FormData) {
 // --- 2. FUND TRANSFER ---
 export async function transferFundsAction(formData: FormData) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+            const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
     const validated = transferSchema.safeParse({
       fromAccountId: formData.get("fromAccountId")?.toString(),
@@ -153,7 +160,10 @@ export async function transferFundsAction(formData: FormData) {
 // --- 3. BANK CHEQUES ---
 export async function createChequeAction(formData: FormData) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+            const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
     const validated = chequeSchema.safeParse({
       type: formData.get("type")?.toString() || "RECEIVED",
@@ -198,7 +208,10 @@ export async function createChequeAction(formData: FormData) {
 
 export async function clearChequeAction(chequeId: string, accountId: string) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+            const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
     const cheque = await prisma.bankCheque.findFirst({
       where: { id: chequeId, shopId: user.shopId },
@@ -261,7 +274,10 @@ export async function clearChequeAction(chequeId: string, accountId: string) {
 
 export async function updateAccountAction(formData: FormData) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+            const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
     const id = formData.get("id")?.toString();
     if (!id) return { success: false, error: "Missing account ID." };
 
@@ -288,7 +304,10 @@ export async function updateAccountAction(formData: FormData) {
 
 export async function deleteAccountAction(id: string) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+            const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
     const account = await prisma.account.findFirst({
       where: { id, shopId: user.shopId },
     });
@@ -312,7 +331,10 @@ export async function deleteAccountAction(id: string) {
 
 export async function deleteChequeAction(id: string) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+            const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
     const cheque = await prisma.bankCheque.findFirst({ where: { id, shopId: user.shopId } });
 
     if (!cheque) return { success: false, error: "Cheque not found." };
@@ -330,7 +352,10 @@ export async function deleteChequeAction(id: string) {
 
 export async function updateChequeAction(formData: FormData) {
   try {
-    const user = await requireAuth(["OWNER", "MANAGER", "ADMIN"]);
+            const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
     const id = formData.get("id")?.toString();
     if (!id) return { success: false, error: "Missing cheque ID." };
 
