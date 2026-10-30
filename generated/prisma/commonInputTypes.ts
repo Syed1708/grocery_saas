@@ -535,6 +535,40 @@ export type EnumStaffStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumStaffStatusFilter<$PrismaModel>
 }
 
+export type EnumPartnerRelationshipFilter<$PrismaModel = never> = {
+  equals?: $Enums.PartnerRelationship | Prisma.EnumPartnerRelationshipFieldRefInput<$PrismaModel>
+  in?: $Enums.PartnerRelationship[]
+  notIn?: $Enums.PartnerRelationship[]
+  not?: Prisma.NestedEnumPartnerRelationshipFilter<$PrismaModel> | $Enums.PartnerRelationship
+}
+
+export type EnumPartnerRelationshipWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PartnerRelationship | Prisma.EnumPartnerRelationshipFieldRefInput<$PrismaModel>
+  in?: $Enums.PartnerRelationship[]
+  notIn?: $Enums.PartnerRelationship[]
+  not?: Prisma.NestedEnumPartnerRelationshipWithAggregatesFilter<$PrismaModel> | $Enums.PartnerRelationship
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPartnerRelationshipFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPartnerRelationshipFilter<$PrismaModel>
+}
+
+export type EnumPartnerTransactionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.PartnerTransactionType | Prisma.EnumPartnerTransactionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.PartnerTransactionType[]
+  notIn?: $Enums.PartnerTransactionType[]
+  not?: Prisma.NestedEnumPartnerTransactionTypeFilter<$PrismaModel> | $Enums.PartnerTransactionType
+}
+
+export type EnumPartnerTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PartnerTransactionType | Prisma.EnumPartnerTransactionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.PartnerTransactionType[]
+  notIn?: $Enums.PartnerTransactionType[]
+  not?: Prisma.NestedEnumPartnerTransactionTypeWithAggregatesFilter<$PrismaModel> | $Enums.PartnerTransactionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPartnerTransactionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPartnerTransactionTypeFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[]
@@ -1044,6 +1078,40 @@ export type NestedEnumStaffStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumStaffStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumStaffStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumPartnerRelationshipFilter<$PrismaModel = never> = {
+  equals?: $Enums.PartnerRelationship | Prisma.EnumPartnerRelationshipFieldRefInput<$PrismaModel>
+  in?: $Enums.PartnerRelationship[]
+  notIn?: $Enums.PartnerRelationship[]
+  not?: Prisma.NestedEnumPartnerRelationshipFilter<$PrismaModel> | $Enums.PartnerRelationship
+}
+
+export type NestedEnumPartnerRelationshipWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PartnerRelationship | Prisma.EnumPartnerRelationshipFieldRefInput<$PrismaModel>
+  in?: $Enums.PartnerRelationship[]
+  notIn?: $Enums.PartnerRelationship[]
+  not?: Prisma.NestedEnumPartnerRelationshipWithAggregatesFilter<$PrismaModel> | $Enums.PartnerRelationship
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPartnerRelationshipFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPartnerRelationshipFilter<$PrismaModel>
+}
+
+export type NestedEnumPartnerTransactionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.PartnerTransactionType | Prisma.EnumPartnerTransactionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.PartnerTransactionType[]
+  notIn?: $Enums.PartnerTransactionType[]
+  not?: Prisma.NestedEnumPartnerTransactionTypeFilter<$PrismaModel> | $Enums.PartnerTransactionType
+}
+
+export type NestedEnumPartnerTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PartnerTransactionType | Prisma.EnumPartnerTransactionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.PartnerTransactionType[]
+  notIn?: $Enums.PartnerTransactionType[]
+  not?: Prisma.NestedEnumPartnerTransactionTypeWithAggregatesFilter<$PrismaModel> | $Enums.PartnerTransactionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPartnerTransactionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPartnerTransactionTypeFilter<$PrismaModel>
 }
 
 

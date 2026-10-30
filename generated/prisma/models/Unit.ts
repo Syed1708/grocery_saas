@@ -264,6 +264,7 @@ export type UnitWhereInput = {
   saleItems?: Prisma.SaleItemListRelationFilter
   saleReturnItems?: Prisma.SaleReturnItemListRelationFilter
   quotationItems?: Prisma.QuotationItemListRelationFilter
+  partnerRationItems?: Prisma.PartnerRationItemListRelationFilter
 }
 
 export type UnitOrderByWithRelationInput = {
@@ -285,6 +286,7 @@ export type UnitOrderByWithRelationInput = {
   saleItems?: Prisma.SaleItemOrderByRelationAggregateInput
   saleReturnItems?: Prisma.SaleReturnItemOrderByRelationAggregateInput
   quotationItems?: Prisma.QuotationItemOrderByRelationAggregateInput
+  partnerRationItems?: Prisma.PartnerRationItemOrderByRelationAggregateInput
   _relevance?: Prisma.UnitOrderByRelevanceInput
 }
 
@@ -311,6 +313,7 @@ export type UnitWhereUniqueInput = Prisma.AtLeast<{
   saleItems?: Prisma.SaleItemListRelationFilter
   saleReturnItems?: Prisma.SaleReturnItemListRelationFilter
   quotationItems?: Prisma.QuotationItemListRelationFilter
+  partnerRationItems?: Prisma.PartnerRationItemListRelationFilter
 }, "id" | "shopId_shortCode">
 
 export type UnitOrderByWithAggregationInput = {
@@ -364,6 +367,7 @@ export type UnitCreateInput = {
   saleItems?: Prisma.SaleItemCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemCreateNestedManyWithoutUnitInput
 }
 
 export type UnitUncheckedCreateInput = {
@@ -383,6 +387,7 @@ export type UnitUncheckedCreateInput = {
   saleItems?: Prisma.SaleItemUncheckedCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemUncheckedCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedCreateNestedManyWithoutUnitInput
 }
 
 export type UnitUpdateInput = {
@@ -402,6 +407,7 @@ export type UnitUpdateInput = {
   saleItems?: Prisma.SaleItemUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitUncheckedUpdateInput = {
@@ -421,6 +427,7 @@ export type UnitUncheckedUpdateInput = {
   saleItems?: Prisma.SaleItemUncheckedUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUncheckedUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitCreateManyInput = {
@@ -724,6 +731,22 @@ export type UnitUpdateOneWithoutQuotationItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UnitUpdateToOneWithWhereWithoutQuotationItemsInput, Prisma.UnitUpdateWithoutQuotationItemsInput>, Prisma.UnitUncheckedUpdateWithoutQuotationItemsInput>
 }
 
+export type UnitCreateNestedOneWithoutPartnerRationItemsInput = {
+  create?: Prisma.XOR<Prisma.UnitCreateWithoutPartnerRationItemsInput, Prisma.UnitUncheckedCreateWithoutPartnerRationItemsInput>
+  connectOrCreate?: Prisma.UnitCreateOrConnectWithoutPartnerRationItemsInput
+  connect?: Prisma.UnitWhereUniqueInput
+}
+
+export type UnitUpdateOneWithoutPartnerRationItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.UnitCreateWithoutPartnerRationItemsInput, Prisma.UnitUncheckedCreateWithoutPartnerRationItemsInput>
+  connectOrCreate?: Prisma.UnitCreateOrConnectWithoutPartnerRationItemsInput
+  upsert?: Prisma.UnitUpsertWithoutPartnerRationItemsInput
+  disconnect?: Prisma.UnitWhereInput | boolean
+  delete?: Prisma.UnitWhereInput | boolean
+  connect?: Prisma.UnitWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UnitUpdateToOneWithWhereWithoutPartnerRationItemsInput, Prisma.UnitUpdateWithoutPartnerRationItemsInput>, Prisma.UnitUncheckedUpdateWithoutPartnerRationItemsInput>
+}
+
 export type UnitCreateWithoutShopInput = {
   id?: string
   name: string
@@ -740,6 +763,7 @@ export type UnitCreateWithoutShopInput = {
   saleItems?: Prisma.SaleItemCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemCreateNestedManyWithoutUnitInput
 }
 
 export type UnitUncheckedCreateWithoutShopInput = {
@@ -758,6 +782,7 @@ export type UnitUncheckedCreateWithoutShopInput = {
   saleItems?: Prisma.SaleItemUncheckedCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemUncheckedCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedCreateNestedManyWithoutUnitInput
 }
 
 export type UnitCreateOrConnectWithoutShopInput = {
@@ -818,6 +843,7 @@ export type UnitCreateWithoutSubUnitsInput = {
   saleItems?: Prisma.SaleItemCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemCreateNestedManyWithoutUnitInput
 }
 
 export type UnitUncheckedCreateWithoutSubUnitsInput = {
@@ -836,6 +862,7 @@ export type UnitUncheckedCreateWithoutSubUnitsInput = {
   saleItems?: Prisma.SaleItemUncheckedCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemUncheckedCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedCreateNestedManyWithoutUnitInput
 }
 
 export type UnitCreateOrConnectWithoutSubUnitsInput = {
@@ -859,6 +886,7 @@ export type UnitCreateWithoutBaseUnitInput = {
   saleItems?: Prisma.SaleItemCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemCreateNestedManyWithoutUnitInput
 }
 
 export type UnitUncheckedCreateWithoutBaseUnitInput = {
@@ -877,6 +905,7 @@ export type UnitUncheckedCreateWithoutBaseUnitInput = {
   saleItems?: Prisma.SaleItemUncheckedCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemUncheckedCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedCreateNestedManyWithoutUnitInput
 }
 
 export type UnitCreateOrConnectWithoutBaseUnitInput = {
@@ -916,6 +945,7 @@ export type UnitUpdateWithoutSubUnitsInput = {
   saleItems?: Prisma.SaleItemUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitUncheckedUpdateWithoutSubUnitsInput = {
@@ -934,6 +964,7 @@ export type UnitUncheckedUpdateWithoutSubUnitsInput = {
   saleItems?: Prisma.SaleItemUncheckedUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUncheckedUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitUpsertWithWhereUniqueWithoutBaseUnitInput = {
@@ -968,6 +999,7 @@ export type UnitCreateWithoutProductsInput = {
   saleItems?: Prisma.SaleItemCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemCreateNestedManyWithoutUnitInput
 }
 
 export type UnitUncheckedCreateWithoutProductsInput = {
@@ -986,6 +1018,7 @@ export type UnitUncheckedCreateWithoutProductsInput = {
   saleItems?: Prisma.SaleItemUncheckedCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemUncheckedCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedCreateNestedManyWithoutUnitInput
 }
 
 export type UnitCreateOrConnectWithoutProductsInput = {
@@ -1020,6 +1053,7 @@ export type UnitUpdateWithoutProductsInput = {
   saleItems?: Prisma.SaleItemUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitUncheckedUpdateWithoutProductsInput = {
@@ -1038,6 +1072,7 @@ export type UnitUncheckedUpdateWithoutProductsInput = {
   saleItems?: Prisma.SaleItemUncheckedUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUncheckedUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitCreateWithoutPurchaseItemsInput = {
@@ -1056,6 +1091,7 @@ export type UnitCreateWithoutPurchaseItemsInput = {
   saleItems?: Prisma.SaleItemCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemCreateNestedManyWithoutUnitInput
 }
 
 export type UnitUncheckedCreateWithoutPurchaseItemsInput = {
@@ -1074,6 +1110,7 @@ export type UnitUncheckedCreateWithoutPurchaseItemsInput = {
   saleItems?: Prisma.SaleItemUncheckedCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemUncheckedCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedCreateNestedManyWithoutUnitInput
 }
 
 export type UnitCreateOrConnectWithoutPurchaseItemsInput = {
@@ -1108,6 +1145,7 @@ export type UnitUpdateWithoutPurchaseItemsInput = {
   saleItems?: Prisma.SaleItemUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitUncheckedUpdateWithoutPurchaseItemsInput = {
@@ -1126,6 +1164,7 @@ export type UnitUncheckedUpdateWithoutPurchaseItemsInput = {
   saleItems?: Prisma.SaleItemUncheckedUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUncheckedUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitCreateWithoutSaleItemsInput = {
@@ -1144,6 +1183,7 @@ export type UnitCreateWithoutSaleItemsInput = {
   purchaseItems?: Prisma.PurchaseItemCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemCreateNestedManyWithoutUnitInput
 }
 
 export type UnitUncheckedCreateWithoutSaleItemsInput = {
@@ -1162,6 +1202,7 @@ export type UnitUncheckedCreateWithoutSaleItemsInput = {
   purchaseItems?: Prisma.PurchaseItemUncheckedCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemUncheckedCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedCreateNestedManyWithoutUnitInput
 }
 
 export type UnitCreateOrConnectWithoutSaleItemsInput = {
@@ -1196,6 +1237,7 @@ export type UnitUpdateWithoutSaleItemsInput = {
   purchaseItems?: Prisma.PurchaseItemUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitUncheckedUpdateWithoutSaleItemsInput = {
@@ -1214,6 +1256,7 @@ export type UnitUncheckedUpdateWithoutSaleItemsInput = {
   purchaseItems?: Prisma.PurchaseItemUncheckedUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUncheckedUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitCreateWithoutSaleReturnItemsInput = {
@@ -1232,6 +1275,7 @@ export type UnitCreateWithoutSaleReturnItemsInput = {
   purchaseItems?: Prisma.PurchaseItemCreateNestedManyWithoutUnitInput
   saleItems?: Prisma.SaleItemCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemCreateNestedManyWithoutUnitInput
 }
 
 export type UnitUncheckedCreateWithoutSaleReturnItemsInput = {
@@ -1250,6 +1294,7 @@ export type UnitUncheckedCreateWithoutSaleReturnItemsInput = {
   purchaseItems?: Prisma.PurchaseItemUncheckedCreateNestedManyWithoutUnitInput
   saleItems?: Prisma.SaleItemUncheckedCreateNestedManyWithoutUnitInput
   quotationItems?: Prisma.QuotationItemUncheckedCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedCreateNestedManyWithoutUnitInput
 }
 
 export type UnitCreateOrConnectWithoutSaleReturnItemsInput = {
@@ -1284,6 +1329,7 @@ export type UnitUpdateWithoutSaleReturnItemsInput = {
   purchaseItems?: Prisma.PurchaseItemUpdateManyWithoutUnitNestedInput
   saleItems?: Prisma.SaleItemUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitUncheckedUpdateWithoutSaleReturnItemsInput = {
@@ -1302,6 +1348,7 @@ export type UnitUncheckedUpdateWithoutSaleReturnItemsInput = {
   purchaseItems?: Prisma.PurchaseItemUncheckedUpdateManyWithoutUnitNestedInput
   saleItems?: Prisma.SaleItemUncheckedUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUncheckedUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitCreateWithoutQuotationItemsInput = {
@@ -1320,6 +1367,7 @@ export type UnitCreateWithoutQuotationItemsInput = {
   purchaseItems?: Prisma.PurchaseItemCreateNestedManyWithoutUnitInput
   saleItems?: Prisma.SaleItemCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemCreateNestedManyWithoutUnitInput
 }
 
 export type UnitUncheckedCreateWithoutQuotationItemsInput = {
@@ -1338,6 +1386,7 @@ export type UnitUncheckedCreateWithoutQuotationItemsInput = {
   purchaseItems?: Prisma.PurchaseItemUncheckedCreateNestedManyWithoutUnitInput
   saleItems?: Prisma.SaleItemUncheckedCreateNestedManyWithoutUnitInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedCreateNestedManyWithoutUnitInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedCreateNestedManyWithoutUnitInput
 }
 
 export type UnitCreateOrConnectWithoutQuotationItemsInput = {
@@ -1372,6 +1421,7 @@ export type UnitUpdateWithoutQuotationItemsInput = {
   purchaseItems?: Prisma.PurchaseItemUpdateManyWithoutUnitNestedInput
   saleItems?: Prisma.SaleItemUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitUncheckedUpdateWithoutQuotationItemsInput = {
@@ -1390,6 +1440,99 @@ export type UnitUncheckedUpdateWithoutQuotationItemsInput = {
   purchaseItems?: Prisma.PurchaseItemUncheckedUpdateManyWithoutUnitNestedInput
   saleItems?: Prisma.SaleItemUncheckedUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedUpdateManyWithoutUnitNestedInput
+}
+
+export type UnitCreateWithoutPartnerRationItemsInput = {
+  id?: string
+  name: string
+  shortCode: string
+  allowDecimal?: boolean
+  conversionRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  status?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  baseUnit?: Prisma.UnitCreateNestedOneWithoutSubUnitsInput
+  subUnits?: Prisma.UnitCreateNestedManyWithoutBaseUnitInput
+  shop: Prisma.ShopCreateNestedOneWithoutUnitsInput
+  products?: Prisma.ProductCreateNestedManyWithoutUnitInput
+  purchaseItems?: Prisma.PurchaseItemCreateNestedManyWithoutUnitInput
+  saleItems?: Prisma.SaleItemCreateNestedManyWithoutUnitInput
+  saleReturnItems?: Prisma.SaleReturnItemCreateNestedManyWithoutUnitInput
+  quotationItems?: Prisma.QuotationItemCreateNestedManyWithoutUnitInput
+}
+
+export type UnitUncheckedCreateWithoutPartnerRationItemsInput = {
+  id?: string
+  name: string
+  shortCode: string
+  allowDecimal?: boolean
+  baseUnitId?: string | null
+  conversionRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  status?: string
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  subUnits?: Prisma.UnitUncheckedCreateNestedManyWithoutBaseUnitInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutUnitInput
+  purchaseItems?: Prisma.PurchaseItemUncheckedCreateNestedManyWithoutUnitInput
+  saleItems?: Prisma.SaleItemUncheckedCreateNestedManyWithoutUnitInput
+  saleReturnItems?: Prisma.SaleReturnItemUncheckedCreateNestedManyWithoutUnitInput
+  quotationItems?: Prisma.QuotationItemUncheckedCreateNestedManyWithoutUnitInput
+}
+
+export type UnitCreateOrConnectWithoutPartnerRationItemsInput = {
+  where: Prisma.UnitWhereUniqueInput
+  create: Prisma.XOR<Prisma.UnitCreateWithoutPartnerRationItemsInput, Prisma.UnitUncheckedCreateWithoutPartnerRationItemsInput>
+}
+
+export type UnitUpsertWithoutPartnerRationItemsInput = {
+  update: Prisma.XOR<Prisma.UnitUpdateWithoutPartnerRationItemsInput, Prisma.UnitUncheckedUpdateWithoutPartnerRationItemsInput>
+  create: Prisma.XOR<Prisma.UnitCreateWithoutPartnerRationItemsInput, Prisma.UnitUncheckedCreateWithoutPartnerRationItemsInput>
+  where?: Prisma.UnitWhereInput
+}
+
+export type UnitUpdateToOneWithWhereWithoutPartnerRationItemsInput = {
+  where?: Prisma.UnitWhereInput
+  data: Prisma.XOR<Prisma.UnitUpdateWithoutPartnerRationItemsInput, Prisma.UnitUncheckedUpdateWithoutPartnerRationItemsInput>
+}
+
+export type UnitUpdateWithoutPartnerRationItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  shortCode?: Prisma.StringFieldUpdateOperationsInput | string
+  allowDecimal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  conversionRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  baseUnit?: Prisma.UnitUpdateOneWithoutSubUnitsNestedInput
+  subUnits?: Prisma.UnitUpdateManyWithoutBaseUnitNestedInput
+  shop?: Prisma.ShopUpdateOneRequiredWithoutUnitsNestedInput
+  products?: Prisma.ProductUpdateManyWithoutUnitNestedInput
+  purchaseItems?: Prisma.PurchaseItemUpdateManyWithoutUnitNestedInput
+  saleItems?: Prisma.SaleItemUpdateManyWithoutUnitNestedInput
+  saleReturnItems?: Prisma.SaleReturnItemUpdateManyWithoutUnitNestedInput
+  quotationItems?: Prisma.QuotationItemUpdateManyWithoutUnitNestedInput
+}
+
+export type UnitUncheckedUpdateWithoutPartnerRationItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  shortCode?: Prisma.StringFieldUpdateOperationsInput | string
+  allowDecimal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  baseUnitId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  conversionRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  subUnits?: Prisma.UnitUncheckedUpdateManyWithoutBaseUnitNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutUnitNestedInput
+  purchaseItems?: Prisma.PurchaseItemUncheckedUpdateManyWithoutUnitNestedInput
+  saleItems?: Prisma.SaleItemUncheckedUpdateManyWithoutUnitNestedInput
+  saleReturnItems?: Prisma.SaleReturnItemUncheckedUpdateManyWithoutUnitNestedInput
+  quotationItems?: Prisma.QuotationItemUncheckedUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitCreateManyShopInput = {
@@ -1420,6 +1563,7 @@ export type UnitUpdateWithoutShopInput = {
   saleItems?: Prisma.SaleItemUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitUncheckedUpdateWithoutShopInput = {
@@ -1438,6 +1582,7 @@ export type UnitUncheckedUpdateWithoutShopInput = {
   saleItems?: Prisma.SaleItemUncheckedUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUncheckedUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitUncheckedUpdateManyWithoutShopInput = {
@@ -1480,6 +1625,7 @@ export type UnitUpdateWithoutBaseUnitInput = {
   saleItems?: Prisma.SaleItemUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitUncheckedUpdateWithoutBaseUnitInput = {
@@ -1498,6 +1644,7 @@ export type UnitUncheckedUpdateWithoutBaseUnitInput = {
   saleItems?: Prisma.SaleItemUncheckedUpdateManyWithoutUnitNestedInput
   saleReturnItems?: Prisma.SaleReturnItemUncheckedUpdateManyWithoutUnitNestedInput
   quotationItems?: Prisma.QuotationItemUncheckedUpdateManyWithoutUnitNestedInput
+  partnerRationItems?: Prisma.PartnerRationItemUncheckedUpdateManyWithoutUnitNestedInput
 }
 
 export type UnitUncheckedUpdateManyWithoutBaseUnitInput = {
@@ -1524,6 +1671,7 @@ export type UnitCountOutputType = {
   saleItems: number
   saleReturnItems: number
   quotationItems: number
+  partnerRationItems: number
 }
 
 export type UnitCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1533,6 +1681,7 @@ export type UnitCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   saleItems?: boolean | UnitCountOutputTypeCountSaleItemsArgs
   saleReturnItems?: boolean | UnitCountOutputTypeCountSaleReturnItemsArgs
   quotationItems?: boolean | UnitCountOutputTypeCountQuotationItemsArgs
+  partnerRationItems?: boolean | UnitCountOutputTypeCountPartnerRationItemsArgs
 }
 
 /**
@@ -1587,6 +1736,13 @@ export type UnitCountOutputTypeCountQuotationItemsArgs<ExtArgs extends runtime.T
   where?: Prisma.QuotationItemWhereInput
 }
 
+/**
+ * UnitCountOutputType without action
+ */
+export type UnitCountOutputTypeCountPartnerRationItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PartnerRationItemWhereInput
+}
+
 
 export type UnitSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1607,6 +1763,7 @@ export type UnitSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   saleItems?: boolean | Prisma.Unit$saleItemsArgs<ExtArgs>
   saleReturnItems?: boolean | Prisma.Unit$saleReturnItemsArgs<ExtArgs>
   quotationItems?: boolean | Prisma.Unit$quotationItemsArgs<ExtArgs>
+  partnerRationItems?: boolean | Prisma.Unit$partnerRationItemsArgs<ExtArgs>
   _count?: boolean | Prisma.UnitCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["unit"]>
 
@@ -1635,6 +1792,7 @@ export type UnitInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   saleItems?: boolean | Prisma.Unit$saleItemsArgs<ExtArgs>
   saleReturnItems?: boolean | Prisma.Unit$saleReturnItemsArgs<ExtArgs>
   quotationItems?: boolean | Prisma.Unit$quotationItemsArgs<ExtArgs>
+  partnerRationItems?: boolean | Prisma.Unit$partnerRationItemsArgs<ExtArgs>
   _count?: boolean | Prisma.UnitCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1649,6 +1807,7 @@ export type $UnitPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     saleItems: Prisma.$SaleItemPayload<ExtArgs>[]
     saleReturnItems: Prisma.$SaleReturnItemPayload<ExtArgs>[]
     quotationItems: Prisma.$QuotationItemPayload<ExtArgs>[]
+    partnerRationItems: Prisma.$PartnerRationItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2009,6 +2168,7 @@ export interface Prisma__UnitClient<T, Null = never, ExtArgs extends runtime.Typ
   saleItems<T extends Prisma.Unit$saleItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Unit$saleItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SaleItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   saleReturnItems<T extends Prisma.Unit$saleReturnItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Unit$saleReturnItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SaleReturnItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   quotationItems<T extends Prisma.Unit$quotationItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Unit$quotationItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuotationItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  partnerRationItems<T extends Prisma.Unit$partnerRationItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Unit$partnerRationItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PartnerRationItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2556,6 +2716,30 @@ export type Unit$quotationItemsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.QuotationItemScalarFieldEnum | Prisma.QuotationItemScalarFieldEnum[]
+}
+
+/**
+ * Unit.partnerRationItems
+ */
+export type Unit$partnerRationItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PartnerRationItem
+   */
+  select?: Prisma.PartnerRationItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PartnerRationItem
+   */
+  omit?: Prisma.PartnerRationItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PartnerRationItemInclude<ExtArgs> | null
+  where?: Prisma.PartnerRationItemWhereInput
+  orderBy?: Prisma.PartnerRationItemOrderByWithRelationInput | Prisma.PartnerRationItemOrderByWithRelationInput[]
+  cursor?: Prisma.PartnerRationItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PartnerRationItemScalarFieldEnum | Prisma.PartnerRationItemScalarFieldEnum[]
 }
 
 /**

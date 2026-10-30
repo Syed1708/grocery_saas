@@ -87,7 +87,11 @@ export const ModelName = {
   StaffProfile: 'StaffProfile',
   SalaryAdvance: 'SalaryAdvance',
   Payroll: 'Payroll',
-  CashRegister: 'CashRegister'
+  CashRegister: 'CashRegister',
+  Partner: 'Partner',
+  PartnerTransaction: 'PartnerTransaction',
+  PartnerRation: 'PartnerRation',
+  PartnerRationItem: 'PartnerRationItem'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -816,6 +820,74 @@ export const CashRegisterScalarFieldEnum = {
 export type CashRegisterScalarFieldEnum = (typeof CashRegisterScalarFieldEnum)[keyof typeof CashRegisterScalarFieldEnum]
 
 
+export const PartnerScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  relationship: 'relationship',
+  phone: 'phone',
+  nidNumber: 'nidNumber',
+  equityPercent: 'equityPercent',
+  openingCapital: 'openingCapital',
+  currentBalance: 'currentBalance',
+  monthlyAllowance: 'monthlyAllowance',
+  status: 'status',
+  notes: 'notes',
+  shopId: 'shopId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PartnerScalarFieldEnum = (typeof PartnerScalarFieldEnum)[keyof typeof PartnerScalarFieldEnum]
+
+
+export const PartnerTransactionScalarFieldEnum = {
+  id: 'id',
+  voucherNo: 'voucherNo',
+  type: 'type',
+  amount: 'amount',
+  transactionDate: 'transactionDate',
+  paymentMethod: 'paymentMethod',
+  purpose: 'purpose',
+  notes: 'notes',
+  partnerId: 'partnerId',
+  accountId: 'accountId',
+  branchId: 'branchId',
+  shopId: 'shopId',
+  createdAt: 'createdAt'
+} as const
+
+export type PartnerTransactionScalarFieldEnum = (typeof PartnerTransactionScalarFieldEnum)[keyof typeof PartnerTransactionScalarFieldEnum]
+
+
+export const PartnerRationScalarFieldEnum = {
+  id: 'id',
+  rationNo: 'rationNo',
+  rationDate: 'rationDate',
+  totalCost: 'totalCost',
+  notes: 'notes',
+  partnerId: 'partnerId',
+  branchId: 'branchId',
+  shopId: 'shopId',
+  createdAt: 'createdAt'
+} as const
+
+export type PartnerRationScalarFieldEnum = (typeof PartnerRationScalarFieldEnum)[keyof typeof PartnerRationScalarFieldEnum]
+
+
+export const PartnerRationItemScalarFieldEnum = {
+  id: 'id',
+  quantity: 'quantity',
+  unitCost: 'unitCost',
+  lineTotal: 'lineTotal',
+  rationId: 'rationId',
+  productId: 'productId',
+  unitId: 'unitId',
+  createdAt: 'createdAt'
+} as const
+
+export type PartnerRationItemScalarFieldEnum = (typeof PartnerRationItemScalarFieldEnum)[keyof typeof PartnerRationItemScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1369,4 +1441,54 @@ export const CashRegisterOrderByRelevanceFieldEnum = {
 } as const
 
 export type CashRegisterOrderByRelevanceFieldEnum = (typeof CashRegisterOrderByRelevanceFieldEnum)[keyof typeof CashRegisterOrderByRelevanceFieldEnum]
+
+
+export const PartnerOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  phone: 'phone',
+  nidNumber: 'nidNumber',
+  status: 'status',
+  notes: 'notes',
+  shopId: 'shopId'
+} as const
+
+export type PartnerOrderByRelevanceFieldEnum = (typeof PartnerOrderByRelevanceFieldEnum)[keyof typeof PartnerOrderByRelevanceFieldEnum]
+
+
+export const PartnerTransactionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  voucherNo: 'voucherNo',
+  paymentMethod: 'paymentMethod',
+  purpose: 'purpose',
+  notes: 'notes',
+  partnerId: 'partnerId',
+  accountId: 'accountId',
+  branchId: 'branchId',
+  shopId: 'shopId'
+} as const
+
+export type PartnerTransactionOrderByRelevanceFieldEnum = (typeof PartnerTransactionOrderByRelevanceFieldEnum)[keyof typeof PartnerTransactionOrderByRelevanceFieldEnum]
+
+
+export const PartnerRationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  rationNo: 'rationNo',
+  notes: 'notes',
+  partnerId: 'partnerId',
+  branchId: 'branchId',
+  shopId: 'shopId'
+} as const
+
+export type PartnerRationOrderByRelevanceFieldEnum = (typeof PartnerRationOrderByRelevanceFieldEnum)[keyof typeof PartnerRationOrderByRelevanceFieldEnum]
+
+
+export const PartnerRationItemOrderByRelevanceFieldEnum = {
+  id: 'id',
+  rationId: 'rationId',
+  productId: 'productId',
+  unitId: 'unitId'
+} as const
+
+export type PartnerRationItemOrderByRelevanceFieldEnum = (typeof PartnerRationItemOrderByRelevanceFieldEnum)[keyof typeof PartnerRationItemOrderByRelevanceFieldEnum]
 

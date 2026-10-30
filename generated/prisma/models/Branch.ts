@@ -254,6 +254,8 @@ export type BranchWhereInput = {
   supplierPayments?: Prisma.SupplierPaymentListRelationFilter
   customers?: Prisma.CustomerListRelationFilter
   suppliers?: Prisma.SupplierListRelationFilter
+  partnerTransactions?: Prisma.PartnerTransactionListRelationFilter
+  partnerRations?: Prisma.PartnerRationListRelationFilter
 }
 
 export type BranchOrderByWithRelationInput = {
@@ -292,6 +294,8 @@ export type BranchOrderByWithRelationInput = {
   supplierPayments?: Prisma.SupplierPaymentOrderByRelationAggregateInput
   customers?: Prisma.CustomerOrderByRelationAggregateInput
   suppliers?: Prisma.SupplierOrderByRelationAggregateInput
+  partnerTransactions?: Prisma.PartnerTransactionOrderByRelationAggregateInput
+  partnerRations?: Prisma.PartnerRationOrderByRelationAggregateInput
   _relevance?: Prisma.BranchOrderByRelevanceInput
 }
 
@@ -335,6 +339,8 @@ export type BranchWhereUniqueInput = Prisma.AtLeast<{
   supplierPayments?: Prisma.SupplierPaymentListRelationFilter
   customers?: Prisma.CustomerListRelationFilter
   suppliers?: Prisma.SupplierListRelationFilter
+  partnerTransactions?: Prisma.PartnerTransactionListRelationFilter
+  partnerRations?: Prisma.PartnerRationListRelationFilter
 }, "id" | "shopId_code">
 
 export type BranchOrderByWithAggregationInput = {
@@ -406,6 +412,8 @@ export type BranchCreateInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateInput = {
@@ -443,6 +451,8 @@ export type BranchUncheckedCreateInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUpdateInput = {
@@ -480,6 +490,8 @@ export type BranchUpdateInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateInput = {
@@ -517,6 +529,8 @@ export type BranchUncheckedUpdateInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateManyInput = {
@@ -1007,6 +1021,34 @@ export type BranchUpdateOneRequiredWithoutCashRegistersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.BranchUpdateToOneWithWhereWithoutCashRegistersInput, Prisma.BranchUpdateWithoutCashRegistersInput>, Prisma.BranchUncheckedUpdateWithoutCashRegistersInput>
 }
 
+export type BranchCreateNestedOneWithoutPartnerTransactionsInput = {
+  create?: Prisma.XOR<Prisma.BranchCreateWithoutPartnerTransactionsInput, Prisma.BranchUncheckedCreateWithoutPartnerTransactionsInput>
+  connectOrCreate?: Prisma.BranchCreateOrConnectWithoutPartnerTransactionsInput
+  connect?: Prisma.BranchWhereUniqueInput
+}
+
+export type BranchUpdateOneRequiredWithoutPartnerTransactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.BranchCreateWithoutPartnerTransactionsInput, Prisma.BranchUncheckedCreateWithoutPartnerTransactionsInput>
+  connectOrCreate?: Prisma.BranchCreateOrConnectWithoutPartnerTransactionsInput
+  upsert?: Prisma.BranchUpsertWithoutPartnerTransactionsInput
+  connect?: Prisma.BranchWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BranchUpdateToOneWithWhereWithoutPartnerTransactionsInput, Prisma.BranchUpdateWithoutPartnerTransactionsInput>, Prisma.BranchUncheckedUpdateWithoutPartnerTransactionsInput>
+}
+
+export type BranchCreateNestedOneWithoutPartnerRationsInput = {
+  create?: Prisma.XOR<Prisma.BranchCreateWithoutPartnerRationsInput, Prisma.BranchUncheckedCreateWithoutPartnerRationsInput>
+  connectOrCreate?: Prisma.BranchCreateOrConnectWithoutPartnerRationsInput
+  connect?: Prisma.BranchWhereUniqueInput
+}
+
+export type BranchUpdateOneRequiredWithoutPartnerRationsNestedInput = {
+  create?: Prisma.XOR<Prisma.BranchCreateWithoutPartnerRationsInput, Prisma.BranchUncheckedCreateWithoutPartnerRationsInput>
+  connectOrCreate?: Prisma.BranchCreateOrConnectWithoutPartnerRationsInput
+  upsert?: Prisma.BranchUpsertWithoutPartnerRationsInput
+  connect?: Prisma.BranchWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BranchUpdateToOneWithWhereWithoutPartnerRationsInput, Prisma.BranchUpdateWithoutPartnerRationsInput>, Prisma.BranchUncheckedUpdateWithoutPartnerRationsInput>
+}
+
 export type BranchCreateWithoutShopInput = {
   id?: string
   name: string
@@ -1041,6 +1083,8 @@ export type BranchCreateWithoutShopInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutShopInput = {
@@ -1077,6 +1121,8 @@ export type BranchUncheckedCreateWithoutShopInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutShopInput = {
@@ -1156,6 +1202,8 @@ export type BranchCreateWithoutUsersInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutUsersInput = {
@@ -1192,6 +1240,8 @@ export type BranchUncheckedCreateWithoutUsersInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutUsersInput = {
@@ -1244,6 +1294,8 @@ export type BranchUpdateWithoutUsersInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutUsersInput = {
@@ -1280,6 +1332,8 @@ export type BranchUncheckedUpdateWithoutUsersInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutProductStocksInput = {
@@ -1316,6 +1370,8 @@ export type BranchCreateWithoutProductStocksInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutProductStocksInput = {
@@ -1352,6 +1408,8 @@ export type BranchUncheckedCreateWithoutProductStocksInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutProductStocksInput = {
@@ -1404,6 +1462,8 @@ export type BranchUpdateWithoutProductStocksInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutProductStocksInput = {
@@ -1440,6 +1500,8 @@ export type BranchUncheckedUpdateWithoutProductStocksInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutSuppliersInput = {
@@ -1476,6 +1538,8 @@ export type BranchCreateWithoutSuppliersInput = {
   customerPayments?: Prisma.CustomerPaymentCreateNestedManyWithoutBranchInput
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutSuppliersInput = {
@@ -1512,6 +1576,8 @@ export type BranchUncheckedCreateWithoutSuppliersInput = {
   customerPayments?: Prisma.CustomerPaymentUncheckedCreateNestedManyWithoutBranchInput
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutSuppliersInput = {
@@ -1564,6 +1630,8 @@ export type BranchUpdateWithoutSuppliersInput = {
   customerPayments?: Prisma.CustomerPaymentUpdateManyWithoutBranchNestedInput
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutSuppliersInput = {
@@ -1600,6 +1668,8 @@ export type BranchUncheckedUpdateWithoutSuppliersInput = {
   customerPayments?: Prisma.CustomerPaymentUncheckedUpdateManyWithoutBranchNestedInput
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutPurchasesInput = {
@@ -1636,6 +1706,8 @@ export type BranchCreateWithoutPurchasesInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutPurchasesInput = {
@@ -1672,6 +1744,8 @@ export type BranchUncheckedCreateWithoutPurchasesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutPurchasesInput = {
@@ -1724,6 +1798,8 @@ export type BranchUpdateWithoutPurchasesInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutPurchasesInput = {
@@ -1760,6 +1836,8 @@ export type BranchUncheckedUpdateWithoutPurchasesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutSupplierPaymentsInput = {
@@ -1796,6 +1874,8 @@ export type BranchCreateWithoutSupplierPaymentsInput = {
   customerPayments?: Prisma.CustomerPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutSupplierPaymentsInput = {
@@ -1832,6 +1912,8 @@ export type BranchUncheckedCreateWithoutSupplierPaymentsInput = {
   customerPayments?: Prisma.CustomerPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutSupplierPaymentsInput = {
@@ -1884,6 +1966,8 @@ export type BranchUpdateWithoutSupplierPaymentsInput = {
   customerPayments?: Prisma.CustomerPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutSupplierPaymentsInput = {
@@ -1920,6 +2004,8 @@ export type BranchUncheckedUpdateWithoutSupplierPaymentsInput = {
   customerPayments?: Prisma.CustomerPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutCustomersInput = {
@@ -1956,6 +2042,8 @@ export type BranchCreateWithoutCustomersInput = {
   customerPayments?: Prisma.CustomerPaymentCreateNestedManyWithoutBranchInput
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutCustomersInput = {
@@ -1992,6 +2080,8 @@ export type BranchUncheckedCreateWithoutCustomersInput = {
   customerPayments?: Prisma.CustomerPaymentUncheckedCreateNestedManyWithoutBranchInput
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutCustomersInput = {
@@ -2044,6 +2134,8 @@ export type BranchUpdateWithoutCustomersInput = {
   customerPayments?: Prisma.CustomerPaymentUpdateManyWithoutBranchNestedInput
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutCustomersInput = {
@@ -2080,6 +2172,8 @@ export type BranchUncheckedUpdateWithoutCustomersInput = {
   customerPayments?: Prisma.CustomerPaymentUncheckedUpdateManyWithoutBranchNestedInput
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutSalesInput = {
@@ -2116,6 +2210,8 @@ export type BranchCreateWithoutSalesInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutSalesInput = {
@@ -2152,6 +2248,8 @@ export type BranchUncheckedCreateWithoutSalesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutSalesInput = {
@@ -2204,6 +2302,8 @@ export type BranchUpdateWithoutSalesInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutSalesInput = {
@@ -2240,6 +2340,8 @@ export type BranchUncheckedUpdateWithoutSalesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutCustomerPaymentsInput = {
@@ -2276,6 +2378,8 @@ export type BranchCreateWithoutCustomerPaymentsInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutCustomerPaymentsInput = {
@@ -2312,6 +2416,8 @@ export type BranchUncheckedCreateWithoutCustomerPaymentsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutCustomerPaymentsInput = {
@@ -2364,6 +2470,8 @@ export type BranchUpdateWithoutCustomerPaymentsInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutCustomerPaymentsInput = {
@@ -2400,6 +2508,8 @@ export type BranchUncheckedUpdateWithoutCustomerPaymentsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutSaleReturnsInput = {
@@ -2436,6 +2546,8 @@ export type BranchCreateWithoutSaleReturnsInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutSaleReturnsInput = {
@@ -2472,6 +2584,8 @@ export type BranchUncheckedCreateWithoutSaleReturnsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutSaleReturnsInput = {
@@ -2524,6 +2638,8 @@ export type BranchUpdateWithoutSaleReturnsInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutSaleReturnsInput = {
@@ -2560,6 +2676,8 @@ export type BranchUncheckedUpdateWithoutSaleReturnsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutQuotationsInput = {
@@ -2596,6 +2714,8 @@ export type BranchCreateWithoutQuotationsInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutQuotationsInput = {
@@ -2632,6 +2752,8 @@ export type BranchUncheckedCreateWithoutQuotationsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutQuotationsInput = {
@@ -2684,6 +2806,8 @@ export type BranchUpdateWithoutQuotationsInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutQuotationsInput = {
@@ -2720,6 +2844,8 @@ export type BranchUncheckedUpdateWithoutQuotationsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutAccountsInput = {
@@ -2756,6 +2882,8 @@ export type BranchCreateWithoutAccountsInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutAccountsInput = {
@@ -2792,6 +2920,8 @@ export type BranchUncheckedCreateWithoutAccountsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutAccountsInput = {
@@ -2844,6 +2974,8 @@ export type BranchUpdateWithoutAccountsInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutAccountsInput = {
@@ -2880,6 +3012,8 @@ export type BranchUncheckedUpdateWithoutAccountsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutAccountTransactionsInput = {
@@ -2916,6 +3050,8 @@ export type BranchCreateWithoutAccountTransactionsInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutAccountTransactionsInput = {
@@ -2952,6 +3088,8 @@ export type BranchUncheckedCreateWithoutAccountTransactionsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutAccountTransactionsInput = {
@@ -3004,6 +3142,8 @@ export type BranchUpdateWithoutAccountTransactionsInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutAccountTransactionsInput = {
@@ -3040,6 +3180,8 @@ export type BranchUncheckedUpdateWithoutAccountTransactionsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutBankChequesInput = {
@@ -3076,6 +3218,8 @@ export type BranchCreateWithoutBankChequesInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutBankChequesInput = {
@@ -3112,6 +3256,8 @@ export type BranchUncheckedCreateWithoutBankChequesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutBankChequesInput = {
@@ -3164,6 +3310,8 @@ export type BranchUpdateWithoutBankChequesInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutBankChequesInput = {
@@ -3200,6 +3348,8 @@ export type BranchUncheckedUpdateWithoutBankChequesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutLoansInput = {
@@ -3236,6 +3386,8 @@ export type BranchCreateWithoutLoansInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutLoansInput = {
@@ -3272,6 +3424,8 @@ export type BranchUncheckedCreateWithoutLoansInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutLoansInput = {
@@ -3324,6 +3478,8 @@ export type BranchUpdateWithoutLoansInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutLoansInput = {
@@ -3360,6 +3516,8 @@ export type BranchUncheckedUpdateWithoutLoansInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutLoanInstallmentsInput = {
@@ -3396,6 +3554,8 @@ export type BranchCreateWithoutLoanInstallmentsInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutLoanInstallmentsInput = {
@@ -3432,6 +3592,8 @@ export type BranchUncheckedCreateWithoutLoanInstallmentsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutLoanInstallmentsInput = {
@@ -3484,6 +3646,8 @@ export type BranchUpdateWithoutLoanInstallmentsInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutLoanInstallmentsInput = {
@@ -3520,6 +3684,8 @@ export type BranchUncheckedUpdateWithoutLoanInstallmentsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutExpensesInput = {
@@ -3556,6 +3722,8 @@ export type BranchCreateWithoutExpensesInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutExpensesInput = {
@@ -3592,6 +3760,8 @@ export type BranchUncheckedCreateWithoutExpensesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutExpensesInput = {
@@ -3644,6 +3814,8 @@ export type BranchUpdateWithoutExpensesInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutExpensesInput = {
@@ -3680,6 +3852,8 @@ export type BranchUncheckedUpdateWithoutExpensesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutOtherIncomesInput = {
@@ -3716,6 +3890,8 @@ export type BranchCreateWithoutOtherIncomesInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutOtherIncomesInput = {
@@ -3752,6 +3928,8 @@ export type BranchUncheckedCreateWithoutOtherIncomesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutOtherIncomesInput = {
@@ -3804,6 +3982,8 @@ export type BranchUpdateWithoutOtherIncomesInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutOtherIncomesInput = {
@@ -3840,6 +4020,8 @@ export type BranchUncheckedUpdateWithoutOtherIncomesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutCompanyAssetsInput = {
@@ -3876,6 +4058,8 @@ export type BranchCreateWithoutCompanyAssetsInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutCompanyAssetsInput = {
@@ -3912,6 +4096,8 @@ export type BranchUncheckedCreateWithoutCompanyAssetsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutCompanyAssetsInput = {
@@ -3964,6 +4150,8 @@ export type BranchUpdateWithoutCompanyAssetsInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutCompanyAssetsInput = {
@@ -4000,6 +4188,8 @@ export type BranchUncheckedUpdateWithoutCompanyAssetsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutOwnerTransactionsInput = {
@@ -4036,6 +4226,8 @@ export type BranchCreateWithoutOwnerTransactionsInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutOwnerTransactionsInput = {
@@ -4072,6 +4264,8 @@ export type BranchUncheckedCreateWithoutOwnerTransactionsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutOwnerTransactionsInput = {
@@ -4124,6 +4318,8 @@ export type BranchUpdateWithoutOwnerTransactionsInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutOwnerTransactionsInput = {
@@ -4160,6 +4356,8 @@ export type BranchUncheckedUpdateWithoutOwnerTransactionsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutStaffProfilesInput = {
@@ -4196,6 +4394,8 @@ export type BranchCreateWithoutStaffProfilesInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutStaffProfilesInput = {
@@ -4232,6 +4432,8 @@ export type BranchUncheckedCreateWithoutStaffProfilesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutStaffProfilesInput = {
@@ -4284,6 +4486,8 @@ export type BranchUpdateWithoutStaffProfilesInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutStaffProfilesInput = {
@@ -4320,6 +4524,8 @@ export type BranchUncheckedUpdateWithoutStaffProfilesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutSalaryAdvancesInput = {
@@ -4356,6 +4562,8 @@ export type BranchCreateWithoutSalaryAdvancesInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutSalaryAdvancesInput = {
@@ -4392,6 +4600,8 @@ export type BranchUncheckedCreateWithoutSalaryAdvancesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutSalaryAdvancesInput = {
@@ -4444,6 +4654,8 @@ export type BranchUpdateWithoutSalaryAdvancesInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutSalaryAdvancesInput = {
@@ -4480,6 +4692,8 @@ export type BranchUncheckedUpdateWithoutSalaryAdvancesInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutPayrollsInput = {
@@ -4516,6 +4730,8 @@ export type BranchCreateWithoutPayrollsInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutPayrollsInput = {
@@ -4552,6 +4768,8 @@ export type BranchUncheckedCreateWithoutPayrollsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutPayrollsInput = {
@@ -4604,6 +4822,8 @@ export type BranchUpdateWithoutPayrollsInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutPayrollsInput = {
@@ -4640,6 +4860,8 @@ export type BranchUncheckedUpdateWithoutPayrollsInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutCashRegistersInput = {
@@ -4676,6 +4898,8 @@ export type BranchCreateWithoutCashRegistersInput = {
   supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutCashRegistersInput = {
@@ -4712,6 +4936,8 @@ export type BranchUncheckedCreateWithoutCashRegistersInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
   suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutCashRegistersInput = {
@@ -4764,6 +4990,8 @@ export type BranchUpdateWithoutCashRegistersInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutCashRegistersInput = {
@@ -4800,6 +5028,344 @@ export type BranchUncheckedUpdateWithoutCashRegistersInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
+}
+
+export type BranchCreateWithoutPartnerTransactionsInput = {
+  id?: string
+  name: string
+  code: string
+  phone?: string | null
+  email?: string | null
+  address?: string | null
+  isMain?: boolean
+  status?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  shop: Prisma.ShopCreateNestedOneWithoutBranchesInput
+  users?: Prisma.UserCreateNestedManyWithoutBranchInput
+  productStocks?: Prisma.ProductStockCreateNestedManyWithoutBranchInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutBranchInput
+  sales?: Prisma.SaleCreateNestedManyWithoutBranchInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutBranchInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutBranchInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutBranchInput
+  accountTransactions?: Prisma.AccountTransactionCreateNestedManyWithoutBranchInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutBranchInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutBranchInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutBranchInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutBranchInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutBranchInput
+  loans?: Prisma.LoanCreateNestedManyWithoutBranchInput
+  loanInstallments?: Prisma.LoanInstallmentCreateNestedManyWithoutBranchInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutBranchInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutBranchInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutBranchInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutBranchInput
+  customerPayments?: Prisma.CustomerPaymentCreateNestedManyWithoutBranchInput
+  supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutBranchInput
+}
+
+export type BranchUncheckedCreateWithoutPartnerTransactionsInput = {
+  id?: string
+  name: string
+  code: string
+  phone?: string | null
+  email?: string | null
+  address?: string | null
+  isMain?: boolean
+  status?: string
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
+  productStocks?: Prisma.ProductStockUncheckedCreateNestedManyWithoutBranchInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutBranchInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutBranchInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutBranchInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutBranchInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutBranchInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedCreateNestedManyWithoutBranchInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutBranchInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutBranchInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutBranchInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutBranchInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutBranchInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutBranchInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedCreateNestedManyWithoutBranchInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutBranchInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutBranchInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutBranchInput
+  customerPayments?: Prisma.CustomerPaymentUncheckedCreateNestedManyWithoutBranchInput
+  supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutBranchInput
+}
+
+export type BranchCreateOrConnectWithoutPartnerTransactionsInput = {
+  where: Prisma.BranchWhereUniqueInput
+  create: Prisma.XOR<Prisma.BranchCreateWithoutPartnerTransactionsInput, Prisma.BranchUncheckedCreateWithoutPartnerTransactionsInput>
+}
+
+export type BranchUpsertWithoutPartnerTransactionsInput = {
+  update: Prisma.XOR<Prisma.BranchUpdateWithoutPartnerTransactionsInput, Prisma.BranchUncheckedUpdateWithoutPartnerTransactionsInput>
+  create: Prisma.XOR<Prisma.BranchCreateWithoutPartnerTransactionsInput, Prisma.BranchUncheckedCreateWithoutPartnerTransactionsInput>
+  where?: Prisma.BranchWhereInput
+}
+
+export type BranchUpdateToOneWithWhereWithoutPartnerTransactionsInput = {
+  where?: Prisma.BranchWhereInput
+  data: Prisma.XOR<Prisma.BranchUpdateWithoutPartnerTransactionsInput, Prisma.BranchUncheckedUpdateWithoutPartnerTransactionsInput>
+}
+
+export type BranchUpdateWithoutPartnerTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shop?: Prisma.ShopUpdateOneRequiredWithoutBranchesNestedInput
+  users?: Prisma.UserUpdateManyWithoutBranchNestedInput
+  productStocks?: Prisma.ProductStockUpdateManyWithoutBranchNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutBranchNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutBranchNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutBranchNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutBranchNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutBranchNestedInput
+  accountTransactions?: Prisma.AccountTransactionUpdateManyWithoutBranchNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutBranchNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutBranchNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutBranchNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutBranchNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutBranchNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutBranchNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUpdateManyWithoutBranchNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutBranchNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutBranchNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutBranchNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutBranchNestedInput
+  customerPayments?: Prisma.CustomerPaymentUpdateManyWithoutBranchNestedInput
+  supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
+}
+
+export type BranchUncheckedUpdateWithoutPartnerTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
+  productStocks?: Prisma.ProductStockUncheckedUpdateManyWithoutBranchNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutBranchNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutBranchNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutBranchNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutBranchNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutBranchNestedInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutBranchNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutBranchNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutBranchNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutBranchNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutBranchNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutBranchNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedUpdateManyWithoutBranchNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutBranchNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutBranchNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutBranchNestedInput
+  customerPayments?: Prisma.CustomerPaymentUncheckedUpdateManyWithoutBranchNestedInput
+  supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
+}
+
+export type BranchCreateWithoutPartnerRationsInput = {
+  id?: string
+  name: string
+  code: string
+  phone?: string | null
+  email?: string | null
+  address?: string | null
+  isMain?: boolean
+  status?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  shop: Prisma.ShopCreateNestedOneWithoutBranchesInput
+  users?: Prisma.UserCreateNestedManyWithoutBranchInput
+  productStocks?: Prisma.ProductStockCreateNestedManyWithoutBranchInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutBranchInput
+  sales?: Prisma.SaleCreateNestedManyWithoutBranchInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutBranchInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutBranchInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutBranchInput
+  accountTransactions?: Prisma.AccountTransactionCreateNestedManyWithoutBranchInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutBranchInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutBranchInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutBranchInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutBranchInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutBranchInput
+  loans?: Prisma.LoanCreateNestedManyWithoutBranchInput
+  loanInstallments?: Prisma.LoanInstallmentCreateNestedManyWithoutBranchInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutBranchInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutBranchInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutBranchInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutBranchInput
+  customerPayments?: Prisma.CustomerPaymentCreateNestedManyWithoutBranchInput
+  supplierPayments?: Prisma.SupplierPaymentCreateNestedManyWithoutBranchInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutBranchInput
+}
+
+export type BranchUncheckedCreateWithoutPartnerRationsInput = {
+  id?: string
+  name: string
+  code: string
+  phone?: string | null
+  email?: string | null
+  address?: string | null
+  isMain?: boolean
+  status?: string
+  shopId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
+  productStocks?: Prisma.ProductStockUncheckedCreateNestedManyWithoutBranchInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutBranchInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutBranchInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutBranchInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutBranchInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutBranchInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedCreateNestedManyWithoutBranchInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutBranchInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutBranchInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutBranchInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutBranchInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutBranchInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutBranchInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedCreateNestedManyWithoutBranchInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutBranchInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutBranchInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutBranchInput
+  customerPayments?: Prisma.CustomerPaymentUncheckedCreateNestedManyWithoutBranchInput
+  supplierPayments?: Prisma.SupplierPaymentUncheckedCreateNestedManyWithoutBranchInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutBranchInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutBranchInput
+}
+
+export type BranchCreateOrConnectWithoutPartnerRationsInput = {
+  where: Prisma.BranchWhereUniqueInput
+  create: Prisma.XOR<Prisma.BranchCreateWithoutPartnerRationsInput, Prisma.BranchUncheckedCreateWithoutPartnerRationsInput>
+}
+
+export type BranchUpsertWithoutPartnerRationsInput = {
+  update: Prisma.XOR<Prisma.BranchUpdateWithoutPartnerRationsInput, Prisma.BranchUncheckedUpdateWithoutPartnerRationsInput>
+  create: Prisma.XOR<Prisma.BranchCreateWithoutPartnerRationsInput, Prisma.BranchUncheckedCreateWithoutPartnerRationsInput>
+  where?: Prisma.BranchWhereInput
+}
+
+export type BranchUpdateToOneWithWhereWithoutPartnerRationsInput = {
+  where?: Prisma.BranchWhereInput
+  data: Prisma.XOR<Prisma.BranchUpdateWithoutPartnerRationsInput, Prisma.BranchUncheckedUpdateWithoutPartnerRationsInput>
+}
+
+export type BranchUpdateWithoutPartnerRationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shop?: Prisma.ShopUpdateOneRequiredWithoutBranchesNestedInput
+  users?: Prisma.UserUpdateManyWithoutBranchNestedInput
+  productStocks?: Prisma.ProductStockUpdateManyWithoutBranchNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutBranchNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutBranchNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutBranchNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutBranchNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutBranchNestedInput
+  accountTransactions?: Prisma.AccountTransactionUpdateManyWithoutBranchNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutBranchNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutBranchNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutBranchNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutBranchNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutBranchNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutBranchNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUpdateManyWithoutBranchNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutBranchNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutBranchNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutBranchNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutBranchNestedInput
+  customerPayments?: Prisma.CustomerPaymentUpdateManyWithoutBranchNestedInput
+  supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+}
+
+export type BranchUncheckedUpdateWithoutPartnerRationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  shopId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
+  productStocks?: Prisma.ProductStockUncheckedUpdateManyWithoutBranchNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutBranchNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutBranchNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutBranchNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutBranchNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutBranchNestedInput
+  accountTransactions?: Prisma.AccountTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutBranchNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutBranchNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutBranchNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutBranchNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutBranchNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutBranchNestedInput
+  loanInstallments?: Prisma.LoanInstallmentUncheckedUpdateManyWithoutBranchNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutBranchNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutBranchNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutBranchNestedInput
+  customerPayments?: Prisma.CustomerPaymentUncheckedUpdateManyWithoutBranchNestedInput
+  supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateManyShopInput = {
@@ -4849,6 +5415,8 @@ export type BranchUpdateWithoutShopInput = {
   supplierPayments?: Prisma.SupplierPaymentUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutShopInput = {
@@ -4885,6 +5453,8 @@ export type BranchUncheckedUpdateWithoutShopInput = {
   supplierPayments?: Prisma.SupplierPaymentUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutBranchNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateManyWithoutShopInput = {
@@ -4929,6 +5499,8 @@ export type BranchCountOutputType = {
   supplierPayments: number
   customers: number
   suppliers: number
+  partnerTransactions: number
+  partnerRations: number
 }
 
 export type BranchCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4955,6 +5527,8 @@ export type BranchCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   supplierPayments?: boolean | BranchCountOutputTypeCountSupplierPaymentsArgs
   customers?: boolean | BranchCountOutputTypeCountCustomersArgs
   suppliers?: boolean | BranchCountOutputTypeCountSuppliersArgs
+  partnerTransactions?: boolean | BranchCountOutputTypeCountPartnerTransactionsArgs
+  partnerRations?: boolean | BranchCountOutputTypeCountPartnerRationsArgs
 }
 
 /**
@@ -5128,6 +5702,20 @@ export type BranchCountOutputTypeCountSuppliersArgs<ExtArgs extends runtime.Type
   where?: Prisma.SupplierWhereInput
 }
 
+/**
+ * BranchCountOutputType without action
+ */
+export type BranchCountOutputTypeCountPartnerTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PartnerTransactionWhereInput
+}
+
+/**
+ * BranchCountOutputType without action
+ */
+export type BranchCountOutputTypeCountPartnerRationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PartnerRationWhereInput
+}
+
 
 export type BranchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -5165,6 +5753,8 @@ export type BranchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   supplierPayments?: boolean | Prisma.Branch$supplierPaymentsArgs<ExtArgs>
   customers?: boolean | Prisma.Branch$customersArgs<ExtArgs>
   suppliers?: boolean | Prisma.Branch$suppliersArgs<ExtArgs>
+  partnerTransactions?: boolean | Prisma.Branch$partnerTransactionsArgs<ExtArgs>
+  partnerRations?: boolean | Prisma.Branch$partnerRationsArgs<ExtArgs>
   _count?: boolean | Prisma.BranchCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["branch"]>
 
@@ -5210,6 +5800,8 @@ export type BranchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   supplierPayments?: boolean | Prisma.Branch$supplierPaymentsArgs<ExtArgs>
   customers?: boolean | Prisma.Branch$customersArgs<ExtArgs>
   suppliers?: boolean | Prisma.Branch$suppliersArgs<ExtArgs>
+  partnerTransactions?: boolean | Prisma.Branch$partnerTransactionsArgs<ExtArgs>
+  partnerRations?: boolean | Prisma.Branch$partnerRationsArgs<ExtArgs>
   _count?: boolean | Prisma.BranchCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -5240,6 +5832,8 @@ export type $BranchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     supplierPayments: Prisma.$SupplierPaymentPayload<ExtArgs>[]
     customers: Prisma.$CustomerPayload<ExtArgs>[]
     suppliers: Prisma.$SupplierPayload<ExtArgs>[]
+    partnerTransactions: Prisma.$PartnerTransactionPayload<ExtArgs>[]
+    partnerRations: Prisma.$PartnerRationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -5617,6 +6211,8 @@ export interface Prisma__BranchClient<T, Null = never, ExtArgs extends runtime.T
   supplierPayments<T extends Prisma.Branch$supplierPaymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Branch$supplierPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupplierPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   customers<T extends Prisma.Branch$customersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Branch$customersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   suppliers<T extends Prisma.Branch$suppliersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Branch$suppliersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupplierPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  partnerTransactions<T extends Prisma.Branch$partnerTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Branch$partnerTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PartnerTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  partnerRations<T extends Prisma.Branch$partnerRationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Branch$partnerRationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PartnerRationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6554,6 +7150,54 @@ export type Branch$suppliersArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.SupplierScalarFieldEnum | Prisma.SupplierScalarFieldEnum[]
+}
+
+/**
+ * Branch.partnerTransactions
+ */
+export type Branch$partnerTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PartnerTransaction
+   */
+  select?: Prisma.PartnerTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PartnerTransaction
+   */
+  omit?: Prisma.PartnerTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PartnerTransactionInclude<ExtArgs> | null
+  where?: Prisma.PartnerTransactionWhereInput
+  orderBy?: Prisma.PartnerTransactionOrderByWithRelationInput | Prisma.PartnerTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.PartnerTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PartnerTransactionScalarFieldEnum | Prisma.PartnerTransactionScalarFieldEnum[]
+}
+
+/**
+ * Branch.partnerRations
+ */
+export type Branch$partnerRationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PartnerRation
+   */
+  select?: Prisma.PartnerRationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PartnerRation
+   */
+  omit?: Prisma.PartnerRationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PartnerRationInclude<ExtArgs> | null
+  where?: Prisma.PartnerRationWhereInput
+  orderBy?: Prisma.PartnerRationOrderByWithRelationInput | Prisma.PartnerRationOrderByWithRelationInput[]
+  cursor?: Prisma.PartnerRationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PartnerRationScalarFieldEnum | Prisma.PartnerRationScalarFieldEnum[]
 }
 
 /**

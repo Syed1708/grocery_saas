@@ -226,3 +226,23 @@ export type Payroll = Prisma.PayrollModel
  * 
  */
 export type CashRegister = Prisma.CashRegisterModel
+/**
+ * Model Partner
+ * 
+ */
+export type Partner = Prisma.PartnerModel
+/**
+ * Model PartnerTransaction
+ * 
+ */
+export type PartnerTransaction = Prisma.PartnerTransactionModel
+/**
+ * Model PartnerRation
+ * 
+ */
+export type PartnerRation = Prisma.PartnerRationModel
+/**
+ * Model PartnerRationItem
+ * 
+ */
+export type PartnerRationItem = Prisma.PartnerRationItemModel

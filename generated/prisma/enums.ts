@@ -148,3 +148,25 @@ export const StaffStatus = {
 } as const
 
 export type StaffStatus = (typeof StaffStatus)[keyof typeof StaffStatus]
+
+
+export const PartnerRelationship = {
+  FATHER: 'FATHER',
+  UNCLE: 'UNCLE',
+  BROTHER: 'BROTHER',
+  SELF: 'SELF',
+  OTHER: 'OTHER'
+} as const
+
+export type PartnerRelationship = (typeof PartnerRelationship)[keyof typeof PartnerRelationship]
+
+
+export const PartnerTransactionType = {
+  CASH_DRAWING: 'CASH_DRAWING',
+  BANK_DRAWING: 'BANK_DRAWING',
+  CAPITAL_INJECTION: 'CAPITAL_INJECTION',
+  HOUSEHOLD_EXPENSE: 'HOUSEHOLD_EXPENSE',
+  PROFIT_DISTRIBUTION: 'PROFIT_DISTRIBUTION'
+} as const
+
+export type PartnerTransactionType = (typeof PartnerTransactionType)[keyof typeof PartnerTransactionType]

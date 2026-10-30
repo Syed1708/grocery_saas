@@ -20,3 +20,4 @@ export * from "./profit-loss";
 export * from "./expenses";
 export * from "./settings";
 export * from "./dashboard";
+export * from "./partner";

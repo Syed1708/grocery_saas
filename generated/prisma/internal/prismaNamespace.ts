@@ -433,7 +433,11 @@ export const ModelName = {
   StaffProfile: 'StaffProfile',
   SalaryAdvance: 'SalaryAdvance',
   Payroll: 'Payroll',
-  CashRegister: 'CashRegister'
+  CashRegister: 'CashRegister',
+  Partner: 'Partner',
+  PartnerTransaction: 'PartnerTransaction',
+  PartnerRation: 'PartnerRation',
+  PartnerRationItem: 'PartnerRationItem'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -449,7 +453,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "shop" | "branch" | "license" | "user" | "unit" | "productSection" | "category" | "brand" | "product" | "productStock" | "supplier" | "purchase" | "purchaseItem" | "supplierPayment" | "customer" | "sale" | "saleItem" | "customerPayment" | "saleReturn" | "saleReturnItem" | "quotation" | "quotationItem" | "account" | "accountTransaction" | "bankCheque" | "loan" | "loanInstallment" | "expenseCategory" | "expense" | "otherIncome" | "companyAsset" | "ownerTransaction" | "department" | "staffProfile" | "salaryAdvance" | "payroll" | "cashRegister"
+    modelProps: "shop" | "branch" | "license" | "user" | "unit" | "productSection" | "category" | "brand" | "product" | "productStock" | "supplier" | "purchase" | "purchaseItem" | "supplierPayment" | "customer" | "sale" | "saleItem" | "customerPayment" | "saleReturn" | "saleReturnItem" | "quotation" | "quotationItem" | "account" | "accountTransaction" | "bankCheque" | "loan" | "loanInstallment" | "expenseCategory" | "expense" | "otherIncome" | "companyAsset" | "ownerTransaction" | "department" | "staffProfile" | "salaryAdvance" | "payroll" | "cashRegister" | "partner" | "partnerTransaction" | "partnerRation" | "partnerRationItem"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2895,6 +2899,270 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Partner: {
+      payload: Prisma.$PartnerPayload<ExtArgs>
+      fields: Prisma.PartnerFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PartnerFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PartnerFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerPayload>
+        }
+        findFirst: {
+          args: Prisma.PartnerFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PartnerFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerPayload>
+        }
+        findMany: {
+          args: Prisma.PartnerFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerPayload>[]
+        }
+        create: {
+          args: Prisma.PartnerCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerPayload>
+        }
+        createMany: {
+          args: Prisma.PartnerCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.PartnerDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerPayload>
+        }
+        update: {
+          args: Prisma.PartnerUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerPayload>
+        }
+        deleteMany: {
+          args: Prisma.PartnerDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PartnerUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.PartnerUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerPayload>
+        }
+        aggregate: {
+          args: Prisma.PartnerAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePartner>
+        }
+        groupBy: {
+          args: Prisma.PartnerGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PartnerGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PartnerCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PartnerCountAggregateOutputType> | number
+        }
+      }
+    }
+    PartnerTransaction: {
+      payload: Prisma.$PartnerTransactionPayload<ExtArgs>
+      fields: Prisma.PartnerTransactionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PartnerTransactionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerTransactionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PartnerTransactionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerTransactionPayload>
+        }
+        findFirst: {
+          args: Prisma.PartnerTransactionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerTransactionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PartnerTransactionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerTransactionPayload>
+        }
+        findMany: {
+          args: Prisma.PartnerTransactionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerTransactionPayload>[]
+        }
+        create: {
+          args: Prisma.PartnerTransactionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerTransactionPayload>
+        }
+        createMany: {
+          args: Prisma.PartnerTransactionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.PartnerTransactionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerTransactionPayload>
+        }
+        update: {
+          args: Prisma.PartnerTransactionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerTransactionPayload>
+        }
+        deleteMany: {
+          args: Prisma.PartnerTransactionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PartnerTransactionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.PartnerTransactionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerTransactionPayload>
+        }
+        aggregate: {
+          args: Prisma.PartnerTransactionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePartnerTransaction>
+        }
+        groupBy: {
+          args: Prisma.PartnerTransactionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PartnerTransactionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PartnerTransactionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PartnerTransactionCountAggregateOutputType> | number
+        }
+      }
+    }
+    PartnerRation: {
+      payload: Prisma.$PartnerRationPayload<ExtArgs>
+      fields: Prisma.PartnerRationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PartnerRationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PartnerRationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationPayload>
+        }
+        findFirst: {
+          args: Prisma.PartnerRationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PartnerRationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationPayload>
+        }
+        findMany: {
+          args: Prisma.PartnerRationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationPayload>[]
+        }
+        create: {
+          args: Prisma.PartnerRationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationPayload>
+        }
+        createMany: {
+          args: Prisma.PartnerRationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.PartnerRationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationPayload>
+        }
+        update: {
+          args: Prisma.PartnerRationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationPayload>
+        }
+        deleteMany: {
+          args: Prisma.PartnerRationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PartnerRationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.PartnerRationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationPayload>
+        }
+        aggregate: {
+          args: Prisma.PartnerRationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePartnerRation>
+        }
+        groupBy: {
+          args: Prisma.PartnerRationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PartnerRationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PartnerRationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PartnerRationCountAggregateOutputType> | number
+        }
+      }
+    }
+    PartnerRationItem: {
+      payload: Prisma.$PartnerRationItemPayload<ExtArgs>
+      fields: Prisma.PartnerRationItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PartnerRationItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PartnerRationItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationItemPayload>
+        }
+        findFirst: {
+          args: Prisma.PartnerRationItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PartnerRationItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationItemPayload>
+        }
+        findMany: {
+          args: Prisma.PartnerRationItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationItemPayload>[]
+        }
+        create: {
+          args: Prisma.PartnerRationItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationItemPayload>
+        }
+        createMany: {
+          args: Prisma.PartnerRationItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.PartnerRationItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationItemPayload>
+        }
+        update: {
+          args: Prisma.PartnerRationItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.PartnerRationItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PartnerRationItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.PartnerRationItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PartnerRationItemPayload>
+        }
+        aggregate: {
+          args: Prisma.PartnerRationItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePartnerRationItem>
+        }
+        groupBy: {
+          args: Prisma.PartnerRationItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PartnerRationItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PartnerRationItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PartnerRationItemCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3644,6 +3912,74 @@ export const CashRegisterScalarFieldEnum = {
 export type CashRegisterScalarFieldEnum = (typeof CashRegisterScalarFieldEnum)[keyof typeof CashRegisterScalarFieldEnum]
 
 
+export const PartnerScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  relationship: 'relationship',
+  phone: 'phone',
+  nidNumber: 'nidNumber',
+  equityPercent: 'equityPercent',
+  openingCapital: 'openingCapital',
+  currentBalance: 'currentBalance',
+  monthlyAllowance: 'monthlyAllowance',
+  status: 'status',
+  notes: 'notes',
+  shopId: 'shopId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PartnerScalarFieldEnum = (typeof PartnerScalarFieldEnum)[keyof typeof PartnerScalarFieldEnum]
+
+
+export const PartnerTransactionScalarFieldEnum = {
+  id: 'id',
+  voucherNo: 'voucherNo',
+  type: 'type',
+  amount: 'amount',
+  transactionDate: 'transactionDate',
+  paymentMethod: 'paymentMethod',
+  purpose: 'purpose',
+  notes: 'notes',
+  partnerId: 'partnerId',
+  accountId: 'accountId',
+  branchId: 'branchId',
+  shopId: 'shopId',
+  createdAt: 'createdAt'
+} as const
+
+export type PartnerTransactionScalarFieldEnum = (typeof PartnerTransactionScalarFieldEnum)[keyof typeof PartnerTransactionScalarFieldEnum]
+
+
+export const PartnerRationScalarFieldEnum = {
+  id: 'id',
+  rationNo: 'rationNo',
+  rationDate: 'rationDate',
+  totalCost: 'totalCost',
+  notes: 'notes',
+  partnerId: 'partnerId',
+  branchId: 'branchId',
+  shopId: 'shopId',
+  createdAt: 'createdAt'
+} as const
+
+export type PartnerRationScalarFieldEnum = (typeof PartnerRationScalarFieldEnum)[keyof typeof PartnerRationScalarFieldEnum]
+
+
+export const PartnerRationItemScalarFieldEnum = {
+  id: 'id',
+  quantity: 'quantity',
+  unitCost: 'unitCost',
+  lineTotal: 'lineTotal',
+  rationId: 'rationId',
+  productId: 'productId',
+  unitId: 'unitId',
+  createdAt: 'createdAt'
+} as const
+
+export type PartnerRationItemScalarFieldEnum = (typeof PartnerRationItemScalarFieldEnum)[keyof typeof PartnerRationItemScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -4199,6 +4535,56 @@ export const CashRegisterOrderByRelevanceFieldEnum = {
 export type CashRegisterOrderByRelevanceFieldEnum = (typeof CashRegisterOrderByRelevanceFieldEnum)[keyof typeof CashRegisterOrderByRelevanceFieldEnum]
 
 
+export const PartnerOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  phone: 'phone',
+  nidNumber: 'nidNumber',
+  status: 'status',
+  notes: 'notes',
+  shopId: 'shopId'
+} as const
+
+export type PartnerOrderByRelevanceFieldEnum = (typeof PartnerOrderByRelevanceFieldEnum)[keyof typeof PartnerOrderByRelevanceFieldEnum]
+
+
+export const PartnerTransactionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  voucherNo: 'voucherNo',
+  paymentMethod: 'paymentMethod',
+  purpose: 'purpose',
+  notes: 'notes',
+  partnerId: 'partnerId',
+  accountId: 'accountId',
+  branchId: 'branchId',
+  shopId: 'shopId'
+} as const
+
+export type PartnerTransactionOrderByRelevanceFieldEnum = (typeof PartnerTransactionOrderByRelevanceFieldEnum)[keyof typeof PartnerTransactionOrderByRelevanceFieldEnum]
+
+
+export const PartnerRationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  rationNo: 'rationNo',
+  notes: 'notes',
+  partnerId: 'partnerId',
+  branchId: 'branchId',
+  shopId: 'shopId'
+} as const
+
+export type PartnerRationOrderByRelevanceFieldEnum = (typeof PartnerRationOrderByRelevanceFieldEnum)[keyof typeof PartnerRationOrderByRelevanceFieldEnum]
+
+
+export const PartnerRationItemOrderByRelevanceFieldEnum = {
+  id: 'id',
+  rationId: 'rationId',
+  productId: 'productId',
+  unitId: 'unitId'
+} as const
+
+export type PartnerRationItemOrderByRelevanceFieldEnum = (typeof PartnerRationItemOrderByRelevanceFieldEnum)[keyof typeof PartnerRationItemOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -4356,6 +4742,20 @@ export type EnumEquityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'StaffStatus'
  */
 export type EnumStaffStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StaffStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PartnerRelationship'
+ */
+export type EnumPartnerRelationshipFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PartnerRelationship'>
+    
+
+
+/**
+ * Reference to a field of type 'PartnerTransactionType'
+ */
+export type EnumPartnerTransactionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PartnerTransactionType'>
     
 
 
@@ -4553,6 +4953,10 @@ export type GlobalOmitConfig = {
   salaryAdvance?: Prisma.SalaryAdvanceOmit
   payroll?: Prisma.PayrollOmit
   cashRegister?: Prisma.CashRegisterOmit
+  partner?: Prisma.PartnerOmit
+  partnerTransaction?: Prisma.PartnerTransactionOmit
+  partnerRation?: Prisma.PartnerRationOmit
+  partnerRationItem?: Prisma.PartnerRationItemOmit
 }
 
 /* Types for Logging */
