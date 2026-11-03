@@ -1,21 +1,22 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
 import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { getSales } from "@/queries/sale-queries";
 import { prisma } from "@/lib/prisma";
 import SalesClient from "./_components/SalesClient";
+import { IPosShopConfig } from "@/types/sale";
 
 export default async function SalesPage() {
-  const session = await getServerSession(authOptions);
+  const user = await requireAuth({
+    requiredPermission: PERMISSIONS.POS_ACCESS,
+    requireActiveStatus: true,
+  });
 
-  if (!session?.user?.shopId) {
-    redirect("/login");
-  }
+  const { shopId, activeBranchId } = user;
 
-  const { shopId, branchId } = session.user;
-
-  const [sales, shop] = await Promise.all([
-    getSales(shopId, branchId),
+  // 👈 FIX: Strictly filter by activeBranchId for everyone (including OWNER
+  const [sales, rawShop] = await Promise.all([
+    getSales(shopId, activeBranchId),
     prisma.shop.findUnique({
       where: { id: shopId },
       select: {
@@ -24,17 +25,36 @@ export default async function SalesPage() {
         address: true,
         currencySymbol: true,
         thermalWidth: true,
+        invoiceHeader: true,
         invoiceFooter: true,
       },
     }),
   ]);
 
+  if (!rawShop) {
+    redirect("/dashboard");
+  }
+
+  const shop: IPosShopConfig = {
+    name: rawShop.name,
+    phone: rawShop.phone,
+    address: rawShop.address,
+    currencySymbol: rawShop.currencySymbol || "৳",
+    enableVat: false,
+    vatPercent: 0,
+    thermalWidth: rawShop.thermalWidth || "80mm",
+    invoiceHeader: rawShop.invoiceHeader,
+    invoiceFooter: rawShop.invoiceFooter,
+  };
+
+  // 👈 Pass sales directly to SalesClient without double-mapping!
   return (
     <div className="max-w-7xl mx-auto">
       <SalesClient
         data={sales}
         shop={shop}
-        currencySymbol={shop?.currencySymbol || "৳"}
+        currencySymbol={shop.currencySymbol}
+        userRole={user.role} // 👈 OWNER ONLY
       />
     </div>
   );

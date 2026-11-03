@@ -1,20 +1,100 @@
 // ==========================================
-// 1. POS CART & CHECKOUT TYPES
+// 1. POS CATALOG & CART TYPES
 // ==========================================
 
-export interface ISaleCartItem {
-  productId: string;
+export interface IPosProduct {
+  id: string;
   name: string;
+  nameEn?: string | null;
   barcode: string;
+  sku: string;
+  unitPrice: number;
   unitId: string;
   unitCode: string;
-  unitPrice: number;
-  costPrice: number;
-  quantity: number;
+  categoryId: string;
+  categoryName?: string;
   stockAvailable: number;
-  discount: number;
+  alertQuantity?: number;
+  vatPercent?: number;
+}
+
+export interface ISaleCartItem extends IPosProduct {
+  quantity: number;
   lineTotal: number;
 }
+
+export interface IPosCustomer {
+  id: string;
+  name: string;
+  phone: string | null;
+  currentDue: number;
+  creditLimit: number;
+  type: string;
+}
+
+export interface IPosCategory {
+  id: string;
+  name: string;
+  slug?: string;
+}
+
+export interface IPosShopConfig {
+  name: string;
+  phone: string;
+  address: string | null;
+  currencySymbol: string;
+  enableVat: boolean;
+  vatPercent: number;
+  thermalWidth: string;
+  invoiceHeader: string | null;
+  invoiceFooter: string | null;
+}
+
+// ==========================================
+// 2. CHECKOUT PAYLOAD CONTRACTS
+// ==========================================
+
+export interface CheckoutItemPayload {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  unitId?: string;
+}
+
+export interface CheckoutPayload {
+  customerId?: string | null;
+  items: CheckoutItemPayload[];
+  discount: number;
+  vatPercent?: number;
+  cashPaid: number;
+  bkashPaid: number;
+  bankPaid: number;
+}
+
+export interface ISplitPaymentDetails {
+  cash?: number;
+  bkash?: number;
+  bank?: number;
+}
+
+export interface ICompletedSale {
+  invoiceNo: string;
+  date: Date;
+  items: ISaleCartItem[];
+  subtotal: number;
+  discount: number;
+  vatAmount: number;
+  grandTotal: number;
+  paidAmount: number;
+  changeAmount: number;
+  dueAmount: number;
+  splitPayments?: ISplitPaymentDetails; // 👈 Add this line
+
+  customer: IPosCustomer | null;
+  cashierName: string;
+  branchName: string;
+}
+
 
 // ==========================================
 // 2. SALE & SALE ITEM TYPES
@@ -37,6 +117,8 @@ export interface ISaleItem {
   remainingQty?: number;
 }
 
+
+
 export interface ISale {
   id: string; 
   invoiceNo: string;
@@ -54,6 +136,7 @@ export interface ISale {
   offlineUuid?: string | null;
   isSynced?: boolean;
   notes?: string | null;
+  splitPayments?: ISplitPaymentDetails; // 👈 Add this line
   branchId: string;
   branchName?: string | null;
   customerId?: string | null;
@@ -124,9 +207,35 @@ export interface IReturnableSaleItem {
 export interface IReturnableSale {
   id: string;               // Sale ID
   invoiceNo: string;
+  customerId?: string | null; // 👈 ADD THIS LINE
   customerName: string;
+  customerType?: string;      // 👈 "WALK_IN" | "PERMANENT"
+  customerDue?: number;       // 👈 Current active Khata debt
   grandTotal: number;
   paidAmount: number;
   dueAmount: number;
   items: IReturnableSaleItem[];
+}
+
+export interface ICompletedReturnItem {
+  productName: string;
+  quantity: number;
+  unitCode: string;
+  refundPrice: number;
+  lineTotal: number;
+  condition: "RESTOCK" | "DAMAGED";
+}
+
+export interface ICompletedReturn {
+  id?: string;
+  returnNo: string;
+  invoiceNo: string;
+  returnDate: Date | string;
+  customerName: string;
+  totalRefund: number;
+  refundMethod: string;
+  branchName: string;
+  cashierName: string;
+  notes?: string | null;
+  items: ICompletedReturnItem[];
 }

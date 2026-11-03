@@ -56,8 +56,8 @@ export function DashboardSideWidgets({
           {stockAlerts.length === 0 ? (
             <p className="text-xs text-slate-500 py-6 text-center">সব পণ্যের পর্যাপ্ত স্টক ও মেয়াদ সঠিক আছে।</p>
           ) : (
-            stockAlerts.map((item) => (
-              <div key={item.id} className="py-2.5 flex items-center justify-between text-xs">
+            stockAlerts.map((item, index) => (
+              <div key={`${item.id}-${item.type}-${index}`} className="py-2.5 flex items-center justify-between text-xs">
                 <div>
                   <span className="font-semibold text-slate-800 dark:text-slate-200">{item.name}</span>
                   <p className="text-slate-400">SKU: {item.sku}</p>

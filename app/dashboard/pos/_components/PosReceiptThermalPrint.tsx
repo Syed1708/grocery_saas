@@ -1,52 +1,70 @@
 "use client";
 
+import { ICompletedSale, IPosShopConfig, ISaleCartItem } from "@/types/sale";
+
 interface Props {
-  sale: any;
-  shop: any;
+  sale: ICompletedSale | null;
+  shop: IPosShopConfig;
 }
 
 export default function PosReceiptThermalPrint({ sale, shop }: Props) {
   if (!sale) return null;
 
+  // 1. Strict Whitelist against CSS Injection
   const is80mm = (shop?.thermalWidth || "80mm") === "80mm";
+  const paperWidth = is80mm ? "80mm" : "58mm";
+  const printContentWidth = is80mm ? "78mm" : "56mm";
   const currency = shop?.currencySymbol || "৳";
+
+  // Helper for safe number formatting
+  const formatMoney = (val?: number | string | null) => Number(val || 0).toFixed(2);
+
+  // Safe date parser
+  const safeDate = sale.date ? new Date(sale.date) : new Date();
 
   return (
     <>
-      {/* Strict Thermal Print CSS (Zero margins, No URL headers, Popup-free) */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media print {
-          @page {
-            size: ${shop?.thermalWidth || "80mm"} auto;
-            margin: 0 !important;
-          }
-          body {
-            background: white !important;
-            color: black !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-          body * {
-            visibility: hidden !important;
-          }
-          #pos-thermal-slip, #pos-thermal-slip * {
-            visibility: visible !important;
-          }
-          #pos-thermal-slip {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: ${is80mm ? "78mm" : "56mm"} !important;
-            display: block !important;
-            padding: 8px !important;
-            font-family: monospace !important;
-            box-sizing: border-box !important;
-          }
-        }
-      `}} />
+      {/* Strict Thermal Print CSS (No popups, zero page margin, no URL headers) */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            @media print {
+              @page {
+                size: ${paperWidth} auto;
+                margin: 0 !important;
+              }
+              body {
+                background: white !important;
+                color: black !important;
+                margin: 0 !important;
+                padding: 0 !important;
+              }
+              body * {
+                visibility: hidden !important;
+              }
+              #pos-thermal-slip, #pos-thermal-slip * {
+                visibility: visible !important;
+              }
+              #pos-thermal-slip {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: ${printContentWidth} !important;
+                display: block !important;
+                padding: 8px !important;
+                font-family: monospace !important;
+                box-sizing: border-box !important;
+              }
+            }
+          `,
+        }}
+      />
 
-      {/* 80mm / 58mm Thermal Print Container */}
-      <div id="pos-thermal-slip" className="hidden print:block font-mono text-black text-[10px] leading-tight">
+      {/* Printable Receipt Container */}
+      <div
+        id="pos-thermal-slip"
+        className="hidden print:block font-mono text-black text-[10px] leading-tight select-none"
+      >
         {/* 1. Header Greeting Note */}
         {shop?.invoiceHeader && (
           <p className="text-center font-bold text-[9px] pb-1 border-b border-dotted border-black">
@@ -54,37 +72,32 @@ export default function PosReceiptThermalPrint({ sale, shop }: Props) {
           </p>
         )}
 
-        {/* 2. Store Brand & Active Branch Location */}
+        {/* 2. Store Brand & Branch Information */}
         <div className="text-center py-1.5 border-b border-dashed border-black">
           <h1 className="font-extrabold text-xs uppercase">{shop?.name || "GROCERY STORE"}</h1>
-          
-          {/* Active Branch Name */}
+
+          {/* Prints the exact branch name where the cashier is operating */}
           <h2 className="font-bold text-[10px] text-neutral-900 mt-0.5">
             শাখা: {sale.branchName || "Main Branch"}
           </h2>
 
-          {/* Active Branch Address & Phone */}
-          <p className="text-[9px] text-neutral-800 leading-normal">
-            {shop?.address || ""}
-          </p>
-          <p className="text-[9px]">
-            হেল্পলাইন: {shop?.phone || ""}
-          </p>
-
-          {shop?.enableVat && shop?.binVatNumber && (
-            <p className="text-[8px] font-mono mt-0.5">BIN/VAT: {shop.binVatNumber}</p>
+          {shop?.address && (
+            <p className="text-[9px] text-neutral-800 leading-normal">{shop.address}</p>
+          )}
+          {shop?.phone && (
+            <p className="text-[9px]">হেল্পলাইন: {shop.phone}</p>
           )}
         </div>
 
         {/* 3. Invoice Metadata */}
         <div className="py-1 border-b border-black text-[9px] space-y-0.5">
           <div className="flex justify-between">
-            <span>ইনভয়েস: #{sale.invoiceNo}</span>
-            <span>{new Date(sale.date || Date.now()).toLocaleDateString()}</span>
+            <span>ইনভয়েস নং: #{sale.invoiceNo}</span>
+            <span>{safeDate.toLocaleDateString()}</span>
           </div>
           <div className="flex justify-between">
-            <span>ক্যাশিয়ার: {sale.cashierName}</span>
-            <span>{new Date(sale.date || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            <span>ক্যাশিয়ার: {sale.cashierName || "Staff"}</span>
+            <span>{safeDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
           </div>
           {sale.customer && (
             <div className="flex justify-between font-bold pt-0.5">
@@ -100,53 +113,82 @@ export default function PosReceiptThermalPrint({ sale, shop }: Props) {
             <span>বিবরণ (Item)</span>
             <span>মোট</span>
           </div>
-          {sale.items.map((it: any, idx: number) => (
-            <div key={idx} className="space-y-0.5 text-[9px]">
+          {(sale.items || []).map((it: ISaleCartItem, idx: number) => (
+            <div key={it.id || idx} className="space-y-0.5 text-[9px]">
               <span className="font-bold block truncate">{it.name}</span>
               <div className="flex justify-between text-neutral-700">
-                <span>{it.quantity} {it.unitCode || "pcs"} x {currency}{it.unitPrice.toFixed(2)}</span>
-                <span className="font-bold text-black">{currency}{it.lineTotal.toFixed(2)}</span>
+                <span>
+                  {it.quantity} {it.unitCode || "pcs"} x {currency}{formatMoney(it.unitPrice)}
+                </span>
+                <span className="font-bold text-black">{currency}{formatMoney(it.lineTotal)}</span>
               </div>
             </div>
           ))}
         </div>
 
-        {/* 5. Totals Breakdown */}
+        {/* 5. Financial Totals */}
         <div className="py-1.5 border-b-2 border-black space-y-0.5 text-[10px]">
           <div className="flex justify-between font-bold">
             <span>সাবটোটাল:</span>
-            <span>{currency}{sale.subtotal.toFixed(2)}</span>
+            <span>{currency}{formatMoney(sale.subtotal)}</span>
           </div>
-          {sale.discount > 0 && (
+          {Number(sale.discount || 0) > 0 && (
             <div className="flex justify-between">
               <span>ডিসকাউন্ট:</span>
-              <span>-{currency}{sale.discount.toFixed(2)}</span>
+              <span>-{currency}{formatMoney(sale.discount)}</span>
             </div>
           )}
-          {sale.vatAmount > 0 && (
+          {Number(sale.vatAmount || 0) > 0 && (
             <div className="flex justify-between">
               <span>ভ্যাট (+):</span>
-              <span>+{currency}{sale.vatAmount.toFixed(2)}</span>
+              <span>+{currency}{formatMoney(sale.vatAmount)}</span>
             </div>
           )}
           <div className="flex justify-between font-black text-xs pt-1 border-t border-dotted border-black">
             <span>সর্বমোট বিল:</span>
-            <span>{currency}{sale.grandTotal.toFixed(2)}</span>
+            <span>{currency}{formatMoney(sale.grandTotal)}</span>
           </div>
-          <div className="flex justify-between font-bold text-neutral-800">
+
+          {/* Paid Amount */}
+          <div className="flex justify-between font-bold text-neutral-900">
             <span>পরিশোধিত:</span>
-            <span>{currency}{sale.paidAmount.toFixed(2)}</span>
+            <span>{currency}{formatMoney(sale.paidAmount)}</span>
           </div>
-          {sale.changeAmount > 0 && (
-            <div className="flex justify-between font-bold text-emerald-800">
-              <span>ফেরত:</span>
-              <span>{currency}{sale.changeAmount.toFixed(2)}</span>
+
+          {/* 👈 Detailed Split Payment Breakdown (Cash, bKash, Bank) */}
+          {sale.splitPayments && (
+            <div className="pl-2 space-y-0.5 text-[8.5px] text-neutral-800 border-l border-dotted border-black my-0.5 font-semibold">
+              {Number(sale.splitPayments.cash || 0) > 0 && (
+                <div className="flex justify-between">
+                  <span>• নগদ (Cash):</span>
+                  <span>{currency}{formatMoney(sale.splitPayments.cash)}</span>
+                </div>
+              )}
+              {Number(sale.splitPayments.bkash || 0) > 0 && (
+                <div className="flex justify-between">
+                  <span>• বিকাশ/নগদ (bKash):</span>
+                  <span>{currency}{formatMoney(sale.splitPayments.bkash)}</span>
+                </div>
+              )}
+              {Number(sale.splitPayments.bank || 0) > 0 && (
+                <div className="flex justify-between">
+                  <span>• ব্যাংক/কার্ড (Bank):</span>
+                  <span>{currency}{formatMoney(sale.splitPayments.bank)}</span>
+                </div>
+              )}
             </div>
           )}
-          {sale.dueAmount > 0 && (
+
+          {Number(sale.changeAmount || 0) > 0 && (
+            <div className="flex justify-between font-bold text-emerald-800">
+              <span>ফেরত দেওয়া হয়েছে:</span>
+              <span>{currency}{formatMoney(sale.changeAmount)}</span>
+            </div>
+          )}
+          {Number(sale.dueAmount || 0) > 0 && (
             <div className="flex justify-between font-black text-red-600">
               <span>বকেয়া বাকি:</span>
-              <span>{currency}{sale.dueAmount.toFixed(2)}</span>
+              <span>{currency}{formatMoney(sale.dueAmount)}</span>
             </div>
           )}
         </div>

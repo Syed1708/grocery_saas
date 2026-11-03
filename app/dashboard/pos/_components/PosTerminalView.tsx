@@ -5,6 +5,16 @@ import PosTopBar from "./PosTopBar";
 import PosCatalog from "./PosCatalog";
 import PosCart from "./PosCart";
 import PosModals from "./PosModals";
+import { IPosProduct, IPosCustomer, IPosCategory, IPosShopConfig } from "@/types/sale";
+
+interface PosTerminalProps {
+  catalog: IPosProduct[];
+  customers: IPosCustomer[];
+  categories: IPosCategory[];
+  shop: IPosShopConfig;
+  cashierName: string;
+  branchName: string;
+}
 
 export default function PosTerminalView({
   catalog,
@@ -13,14 +23,7 @@ export default function PosTerminalView({
   shop,
   cashierName,
   branchName,
-}: {
-  catalog: any[];
-  customers: any[];
-  categories: any[];
-  shop: any;
-  cashierName: string;
-  branchName: string;
-}) {
+}: PosTerminalProps) {
   const pos = usePosCart(catalog, customers, shop, cashierName, branchName);
 
   return (

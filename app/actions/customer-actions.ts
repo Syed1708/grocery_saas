@@ -12,11 +12,10 @@ import { PERMISSIONS } from "@/types";
 export async function createCustomerAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.POS_ACCESS, // Cashiers can register customers
       requireActiveStatus: true,
     });
 
-    // Zero-Trust Guard: Customer MUST be linked to an active branch
     if (!user.activeBranchId) {
       return { success: false, error: "Active branch context is required to register a customer." };
     }
@@ -29,7 +28,7 @@ export async function createCustomerAction(formData: FormData) {
       village: formData.get("village")?.toString().trim() || null,
       district: formData.get("district")?.toString().trim() || null,
       addressLine: formData.get("addressLine")?.toString().trim() || null,
-      creditLimit: formData.get("creditLimit") || 0,
+      creditLimit: formData.get("creditLimit") || 5000,
       openingBalance: formData.get("openingBalance") || 0,
     });
 
@@ -39,7 +38,7 @@ export async function createCustomerAction(formData: FormData) {
 
     const data = validated.data;
 
-    // Optional: Check if phone already registered in this branch
+    // Check duplicate phone in this branch
     if (data.phone) {
       const existing = await prisma.customer.findFirst({
         where: {
@@ -53,7 +52,7 @@ export async function createCustomerAction(formData: FormData) {
       }
     }
 
-    await prisma.customer.create({
+    const customer = await prisma.customer.create({
       data: {
         name: data.name,
         phone: data.phone,
@@ -66,14 +65,17 @@ export async function createCustomerAction(formData: FormData) {
         openingDue: data.openingBalance,
         currentDue: data.openingBalance,
         shopId: user.shopId,
-        branchId: user.activeBranchId, // 👈 STRICT: Always tied to active branch
+        branchId: user.activeBranchId,
         status: "active",
       },
     });
 
     revalidatePath("/dashboard/admin/customers");
+    revalidatePath("/pos");
     revalidatePath("/reports/customers-due");
-    return { success: true };
+
+    // 👈 RETURN customerId so POS auto-selects it!
+    return { success: true, customerId: customer.id };
   } catch (error: any) {
     console.error("createCustomerAction error:", error);
     return { success: false, error: error.message || "Failed to create customer." };
@@ -86,7 +88,7 @@ export async function createCustomerAction(formData: FormData) {
 export async function updateCustomerAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.CATALOG_VIEW,
       requireActiveStatus: true,
     });
 
@@ -111,7 +113,6 @@ export async function updateCustomerAction(formData: FormData) {
 
     const data = validated.data;
 
-    // Zero-Trust Guard: Non-owners can only edit their own branch's customers
     const existing = await prisma.customer.findFirst({
       where: {
         id,
@@ -147,7 +148,7 @@ export async function updateCustomerAction(formData: FormData) {
 }
 
 // ==========================================
-// 3. RECORD PAYMENT (Atomic with CustomerPayment)
+// 3. RECORD PAYMENT (Atomic with CustomerPayment & Account)
 // ==========================================
 export async function recordCustomerPaymentAction(
   customerId: string, 
@@ -157,7 +158,7 @@ export async function recordCustomerPaymentAction(
 ) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.POS_ACCESS,
       requireActiveStatus: true,
     });
 
@@ -169,7 +170,6 @@ export async function recordCustomerPaymentAction(
       return { success: false, error: "Please enter a valid payment amount." };
     }
 
-    // Verify customer belongs to this branch (or shop for Owner)
     const customer = await prisma.customer.findFirst({
       where: { 
         id: customerId, 
@@ -181,25 +181,37 @@ export async function recordCustomerPaymentAction(
 
     const receiptNo = `REC-${Date.now().toString().slice(-6)}`;
 
-    // ATOMIC TRANSACTION: Decrement Due + Create Payment Record in this branch
     await prisma.$transaction(async (tx) => {
+      // 1. Decrement Customer Due
       await tx.customer.update({
         where: { id: customerId },
-        data: {
-          currentDue: { decrement: amount },
-        },
+        data: { currentDue: { decrement: amount } },
       });
 
+      // 2. Create Payment Record
       await tx.customerPayment.create({
         data: {
           receiptNo,
           amount,
           paymentMethod,
           note: note || "কাস্টমার বকেয়া কালেকশন (Due Collection)",
-          branchId: user.activeBranchId!, // Payments enter this branch's drawer
+          branchId: user.activeBranchId,
           customerId: customer.id,
         },
       });
+
+      // 3. Increment Branch Cash Drawer if paid in cash
+      if (paymentMethod === "cash") {
+        const cashDrawer = await tx.account.findFirst({
+          where: { branchId: user.activeBranchId, type: "CASH", status: "active" },
+        });
+        if (cashDrawer) {
+          await tx.account.update({
+            where: { id: cashDrawer.id },
+            data: { currentBalance: { increment: amount } },
+          });
+        }
+      }
     });
 
     revalidatePath("/dashboard/admin/customers");
@@ -218,7 +230,7 @@ export async function recordCustomerPaymentAction(
 export async function deleteCustomerAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_LOANS,
       requireActiveStatus: true,
     });
 
@@ -229,9 +241,7 @@ export async function deleteCustomerAction(id: string) {
         ...(user.role !== "OWNER" && user.activeBranchId ? { branchId: user.activeBranchId } : {}),
       },
       include: {
-        _count: {
-          select: { sales: true },
-        },
+        _count: { select: { sales: true } },
       },
     });
 
@@ -240,14 +250,14 @@ export async function deleteCustomerAction(id: string) {
     if (Number(customer.currentDue) > 0) {
       return {
         success: false,
-        error: `Cannot delete: ${customer.name} owes ৳${Number(customer.currentDue).toFixed(2)} in unpaid credit. Settle the balance first.`,
+        error: `Cannot delete: ${customer.name} owes ৳${Number(customer.currentDue).toFixed(2)} in unpaid credit.`,
       };
     }
 
     if (customer._count.sales > 0) {
       return {
         success: false,
-        error: `Cannot delete: ${customer.name} has ${customer._count.sales} purchase invoices in system. Mark customer inactive instead.`,
+        error: `Cannot delete: ${customer.name} has ${customer._count.sales} invoices on record. Mark customer inactive instead.`,
       };
     }
 
