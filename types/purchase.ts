@@ -48,7 +48,9 @@ export interface IPurchase {
   paymentStatus: "PAID" | "PARTIAL" | "DUE";
   notes: string | null;
   supplierId: string;
+  branchName: string;
   supplierName: string;
+  supplierPhone: number | null;
   supplierCompany: string;
   items: IPurchaseItem[];
   createdAt: Date;

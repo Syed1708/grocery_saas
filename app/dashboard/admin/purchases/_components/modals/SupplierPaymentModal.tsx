@@ -1,13 +1,15 @@
-// app/dashboard/admin/purchases/_components/modals/SupplierPaymentModal.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import Modal from "@/components/common/Modal";
-import { recordSupplierPaymentAction } from "@/app/actions/supplier-actions";
+import { useState } from "react";
 import { toast } from "sonner";
+import FormModal from "@/components/common/FormModal";
+import { recordSupplierPaymentAction } from "@/app/actions/supplier-actions";
+import { ISupplier } from "@/types";
+import { Input } from "@/components/common/ui/Input";
+import { Select } from "@/components/common/ui/Select";
 
-interface SupplierPaymentModalProps {
-  supplier: any | null;
+interface Props {
+  supplier: ISupplier | null;
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (paymentData: any) => void;
@@ -20,140 +22,117 @@ export default function SupplierPaymentModal({
   onClose,
   onSuccess,
   currencySymbol = "৳",
-}: SupplierPaymentModalProps) {
-  const [payAmount, setPayAmount] = useState<number>(0);
-  const [payMethod, setPayMethod] = useState("cash");
-  const [payReference, setPayReference] = useState("");
-  const [payNote, setPayNote] = useState("");
+}: Props) {
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (supplier) {
-      const debt = Number(supplier.currentDue ?? supplier.payableBalance ?? 0);
-      setPayAmount(debt);
-      setPayMethod("cash");
-      setPayReference("");
-      setPayNote("");
-    }
-  }, [supplier]);
+  const [amount, setAmount] = useState<number>(0);
 
   if (!supplier) return null;
 
-  const currentDebt = Number(supplier.currentDue ?? supplier.payableBalance ?? 0);
+  const currentDue = Number(supplier.currentDue || 0);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (amount <= 0) return toast.error("পরিশোধের পরিমাণ উল্লেখ করুন।");
+
     setLoading(true);
+    const formData = new FormData(e.currentTarget);
 
     const res = await recordSupplierPaymentAction({
       supplierId: supplier.id,
-      amount: Number(payAmount),
-      paymentMethod: payMethod,
-      reference: payReference,
-      note: payNote,
+      amount,
+      paymentMethod: formData.get("paymentMethod")?.toString() || "cash",
+      reference: formData.get("reference")?.toString() || undefined,
+      note: formData.get("note")?.toString() || undefined,
     });
 
     setLoading(false);
 
     if (res.success) {
-      toast.success(`Payment of ${currencySymbol}${payAmount} recorded!`);
+      toast.success("বকেয়া পরিশোধ সফল হয়েছে ও ক্যাশ ড্রয়ার সমন্বয় করা হয়েছে!");
       onSuccess(res);
       onClose();
     } else {
-      toast.error(res.error || "Failed to record payment.");
+      toast.error(res.error || "পেমেন্ট ব্যর্থ হয়েছে।");
     }
   }
 
   return (
-    <Modal
+    <FormModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Record Supplier Payment (মহাজন পাওনা পরিশোধ)"
-      description={`Disburse payment to ${supplier.companyName}.`}
+      onSubmit={handleSubmit}
+      title="মহাজনের বকেয়া পরিশোধ (Supplier Due Payout)"
+      description="টাকা পরিশোধ করলে স্বয়ংক্রিয়ভাবে নির্বাচিত ক্যাশ ড্রয়ার বা ব্যাংক অ্যাকাউন্ট থেকে কর্তন হবে।"
+      loading={loading}
+      submitLabel="পরিশোধ নিশ্চিত করুন"
       maxWidth="md"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="p-3 bg-neutral-50 dark:bg-neutral-800/60 rounded-xl border border-neutral-200 dark:border-neutral-700 flex justify-between items-center text-xs">
-          <span className="text-neutral-500">Current Owed Debt:</span>
-          <span className="font-bold text-amber-600 dark:text-amber-400 text-sm">
-            {currencySymbol}{currentDebt.toFixed(2)}
-          </span>
+      <div className="space-y-4">
+        {/* Due Banner */}
+        <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-xl flex justify-between items-center text-xs">
+          <div>
+            <strong className="block text-neutral-900 dark:text-neutral-100">{supplier.companyName || supplier.name}</strong>
+            <span className="text-[11px] text-neutral-500">ফোন: {supplier.phone}</span>
+          </div>
+          <div className="text-right">
+            <span className="text-[10px] text-rose-500 block">বর্তমান বাকি দেনা</span>
+            <span className="text-base font-black font-mono text-rose-600">
+              {currencySymbol}{currentDue.toFixed(2)}
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium mb-1">Payment Amount ({currencySymbol}) *</label>
-            <input
+            <Input
+              label="পরিশোধের পরিমাণ *"
+              name="amount"
               type="number"
               step="0.01"
+              min="0.01"
+              value={amount || ""}
+              onChange={(e) => setAmount(Number(e.target.value))}
               required
-              value={payAmount}
-              onChange={(e) => setPayAmount(Number(e.target.value))}
-              className="w-full px-3 py-2 text-xs border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold dark:bg-neutral-800 dark:border-neutral-700"
+              placeholder="e.g. 5000"
             />
           </div>
-          <div>
-            <label className="block text-xs font-medium mb-1">Disbursement Method *</label>
-            <select
-              value={payMethod}
-              onChange={(e) => setPayMethod(e.target.value)}
-              className="w-full px-3 py-2 text-xs border rounded-xl outline-none dark:bg-neutral-800 dark:border-neutral-700 cursor-pointer"
-            >
-              <option value="cash">Cash (ক্যাশ ড্রয়ার)</option>
-              <option value="bank">Bank Transfer (ব্যাংক ট্রান্সফার)</option>
-              <option value="bkash">bKash (বিকাশ)</option>
-              <option value="nagad">Nagad (নগদ)</option>
-              <option value="cheque">Bank Cheque (চেক)</option>
-            </select>
-          </div>
-        </div>
 
-        <div>
-          <label className="block text-xs font-medium mb-1">Cheque # / Bank Ref / Slip No</label>
-          <input
-            type="text"
-            value={payReference}
-            onChange={(e) => setPayReference(e.target.value)}
-            placeholder="e.g. CHQ-90182 or TrxID..."
-            className="w-full px-3 py-2 text-xs border rounded-xl outline-none dark:bg-neutral-800 dark:border-neutral-700"
+          <Select
+            label="উৎস অ্যাকাউন্ট (Payment Method) *"
+            name="paymentMethod"
+            defaultValue="cash"
+            options={[
+              { value: "cash", label: "ক্যাশ ড্রয়ার (Cash Drawer)" },
+              { value: "bank", label: "ব্যাংক অ্যাকাউন্ট (Bank)" },
+              { value: "bkash", label: "বিকাশ মার্চেন্ট (bKash)" },
+              { value: "nagad", label: "নগদ মার্চেন্ট (Nagad)" },
+            ]}
           />
         </div>
 
-        <div>
-          <label className="block text-xs font-medium mb-1">Notes / Description</label>
-          <input
-            type="text"
-            value={payNote}
-            onChange={(e) => setPayNote(e.target.value)}
-            placeholder="e.g. Paid weekly dues against Chalan..."
-            className="w-full px-3 py-2 text-xs border rounded-xl outline-none dark:bg-neutral-800 dark:border-neutral-700"
-          />
-        </div>
-
-        <div className="p-2.5 bg-neutral-100 dark:bg-neutral-800/80 rounded-xl flex justify-between text-xs font-semibold">
-          <span>Remaining Due Balance:</span>
-          <span className="text-amber-600 dark:text-amber-400">
-            {currencySymbol}{Math.max(0, currentDebt - payAmount).toFixed(2)}
-          </span>
-        </div>
-
-        <div className="flex justify-end gap-2 pt-2">
+        {/* Quick Full-Pay Button */}
+        {currentDue > 0 && (
           <button
             type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 cursor-pointer"
+            onClick={() => setAmount(currentDue)}
+            className="text-xs font-semibold text-blue-600 hover:underline cursor-pointer"
           >
-            Cancel
+            সম্পূর্ণ বকেয়া পরিশোধ করুন ({currencySymbol}{currentDue.toFixed(2)})
           </button>
-          <button
-            type="submit"
-            disabled={loading || payAmount <= 0}
-            className="px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition disabled:opacity-50 cursor-pointer"
-          >
-            {loading ? "Recording..." : "Disburse & Print Voucher"}
-          </button>
-        </div>
-      </form>
-    </Modal>
+        )}
+
+        <Input
+          label="মেমো বা চেক রেফারেন্স (ঐচ্ছিক)"
+          name="reference"
+          placeholder="যেমন: Chalan #8912 or Cheque #1290"
+        />
+
+        <Input
+          label="নোট বা বিবরণ"
+          name="note"
+          placeholder="পেমেন্ট সংক্রান্ত মন্তব্য..."
+        />
+      </div>
+    </FormModal>
   );
 }

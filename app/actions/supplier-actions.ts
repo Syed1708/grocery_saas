@@ -1,39 +1,20 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { supplierSchema } from "@/lib/validations";
 
-async function getAuthenticatedUser() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.shopId) {
-    throw new Error("Unauthorized: Please log in.");
-  }
-
-  // Fail-safe: Ensure active branch is resolved
-  let branchId = session.user.branchId;
-  if (!branchId) {
-    const dbUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { branchId: true },
-    });
-    branchId = dbUser?.branchId || null;
-  }
-
-  return {
-    ...session.user,
-    branchId,
-  };
-}
-
 // ==========================================
-// 1. CREATE SUPPLIER (Tagged with branchId)
+// 1. CREATE SUPPLIER (Branch Scoped or Global)
 // ==========================================
 export async function createSupplierAction(formData: FormData) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
     const validated = supplierSchema.safeParse({
       name: formData.get("name")?.toString().trim(),
@@ -51,11 +32,9 @@ export async function createSupplierAction(formData: FormData) {
     }
 
     const data = validated.data;
-    
-    // Check if user toggled "Global Corporate Supplier" (e.g. Unilever, Pran)
     const isGlobal = formData.get("isGlobal") === "true";
 
-    await prisma.supplier.create({
+    const supplier = await prisma.supplier.create({
       data: {
         name: data.name,
         companyName: data.companyName,
@@ -67,29 +46,31 @@ export async function createSupplierAction(formData: FormData) {
         openingDue: data.openingBalance,
         currentDue: data.openingBalance,
         shopId: user.shopId,
-        // 👈 TAG WITH BRANCH: null if global distributor, otherwise active branch
-        branchId: isGlobal ? null : user.branchId,
+        branchId: isGlobal ? null : user.activeBranchId,
       },
     });
 
     revalidatePath("/dashboard/admin/suppliers");
-    revalidatePath("/admin/suppliers");
-    return { success: true };
+    revalidatePath("/purchases");
+    return { success: true, supplierId: supplier.id };
   } catch (error: any) {
     console.error("createSupplierAction error:", error);
-    return { success: false, error: error.message || "Failed to create supplier." };
+    return { success: false, error: error.message || "সরবরাহকারী যোগ করা সম্ভব হয়নি।" };
   }
 }
 
 // ==========================================
-// 2. UPDATE SUPPLIER (Multi-tenant guarded)
+// 2. UPDATE SUPPLIER
 // ==========================================
 export async function updateSupplierAction(formData: FormData) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
     const id = formData.get("id")?.toString();
-    if (!id) return { success: false, error: "Missing supplier ID." };
+    if (!id) return { success: false, error: "সাপ্লায়ার আইডি দেওয়া হয়নি।" };
 
     const validated = supplierSchema.safeParse({
       id,
@@ -107,8 +88,9 @@ export async function updateSupplierAction(formData: FormData) {
     }
 
     const data = validated.data;
+    const isGlobal = formData.get("isGlobal") === "true";
 
-    // 👈 Multi-tenant check: ID + shopId
+
     await prisma.supplier.update({
       where: { 
         id, 
@@ -122,61 +104,67 @@ export async function updateSupplierAction(formData: FormData) {
         village: data.village,
         district: data.district,
         address: data.addressLine,
+        branchId: isGlobal ? null : user.activeBranchId,
       },
     });
 
     revalidatePath("/dashboard/admin/suppliers");
-    revalidatePath("/admin/suppliers");
+    revalidatePath("/purchases");
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to update supplier." };
+    return { success: false, error: error.message || "সাপ্লায়ার আপডেট ব্যর্থ হয়েছে।" };
   }
 }
 
 // ==========================================
-// 3. DELETE SUPPLIER (Safe guarded)
+// 3. DELETE SUPPLIER (Owner Only)
 // ==========================================
 export async function deleteSupplierAction(id: string) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
+
+    if (user.role !== "OWNER") {
+      return { success: false, error: "অনুমতি নেই: শুধুমাত্র দোকানের মালিক সাপ্লায়ার মুছে ফেলতে পারেন।" };
+    }
 
     const supplier = await prisma.supplier.findFirst({
       where: { id, shopId: user.shopId },
       include: {
-        _count: {
-          select: { purchases: true },
-        },
+        _count: { select: { purchases: true } },
       },
     });
 
-    if (!supplier) return { success: false, error: "Supplier not found." };
+    if (!supplier) return { success: false, error: "সরবরাহকারী পাওয়া যায়নি।" };
 
     if (Number(supplier.currentDue) > 0) {
       return {
         success: false,
-        error: `Cannot delete: You owe ${supplier.companyName || supplier.name} an unpaid balance of ৳${Number(supplier.currentDue).toFixed(2)}. Settle the balance first.`,
+        error: `মুছে ফেলা সম্ভব নয়: ${supplier.companyName || supplier.name} এর নিকট আপনার ৳${Number(supplier.currentDue).toFixed(2)} বকেয়া দেনা রয়েছে। দেনা পরিশোধ করুন।`,
       };
     }
 
     if (supplier._count.purchases > 0) {
       return {
         success: false,
-        error: `Cannot delete: ${supplier.companyName || supplier.name} has ${supplier._count.purchases} purchase chalans in system. Mark supplier inactive instead.`,
+        error: `মুছে ফেলা সম্ভব নয়: এই সাপ্লায়ারের ${supplier._count.purchases} টি ক্রয় চালান রয়েছে। নিষ্ক্রিয় (Inactive) হিসেবে চিহ্নিত করুন।`,
       };
     }
 
     await prisma.supplier.delete({ where: { id } });
 
     revalidatePath("/dashboard/admin/suppliers");
-    revalidatePath("/admin/suppliers");
+    revalidatePath("/purchases");
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to delete supplier." };
+    return { success: false, error: error.message || "সাপ্লায়ার মুছে ফেলা সম্ভব হয়নি।" };
   }
 }
 
 // ==========================================
-// 4. RECORD PAYMENT (Supports both 1 object OR 3 arguments)
+// 4. RECORD SUPPLIER PAYMENT (WITH ACCOUNT SYNC)
 // ==========================================
 export interface RecordSupplierPaymentPayload {
   supplierId: string;
@@ -192,9 +180,15 @@ export async function recordSupplierPaymentAction(
   paymentMethodArg: string = "cash"
 ) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
 
-    // 👈 Polyfill: Supports both recordSupplierPaymentAction(id, amount, method) AND recordSupplierPaymentAction({ ... })
+    if (!user.activeBranchId) {
+      return { success: false, error: "সক্রিয় ব্রাঞ্চ পাওয়া যায়নি।" };
+    }
+
     const payload: RecordSupplierPaymentPayload =
       typeof payloadOrId === "string"
         ? {
@@ -205,61 +199,67 @@ export async function recordSupplierPaymentAction(
         : payloadOrId;
 
     const { supplierId, amount, paymentMethod = "cash", reference, note } = payload;
+    const sAmount = Math.max(0, Number(amount) || 0);
 
-    if (!amount || amount <= 0) {
-      return { success: false, error: "Please enter a valid payment amount." };
+    if (sAmount <= 0) {
+      return { success: false, error: "পরিশোধের পরিমাণ অবশ্যই শূন্যের চেয়ে বেশি হতে হবে।" };
     }
 
     const supplier = await prisma.supplier.findFirst({
       where: { id: supplierId, shopId: user.shopId },
     });
-    if (!supplier) return { success: false, error: "Supplier not found." };
+    if (!supplier) return { success: false, error: "সাপ্লায়ার পাওয়া যায়নি।" };
 
-    // Resolve branch for payment
-    let activeBranchId = user.branchId;
-    if (!activeBranchId) {
-      const mainBranch = await prisma.branch.findFirst({
-        where: { shopId: user.shopId, isMain: true },
-        select: { id: true },
-      });
-      activeBranchId = mainBranch?.id || null;
-    }
-
-    if (!activeBranchId) {
-      return { success: false, error: "Active branch required to record cash payout." };
-    }
-
-    const voucherNo = `PV-${Date.now().toString().slice(-6)}`;
+    const voucherNo = `PAY-VCH-${Date.now().toString().slice(-6)}`;
     const previousDue = Number(supplier.currentDue);
-    const remainingDue = Math.max(0, previousDue - amount);
+    const remainingDue = Math.max(0, previousDue - sAmount);
 
-    // Atomic Transaction: SupplierPayment voucher + decrement supplier debt
+    // 🚀 ATOMIC TRANSACTION: Voucher + Ledger decrement + Drawer Cash deduction
     const payment = await prisma.$transaction(async (tx) => {
+      // 1. Create Supplier Payment Voucher
       const p = await tx.supplierPayment.create({
         data: {
-          amount,
+          amount: sAmount,
           paymentMethod,
           voucherNo,
           reference: reference || null,
-          note: note || "Supplier due payment (মহাজনের বাকি পরিশোধ)",
+          note: note || "মহাজনের বকেয়া পরিশোধ (Supplier Due Payout)",
           supplierId,
-          branchId: activeBranchId,
+          branchId: user.activeBranchId,
         },
       });
 
+      // 2. Decrement Supplier Ledger Debt
       await tx.supplier.update({
         where: { id: supplierId },
         data: {
-          currentDue: { decrement: amount },
+          currentDue: { decrement: sAmount },
         },
       });
+
+      // 3. 👈 DEDUCT CASH FROM DRAWER / BANK ACCOUNT (Real Financial Sync)
+      const accountType = paymentMethod.toUpperCase();
+      const paymentAccount = await tx.account.findFirst({
+        where: {
+          branchId: user.activeBranchId,
+          type: ["CASH", "BANK", "BKASH", "NAGAD"].includes(accountType) ? (accountType as any) : "CASH",
+          status: "active",
+        },
+      });
+
+      if (paymentAccount) {
+        await tx.account.update({
+          where: { id: paymentAccount.id },
+          data: { currentBalance: { decrement: sAmount } },
+        });
+      }
 
       return p;
     });
 
-    revalidatePath("/dashboard/admin/purchases");
+    revalidatePath("/purchases");
     revalidatePath("/dashboard/admin/suppliers");
-    revalidatePath("/reports/closings"); // 👈 Immediately updates Day-End Z-Report (cashSupplierPaid)!
+    revalidatePath("/reports/closings"); // 👈 Realtime Z-Report cashSupplierPaid update!
     revalidatePath("/reports/purchases");
 
     return {
@@ -269,7 +269,7 @@ export async function recordSupplierPaymentAction(
       companyName: supplier.companyName,
       phone: supplier.phone,
       previousDue,
-      amountPaid: amount,
+      amountPaid: sAmount,
       remainingDue,
       paymentMethod,
       reference,
@@ -277,16 +277,16 @@ export async function recordSupplierPaymentAction(
     };
   } catch (error: any) {
     console.error("Supplier payment error:", error);
-    return { success: false, error: error.message || "Failed to record payment." };
+    return { success: false, error: error.message || "পেমেন্ট সম্পন্ন করা সম্ভব হয়নি।" };
   }
 }
 
 // ==========================================
-// 5. SUPPLIER PAYMENT HISTORY LEDGER
+// 5. SUPPLIER PAYMENT HISTORY
 // ==========================================
 export async function getSupplierPaymentHistoryAction(supplierId: string) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await requireAuth();
 
     const payments = await prisma.supplierPayment.findMany({
       where: {
@@ -309,6 +309,6 @@ export async function getSupplierPaymentHistoryAction(supplierId: string) {
       })),
     };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to fetch payment ledger." };
+    return { success: false, error: error.message || "পেমেন্ট লেজার লোড ব্যর্থ হয়েছে।" };
   }
 }

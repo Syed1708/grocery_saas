@@ -22,18 +22,19 @@ import {
   Clock,
 } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
+import { IPurchase } from "@/types/purchase";
 
 interface InvoicesTabProps {
-  purchases: any[];
+  purchases: IPurchase[];
   currencySymbol: string;
-  onView: (p: any) => void;
-  onPrint: (p: any) => void;
-  onDelete: (p: any) => void;
+  onView: (p: IPurchase) => void;
+  onPrint: (p: IPurchase) => void;
+  onDelete?: (p: IPurchase) => void; // Optional for non-owners
 }
 
 export default function InvoicesTab({
-  purchases,
-  currencySymbol,
+  purchases = [],
+  currencySymbol = "৳",
   onView,
   onPrint,
   onDelete,
@@ -56,10 +57,10 @@ export default function InvoicesTab({
     });
   }, [purchases, search, statusFilter]);
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<IPurchase>[] = [
     {
       accessorKey: "chalanNo",
-      header: "Chalan #",
+      header: "চালান #",
       cell: ({ row }) => (
         <span className="font-mono text-xs font-bold text-neutral-900 dark:text-neutral-100 flex items-center gap-1.5">
           <Receipt size={13} className="text-neutral-400" />
@@ -69,36 +70,36 @@ export default function InvoicesTab({
     },
     {
       accessorKey: "supplierCompany",
-      header: "Distributor / Supplier",
+      header: "ডিস্ট্রিবিউটর / সাপ্লায়ার",
       cell: ({ row }) => (
         <div>
           <span className="font-semibold text-neutral-900 dark:text-neutral-100 block">
             {row.original.supplierCompany || row.original.supplierName}
           </span>
-          <span className="text-[11px] text-neutral-400">Contact: {row.original.supplierName}</span>
+          <span className="text-[11px] text-neutral-400">SR: {row.original.supplierName}</span>
         </div>
       ),
     },
     {
       accessorKey: "grandTotal",
-      header: "Bill Total",
+      header: "চালান মূল্য",
       cell: ({ row }) => (
-        <span className="font-bold text-neutral-900 dark:text-neutral-100 text-xs">
+        <span className="font-bold text-neutral-900 dark:text-neutral-100 text-xs font-mono">
           {currencySymbol}{Number(row.getValue("grandTotal")).toFixed(2)}
         </span>
       ),
     },
     {
       accessorKey: "paidAmount",
-      header: "Paid / Due",
+      header: "পরিশোধ / বাকি",
       cell: ({ row }) => (
-        <div className="text-xs">
+        <div className="text-xs font-mono">
           <span className="text-emerald-600 dark:text-emerald-400 font-semibold block">
-            Paid: {currencySymbol}{Number(row.original.paidAmount).toFixed(2)}
+            পরিশোধ: {currencySymbol}{Number(row.original.paidAmount).toFixed(2)}
           </span>
           {Number(row.original.dueAmount) > 0 && (
             <span className="text-red-600 dark:text-red-400 font-semibold block">
-              Due: {currencySymbol}{Number(row.original.dueAmount).toFixed(2)}
+              বাকি: {currencySymbol}{Number(row.original.dueAmount).toFixed(2)}
             </span>
           )}
         </div>
@@ -106,7 +107,7 @@ export default function InvoicesTab({
     },
     {
       accessorKey: "paymentStatus",
-      header: "Status",
+      header: "পেমেন্ট অবস্থা",
       cell: ({ row }) => {
         const status = row.original.paymentStatus;
         return (
@@ -122,16 +123,16 @@ export default function InvoicesTab({
             {status === "PAID" && <CheckCircle2 size={11} />}
             {status === "PARTIAL" && <Clock size={11} />}
             {status === "DUE" && <AlertCircle size={11} />}
-            {status}
+            {status === "PAID" ? "পরিশোধিত" : status === "PARTIAL" ? "আংশিক বাকি" : "সম্পূর্ণ বাকি"}
           </span>
         );
       },
     },
     {
       accessorKey: "purchaseDate",
-      header: "Inward Date",
+      header: "ইনওয়ার্ড তারিখ",
       cell: ({ row }) => (
-        <span className="text-neutral-500 text-xs flex items-center gap-1">
+        <span className="text-neutral-500 text-xs flex items-center gap-1 font-mono">
           <Calendar size={12} className="text-neutral-400" />
           {new Date(row.original.purchaseDate).toLocaleDateString()}
         </span>
@@ -139,39 +140,46 @@ export default function InvoicesTab({
     },
     {
       id: "actions",
-      header: "Actions",
+      header: "অ্যাকশন",
       cell: ({ row }) => {
         const p = row.original;
         return (
           <div className="flex items-center gap-1">
             <button
+              type="button"
               onClick={() => onPrint(p)}
               className="p-1.5 rounded-lg text-neutral-500 hover:text-purple-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
-              title="Print Chalan"
+              title="চালান প্রিন্ট"
             >
               <Printer size={15} />
             </button>
             <button
+              type="button"
               onClick={() => onView(p)}
               className="p-1.5 rounded-lg text-neutral-500 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
-              title="View Invoice"
+              title="চালান বিস্তারিত দেখুন"
             >
               <Eye size={15} />
             </button>
             <Link
               href={`/dashboard/admin/purchases/${p.id}/edit`}
               className="p-1.5 rounded-lg text-neutral-500 hover:text-emerald-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
-              title="Edit Purchase Bill"
+              title="সম্পাদনা করুন"
             >
               <Edit2 size={15} />
             </Link>
-            <button
-              onClick={() => onDelete(p)}
-              className="p-1.5 rounded-lg text-neutral-500 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
-              title="Delete Purchase Bill"
-            >
-              <Trash2 size={15} />
-            </button>
+
+            {/* 🛡️ Guarded Delete button: Only renders if user is OWNER */}
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => onDelete(p)}
+                className="p-1.5 rounded-lg text-neutral-500 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
+                title="চালান মুছে ফেলুন"
+              >
+                <Trash2 size={15} />
+              </button>
+            )}
           </div>
         );
       },
@@ -194,23 +202,24 @@ export default function InvoicesTab({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by Chalan number, Distributor, or Supplier..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-neutral-900 dark:text-neutral-100"
+            placeholder="চালান নম্বর, কোম্পানি বা সরবরাহকারীর নাম দিয়ে খুঁজুন..."
+            className="w-full pl-9 pr-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-neutral-900 dark:text-neutral-100"
           />
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto pt-1">
           <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 shrink-0 mr-1">
-            Filter Status:
+            ফিল্টার:
           </span>
           {[
-            { label: "All Bills", value: "ALL" },
-            { label: "Fully Paid", value: "PAID" },
-            { label: "Partial Paid", value: "PARTIAL" },
-            { label: "Full Due", value: "DUE" },
+            { label: "সব চালান (All)", value: "ALL" },
+            { label: "পরিশোধিত (Paid)", value: "PAID" },
+            { label: "আংশিক বাকি (Partial)", value: "PARTIAL" },
+            { label: "বাকি চালান (Due)", value: "DUE" },
           ].map((pill) => (
             <button
               key={pill.value}
+              type="button"
               onClick={() => setStatusFilter(pill.value)}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition shrink-0 cursor-pointer ${
                 statusFilter === pill.value

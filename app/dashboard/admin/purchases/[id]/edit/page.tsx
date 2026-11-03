@@ -1,27 +1,28 @@
 // app/dashboard/admin/purchases/[id]/edit/page.tsx
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect, notFound } from "next/navigation";
+
+import { notFound } from "next/navigation"; // 👈 FIX: Import notFound
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { prisma } from "@/lib/prisma";
 import { getSuppliers } from "@/queries/supplier-queries";
 import { getProducts } from "@/queries/product-queries";
-import EditPurchaseClient from "./_components/EditPurchaseClient";
+import PurchaseForm from "../../_components/form/PurchaseForm";
 
 export default async function EditPurchasePage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.shopId) {
-    redirect("/login");
-  }
+  // 1. Zero-Trust Guard: Enforce permissions and active status
+  const user = await requireAuth({
+    requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+    requireActiveStatus: true,
+  });
 
   const { id } = await params;
-  const { shopId, branchId } = session.user;
+  const { shopId, activeBranchId } = user;
 
-  // 1. Fetch data from Prisma
+  // 2. Fetch purchase record and dependencies in parallel
   const [rawPurchase, products, suppliers, activeBranch, shop] = await Promise.all([
     prisma.purchase.findFirst({
       where: { id, shopId },
@@ -31,30 +32,33 @@ export default async function EditPurchasePage({
             product: {
               include: {
                 unit: true,
-                stocks: branchId ? { where: { branchId } } : true,
+                stocks: { where: { branchId: activeBranchId } },
               },
             },
           },
         },
         supplier: true,
+        branch: { select: { name: true } },
       },
     }),
-    getProducts(shopId, branchId),
-    getSuppliers(shopId),
-    branchId
-      ? prisma.branch.findUnique({ where: { id: branchId }, select: { name: true } })
-      : prisma.branch.findFirst({ where: { shopId, isMain: true }, select: { name: true } }),
+    getProducts(shopId, activeBranchId),
+    getSuppliers(shopId, activeBranchId),
+    prisma.branch.findUnique({
+      where: { id: activeBranchId },
+      select: { name: true },
+    }),
     prisma.shop.findUnique({
       where: { id: shopId },
       select: { currencySymbol: true },
     }),
   ]);
 
+  // 3. 404 Guard: If chalan doesn't exist, trigger Next.js notFound boundary
   if (!rawPurchase) {
-    notFound();
+    return notFound(); // 👈 FIX: return notFound() guarantees type narrowing!
   }
 
-  // 2. 👈 Convert all Prisma Decimal & Date instances into plain JS numbers/strings
+  // 4. Safely map Decimal & Date instances for the Client Component
   const purchase = {
     id: rawPurchase.id,
     chalanNo: rawPurchase.chalanNo,
@@ -63,7 +67,6 @@ export default async function EditPurchasePage({
     notes: rawPurchase.notes || "",
     supplierId: rawPurchase.supplierId,
     branchId: rawPurchase.branchId,
-    shopId: rawPurchase.shopId,
     purchaseDate: rawPurchase.purchaseDate ? rawPurchase.purchaseDate.toISOString() : null,
     subtotal: Number(rawPurchase.subtotal),
     totalQuantity: Number(rawPurchase.totalQuantity),
@@ -75,48 +78,28 @@ export default async function EditPurchasePage({
     previousDue: Number(rawPurchase.previousDue),
     paidAmount: Number(rawPurchase.paidAmount),
     dueAmount: Number(rawPurchase.dueAmount),
-    createdAt: rawPurchase.createdAt.toISOString(),
-    updatedAt: rawPurchase.updatedAt.toISOString(),
-    supplier: rawPurchase.supplier
-      ? {
-          id: rawPurchase.supplier.id,
-          name: rawPurchase.supplier.name,
-          companyName: rawPurchase.supplier.companyName,
-          phone: rawPurchase.supplier.phone,
-          currentDue: Number(rawPurchase.supplier.currentDue),
-          payableBalance: Number(rawPurchase.supplier.currentDue),
-        }
-      : null,
     items: rawPurchase.items.map((item) => ({
       id: item.id,
       productId: item.productId,
+      productName: item.product?.name || "পণ্য",
+      barcode: item.product?.barcode || "",
+      unitCode: item.product?.unit?.shortCode || "pcs",
+      stock: Number(item.product?.stocks?.[0]?.quantity || 0),
       quantity: Number(item.quantity),
       unitCost: Number(item.unitCost),
-      commission: Number(item.commission),
+      commission: Number(item.commission || 0),
       lineTotal: Number(item.lineTotal),
-      product: item.product
-        ? {
-            id: item.product.id,
-            name: item.product.name,
-            barcode: item.product.barcode,
-            purchasePrice: Number(item.product.purchasePrice),
-            sellingPrice: Number(item.product.sellingPrice),
-            unit: item.product.unit ? { shortCode: item.product.unit.shortCode } : null,
-            stocks: (item.product.stocks || []).map((st) => ({
-              quantity: Number(st.quantity),
-            })),
-          }
-        : null,
     })),
   };
 
   return (
     <div className="max-w-7xl mx-auto">
-      <EditPurchaseClient
-        purchase={purchase}
+      <PurchaseForm
+        mode="edit"
+        initialData={purchase}
         products={products as any}
         suppliers={suppliers as any}
-        activeBranchName={activeBranch?.name || "Main Branch"}
+        activeBranchName={rawPurchase.branch?.name || activeBranch?.name || "Main Branch"}
         currencySymbol={shop?.currencySymbol || "৳"}
       />
     </div>

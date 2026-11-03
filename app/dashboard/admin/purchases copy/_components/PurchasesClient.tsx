@@ -1,4 +1,3 @@
-// app/dashboard/admin/purchases/_components/PurchasesClient.tsx
 "use client";
 "use no memo";
 
@@ -28,43 +27,49 @@ import {
   updateSupplierAction,
   deleteSupplierAction,
 } from "@/app/actions/supplier-actions";
+import { IPurchase } from "@/types/purchase";
 import { ISupplier } from "@/types";
+import { Input } from "@/components/common/ui/Input";
 
-export default function PurchasesClient({
-  purchases,
-  suppliers,
-  currencySymbol = "৳",
-  shopName = "Grocery Store",
-}: {
-  purchases: any[];
-  suppliers: any[];
+interface PurchasesClientProps {
+  purchases: IPurchase[];
+  suppliers: ISupplier[];
   currencySymbol?: string;
   shopName?: string;
-}) {
+  userRole?: string;
+}
+
+export default function PurchasesClient({
+  purchases = [],
+  suppliers = [],
+  currencySymbol = "৳",
+  shopName = "Grocery Store",
+  userRole = "OWNER",
+}: PurchasesClientProps) {
   const [activeTab, setActiveTab] = useState<"invoices" | "suppliers" | "dues">("invoices");
   const [loading, setLoading] = useState(false);
 
   // Modal Targets
-  const [viewInvoice, setViewInvoice] = useState<any | null>(null);
-  const [deletePurchaseTarget, setDeletePurchaseTarget] = useState<any | null>(null);
+  const [viewInvoice, setViewInvoice] = useState<IPurchase | null>(null);
+  const [deletePurchaseTarget, setDeletePurchaseTarget] = useState<IPurchase | null>(null);
 
-  const [activeSupplierForPayment, setActiveSupplierForPayment] = useState<any | null>(null);
-  const [activeSupplierForHistory, setActiveSupplierForHistory] = useState<any | null>(null);
+  const [activeSupplierForPayment, setActiveSupplierForPayment] = useState<ISupplier | null>(null);
+  const [activeSupplierForHistory, setActiveSupplierForHistory] = useState<ISupplier | null>(null);
   const [supplierModalOpen, setSupplierModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<ISupplier | null>(null);
   const [deleteSupplierTarget, setDeleteSupplierTarget] = useState<ISupplier | null>(null);
 
-  // Delete Purchase Action
+  // Delete Purchase Action (Owner Only)
   async function handleDeletePurchaseConfirm() {
     if (!deletePurchaseTarget) return;
     setLoading(true);
     const res = await deletePurchaseAction(deletePurchaseTarget.id);
     setLoading(false);
     if (res.success) {
-      toast.success(`Chalan #${deletePurchaseTarget.chalanNo} deleted.`);
+      toast.success(`চালান #${deletePurchaseTarget.chalanNo} মুছে ফেলা ও স্টক সমন্বয় সম্পন্ন!`);
       setDeletePurchaseTarget(null);
     } else {
-      toast.error(res.error || "Failed to delete purchase.");
+      toast.error(res.error || "চালান মুছে ফেলা সম্ভব হয়নি।");
     }
   }
 
@@ -81,10 +86,11 @@ export default function PurchasesClient({
 
     setLoading(false);
     if (res.success) {
-      toast.success(editingSupplier ? "Supplier updated!" : "Supplier created!");
+      toast.success(editingSupplier ? "সাপ্লায়ার তথ্য আপডেট হয়েছে!" : "নতুন সাপ্লায়ার যোগ হয়েছে!");
       setSupplierModalOpen(false);
+      setEditingSupplier(null);
     } else {
-      toast.error(res.error || "Operation failed.");
+      toast.error(res.error || "অপারেশন ব্যর্থ হয়েছে।");
     }
   }
 
@@ -95,21 +101,22 @@ export default function PurchasesClient({
     const res = await deleteSupplierAction(deleteSupplierTarget.id);
     setLoading(false);
     if (res.success) {
-      toast.success(`Supplier "${deleteSupplierTarget.companyName}" deleted.`);
+      toast.success(`সাপ্লায়ার "${deleteSupplierTarget.companyName}" মুছে ফেলা হয়েছে।`);
       setDeleteSupplierTarget(null);
     } else {
-      toast.error(res.error || "Failed to delete supplier.");
+      toast.error(res.error || "মুছে ফেলা ব্যর্থ হয়েছে।");
     }
   }
 
   return (
     <div className="space-y-6">
-      <Breadcrumbs items={[{ label: "Purchases & Procurement" }]} />
+      <Breadcrumbs items={[{ label: "ক্রয় ও সরবরাহকারী (Procurement)" }]} />
 
       {/* Primary Tabs Bar */}
       <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-4">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           <button
+            type="button"
             onClick={() => setActiveTab("invoices")}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${
               activeTab === "invoices"
@@ -117,10 +124,11 @@ export default function PurchasesClient({
                 : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
             }`}
           >
-            <Receipt size={14} /> Purchase Invoices ({purchases.length})
+            <Receipt size={14} /> ক্রয় চালান সমূহ ({purchases.length})
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab("suppliers")}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${
               activeTab === "suppliers"
@@ -128,10 +136,11 @@ export default function PurchasesClient({
                 : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
             }`}
           >
-            <Truck size={14} /> Suppliers &amp; Vendors ({suppliers.length})
+            <Truck size={14} /> সরবরাহকারী তালিকা ({suppliers.length})
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab("dues")}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${
               activeTab === "dues"
@@ -139,7 +148,7 @@ export default function PurchasesClient({
                 : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
             }`}
           >
-            <DollarSign size={14} /> Supplier Dues (বাকির খাতা)
+            <DollarSign size={14} /> সাপ্লায়ার দেনা (বাকির খাতা)
           </button>
         </div>
 
@@ -149,19 +158,20 @@ export default function PurchasesClient({
               href="/dashboard/admin/purchases/create"
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition"
             >
-              <PackagePlus size={16} /> New Purchase Bill
+              <PackagePlus size={16} /> নতুন ক্রয় চালান (New Bill)
             </Link>
           )}
 
           {activeTab === "suppliers" && (
             <button
+              type="button"
               onClick={() => {
                 setEditingSupplier(null);
                 setSupplierModalOpen(true);
               }}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition cursor-pointer"
             >
-              <Plus size={16} /> Add Supplier
+              <Plus size={16} /> সাপ্লায়ার যোগ করুন
             </button>
           )}
         </div>
@@ -174,7 +184,7 @@ export default function PurchasesClient({
           currencySymbol={currencySymbol}
           onView={(p) => setViewInvoice(p)}
           onPrint={(p) => printPurchaseInvoice({ invoice: p, shopName, currencySymbol })}
-          onDelete={(p) => setDeletePurchaseTarget(p)}
+          onDelete={userRole === "OWNER" ? (p) => setDeletePurchaseTarget(p) : undefined}
         />
       )}
 
@@ -186,7 +196,7 @@ export default function PurchasesClient({
             setEditingSupplier(s);
             setSupplierModalOpen(true);
           }}
-          onDelete={(s) => setDeleteSupplierTarget(s)}
+          onDelete={userRole === "OWNER" ? (s) => setDeleteSupplierTarget(s) : undefined}
           onPay={(s) => setActiveSupplierForPayment(s)}
           onHistory={(s) => setActiveSupplierForHistory(s)}
         />
@@ -227,9 +237,9 @@ export default function PurchasesClient({
           printSupplierVoucher({
             details: {
               voucherNo: p.voucherNo,
-              supplierName: activeSupplierForHistory.name,
-              companyName: activeSupplierForHistory.companyName,
-              phone: activeSupplierForHistory.phone,
+              supplierName: activeSupplierForHistory?.name || "",
+              companyName: activeSupplierForHistory?.companyName || "",
+              phone: activeSupplierForHistory?.phone || "",
               amountPaid: p.amount,
               previousDue: p.amount,
               remainingDue: 0,
@@ -244,57 +254,54 @@ export default function PurchasesClient({
         currencySymbol={currencySymbol}
       />
 
-      {/* Supplier Create/Edit FormModal */}
+      {/* 👈 Clean FormModal using our generic Input primitives */}
       <FormModal
         isOpen={supplierModalOpen}
-        onClose={() => setSupplierModalOpen(false)}
+        onClose={() => {
+          setSupplierModalOpen(false);
+          setEditingSupplier(null);
+        }}
         onSubmit={handleSupplierSubmit}
-        title={editingSupplier ? "Edit Supplier" : "Register New Supplier"}
-        description="Vendor details for stock bills and ledger."
+        title={editingSupplier ? "সাপ্লায়ার তথ্য সম্পাদনা" : "নতুন সরবরাহকারী (সাপ্লায়ার) যোগ"}
+        description="স্টক সরবরাহকারী প্রতিষ্ঠান ও বিক্রয় প্রতিনিধির বিবরণ লিখুন।"
         isEditing={Boolean(editingSupplier)}
         loading={loading}
+        submitLabel={editingSupplier ? "আপডেট করুন" : "যোগ করুন"}
         maxWidth="md"
       >
-        <div>
-          <label className="block text-xs font-medium mb-1">Company / Distributor Name *</label>
-          <input
-            type="text"
+        <div className="space-y-4">
+          <Input
+            label="কোম্পানি / ডিস্ট্রিবিউটর নাম *"
             name="companyName"
             required
             defaultValue={editingSupplier?.companyName || ""}
-            className="w-full px-3 py-2 text-xs border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700"
+            placeholder="যেমন: প্রাণ ফুডস লিমিটেড"
           />
-        </div>
-        <div>
-          <label className="block text-xs font-medium mb-1">Contact Person *</label>
-          <input
-            type="text"
+          <Input
+            label="যোগাযোগকারী ব্যক্তি (SR) *"
             name="name"
             required
             defaultValue={editingSupplier?.name || ""}
-            className="w-full px-3 py-2 text-xs border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700"
+            placeholder="যেমন: মোঃ রফিকুল ইসলাম"
           />
-        </div>
-        <div>
-          <label className="block text-xs font-medium mb-1">Phone Number *</label>
-          <input
-            type="text"
+          <Input
+            label="মোবাইল নম্বর *"
             name="phone"
             required
             defaultValue={editingSupplier?.phone || ""}
-            className="w-full px-3 py-2 text-xs border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700"
+            placeholder="017xxxxxxxx"
           />
         </div>
       </FormModal>
 
-      {/* Confirm Deletion Dialogs */}
+      {/* Confirmation Dialogs */}
       <ConfirmDialog
         isOpen={Boolean(deletePurchaseTarget)}
         onClose={() => setDeletePurchaseTarget(null)}
         onConfirm={handleDeletePurchaseConfirm}
-        title="Delete Purchase Bill"
-        message={`Are you sure you want to delete Chalan #${deletePurchaseTarget?.chalanNo}? This will rollback stock and deduct ${currencySymbol}${Number(deletePurchaseTarget?.dueAmount || 0).toFixed(2)} from the supplier's due balance.`}
-        confirmLabel="Delete & Rollback"
+        title="ক্রয় চালান বাতিল করুন (Rollback Chalan)"
+        message={`আপনি কি নিশ্চিতভাবে চালান #${deletePurchaseTarget?.chalanNo} মুছে ফেলতে চান? এর ফলে মালামাল ব্রাঞ্চের স্টক থেকে হ্রাস পাবে এবং সাপ্লায়ার দেনা সমন্বয় করা হবে।`}
+        confirmLabel="মুছে ফেলুন ও স্টক রোলব্যাক"
         loading={loading}
       />
 
@@ -302,9 +309,9 @@ export default function PurchasesClient({
         isOpen={Boolean(deleteSupplierTarget)}
         onClose={() => setDeleteSupplierTarget(null)}
         onConfirm={handleDeleteSupplierConfirm}
-        title="Delete Supplier"
-        message={`Are you sure you want to delete "${deleteSupplierTarget?.companyName}"?`}
-        confirmLabel="Delete Supplier"
+        title="সাপ্লায়ার মুছে ফেলুন"
+        message={`আপনি কি নিশ্চিতভাবে "${deleteSupplierTarget?.companyName}" মুছে ফেলতে চান?`}
+        confirmLabel="সাপ্লায়ার মুছুন"
         loading={loading}
       />
     </div>

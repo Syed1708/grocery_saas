@@ -1,3 +1,4 @@
+
 import { prisma } from "@/lib/prisma";
 import { ISupplier } from "@/types";
 
@@ -5,28 +6,33 @@ export async function getSuppliers(
   shopId: string,
   branchId?: string | null
 ): Promise<ISupplier[]> {
-  const rawSuppliers = await prisma.supplier.findMany({
+  const suppliers = await prisma.supplier.findMany({
     where: {
       shopId,
       status: "active",
+      // 👈 Shows active branch suppliers + Global suppliers (branchId: null)
       ...(branchId
         ? {
             OR: [
               { branchId: branchId },
-              { branchId: null }, // Corporate vendors visible everywhere
+              { branchId: null }, // Global distributors (PRAN, Unilever)
             ],
           }
         : {}),
     },
     include: {
       branch: {
-        select: { id: true, name: true, code: true },
+        select: {
+          id: true,
+          name: true,
+          code: true,
+        },
       },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: { name: "asc" },
   });
 
-  return rawSuppliers.map((s) => ({
+  return suppliers.map((s) => ({
     id: s.id,
     name: s.name,
     companyName: s.companyName,
@@ -35,14 +41,14 @@ export async function getSuppliers(
     village: s.village,
     district: s.district,
     address: s.address,
-    contactPerson: s.contactPerson,
-    openingDue: Number(s.openingDue),
-    currentDue: Number(s.currentDue),
+    contactPerson: s.contactPerson || s.name,
+    openingDue: Number(s.openingDue || 0),
+    currentDue: Number(s.currentDue || 0),
     status: s.status,
     shopId: s.shopId,
     branchId: s.branchId,
     branch: s.branch,
-    branchName: s.branch?.name || "Global Distributor",
+    branchName: s.branch?.name || "Global (সকল শাখা)",
     createdAt: s.createdAt,
   }));
 }

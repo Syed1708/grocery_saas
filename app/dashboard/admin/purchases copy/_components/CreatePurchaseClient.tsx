@@ -38,7 +38,7 @@ interface SupplierItem {
 
 interface PurchaseRow {
   rowId: string;
-  productId: string; // Empty string "" represents a blank row
+  productId: string;
   name: string;
   barcode: string;
   unit: string;
@@ -49,8 +49,8 @@ interface PurchaseRow {
 }
 
 export default function CreatePurchaseClient({
-  products,
-  suppliers,
+  products = [],
+  suppliers = [],
   activeBranchName,
   currencySymbol = "৳",
   autoChalan,
@@ -64,23 +64,23 @@ export default function CreatePurchaseClient({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  // 1. Supplier Dual Selector State
+  // 1. Supplier Selector
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
   const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
   const [showSupplierDropdown, setShowSupplierDropdown] = useState(false);
   const [supplierPreviousDue, setSupplierPreviousDue] = useState(0);
 
-  // 2. Chalan Meta Details State
+  // 2. Chalan Meta Details
   const [chalanNo, setChalanNo] = useState(autoChalan);
   const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split("T")[0]);
 
-  // 3. Barcode & Product Live Search
+  // 3. Barcode & Live Search
   const [barcodeSearch, setBarcodeSearch] = useState("");
   const [showProductSuggestions, setShowProductSuggestions] = useState(false);
   const barcodeInputRef = useRef<HTMLInputElement>(null);
   const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
 
-  // 4. Initial Rows State (Starts with 1 blank row ready for selection)
+  // 4. Rows State
   const [items, setItems] = useState<PurchaseRow[]>([
     {
       rowId: `row-${Date.now()}`,
@@ -95,13 +95,15 @@ export default function CreatePurchaseClient({
     },
   ]);
 
-  // 5. Payment & Financial Summary State
+  // 5. Financial States
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [notes, setNotes] = useState("");
   const [discount, setDiscount] = useState<number>(0);
   const [transportCost, setTransportCost] = useState<number>(0);
   const [vatPercent, setVatPercent] = useState<number>(0);
   const [paidAmount, setPaidAmount] = useState<number>(0);
+
+  const sanitizeNumber = (val: any) => Math.max(0, Number(val) || 0);
 
   useEffect(() => {
     barcodeInputRef.current?.focus();
@@ -149,11 +151,10 @@ export default function CreatePurchaseClient({
     );
   }, [products, barcodeSearch]);
 
-  // 👈 FIX: Appends a completely BLANK row with no product pre-selected
   function addEmptyRow() {
     const newBlankRow: PurchaseRow = {
       rowId: `row-${Date.now()}-${Math.random()}`,
-      productId: "", // Empty: user will choose from the select dropdown
+      productId: "",
       name: "",
       barcode: "",
       unit: "pcs",
@@ -165,12 +166,8 @@ export default function CreatePurchaseClient({
     setItems((prev) => [...prev, newBlankRow]);
   }
 
-  // Adding via Barcode Scanner or Autocomplete
   function addOrIncrementProduct(product: ProductItem) {
-    // 1. If already exists in table -> increment quantity by 1
-    const existingIndex = items.findIndex(
-      (i) => i.productId && i.productId === product.id
-    );
+    const existingIndex = items.findIndex((i) => i.productId && i.productId === product.id);
 
     if (existingIndex > -1) {
       setItems((prev) => {
@@ -181,13 +178,10 @@ export default function CreatePurchaseClient({
         };
         return next;
       });
-
       setHighlightedRowId(items[existingIndex].rowId);
       setTimeout(() => setHighlightedRowId(null), 600);
     } else {
-      // 2. If a blank row is available, fill that blank row instead of adding a new one
       const blankIndex = items.findIndex((i) => !i.productId);
-
       if (blankIndex > -1) {
         setItems((prev) => {
           const next = [...prev];
@@ -204,11 +198,9 @@ export default function CreatePurchaseClient({
           };
           return next;
         });
-
         setHighlightedRowId(items[blankIndex].rowId);
         setTimeout(() => setHighlightedRowId(null), 600);
       } else {
-        // 3. Otherwise append new populated row
         const newRow: PurchaseRow = {
           rowId: `row-${Date.now()}-${Math.random()}`,
           productId: product.id,
@@ -242,12 +234,11 @@ export default function CreatePurchaseClient({
       if (matched) {
         addOrIncrementProduct(matched);
       } else {
-        toast.error(`Barcode "${code}" not found in catalog.`);
+        toast.error(`Barcode "${code}" ক্যাটালগে পাওয়া যায়নি।`);
       }
     }
   }
 
-  // 👈 Updates row when user chooses product from dropdown or changes Qty/Cost
   function updateRow(rowId: string, field: keyof PurchaseRow, value: any) {
     setItems((prev) =>
       prev.map((r) => {
@@ -284,7 +275,6 @@ export default function CreatePurchaseClient({
 
   function removeRow(rowId: string) {
     if (items.length === 1) {
-      // If only 1 row left, reset it to blank instead of leaving an empty table
       setItems([
         {
           rowId: `row-${Date.now()}`,
@@ -303,10 +293,10 @@ export default function CreatePurchaseClient({
     setItems((prev) => prev.filter((r) => r.rowId !== rowId));
   }
 
-  // Financial Calculations
+  // Financial Computations
   const subtotal = useMemo(() => {
     return items.reduce((sum, item) => {
-      if (!item.productId) return sum; // Ignore blank rows
+      if (!item.productId) return sum;
       const line = Number(item.quantity) * Number(item.unitCost) - Number(item.commission || 0);
       return sum + Math.max(0, line);
     }, 0);
@@ -320,30 +310,32 @@ export default function CreatePurchaseClient({
   }, [items]);
 
   const baseAmount = Math.max(0, subtotal - discount);
-  const vatAmount = (baseAmount * vatPercent) / 100;
-  const grandTotal = baseAmount + transportCost + vatAmount;
+  const vatAmount = Math.round(((baseAmount * vatPercent) / 100) * 100) / 100;
+  const grandTotal = Math.round((baseAmount + transportCost + vatAmount) * 100) / 100;
+
+  // Invoice-specific due vs Overall Supplier Balance
+  const chalanDue = Math.max(0, grandTotal - paidAmount);
   const netTotalPayable = grandTotal + supplierPreviousDue;
-  const currentDue = Math.max(0, netTotalPayable - paidAmount);
+  const finalSupplierBalance = Math.max(0, netTotalPayable - paidAmount);
 
   // Submit Handler
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     if (!selectedSupplierId) {
-      toast.error("Please select a supplier.");
+      toast.error("অনুগ্রহ করে সরবরাহকারী নির্বাচন করুন।");
       return;
     }
 
     if (!chalanNo.trim()) {
-      toast.error("Please enter a chalan / memo number.");
+      toast.error("চালান বা মেমো নম্বর লিখুন।");
       return;
     }
 
-    // 👈 Filter out any empty/unselected rows before submitting
     const validItems = items.filter((i) => i.productId && i.productId.trim() !== "");
 
     if (validItems.length === 0) {
-      toast.error("Please select at least one product for this purchase.");
+      toast.error("অন্তত একটি পণ্য সিলেক্ট করুন।");
       return;
     }
 
@@ -352,17 +344,18 @@ export default function CreatePurchaseClient({
     const payload = {
       supplierId: selectedSupplierId,
       chalanNo: chalanNo.trim(),
+      purchaseDate, // 👈 FIXED: Included selected date in payload!
       paymentMethod,
-      paidAmount: Number(paidAmount) || 0,
-      discount: Number(discount) || 0,
-      transportCost: Number(transportCost) || 0,
-      vatPercent: Number(vatPercent) || 0,
+      paidAmount: sanitizeNumber(paidAmount),
+      discount: sanitizeNumber(discount),
+      transportCost: sanitizeNumber(transportCost),
+      vatPercent: sanitizeNumber(vatPercent),
       notes,
       items: validItems.map((i) => ({
         productId: i.productId,
-        quantity: Number(i.quantity),
-        unitCost: Number(i.unitCost),
-        commission: Number(i.commission) || 0,
+        quantity: sanitizeNumber(i.quantity),
+        unitCost: sanitizeNumber(i.unitCost),
+        commission: sanitizeNumber(i.commission),
       })),
     };
 
@@ -370,11 +363,11 @@ export default function CreatePurchaseClient({
     setLoading(false);
 
     if (res.success) {
-      toast.success("Purchase recorded & branch stock incremented successfully!");
+      toast.success("পণ্য ক্রয় সম্পন্ন ও ব্রাঞ্চ স্টক আপডেট হয়েছে!");
       router.push("/dashboard/admin/purchases");
       router.refresh();
     } else {
-      toast.error(res.error || "Failed to record purchase.");
+      toast.error(res.error || "ক্রয় সম্পন্ন করা যায়নি।");
     }
   }
 
@@ -382,20 +375,19 @@ export default function CreatePurchaseClient({
     <div className="space-y-6 pb-16">
       <Breadcrumbs
         items={[
-          { label: "Purchases & Procurement", href: "/dashboard/admin/purchases" },
-          { label: "New Stock-In Entry" },
+          { label: "ক্রয় ও সরবরাহকারী", href: "/dashboard/admin/purchases" },
+          { label: "নতুন ক্রয় চালান এন্ট্রি" },
         ]}
       />
 
-      {/* Header Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-5 rounded-2xl shadow-xs">
         <div>
           <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight flex items-center gap-2">
             <Receipt className="text-blue-600" size={22} />
-            New Purchase / Stock-In (পণ্য ক্রয় ও চালান এন্ট্রি)
+            নতুন ক্রয় চালান এন্ট্রি (Inward Stock-In)
           </h1>
           <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-            Search supplier, scan barcodes, and restock inventory directly to this branch
+            সাপ্লায়ার সিলেক্ট করুন, বারকোড স্ক্যান করুন এবং মালামাল সরাসরি বর্তমান ব্রাঞ্চে ইনওয়ার্ড করুন
           </p>
         </div>
 
@@ -403,20 +395,17 @@ export default function CreatePurchaseClient({
           href="/dashboard/admin/purchases"
           className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
         >
-          <ArrowLeft size={14} /> Back to Purchases
+          <ArrowLeft size={14} /> ক্রয় তালিকায় ফিরে যান
         </Link>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* ========================================================= */}
-        {/* 1. DUAL SUPPLIER SELECTOR & CHALAN META                   */}
-        {/* ========================================================= */}
+        {/* 1. Supplier & Chalan Details */}
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-5 shadow-xs space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* LEFT: AJAX Live Search */}
             <div className="relative">
               <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                🔍 Option 1: Search Supplier (নাম বা ফোন দিয়ে সার্চ)
+                🔍 পদ্ধতি ১: নাম বা ফোন নম্বর দিয়ে খুঁজুন
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-2.5 text-neutral-400" size={15} />
@@ -428,12 +417,11 @@ export default function CreatePurchaseClient({
                     setShowSupplierDropdown(true);
                   }}
                   onFocus={() => setShowSupplierDropdown(true)}
-                  placeholder="Type name, company, or phone..."
+                  placeholder="সাপ্লায়ার বা কোম্পানির নাম..."
                   className="w-full pl-9 pr-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              {/* Suggestions Popup */}
               {showSupplierDropdown && filteredSuppliers.length > 0 && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-xl z-50 max-h-56 overflow-y-auto divide-y divide-neutral-100 dark:divide-neutral-700">
                   {filteredSuppliers.map((s) => (
@@ -451,7 +439,7 @@ export default function CreatePurchaseClient({
                           ? "bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400"
                           : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400"
                       }`}>
-                        Due: {currencySymbol}{Number(s.currentDue ?? s.payableBalance ?? 0).toFixed(2)}
+                        বাকি: {currencySymbol}{Number(s.currentDue ?? s.payableBalance ?? 0).toFixed(2)}
                       </span>
                     </div>
                   ))}
@@ -459,10 +447,9 @@ export default function CreatePurchaseClient({
               )}
             </div>
 
-            {/* RIGHT: Dropdown Selector */}
             <div>
               <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                📋 Option 2: Or Select Supplier from Dropdown <span className="text-red-500">*</span>
+                📋 পদ্ধতি ২: সরাসরি ড্রপডাউন থেকে নির্বাচন করুন <span className="text-red-500">*</span>
               </label>
               <select
                 value={selectedSupplierId}
@@ -470,10 +457,10 @@ export default function CreatePurchaseClient({
                 required
                 className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
               >
-                <option value="">-- Choose Supplier from List --</option>
+                <option value="">-- তালিকা থেকে নির্বাচন করুন --</option>
                 {suppliers.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.name} ({s.companyName || "Vendor"}) - Due: {currencySymbol}
+                    {s.name} ({s.companyName || "Vendor"}) - পূর্বের বাকি: {currencySymbol}
                     {Number(s.currentDue ?? s.payableBalance ?? 0).toFixed(2)}
                   </option>
                 ))}
@@ -481,11 +468,10 @@ export default function CreatePurchaseClient({
             </div>
           </div>
 
-          {/* Meta Details Row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-neutral-100 dark:border-neutral-800">
             <div>
               <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Chalan / Memo No <span className="text-red-500">*</span>
+                চালান / মেমো নম্বর <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -499,7 +485,7 @@ export default function CreatePurchaseClient({
 
             <div>
               <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Purchase Date <span className="text-red-500">*</span>
+                চালানের তারিখ <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
@@ -512,7 +498,7 @@ export default function CreatePurchaseClient({
 
             <div>
               <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Receiving Branch
+                মাল গ্রহণকারী ব্রাঞ্চ
               </label>
               <input
                 type="text"
@@ -524,9 +510,7 @@ export default function CreatePurchaseClient({
           </div>
         </div>
 
-        {/* ========================================================= */}
-        {/* 2. BARCODE SCANNER & FAST SEARCH CARD                    */}
-        {/* ========================================================= */}
+        {/* 2. Barcode & Add Row */}
         <div className="bg-blue-50/50 dark:bg-blue-950/20 border-2 border-dashed border-blue-400 dark:border-blue-600 rounded-2xl p-4 shadow-xs">
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <span className="text-2xl p-2 bg-blue-100 dark:bg-blue-900/60 rounded-xl text-blue-600">📷</span>
@@ -541,11 +525,10 @@ export default function CreatePurchaseClient({
                   setShowProductSuggestions(true);
                 }}
                 onKeyDown={handleBarcodeKeyDown}
-                placeholder="Scan Barcode with Gun or type product name/SKU and press Enter..."
+                placeholder="বারকোড স্ক্যান করুন অথবা পণ্যের নাম লিখে Enter চাপুন..."
                 className="w-full px-4 py-2.5 text-xs bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-neutral-900 dark:text-neutral-100 shadow-xs"
               />
 
-              {/* Suggestions Popup */}
               {showProductSuggestions && filteredProducts.length > 0 && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-xl z-50 max-h-56 overflow-y-auto divide-y divide-neutral-100 dark:divide-neutral-700">
                   {filteredProducts.map((p) => (
@@ -560,7 +543,7 @@ export default function CreatePurchaseClient({
                       </div>
                       <div className="text-right">
                         <span className="font-bold text-blue-600 block">{currencySymbol}{p.costPrice.toFixed(2)}</span>
-                        <span className="text-[10px] text-neutral-400">Stock: {p.stockQuantity} {p.unitCode}</span>
+                        <span className="text-[10px] text-neutral-400">স্টক: {p.stockQuantity} {p.unitCode}</span>
                       </div>
                     </div>
                   ))}
@@ -568,27 +551,22 @@ export default function CreatePurchaseClient({
               )}
             </div>
 
-            {/* 👈 FIX: Adds a blank row without selecting first product or incrementing */}
             <button
               type="button"
               onClick={addEmptyRow}
               className="w-full sm:w-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl transition cursor-pointer shrink-0 shadow-xs flex items-center justify-center gap-1.5"
             >
-              <Plus size={16} /> Add Product Row
+              <Plus size={16} /> খালি সারি যোগ করুন
             </button>
           </div>
         </div>
 
-        {/* ========================================================= */}
-        {/* 3. PURCHASED ITEMS TABLE                                 */}
-        {/* ========================================================= */}
+        {/* 3. Items Table */}
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden shadow-xs">
           <div className="p-4 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center">
-            <h3 className="text-xs font-bold text-neutral-900 dark:text-neutral-100">
-              Purchased Items List
-            </h3>
+            <h3 className="text-xs font-bold text-neutral-900 dark:text-neutral-100">চালানের পণ্যের তালিকা</h3>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-              {items.filter((i) => i.productId).length} Selected Items
+              {items.filter((i) => i.productId).length} টি পণ্য
             </span>
           </div>
 
@@ -596,16 +574,16 @@ export default function CreatePurchaseClient({
             <table className="w-full text-left text-xs">
               <thead className="bg-neutral-50 dark:bg-neutral-800/60 border-b border-neutral-200 dark:border-neutral-800 text-neutral-500 uppercase tracking-wider text-[11px]">
                 <tr>
-                  <th className="p-3.5 min-w-70">Select Product</th>
-                  <th className="p-3.5 text-center w-28">Stock</th>
-                  <th className="p-3.5 w-32">Quantity</th>
-                  <th className="p-3.5 w-32">Unit Cost ({currencySymbol})</th>
-                  <th className="p-3.5 w-32">Commission ({currencySymbol})</th>
-                  <th className="p-3.5 text-right w-36">Line Total</th>
+                  <th className="p-3.5 min-w-70">পণ্য নির্বাচন</th>
+                  <th className="p-3.5 text-center w-28">বর্তমান স্টক</th>
+                  <th className="p-3.5 w-32">পরিমাণ</th>
+                  <th className="p-3.5 w-32">একক দর ({currencySymbol})</th>
+                  <th className="p-3.5 w-32">কমিশন/ছাড় ({currencySymbol})</th>
+                  <th className="p-3.5 text-right w-36">মোট মূল্য</th>
                   <th className="p-3.5 text-center w-12"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800 text-neutral-800 dark:text-neutral-200">
+              <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
                 {items.map((row) => {
                   const lineTotal = row.productId
                     ? Math.max(0, row.quantity * row.unitCost - (row.commission || 0))
@@ -621,14 +599,13 @@ export default function CreatePurchaseClient({
                           : "hover:bg-neutral-50/60 dark:hover:bg-neutral-800/40"
                       }`}
                     >
-                      {/* Product Selector with Default Blank Option */}
                       <td className="p-3">
                         <select
                           value={row.productId}
                           onChange={(e) => updateRow(row.rowId, "productId", e.target.value)}
                           className="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none cursor-pointer"
                         >
-                          <option value="">-- Choose Product from List --</option>
+                          <option value="">-- ড্রপডাউন থেকে পণ্য সিলেক্ট করুন --</option>
                           {products.map((p) => (
                             <option key={p.id} value={p.id}>
                               {p.name} ({p.barcode})
@@ -651,7 +628,7 @@ export default function CreatePurchaseClient({
                             min="0.01"
                             required
                             value={row.quantity}
-                            onChange={(e) => updateRow(row.rowId, "quantity", Number(e.target.value))}
+                            onChange={(e) => updateRow(row.rowId, "quantity", sanitizeNumber(e.target.value))}
                             className="w-20 px-2 py-1 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none bg-white dark:bg-neutral-800 text-center font-bold"
                           />
                           <span className="text-[11px] text-neutral-400">{row.unit}</span>
@@ -664,7 +641,7 @@ export default function CreatePurchaseClient({
                           step="0.01"
                           required
                           value={row.unitCost}
-                          onChange={(e) => updateRow(row.rowId, "unitCost", Number(e.target.value))}
+                          onChange={(e) => updateRow(row.rowId, "unitCost", sanitizeNumber(e.target.value))}
                           className="w-24 px-2 py-1 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none bg-white dark:bg-neutral-800 text-center font-bold"
                         />
                       </td>
@@ -674,12 +651,12 @@ export default function CreatePurchaseClient({
                           type="number"
                           step="0.01"
                           value={row.commission}
-                          onChange={(e) => updateRow(row.rowId, "commission", Number(e.target.value))}
+                          onChange={(e) => updateRow(row.rowId, "commission", sanitizeNumber(e.target.value))}
                           className="w-20 px-2 py-1 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none bg-white dark:bg-neutral-800 text-center"
                         />
                       </td>
 
-                      <td className="p-3 text-right font-bold text-xs">
+                      <td className="p-3 text-right font-bold text-xs font-mono">
                         {currencySymbol}{lineTotal.toFixed(2)}
                       </td>
 
@@ -700,15 +677,12 @@ export default function CreatePurchaseClient({
           </div>
         </div>
 
-        {/* ========================================================= */}
-        {/* 4. PRICING, TAXES & DUES CALCULATOR                       */}
-        {/* ========================================================= */}
+        {/* 4. Pricing & Dues Calculator */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-          {/* Left: Payment details */}
           <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-5 shadow-xs space-y-4">
             <div>
               <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Payment Method
+                পেমেন্ট মাধ্যম (Payment Method)
               </label>
               <select
                 value={paymentMethod}
@@ -724,63 +698,62 @@ export default function CreatePurchaseClient({
 
             <div>
               <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Notes / Special Instructions
+                চালানের বিশেষ মন্তব্য বা রেফারেন্স
               </label>
               <textarea
                 rows={4}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="চালানের বিশেষ মন্তব্য..."
+                placeholder="গাড়ি নম্বর, ডেলিভারি ম্যান বা বিশেষ কোনো শর্ত..."
                 className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
-          {/* Right: Summary Calculator */}
           <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-5 shadow-xs space-y-3 text-xs">
             <div className="flex justify-between items-center text-neutral-600 dark:text-neutral-400">
-              <span>Total Quantity (মোট পরিমাণ):</span>
-              <strong className="text-neutral-900 dark:text-neutral-100">{totalQuantity.toFixed(2)}</strong>
+              <span>মোট পরিমাণ (Total Quantity):</span>
+              <strong className="text-neutral-900 dark:text-neutral-100 font-mono">{totalQuantity.toFixed(2)}</strong>
             </div>
 
             <div className="flex justify-between items-center text-neutral-600 dark:text-neutral-400">
-              <span>Subtotal:</span>
-              <strong className="text-neutral-900 dark:text-neutral-100">{currencySymbol}{subtotal.toFixed(2)}</strong>
+              <span>সাবটোটাল:</span>
+              <strong className="text-neutral-900 dark:text-neutral-100 font-mono">{currencySymbol}{subtotal.toFixed(2)}</strong>
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-neutral-600 dark:text-neutral-400">Discount (-):</span>
+              <span className="text-neutral-600 dark:text-neutral-400">বিশেষ ছাড় (-):</span>
               <input
                 type="number"
                 step="0.01"
                 min="0"
                 value={discount}
-                onChange={(e) => setDiscount(Number(e.target.value))}
+                onChange={(e) => setDiscount(sanitizeNumber(e.target.value))}
                 className="w-28 px-2.5 py-1 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none text-right font-bold bg-white dark:bg-neutral-800"
               />
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-neutral-600 dark:text-neutral-400">Labor / Freight (+):</span>
+              <span className="text-neutral-600 dark:text-neutral-400">পরিবহন ও কুলি খরচ (+):</span>
               <input
                 type="number"
                 step="0.01"
                 min="0"
                 value={transportCost}
-                onChange={(e) => setTransportCost(Number(e.target.value))}
+                onChange={(e) => setTransportCost(sanitizeNumber(e.target.value))}
                 className="w-28 px-2.5 py-1 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none text-right font-bold bg-white dark:bg-neutral-800"
               />
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-neutral-600 dark:text-neutral-400">VAT / Tax Rate (%):</span>
+              <span className="text-neutral-600 dark:text-neutral-400">ভ্যাট হার (%):</span>
               <div className="flex items-center gap-1.5">
                 <input
                   type="number"
                   step="0.1"
                   min="0"
                   value={vatPercent}
-                  onChange={(e) => setVatPercent(Number(e.target.value))}
+                  onChange={(e) => setVatPercent(sanitizeNumber(e.target.value))}
                   className="w-16 px-2 py-1 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none text-right font-bold bg-white dark:bg-neutral-800"
                 />
                 <span className="text-[11px] text-neutral-400">({currencySymbol}{vatAmount.toFixed(2)})</span>
@@ -788,36 +761,41 @@ export default function CreatePurchaseClient({
             </div>
 
             <div className="flex justify-between items-center pt-2 border-t border-neutral-200 dark:border-neutral-800 text-sm font-bold text-neutral-900 dark:text-neutral-100">
-              <span>Invoice Total (চালান মূল্য):</span>
-              <span className="text-blue-600 dark:text-blue-400">{currencySymbol}{grandTotal.toFixed(2)}</span>
+              <span>এই চালানের মোট মূল্য:</span>
+              <span className="text-blue-600 dark:text-blue-400 font-mono">{currencySymbol}{grandTotal.toFixed(2)}</span>
             </div>
 
-            {/* Previous Due Row */}
             <div className="flex justify-between items-center p-2 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 font-semibold">
-              <span>Previous Due (পূর্বের বাকি):</span>
-              <span>{currencySymbol}{supplierPreviousDue.toFixed(2)}</span>
+              <span>সাপ্লায়ারের পূর্বের বকেয়া:</span>
+              <span className="font-mono">{currencySymbol}{supplierPreviousDue.toFixed(2)}</span>
             </div>
 
             <div className="flex justify-between items-center pt-2 border-t-2 border-neutral-200 dark:border-neutral-800 text-base font-extrabold text-neutral-900 dark:text-neutral-100">
-              <span>Net Total Payable (সর্বমোট দেয়):</span>
-              <span>{currencySymbol}{netTotalPayable.toFixed(2)}</span>
+              <span>সর্বমোট প্রদেয় (Net Payable):</span>
+              <span className="font-mono">{currencySymbol}{netTotalPayable.toFixed(2)}</span>
             </div>
 
             <div className="flex justify-between items-center pt-1">
-              <span className="font-bold text-neutral-800 dark:text-neutral-200">Paid Amount:</span>
+              <span className="font-bold text-neutral-800 dark:text-neutral-200">আজকের পরিশোধ (Paid):</span>
               <input
                 type="number"
                 step="0.01"
                 min="0"
                 value={paidAmount}
-                onChange={(e) => setPaidAmount(Number(e.target.value))}
+                onChange={(e) => setPaidAmount(sanitizeNumber(e.target.value))}
                 className="w-32 px-2.5 py-1 text-xs border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none text-right font-extrabold text-emerald-600 dark:text-emerald-400 bg-white dark:bg-neutral-800"
               />
             </div>
 
-            <div className="flex justify-between items-center p-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 font-bold text-sm">
-              <span>Current Due (বর্তমান বাকি):</span>
-              <span>{currencySymbol}{currentDue.toFixed(2)}</span>
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <div className="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300">
+                <span className="text-[10px] block">চালানের বাকি:</span>
+                <strong className="font-mono text-xs">{currencySymbol}{chalanDue.toFixed(2)}</strong>
+              </div>
+              <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400">
+                <span className="text-[10px] block">সর্বমোট অবশিষ্ট বাকি:</span>
+                <strong className="font-mono text-xs">{currencySymbol}{finalSupplierBalance.toFixed(2)}</strong>
+              </div>
             </div>
 
             <div className="pt-3">
@@ -827,7 +805,7 @@ export default function CreatePurchaseClient({
                 className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-xs transition flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 {loading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-                Complete Purchase &amp; Stock-In
+                চালান ইনওয়ার্ড ও স্টক সম্পন্ন করুন
               </button>
             </div>
           </div>

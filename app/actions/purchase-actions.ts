@@ -1,63 +1,29 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from "@/lib/auth/guard";
+import { CreatePurchasePayload, PERMISSIONS, UpdatePurchasePayload } from "@/types";
 
-async function getAuthenticatedUser() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.shopId) {
-    throw new Error("Unauthorized: Please log in.");
-  }
-  if (session.user.role !== "OWNER" && session.user.role !== "MANAGER" && session.user.role !== "ADMIN") {
-    throw new Error("Forbidden: Only Owners and Managers can record purchases.");
-  }
-
-  let activeBranchId = session.user.branchId;
-  if (!activeBranchId) {
-    const mainBranch = await prisma.branch.findFirst({
-      where: { shopId: session.user.shopId, isMain: true },
-      select: { id: true },
-    });
-    activeBranchId = mainBranch?.id || null;
-  }
-
-  if (!activeBranchId) {
-    throw new Error("No active branch found. Please select or configure a branch.");
-  }
-
-  return {
-    ...session.user,
-    activeBranchId,
-  };
-}
-
-interface PurchaseItemInput {
-  productId: string;
-  quantity: number;
-  unitCost: number;
-  commission?: number;
-}
-
-interface CreatePurchasePayload {
-  supplierId: string;
-  chalanNo: string;
-  paymentMethod?: string;
-  paidAmount: number;
-  discount?: number;
-  transportCost?: number;
-  vatPercent?: number;
-  notes?: string;
-  items: PurchaseItemInput[];
-}
-
+// ==========================================
+// 1. CREATE PURCHASE CHALAN
+// ==========================================
 export async function createPurchaseAction(payload: CreatePurchasePayload) {
   try {
-    const user = await getAuthenticatedUser();
+    // 🛡️ Zero-Trust Guard: Resolve active branch and verify permissions
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
+
+    if (!user.activeBranchId) {
+      return { success: false, error: "সক্রিয় ব্রাঞ্চ পাওয়া যায়নি।" };
+    }
+
     const {
       supplierId,
       chalanNo,
+      purchaseDate,
       paymentMethod = "cash",
       paidAmount = 0,
       discount = 0,
@@ -67,62 +33,77 @@ export async function createPurchaseAction(payload: CreatePurchasePayload) {
       items,
     } = payload;
 
-    if (!supplierId || !chalanNo || !items || items.length === 0) {
-      return { success: false, error: "Supplier, Chalan #, and at least one item are required." };
+    const cleanChalanNo = chalanNo.trim();
+
+    if (!supplierId || !cleanChalanNo || !items || items.length === 0) {
+      return { success: false, error: "সাপ্লায়ার, চালান নম্বর এবং কমপক্ষে একটি পণ্য আবশ্যক।" };
     }
 
     // Check duplicate chalan number within store
     const existing = await prisma.purchase.findUnique({
-      where: { shopId_chalanNo: { shopId: user.shopId, chalanNo } },
+      where: { shopId_chalanNo: { shopId: user.shopId, chalanNo: cleanChalanNo } },
     });
     if (existing) {
-      return { success: false, error: `Purchase Chalan #${chalanNo} already exists in your store.` };
+      return { success: false, error: `চালান #${cleanChalanNo} ইতোমধ্যেই এই দোকানে বিদ্যমান।` };
     }
 
     const supplier = await prisma.supplier.findFirst({
       where: { id: supplierId, shopId: user.shopId },
     });
-    if (!supplier) return { success: false, error: "Supplier not found." };
+    if (!supplier) return { success: false, error: "সাপ্লায়ার খুঁজে পাওয়া যায়নি।" };
 
-    // Calculate totals
+    // Calculate Chalan Totals
     let subtotal = 0;
     let totalQuantity = 0;
 
     for (const item of items) {
-      const comm = item.commission || 0;
-      const line = item.quantity * item.unitCost - comm;
-      subtotal += line;
-      totalQuantity += item.quantity;
+      const qty = Number(item.quantity);
+      const cost = Number(item.unitCost);
+      const comm = Number(item.commission || 0);
+
+      if (qty <= 0 || cost <= 0) {
+        return { success: false, error: "পণ্যের পরিমাণ এবং ক্রয়মূল্য শূন্যের বেশি হতে হবে।" };
+      }
+
+      subtotal += qty * cost - comm;
+      totalQuantity += qty;
     }
 
-    const baseAmount = Math.max(0, subtotal - discount);
-    const vatAmount = (baseAmount * vatPercent) / 100;
-    const grandTotal = baseAmount + transportCost + vatAmount;
+    const sDiscount = Math.max(0, Number(discount) || 0);
+    const sTransport = Math.max(0, Number(transportCost) || 0);
+    const sVatPercent = Math.max(0, Number(vatPercent) || 0);
+    const sPaidAmount = Math.max(0, Number(paidAmount) || 0);
 
+    const baseAmount = Math.max(0, subtotal - sDiscount);
+    const vatAmount = Math.round(((baseAmount * sVatPercent) / 100) * 100) / 100;
+    const grandTotal = Math.round((baseAmount + sTransport + vatAmount) * 100) / 100;
 
+    // 🛡️ ACCURATE KHATA MATH (Fixed previous due explosion!)
+    const previousDue = Number(supplier.currentDue || 0);
+    // Chalan-specific due (how much of this invoice remains unpaid)
+    const chalanDue = Math.max(0, grandTotal - sPaidAmount);
+    // Status reflects this chalan
+    const paymentStatus = chalanDue === 0 ? "PAID" : sPaidAmount > 0 ? "PARTIAL" : "DUE";
+    // Net delta that will be added/subtracted from supplier's overall balance
+    const netKhataDelta = grandTotal - sPaidAmount;
 
-    // ✅ CORRECT (Net Khata calculation)
-const previousDue = Number(supplier.currentDue || 0);
-const netPayable = grandTotal + previousDue; // 140 + 80 = 220
-const dueAmount = Math.max(0, netPayable - paidAmount); // 220 - 200 = 20
-const paymentStatus = dueAmount === 0 ? "PAID" : paidAmount > 0 ? "PARTIAL" : "DUE";
-
-    // 👈 ATOMIC DATABASE TRANSACTION
+    // 🚀 ATOMIC DATABASE TRANSACTION
     await prisma.$transaction(async (tx) => {
       // 1. Create Purchase Bill
       const purchase = await tx.purchase.create({
         data: {
-          chalanNo,
+          chalanNo: cleanChalanNo,
           subtotal,
           totalQuantity,
-          discount,
-          transportCost,
-          vatPercent,
+          discount: sDiscount,
+          transportCost: sTransport,
+          vatPercent: sVatPercent,
           vatAmount,
           grandTotal,
           previousDue,
-          paidAmount,
-          dueAmount,
+          purchaseDate: purchaseDate ? new Date(purchaseDate) : new Date(),
+          paidAmount: sPaidAmount,
+          dueAmount: chalanDue,
           paymentMethod,
           paymentStatus,
           notes: notes || null,
@@ -132,9 +113,9 @@ const paymentStatus = dueAmount === 0 ? "PAID" : paidAmount > 0 ? "PARTIAL" : "D
         },
       });
 
-      // 2. Process Items: Create PurchaseItem, Increment ProductStock for branch, Update Cost
+      // 2. Process Items: Increment ProductStock & Update Latest Cost
       for (const item of items) {
-        const comm = item.commission || 0;
+        const comm = Number(item.commission || 0);
         const lineTotal = item.quantity * item.unitCost - comm;
 
         await tx.purchaseItem.create({
@@ -148,7 +129,7 @@ const paymentStatus = dueAmount === 0 ? "PAID" : paidAmount > 0 ? "PARTIAL" : "D
           },
         });
 
-        // 👈 Increment stock in ProductStock for active branch
+        // Increment stock in ProductStock for active branch
         await tx.productStock.upsert({
           where: {
             productId_branchId: {
@@ -156,9 +137,7 @@ const paymentStatus = dueAmount === 0 ? "PAID" : paidAmount > 0 ? "PARTIAL" : "D
               branchId: user.activeBranchId,
             },
           },
-          update: {
-            quantity: { increment: item.quantity },
-          },
+          update: { quantity: { increment: item.quantity } },
           create: {
             productId: item.productId,
             branchId: user.activeBranchId,
@@ -166,74 +145,76 @@ const paymentStatus = dueAmount === 0 ? "PAID" : paidAmount > 0 ? "PARTIAL" : "D
           },
         });
 
-        // Update latest purchase price on product
+        // Update product's latest purchase cost
         await tx.product.update({
           where: { id: item.productId },
           data: { purchasePrice: item.unitCost },
         });
       }
 
-      // 3. Record Supplier Payment if paidAmount > 0
-      if (paidAmount > 0) {
+      // 3. Record Supplier Payment Voucher
+      if (sPaidAmount > 0) {
         await tx.supplierPayment.create({
           data: {
-            amount: paidAmount,
+            amount: sPaidAmount,
             paymentMethod,
             voucherNo: `PAY-PUR-${Date.now().toString().slice(-6)}`,
-            reference: chalanNo,
-            note: `Payment for purchase chalan #${chalanNo}`,
+            reference: cleanChalanNo,
+            note: `Payment for purchase chalan #${cleanChalanNo}`,
             supplierId,
             purchaseId: purchase.id,
             branchId: user.activeBranchId,
           },
         });
+
+        // 👈 DEDUCT CASH DRAWER / BANK ACCOUNT (Real Financial Sync)
+        const accountType = paymentMethod.toUpperCase();
+        const paymentAccount = await tx.account.findFirst({
+          where: {
+            branchId: user.activeBranchId,
+            type: ["CASH", "BANK", "BKASH", "NAGAD"].includes(accountType) ? (accountType as any) : "CASH",
+            status: "active",
+          },
+        });
+
+        if (paymentAccount) {
+          await tx.account.update({
+            where: { id: paymentAccount.id },
+            data: { currentBalance: { decrement: sPaidAmount } },
+          });
+        }
       }
 
-      // 4. Update Supplier Current Due
-      if (dueAmount > 0) {
-        await tx.supplier.update({
-          where: { id: supplierId },
-          data: { currentDue: { increment: dueAmount } },
-        });
-      } else if (paidAmount > grandTotal) {
-        // If extra paid against previous debt
-        const extraPaid = paidAmount - grandTotal;
-        await tx.supplier.update({
-          where: { id: supplierId },
-          data: { currentDue: { decrement: Math.min(Number(supplier.currentDue), extraPaid) } },
-        });
-      }
+      // 4. Update Supplier Current Due (Accurate Net Khata Delta)
+      await tx.supplier.update({
+        where: { id: supplierId },
+        data: { currentDue: { increment: netKhataDelta } },
+      });
     });
 
-    revalidatePath("/dashboard/admin/purchases");
-    revalidatePath("/dashboard/admin/products");
-    revalidatePath("/dashboard/admin/suppliers");
+    revalidatePath("/purchases");
+    revalidatePath("/inventory");
+    revalidatePath("/suppliers");
     revalidatePath("/dashboard");
+    revalidatePath("/reports/closings");
+
     return { success: true };
   } catch (error: any) {
     console.error("Purchase creation error:", error);
-    return { success: false, error: error.message || "Failed to record purchase." };
+    return { success: false, error: error.message || "চালান এন্ট্রি সম্পন্ন করা সম্ভব হয়নি।" };
   }
 }
 
-// Add to app/actions/purchase-actions.ts
-
-interface UpdatePurchasePayload {
-  id: string;
-  supplierId: string;
-  chalanNo: string;
-  paymentMethod?: string;
-  paidAmount: number;
-  discount?: number;
-  transportCost?: number;
-  vatPercent?: number;
-  notes?: string;
-  items: PurchaseItemInput[];
-}
-
+// ==========================================
+// 2. UPDATE PURCHASE CHALAN
+// ==========================================
 export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.FINANCE_LOANS,
+      requireActiveStatus: true,
+    });
+
     const {
       id,
       supplierId,
@@ -247,47 +228,54 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
       items,
     } = payload;
 
-    if (!id || !supplierId || !chalanNo || !items || items.length === 0) {
-      return { success: false, error: "Supplier, Chalan #, and at least one item are required." };
-    }
-
     const existingPurchase = await prisma.purchase.findFirst({
       where: { id, shopId: user.shopId },
       include: { items: true },
     });
 
     if (!existingPurchase) {
-      return { success: false, error: "Purchase record not found." };
+      return { success: false, error: "চালান খুঁজে পাওয়া যায়নি।" };
     }
 
     const supplier = await prisma.supplier.findFirst({
       where: { id: supplierId, shopId: user.shopId },
     });
-    if (!supplier) return { success: false, error: "Supplier not found." };
+    if (!supplier) return { success: false, error: "সাপ্লায়ার পাওয়া যায়নি।" };
 
-    // Calculate totals
+    // Calculate new totals
     let subtotal = 0;
     let totalQuantity = 0;
     for (const item of items) {
-      const comm = item.commission || 0;
+      const comm = Number(item.commission || 0);
       subtotal += item.quantity * item.unitCost - comm;
       totalQuantity += item.quantity;
     }
 
-    const baseAmount = Math.max(0, subtotal - discount);
-    const vatAmount = (baseAmount * vatPercent) / 100;
-    const grandTotal = baseAmount + transportCost + vatAmount;
+    const sDiscount = Math.max(0, Number(discount) || 0);
+    const sTransport = Math.max(0, Number(transportCost) || 0);
+    const sVatPercent = Math.max(0, Number(vatPercent) || 0);
+    const sPaidAmount = Math.max(0, Number(paidAmount) || 0);
 
-    const previousDue = Number(existingPurchase.previousDue);
-    const netPayable = grandTotal + previousDue;
-    const dueAmount = Math.max(0, netPayable - paidAmount);
-    const paymentStatus = dueAmount === 0 ? "PAID" : paidAmount > 0 ? "PARTIAL" : "DUE";
+    const baseAmount = Math.max(0, subtotal - sDiscount);
+    const vatAmount = Math.round(((baseAmount * sVatPercent) / 100) * 100) / 100;
+    const grandTotal = Math.round((baseAmount + sTransport + vatAmount) * 100) / 100;
+
+    const chalanDue = Math.max(0, grandTotal - sPaidAmount);
+    const paymentStatus = chalanDue === 0 ? "PAID" : sPaidAmount > 0 ? "PARTIAL" : "DUE";
+
+    // 🛡️ Calculate exact difference between old and new purchase impact on supplier debt
+    const oldNetImpact = Number(existingPurchase.grandTotal) - Number(existingPurchase.paidAmount);
+    const newNetImpact = grandTotal - sPaidAmount;
+    const netDueDelta = newNetImpact - oldNetImpact;
+
+    // Use original purchase branch to prevent cross-branch corruption
+    const purchaseBranchId = existingPurchase.branchId || user.activeBranchId;
 
     await prisma.$transaction(async (tx) => {
-      // 1. Rollback old stock quantities
+      // 1. Rollback old stock using the original purchase branch
       for (const oldItem of existingPurchase.items) {
         await tx.productStock.updateMany({
-          where: { productId: oldItem.productId, branchId: user.activeBranchId },
+          where: { productId: oldItem.productId, branchId: purchaseBranchId },
           data: { quantity: { decrement: oldItem.quantity } },
         });
       }
@@ -297,7 +285,7 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
 
       // 3. Create updated items and apply new stock
       for (const item of items) {
-        const comm = item.commission || 0;
+        const comm = Number(item.commission || 0);
         const lineTotal = item.quantity * item.unitCost - comm;
 
         await tx.purchaseItem.create({
@@ -313,12 +301,12 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
 
         await tx.productStock.upsert({
           where: {
-            productId_branchId: { productId: item.productId, branchId: user.activeBranchId },
+            productId_branchId: { productId: item.productId, branchId: purchaseBranchId },
           },
           update: { quantity: { increment: item.quantity } },
           create: {
             productId: item.productId,
-            branchId: user.activeBranchId,
+            branchId: purchaseBranchId,
             quantity: item.quantity,
           },
         });
@@ -329,9 +317,7 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
         });
       }
 
-      // 4. Update Supplier ledger due difference
-      const oldDueDiff = Number(existingPurchase.dueAmount);
-      const netDueDelta = dueAmount - oldDueDiff;
+      // 4. Update Supplier currentDue with the exact net delta
       if (netDueDelta !== 0) {
         await tx.supplier.update({
           where: { id: supplierId },
@@ -344,16 +330,16 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
         where: { id },
         data: {
           supplierId,
-          chalanNo,
+          chalanNo: chalanNo.trim(),
           subtotal,
           totalQuantity,
-          discount,
-          transportCost,
-          vatPercent,
+          discount: sDiscount,
+          transportCost: sTransport,
+          vatPercent: sVatPercent,
           vatAmount,
           grandTotal,
-          paidAmount,
-          dueAmount,
+          paidAmount: sPaidAmount,
+          dueAmount: chalanDue,
           paymentMethod,
           paymentStatus,
           notes: notes || null,
@@ -361,40 +347,52 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
       });
     });
 
-    revalidatePath("/dashboard/admin/purchases");
-    revalidatePath("/dashboard/admin/products");
-    revalidatePath("/dashboard/admin/suppliers");
+    revalidatePath("/purchases");
+    revalidatePath("/inventory");
+    revalidatePath("/suppliers");
     return { success: true };
   } catch (error: any) {
     console.error("Update purchase error:", error);
-    return { success: false, error: error.message || "Failed to update purchase." };
+    return { success: false, error: error.message || "চালান আপডেট ব্যর্থ হয়েছে।" };
   }
 }
 
-// app/actions/purchase-actions.ts
-
+// ==========================================
+// 3. DELETE PURCHASE CHALAN (ATOMIC ROLLBACK)
+// ==========================================
 export async function deletePurchaseAction(purchaseId: string) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.FINANCE_LOANS,
+      requireActiveStatus: true,
+    });
 
-    // 1. Fetch purchase with items and supplier
+    // Only OWNER can delete purchase chalans
+    if (user.role !== "OWNER") {
+      return { success: false, error: "অনুমতি নেই: শুধুমাত্র দোকানের মালিক চালান মুছে ফেলতে পারেন।" };
+    }
+
     const purchase = await prisma.purchase.findFirst({
       where: { id: purchaseId, shopId: user.shopId },
       include: { items: true, supplier: true },
     });
 
     if (!purchase) {
-      return { success: false, error: "Purchase invoice not found." };
+      return { success: false, error: "চালান খুঁজে পাওয়া যায়নি।" };
     }
 
-    // 2. Perform Atomic Rollback in a single transaction
+    const purchaseBranchId = purchase.branchId || user.activeBranchId;
+    // Net debt left by this chalan that must be removed from supplier balance
+    const netDebtToRevert = Number(purchase.grandTotal) - Number(purchase.paidAmount);
+    const paidToRevert = Number(purchase.paidAmount);
+
     await prisma.$transaction(async (tx) => {
-      // A. Revert Branch Stock for every line item
+      // 1. Revert Branch Stock for every line item
       for (const item of purchase.items) {
         await tx.productStock.updateMany({
           where: {
             productId: item.productId,
-            branchId: purchase.branchId || user.activeBranchId,
+            branchId: purchaseBranchId,
           },
           data: {
             quantity: { decrement: item.quantity },
@@ -402,23 +400,33 @@ export async function deletePurchaseAction(purchaseId: string) {
         });
       }
 
-      // B. Revert Supplier Due (Bakir Khata)
-      // If this invoice left an unpaid due, subtract it from supplier's balance
-      if (Number(purchase.dueAmount) > 0) {
+      // 2. Revert Supplier Due (Bakir Khata)
+      if (netDebtToRevert !== 0) {
         await tx.supplier.update({
           where: { id: purchase.supplierId },
-          data: {
-            currentDue: { decrement: Number(purchase.dueAmount) },
-          },
+          data: { currentDue: { decrement: netDebtToRevert } },
         });
       }
 
-      // C. Remove any SupplierPayment vouchers tied to this purchase
+      // 3. Refund physical cash back to drawer if money was paid
+      if (paidToRevert > 0 && purchase.paymentMethod === "cash") {
+        const cashDrawer = await tx.account.findFirst({
+          where: { branchId: purchaseBranchId, type: "CASH", status: "active" },
+        });
+        if (cashDrawer) {
+          await tx.account.update({
+            where: { id: cashDrawer.id },
+            data: { currentBalance: { increment: paidToRevert } },
+          });
+        }
+      }
+
+      // 4. Remove payment vouchers tied to this purchase
       await tx.supplierPayment.deleteMany({
         where: { purchaseId: purchase.id },
       });
 
-      // D. Delete line items and the purchase invoice
+      // 5. Delete line items and the purchase invoice
       await tx.purchaseItem.deleteMany({
         where: { purchaseId: purchase.id },
       });
@@ -428,13 +436,13 @@ export async function deletePurchaseAction(purchaseId: string) {
       });
     });
 
-    // 3. Revalidate dashboard caches
-    revalidatePath("/dashboard/admin/purchases");
-    revalidatePath("/dashboard/admin/suppliers");
-    revalidatePath("/dashboard/admin/products");
+    revalidatePath("/purchases");
+    revalidatePath("/suppliers");
+    revalidatePath("/inventory");
+    revalidatePath("/dashboard/closings");
     return { success: true };
   } catch (error: any) {
     console.error("Delete purchase error:", error);
-    return { success: false, error: error.message || "Failed to delete purchase invoice." };
+    return { success: false, error: error.message || "চালান মুছে ফেলা সম্ভব হয়নি।" };
   }
 }

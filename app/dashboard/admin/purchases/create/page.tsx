@@ -1,28 +1,28 @@
-// app/dashboard/admin/purchases/create/page.tsx
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect } from "next/navigation";
+
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { prisma } from "@/lib/prisma";
 import { getSuppliers } from "@/queries/supplier-queries";
 import { getProducts } from "@/queries/product-queries";
-import CreatePurchaseClient from "../_components/CreatePurchaseClient";
+import PurchaseForm from "../_components/form/PurchaseForm";
 
 export default async function CreatePurchasePage() {
-  const session = await getServerSession(authOptions);
+  // 🛡️ Zero-Trust Guard
+  const user = await requireAuth({
+    requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+    requireActiveStatus: true,
+  });
 
-  if (!session?.user?.shopId) {
-    redirect("/login");
-  }
+  const { shopId, activeBranchId } = user;
 
-  const { shopId, branchId } = session.user;
-
-  // 1. Fetch products, suppliers, active branch & shop info in parallel
+  // Parallel queries scoped strictly to activeBranchId
   const [products, suppliers, activeBranch, shop] = await Promise.all([
-    getProducts(shopId, branchId),
-    getSuppliers(shopId),
-    branchId
-      ? prisma.branch.findUnique({ where: { id: branchId }, select: { name: true, code: true } })
-      : prisma.branch.findFirst({ where: { shopId, isMain: true }, select: { name: true, code: true } }),
+    getProducts(shopId, activeBranchId),
+    getSuppliers(shopId, activeBranchId),
+    prisma.branch.findUnique({
+      where: { id: activeBranchId },
+      select: { name: true, code: true },
+    }),
     prisma.shop.findUnique({
       where: { id: shopId },
       select: { currencySymbol: true, name: true },
@@ -33,9 +33,11 @@ export default async function CreatePurchasePage() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <CreatePurchaseClient
-        products={products as any}
-        suppliers={suppliers as any}
+
+        <PurchaseForm
+        mode="create"
+        products={products}
+        suppliers={suppliers}
         activeBranchName={activeBranch?.name || "Main Branch"}
         currencySymbol={shop?.currencySymbol || "৳"}
         autoChalan={autoChalan}
