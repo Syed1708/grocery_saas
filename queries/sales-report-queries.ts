@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { ISalesFilterParams, ISalesReportKPIs, ISaleReportRow, IItemVelocityRow } from "@/types/index";
-import { Prisma } from "@prisma/client";
 
 export async function getSalesReportData(
   shopId: string,
@@ -11,16 +10,17 @@ export async function getSalesReportData(
   invoices: ISaleReportRow[];
   itemVelocity: IItemVelocityRow[];
 }> {
-  const where: Prisma.SaleWhereInput = {
+  // 👈 Simple, clean, and no extra imports needed
+  const where: any = {
     shopId,
     branchId,
   };
 
-  // Date range filter
+  // Date range filter on saleDate
   if (filters.startDate || filters.endDate) {
-    where.createdAt = {};
-    if (filters.startDate) where.createdAt.gte = new Date(`${filters.startDate}T00:00:00`);
-    if (filters.endDate) where.createdAt.lte = new Date(`${filters.endDate}T23:59:59`);
+    where.saleDate = {};
+    if (filters.startDate) where.saleDate.gte = new Date(`${filters.startDate}T00:00:00`);
+    if (filters.endDate) where.saleDate.lte = new Date(`${filters.endDate}T23:59:59`);
   }
 
   // Payment method & status filters
@@ -32,11 +32,12 @@ export async function getSalesReportData(
   }
 
   // Invoice or customer search
-  if (filters.search) {
+  if (filters.search && filters.search.trim()) {
+    const q = filters.search.trim();
     where.OR = [
-      { invoiceNo: { contains: filters.search } },
-      { customer: { name: { contains: filters.search } } },
-      { customer: { phone: { contains: filters.search } } },
+      { invoiceNo: { contains: q } },
+      { customer: { name: { contains: q } } },
+      { customer: { phone: { contains: q } } },
     ];
   }
 
@@ -62,7 +63,7 @@ export async function getSalesReportData(
     totalInvoices: agg._count.id || 0,
   };
 
-  // 2. Paginated / Recent Invoices List
+  // 2. Recent Invoices List
   const sales = await prisma.sale.findMany({
     where,
     include: {
@@ -77,7 +78,7 @@ export async function getSalesReportData(
     id: s.id,
     invoiceNo: s.invoiceNo,
     saleDate: s.saleDate,
-    customerName: s.customer?.name || "Walk-in Customer",
+    customerName: s.customer?.name || "নগদ ক্রেতা (Walk-in)",
     customerPhone: s.customer?.phone,
     paymentMethod: s.paymentMethod,
     paymentStatus: s.paymentStatus,
@@ -98,30 +99,31 @@ export async function getSalesReportData(
     _sum: {
       quantity: true,
       lineTotal: true,
-      purchaseCost: true,
     },
     orderBy: {
       _sum: {
         quantity: "desc",
       },
     },
-    take: 20,
+    take: 25,
   });
 
   const productIds = saleItems.map((item) => item.productId);
   const products = await prisma.product.findMany({
     where: { id: { in: productIds } },
-    select: { id: true, name: true, barcode: true },
+    select: { id: true, name: true, barcode: true, purchasePrice: true },
   });
 
   const productMap = new Map(products.map((p) => [p.id, p]));
 
+  // 🛡️ Accurate Profit Calculation: (rev - unitPurchaseCost * qty)
   const itemVelocity: IItemVelocityRow[] = saleItems.map((item) => {
     const prod = productMap.get(item.productId);
     const qty = Number(item._sum.quantity || 0);
     const rev = Number(item._sum.lineTotal || 0);
-    const cost = Number(item._sum.purchaseCost || 0) * qty;
-    const profit = rev - cost;
+    const unitCost = Number(prod?.purchasePrice || 0);
+    const cost = Math.round(unitCost * qty * 100) / 100;
+    const profit = Math.round((rev - cost) * 100) / 100;
     const margin = rev > 0 ? (profit / rev) * 100 : 0;
 
     return {

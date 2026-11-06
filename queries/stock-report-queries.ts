@@ -1,3 +1,4 @@
+
 import { prisma } from "@/lib/prisma";
 import { 
   IStockReportKPIs, 
@@ -6,14 +7,13 @@ import {
   StockStatusType,
   ExpiryStatusType
 } from "@/types/stock";
-import { Prisma } from "@prisma/client";
 
 export async function getStockReportData(
   shopId: string,
   branchId: string,
   filters: IStockFilterParams
-) {
-  const where: Prisma.ProductStockWhereInput = {
+): Promise<{ kpis: IStockReportKPIs; rows: IStockReportRow[] }> {
+  const where: any = {
     branchId,
     product: {
       shopId,
@@ -31,13 +31,14 @@ export async function getStockReportData(
   if (filters.sectionId && filters.sectionId !== "all") {
     where.product = { ...where.product, sectionId: filters.sectionId };
   }
-  if (filters.search) {
+  if (filters.search && filters.search.trim()) {
+    const q = filters.search.trim();
     where.product = {
       ...where.product,
       OR: [
-        { name: { contains: filters.search } },
-        { barcode: { contains: filters.search } },
-        { sku: { contains: filters.search } },
+        { name: { contains: q } },
+        { barcode: { contains: q } },
+        { sku: { contains: q } },
       ],
     };
   }
@@ -58,7 +59,11 @@ export async function getStockReportData(
     orderBy: { product: { name: "asc" } },
   });
 
-  const now = new Date().getTime();
+  // Normalize current timestamp to midnight for accurate day calculations
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const nowMs = today.getTime();
+
   let totalUnits = 0;
   let totalCost = 0;
   let totalRetail = 0;
@@ -69,22 +74,24 @@ export async function getStockReportData(
   const rows: IStockReportRow[] = [];
 
   for (const s of rawStocks) {
-    const qty = Number(s.quantity);
-    const pPrice = Number(s.product.purchasePrice);
-    const sPrice = Number(s.product.sellingPrice);
-    const alertQty = Number(s.product.alertQuantity);
+    const qty = Number(s.quantity || 0);
+    const pPrice = Number(s.product.purchasePrice || 0);
+    const sPrice = Number(s.product.sellingPrice || 0);
+    const alertQty = Number(s.product.alertQuantity || 5);
 
-    const costVal = qty * pPrice;
-    const retailVal = qty * sPrice;
+    const costVal = Math.round(qty * pPrice * 100) / 100;
+    const retailVal = Math.round(qty * sPrice * 100) / 100;
 
     totalUnits += qty;
     totalCost += costVal;
     totalRetail += retailVal;
 
-    // Stock Status
+    // 🛡️ FIX: Low Stock includes both OUT_OF_STOCK and LOW_STOCK
     let stockStatus: StockStatusType = "IN_STOCK";
-    if (qty <= 0) stockStatus = "OUT_OF_STOCK";
-    else if (qty <= alertQty) {
+    if (qty <= 0) {
+      stockStatus = "OUT_OF_STOCK";
+      lowStockCount++; // 👈 Out of stock is counted in low stock alert!
+    } else if (qty <= alertQty) {
       stockStatus = "LOW_STOCK";
       lowStockCount++;
     }
@@ -94,8 +101,9 @@ export async function getStockReportData(
     let daysUntilExpiry: number | null = null;
 
     if (s.product.expiryDate) {
-      const expTime = new Date(s.product.expiryDate).getTime();
-      daysUntilExpiry = Math.ceil((expTime - now) / (1000 * 60 * 60 * 24));
+      const expDate = new Date(s.product.expiryDate);
+      expDate.setHours(0, 0, 0, 0);
+      daysUntilExpiry = Math.ceil((expDate.getTime() - nowMs) / (1000 * 60 * 60 * 24));
 
       if (daysUntilExpiry < 0) {
         expiryStatus = "EXPIRED";
@@ -108,7 +116,6 @@ export async function getStockReportData(
       }
     }
 
-    // Profit margin on retail
     const margin = sPrice > 0 ? ((sPrice - pPrice) / sPrice) * 100 : 0;
 
     rows.push({
@@ -118,11 +125,11 @@ export async function getStockReportData(
       nameEn: s.product.nameEn,
       barcode: s.product.barcode,
       sku: s.product.sku,
-      categoryName: s.product.category.name,
+      categoryName: s.product.category?.name || "সাধারণ",
       brandName: s.product.brand?.name || null,
       sectionCode: s.product.section?.code || null,
       sectionName: s.product.section?.name || null,
-      unitCode: s.product.unit.shortCode,
+      unitCode: s.product.unit?.shortCode || "pcs",
       quantity: qty,
       alertQuantity: alertQty,
       purchasePrice: pPrice,
@@ -137,7 +144,7 @@ export async function getStockReportData(
     });
   }
 
-  // 3. Post-filter for stockStatus & expiryStatus
+  // Post-filter for stockStatus & expiryStatus
   let filteredRows = rows;
   if (filters.stockStatus && filters.stockStatus !== "all") {
     filteredRows = filteredRows.filter((r) => r.stockStatus === filters.stockStatus);
@@ -149,9 +156,9 @@ export async function getStockReportData(
   const kpis: IStockReportKPIs = {
     totalProductsCount: rows.length,
     totalStockUnits: totalUnits,
-    totalCostValue: totalCost,
-    totalRetailValue: totalRetail,
-    potentialGrossProfit: totalRetail - totalCost,
+    totalCostValue: Math.round(totalCost * 100) / 100,
+    totalRetailValue: Math.round(totalRetail * 100) / 100,
+    potentialGrossProfit: Math.round((totalRetail - totalCost) * 100) / 100,
     lowStockItemsCount: lowStockCount,
     expiringSoonCount,
     expiredCount,

@@ -1,6 +1,6 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect } from "next/navigation";
+
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { prisma } from "@/lib/prisma";
 import { getStockReportData } from "@/queries/stock-report-queries";
 import StockReportClient from "./_components/StockReportClient";
@@ -11,17 +11,18 @@ interface PageProps {
 }
 
 export default async function StockReportPage({ searchParams }: PageProps) {
-  const session = await getServerSession(authOptions);
+  // 🛡️ Zero-Trust Guard: Enforce permissions and active status
+  const user = await requireAuth({
+    requiredPermission: PERMISSIONS.POS_ACCESS,
+    requireActiveStatus: true,
+  });
 
-  if (!session?.user?.shopId || !session?.user?.branchId) {
-    redirect("/login");
-  }
-
-  const { shopId, branchId } = session.user;
+  const { shopId, activeBranchId, role } = user;
   const filters = await searchParams;
 
+  // Parallel server queries scoped strictly to activeBranchId
   const [stockData, categories, brands, sections, shop, branch] = await Promise.all([
-    getStockReportData(shopId, branchId, filters),
+    getStockReportData(shopId, activeBranchId, filters),
     prisma.category.findMany({ where: { shopId, status: "active" }, select: { id: true, name: true } }),
     prisma.brand.findMany({ where: { shopId, status: "active" }, select: { id: true, name: true } }),
     prisma.productSection.findMany({ where: { shopId, status: "active" }, select: { id: true, name: true, code: true } }),
@@ -30,13 +31,13 @@ export default async function StockReportPage({ searchParams }: PageProps) {
       select: { name: true, phone: true, address: true, currencySymbol: true },
     }),
     prisma.branch.findUnique({
-      where: { id: branchId },
+      where: { id: activeBranchId },
       select: { name: true },
     }),
   ]);
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto space-y-4">
       <StockReportClient
         kpis={stockData.kpis}
         rows={stockData.rows}
@@ -45,11 +46,12 @@ export default async function StockReportPage({ searchParams }: PageProps) {
         brands={brands}
         sections={sections}
         shop={{
-          name: shop?.name || "Grocery ERP",
+          name: shop?.name || "Grocery Store",
           phone: shop?.phone,
           address: shop?.address,
         }}
         branchName={branch?.name || "Main Branch"}
+        userRole={role}
       />
     </div>
   );

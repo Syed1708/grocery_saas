@@ -1,3 +1,5 @@
+// queries/product-queries.ts
+
 import { prisma } from "@/lib/prisma";
 import { IProduct, ICategoryOption, IUnitOption } from "@/types";
 
@@ -10,6 +12,11 @@ export interface ItemWithCount {
   _count: { products: number };
 }
 
+/**
+ * 1. GET PRODUCTS CATALOG
+ * - Strictly isolates stock to the active branch (No cross-branch stock bleed)
+ * - Safe numeric parsing for Decimal fields
+ */
 export async function getProducts(
   shopId: string,
   branchId?: string | null
@@ -21,45 +28,46 @@ export async function getProducts(
       unit: { select: { id: true, name: true, shortCode: true } },
       brand: { select: { id: true, name: true } },
       section: { select: { id: true, name: true } },
-      stocks: branchId ? { where: { branchId } } : true,
+      // 🛡️ Scopes stock strictly to active branch
+      stocks: branchId ? { where: { branchId } } : false,
     },
     orderBy: { createdAt: "desc" },
   });
 
-// Inside getProducts:
-return products.map((p) => {
-  const currentStock = p.stocks.reduce((sum, s) => sum + Number(s.quantity || 0), 0);
+  return products.map((p) => {
+    // 🛡️ Single branch stock quantity (never sums across branches)
+    const currentStock = Number(p.stocks?.[0]?.quantity ?? 0);
 
-  return {
-    id: p.id,
-    name: p.name,
-    nameEn: p.nameEn || null,
-    barcode: p.barcode,
-    sku: p.sku,
-    description: p.description,
-    costPrice: Number(p.purchasePrice),
-    sellingPrice: Number(p.sellingPrice),
-    wholesalePrice: p.wholesalePrice ? Number(p.wholesalePrice) : null,
-    vatPercent: p.vatPercent ? Number(p.vatPercent) : 0, // 👈
-    expiryDate: p.expiryDate ? p.expiryDate.toISOString().split("T")[0] : null, // 👈
-    stockQuantity: currentStock,
-    minStockAlert: Number(p.alertQuantity),
-    unitId: p.unitId,
-    unitName: p.unit.name,
-    unitCode: p.unit.shortCode,
-    bulkUnitName: p.bulkUnitName,
-    conversionFactor: Number(p.conversionFactor || 1),
-    image: p.image,
-    categoryId: p.categoryId,
-    categoryName: p.category.name,
-    brandId: p.brandId || null,
-    brandName: p.brand?.name || null,
-    sectionId: p.sectionId || null,
-    sectionName: p.section?.name || null,
-    status: p.status as IProduct["status"], // 👈
-    createdAt: p.createdAt,
-  };
-});
+    return {
+      id: p.id,
+      name: p.name,
+      nameEn: p.nameEn || null,
+      barcode: p.barcode,
+      sku: p.sku,
+      description: p.description,
+      costPrice: Number(p.purchasePrice),
+      sellingPrice: Number(p.sellingPrice),
+      wholesalePrice: p.wholesalePrice ? Number(p.wholesalePrice) : null,
+      vatPercent: p.vatPercent ? Number(p.vatPercent) : 0,
+      expiryDate: p.expiryDate ? p.expiryDate.toISOString().split("T")[0] : null,
+      stockQuantity: currentStock,
+      minStockAlert: Number(p.alertQuantity),
+      unitId: p.unitId,
+      unitName: p.unit.name,
+      unitCode: p.unit.shortCode,
+      bulkUnitName: p.bulkUnitName,
+      conversionFactor: Number(p.conversionFactor || 1),
+      image: p.image,
+      categoryId: p.categoryId,
+      categoryName: p.category.name,
+      brandId: p.brandId || null,
+      brandName: p.brand?.name || null,
+      sectionId: p.sectionId || null,
+      sectionName: p.section?.name || null,
+      status: p.status as IProduct["status"],
+      createdAt: p.createdAt,
+    };
+  });
 }
 
 export async function getCategoriesForSelect(shopId: string): Promise<ICategoryOption[]> {

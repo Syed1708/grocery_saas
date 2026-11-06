@@ -1,15 +1,30 @@
+// app/(dashboard)/reports/stock/_components/stock-report-client.tsx
 "use client";
+"use no memo";
 
 import { useState, useMemo } from "react";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { Boxes, DollarSign, TrendingUp, AlertTriangle, Clock } from "lucide-react";
+import {
+  ColumnDef,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
+  DollarSign,
+  TrendingUp,
+  Boxes,
+  AlertTriangle,
+  Clock,
+  Store,
+} from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
-import StockReportFilters from "./StockReportFilters";
-import StockExportActions from "./StockExportActions";
-import { getStockColumns } from "./Columns";
-import StockValuationPdf from "./StockValuationPdf";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
 import { IStockReportKPIs, IStockReportRow } from "@/types/stock";
 import { ReportKpiCard } from "../../common/report-kpi-card";
+import { getStockColumns } from "./Columns";
+import StockExportActions from "./StockExportActions";
+import StockReportFilters from "./StockReportFilters";
+import StockValuationPdf from "./StockValuationPdf";
 
 interface Props {
   kpis: IStockReportKPIs;
@@ -20,6 +35,7 @@ interface Props {
   sections: { id: string; name: string; code: string | null }[];
   shop: { name: string; phone?: string | null; address?: string | null };
   branchName: string;
+  userRole?: string;
 }
 
 export default function StockReportClient({
@@ -30,11 +46,15 @@ export default function StockReportClient({
   brands,
   sections,
   shop,
-  branchName,
+  branchName = "Main Branch",
+  userRole = "OWNER",
 }: Props) {
   const [activeTab, setActiveTab] = useState<"all" | "low" | "expiring">("all");
 
-  //  1. Memoize filtered data so TanStack Table reference remains stable
+  // 🛡️ Privacy Guard: Only Owners and Managers can see capital tied in stock and profit margins
+  const canViewCost = userRole === "OWNER" || userRole === "MANAGER";
+
+  // 1. Stable memoized filtered rows per sub-tab
   const filteredData = useMemo(() => {
     if (!Array.isArray(rows)) return [];
     if (activeTab === "low") {
@@ -46,25 +66,34 @@ export default function StockReportClient({
     return rows;
   }, [activeTab, rows]);
 
-  //  2. Memoize columns definition
-  const columns = useMemo(() => getStockColumns(currencySymbol), [currencySymbol]);
+  // 2. Memoized columns with role-based cost protection
+  const columns = useMemo(() => getStockColumns(currencySymbol, canViewCost), [currencySymbol, canViewCost]);
 
-  //  3. TanStack Table with stable memoized inputs
+  // 3. TanStack Table with safe pagination
   const table = useReactTable({
     data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(), // 👈 FIX: Prevents rendering thousands of rows at once!
   });
 
   return (
     <div className="space-y-4">
-      {/* Screen Interface */}
+      {/* Screen Interface (Hidden in Print) */}
       <div className="print:hidden space-y-4">
-        {/* Header Bar with Action Exports */}
+        {/* Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-bold tracking-tight">মজুদ পণ্য ও মেয়াদ রিপোর্ট (Stock Valuation)</h1>
-            <p className="text-xs text-neutral-500">Live inventory valuation, shelf tracking, and perishable expiry watch</p>
+            <Breadcrumbs items={[{ label: "রিপোর্ট হাব", href: "/reports" }, { label: "মজুদ পণ্য ও মেয়াদ অডিট" }]} />
+            <div className="flex items-center gap-2 mt-1">
+              <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+                মজুদ পণ্য ও মেয়াদ রিপোর্ট (Stock Valuation)
+              </h1>
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                <Store size={11} /> শাখা: {branchName}
+              </span>
+            </div>
+            <p className="text-xs text-neutral-500 mt-0.5">রিয়েলটাইম ইনভেন্টরি ভ্যালুয়েশন, শেলফ ট্র্যাকিং ও মেয়াদোত্তীর্ণ পণ্যের নজরদারি</p>
           </div>
 
           {/* Export Actions: Excel CSV & A4 Print */}
@@ -73,38 +102,42 @@ export default function StockReportClient({
 
         {/* KPI Metric Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <ReportKpiCard
-            title="ক্রয় মূল্যে মোট মজুদ"
-            value={`${currencySymbol}${(kpis?.totalCostValue || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
-            subtitle="Capital tied in stock"
-            icon={DollarSign}
-            variant="default"
-          />
+          {canViewCost && (
+            <ReportKpiCard
+              title="ক্রয় মূল্যে মোট মজুদ"
+              value={`${currencySymbol}${(kpis?.totalCostValue || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
+              subtitle="স্টকে আটকে থাকা মূলধন"
+              icon={DollarSign}
+              variant="default"
+            />
+          )}
           <ReportKpiCard
             title="বিক্রয় মূল্যে মোট মজুদ"
             value={`${currencySymbol}${(kpis?.totalRetailValue || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
-            subtitle="Expected sales turnover"
+            subtitle="প্রত্যাশিত বিক্রয় টার্নওভার"
             icon={TrendingUp}
             variant="info"
           />
+          {canViewCost && (
+            <ReportKpiCard
+              title="প্রত্যাশিত মোট লাভ"
+              value={`${currencySymbol}${(kpis?.potentialGrossProfit || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
+              subtitle="সম্ভাব্য গ্রস প্রফিট"
+              icon={Boxes}
+              variant="success"
+            />
+          )}
           <ReportKpiCard
-            title="প্রত্যাশিত মোট লাভ"
-            value={`${currencySymbol}${(kpis?.potentialGrossProfit || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
-            subtitle="Unrealized gross profit"
-            icon={Boxes}
-            variant="success"
-          />
-          <ReportKpiCard
-            title="লো স্টক পণ্য"
+            title="লো স্টক ও খালি পণ্য"
             value={`${kpis?.lowStockItemsCount || 0} টি`}
-            subtitle="Below safety buffer"
+            subtitle="রি-অর্ডার সীমার নিচে"
             icon={AlertTriangle}
             variant="warning"
           />
           <ReportKpiCard
             title="মেয়াদোত্তীর্ণের পথে"
             value={`${kpis?.expiringSoonCount || 0} টি`}
-            subtitle="Expiring in ≤ 30 days"
+            subtitle="মেয়াদ ≤ ৩০ দিন অবশিষ্ট"
             icon={Clock}
             variant="danger"
           />
@@ -150,7 +183,7 @@ export default function StockReportClient({
           </button>
         </div>
 
-        {/* Data Table */}
+        {/* Data Table with Pagination */}
         <DataTable table={table} columns={columns} />
       </div>
 
