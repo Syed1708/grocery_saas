@@ -1,6 +1,6 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect } from "next/navigation";
+
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { prisma } from "@/lib/prisma";
 import { getCustomerDueReportData } from "@/queries/customer-due-queries";
 import CustomersDueClient from "./_components/customers-due-client";
@@ -10,30 +10,38 @@ interface PageProps {
 }
 
 export default async function CustomerDueReportPage({ searchParams }: PageProps) {
-  const session = await getServerSession(authOptions);
+  // 🛡️ Zero-Trust Guard: Enforce permissions and active status
+  const user = await requireAuth({
+    requiredPermission: PERMISSIONS.POS_ACCESS,
+    requireActiveStatus: true,
+  });
 
-  if (!session?.user?.shopId) {
-    redirect("/login");
-  }
-
-  const { shopId } = session.user;
+  const { shopId, activeBranchId, role } = user;
   const { search, type, aging } = await searchParams;
 
-  const [data, shop] = await Promise.all([
-    getCustomerDueReportData(shopId, search, type, aging),
+  // Non-owners are strictly locked to their branch; Owners can view switched branch
+  const targetBranchId = role === "OWNER" ? activeBranchId : activeBranchId;
+
+  const [data, shop, activeBranch] = await Promise.all([
+    getCustomerDueReportData(shopId, targetBranchId, search, type, aging),
     prisma.shop.findUnique({
       where: { id: shopId },
       select: { name: true, currencySymbol: true },
     }),
+    prisma.branch.findUnique({
+      where: { id: activeBranchId },
+      select: { name: true },
+    }),
   ]);
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto space-y-4">
       <CustomersDueClient
         kpis={data.kpis}
         customers={data.customers}
         currencySymbol={shop?.currencySymbol || "৳"}
-        shopName={shop?.name || "Grocery ERP"}
+        shopName={shop?.name || "Grocery Store"}
+        branchName={activeBranch?.name || "Main Branch"}
       />
     </div>
   );

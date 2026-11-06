@@ -1,3 +1,5 @@
+// 📁 queries/customer-due-queries.ts
+
 import { prisma } from "@/lib/prisma";
 import { 
   ICustomerDueKPIs, 
@@ -6,8 +8,15 @@ import {
   ICustomerKhataSummary 
 } from "@/types/index";
 
+/**
+ * 1. GET CUSTOMER DUE REPORT DATA
+ * - Aligned signature with branch isolation
+ * - Accurate 30+ days aging calculation (including opening due debts)
+ * - Safe numeric conversions
+ */
 export async function getCustomerDueReportData(
   shopId: string,
+  branchId?: string | null,
   search?: string,
   customerType?: string,
   agingFilter?: string
@@ -19,17 +28,19 @@ export async function getCustomerDueReportData(
     shopId,
     status: "active",
     currentDue: { gt: 0 },
+    ...(branchId ? { branchId } : {}), // 🛡️ Strict Branch Scoping
   };
 
   if (customerType && customerType !== "all") {
     where.type = customerType;
   }
 
-  if (search) {
+  if (search && search.trim()) {
+    const q = search.trim();
     where.OR = [
-      { name: { contains: search } },
-      { phone: { contains: search } },
-      { village: { contains: search } },
+      { name: { contains: q } },
+      { phone: { contains: q } },
+      { village: { contains: q } },
     ];
   }
 
@@ -67,13 +78,16 @@ export async function getCustomerDueReportData(
 
     if (due > limit) creditExceededCount++;
 
-    const oldestInvoice = c.sales[0]?.createdAt || null;
+    // 🛡️ FIX: If no unpaid sales exist, fallback to customer creation date for opening balance aging!
+    const oldestDebtDate = c.sales[0]?.createdAt || (openingDue > 0 ? c.createdAt : null);
     let overdueDays = 0;
 
-    if (oldestInvoice) {
-      const diffTime = Math.abs(now - new Date(oldestInvoice).getTime());
+    if (oldestDebtDate) {
+      const diffTime = Math.abs(now - new Date(oldestDebtDate).getTime());
       overdueDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      if (overdueDays > 30) overdue30DaysAmount += due;
+      if (overdueDays > 30) {
+        overdue30DaysAmount += due;
+      }
     }
 
     const usagePercent = limit > 0 ? Number(((due / limit) * 100).toFixed(0)) : 100;
@@ -90,95 +104,102 @@ export async function getCustomerDueReportData(
       currentDue: due,
       limitUsagePercent: usagePercent,
       lastPaymentDate: c.payments[0]?.paymentDate || null,
-      oldestUnpaidInvoiceDate: oldestInvoice,
+      oldestUnpaidInvoiceDate: oldestDebtDate,
       overdueDays,
       totalInvoicesCount: c._count.sales,
     };
   });
 
-  // Optional aging filter
+  // Optional Table Filters
   if (agingFilter === "overdue30") {
     customers = customers.filter((c) => c.overdueDays > 30);
   } else if (agingFilter === "overlimit") {
     customers = customers.filter((c) => c.currentDue > c.creditLimit);
   }
 
+  // Consistent Baseline Portfolio KPIs
   const kpis: ICustomerDueKPIs = {
     totalDueAmount: totalDue,
-    totalDueCustomers: customers.length,
+    totalDueCustomers: rawCustomers.length,
     overdue30DaysAmount,
     creditExceededCustomersCount: creditExceededCount,
-    averageDuePerCustomer: customers.length > 0 ? totalDue / customers.length : 0,
+    averageDuePerCustomer: rawCustomers.length > 0 ? Math.round(totalDue / rawCustomers.length) : 0,
   };
 
   return { kpis, customers };
 }
 
+/**
+ * 2. GET INDIVIDUAL CUSTOMER KHATA LEDGER STATEMENT
+ */
 export async function getCustomerKhataLedger(
   customerId: string,
   shopId: string
 ): Promise<{
   summary: ICustomerKhataSummary;
   ledger: ICustomerKhataEntry[];
-}> {
-  const customer = await prisma.customer.findUnique({
-    where: { id: customerId },
+} | null> {
+  const customer = await prisma.customer.findFirst({
+    where: { id: customerId, shopId },
     select: {
+      name: true,
       openingDue: true,
       currentDue: true,
       createdAt: true,
     },
   });
 
-  const openingDue = Number(customer?.openingDue || 0);
+  if (!customer) return null;
 
-  // 1. Fetch Sales
-  const sales = await prisma.sale.findMany({
-    where: { customerId, shopId },
-    select: {
-      id: true,
-      invoiceNo: true,
-      grandTotal: true,
-      paidAmount: true,
-      dueAmount: true,
-      paymentMethod: true,
-      createdAt: true,
-    },
-  });
+  const openingDue = Number(customer.openingDue || 0);
 
-  // 2. Fetch Direct Payments (Installments / Collections)
-  const payments = await prisma.customerPayment.findMany({
-    where: { customerId },
-    select: {
-      id: true,
-      receiptNo: true,
-      amount: true,
-      paymentMethod: true,
-      paymentDate: true,
-      note: true,
-    },
-  });
-
-  // 3. Fetch Returns
-  const returns = await prisma.saleReturn.findMany({
-    where: { customerId, shopId },
-    select: {
-      id: true,
-      returnNo: true,
-      totalRefund: true,
-      refundMethod: true,
-      returnDate: true,
-      notes: true,
-    },
-  });
+  // Parallel database queries
+  const [sales, payments, returns] = await Promise.all([
+    prisma.sale.findMany({
+      where: { customerId, shopId },
+      select: {
+        id: true,
+        invoiceNo: true,
+        grandTotal: true,
+        paidAmount: true,
+        dueAmount: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.customerPayment.findMany({
+      where: { customerId },
+      select: {
+        id: true,
+        receiptNo: true,
+        amount: true,
+        paymentMethod: true,
+        paymentDate: true,
+        note: true,
+      },
+      orderBy: { paymentDate: "asc" },
+    }),
+    prisma.saleReturn.findMany({
+      where: { customerId, shopId },
+      select: {
+        id: true,
+        returnNo: true,
+        totalRefund: true,
+        refundMethod: true,
+        returnDate: true,
+        notes: true,
+      },
+      orderBy: { returnDate: "asc" },
+    }),
+  ]);
 
   const events: any[] = [];
 
-  // Opening Balance Entry
+  // 1. Opening Balance
   if (openingDue > 0) {
     events.push({
       id: "opening-balance",
-      date: customer?.createdAt || new Date(),
+      date: new Date(customer.createdAt.getTime() - 1000), // Ensures opening balance is always first
       type: "OPENING" as const,
       title: "পূর্বের বাকি (Opening Balance)",
       referenceNo: "OB-001",
@@ -190,7 +211,7 @@ export async function getCustomerKhataLedger(
     });
   }
 
-  // Sales Entries
+  // 2. Sales
   sales.forEach((s) => {
     const grand = Number(s.grandTotal);
     const paid = Number(s.paidAmount);
@@ -204,13 +225,13 @@ export async function getCustomerKhataLedger(
       referenceNo: s.invoiceNo,
       invoiceTotal: grand,
       paidAtPos: paid,
-      debit: due, // Only the unpaid portion adds to the customer's debt
+      debit: due,
       credit: 0,
-      note: `মোট বিল: ৳${grand.toFixed(2)}${paid > 0 ? ` | জমা: ৳${paid.toFixed(2)}` : ""}`,
+      note: `মোট বিল: ৳${grand.toFixed(2)}${paid > 0 ? ` | নগদ পরিশোধ: ৳${paid.toFixed(2)}` : ""}`,
     });
   });
 
-  // Subsequent Payment Collections
+  // 3. Direct Repayments
   payments.forEach((p) => {
     events.push({
       id: p.id,
@@ -226,13 +247,12 @@ export async function getCustomerKhataLedger(
     });
   });
 
-  // Returns
+  // 4. Returns
   returns.forEach((r) => {
     const refund = Number(r.totalRefund);
-    const isBalanceDeduction = r.refundMethod?.toLowerCase() === "balance";
+    const isBalance = r.refundMethod?.toLowerCase() === "balance";
 
-    if (isBalanceDeduction) {
-      // Adjusted with Khata: Reduces Debt
+    if (isBalance) {
       events.push({
         id: r.id,
         date: r.returnDate,
@@ -242,11 +262,10 @@ export async function getCustomerKhataLedger(
         invoiceTotal: refund,
         paidAtPos: 0,
         debit: 0,
-        credit: refund, // Reduces debt
+        credit: refund,
         note: "খাতার বাকি থেকে কর্তন করা হয়েছে",
       });
     } else {
-      // Cash Refund: Handed cash to customer, so DEBT DOES NOT CHANGE
       events.push({
         id: r.id,
         date: r.returnDate,
@@ -256,7 +275,7 @@ export async function getCustomerKhataLedger(
         invoiceTotal: refund,
         paidAtPos: refund,
         debit: 0,
-        credit: 0, // 0 Effect on due balance!
+        credit: 0,
         note: `নগদ ৳${refund.toFixed(2)} ক্যাশ থেকে ফেরত দেওয়া হয়েছে (বাকিতে প্রভাব নেই)`,
       });
     }
@@ -277,16 +296,16 @@ export async function getCustomerKhataLedger(
 
     return {
       ...item,
-      balance: runningBalance,
+      balance: Math.round(runningBalance * 100) / 100,
     };
   });
 
   return {
     summary: {
       openingDue,
-      totalBilled,
-      totalPaid,
-      currentDue: Number(customer?.currentDue || runningBalance),
+      totalBilled: Math.round(totalBilled * 100) / 100,
+      totalPaid: Math.round(totalPaid * 100) / 100,
+      currentDue: Number(customer.currentDue || runningBalance),
     },
     ledger,
   };

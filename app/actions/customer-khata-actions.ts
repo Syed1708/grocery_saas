@@ -1,20 +1,25 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { getCustomerKhataLedger } from "@/queries/customer-due-queries";
 
 export async function fetchCustomerKhataAction(customerId: string) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.shopId) {
-    return { success: false, error: "Unauthorized access" };
-  }
-
   try {
-    const data = await getCustomerKhataLedger(customerId, session.user.shopId);
+    // 🛡️ Zero-Trust Guard: Enforce permissions and active session
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.POS_ACCESS,
+      requireActiveStatus: true,
+    });
+
+    const data = await getCustomerKhataLedger(customerId, user.shopId);
+    if (!data) {
+      return { success: false, error: "কাস্টমার বা খাতা রেকর্ড পাওয়া যায়নি।" };
+    }
+
     return { success: true, data };
-  } catch (err) {
+  } catch (err: any) {
     console.error("Failed to load customer khata:", err);
-    return { success: false, error: "Database error retrieving ledger." };
+    return { success: false, error: err.message || "খাতা লেজার লোড করতে ব্যর্থ হয়েছে।" };
   }
 }

@@ -7,17 +7,17 @@ import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types";
 
 // ==========================================
-// 1. CREATE CUSTOMER (Strict Branch Locked)
+// 1. CREATE CUSTOMER
 // ==========================================
 export async function createCustomerAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.POS_ACCESS, // Cashiers can register customers
+      requiredPermission: PERMISSIONS.POS_ACCESS,
       requireActiveStatus: true,
     });
 
     if (!user.activeBranchId) {
-      return { success: false, error: "Active branch context is required to register a customer." };
+      return { success: false, error: "সক্রিয় ব্রাঞ্চ পাওয়া যায়নি।" };
     }
 
     const validated = customerSchema.safeParse({
@@ -38,7 +38,6 @@ export async function createCustomerAction(formData: FormData) {
 
     const data = validated.data;
 
-    // Check duplicate phone in this branch
     if (data.phone) {
       const existing = await prisma.customer.findFirst({
         where: {
@@ -74,7 +73,6 @@ export async function createCustomerAction(formData: FormData) {
     revalidatePath("/pos");
     revalidatePath("/reports/customers-due");
 
-    // 👈 RETURN customerId so POS auto-selects it!
     return { success: true, customerId: customer.id };
   } catch (error: any) {
     console.error("createCustomerAction error:", error);
@@ -83,12 +81,13 @@ export async function createCustomerAction(formData: FormData) {
 }
 
 // ==========================================
-// 2. UPDATE CUSTOMER (Branch Isolated)
+// 2. UPDATE CUSTOMER (Fixed Permission Key!)
 // ==========================================
 export async function updateCustomerAction(formData: FormData) {
   try {
+    // 🛡️ FIX: Replaced CATALOG_VIEW with proper POS_ACCESS permission
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_VIEW,
+      requiredPermission: PERMISSIONS.POS_ACCESS,
       requireActiveStatus: true,
     });
 
@@ -148,7 +147,7 @@ export async function updateCustomerAction(formData: FormData) {
 }
 
 // ==========================================
-// 3. RECORD PAYMENT (Atomic with CustomerPayment & Account)
+// 3. RECORD PAYMENT
 // ==========================================
 export async function recordCustomerPaymentAction(
   customerId: string, 
@@ -225,20 +224,28 @@ export async function recordCustomerPaymentAction(
 }
 
 // ==========================================
-// 4. DELETE CUSTOMER (Safe Guarded)
+// 4. DELETE CUSTOMER (Owner Only Security!)
 // ==========================================
 export async function deleteCustomerAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.FINANCE_LOANS,
+      requiredPermission: PERMISSIONS.POS_ACCESS,
       requireActiveStatus: true,
     });
+
+    // 🛡️ FIX: Replaced FINANCE_LOANS with strict OWNER role check
+    if (user.role !== "OWNER") {
+      return {
+        success: false,
+        error: "অনুমতি নেই: শুধুমাত্র দোকানের মালিক কাস্টমার প্রোফাইল মুছে ফেলতে পারেন।",
+      };
+    }
 
     const customer = await prisma.customer.findFirst({
       where: { 
         id, 
         shopId: user.shopId,
-        ...(user.role !== "OWNER" && user.activeBranchId ? { branchId: user.activeBranchId } : {}),
+        ...(user.activeBranchId ? { branchId: user.activeBranchId } : {}),
       },
       include: {
         _count: { select: { sales: true } },
