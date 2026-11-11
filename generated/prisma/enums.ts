@@ -150,6 +150,25 @@ export const StaffStatus = {
 export type StaffStatus = (typeof StaffStatus)[keyof typeof StaffStatus]
 
 
+export const PurchaseOrderStatus = {
+  DRAFT: 'DRAFT',
+  SENT_TO_SR: 'SENT_TO_SR',
+  CONVERTED: 'CONVERTED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type PurchaseOrderStatus = (typeof PurchaseOrderStatus)[keyof typeof PurchaseOrderStatus]
+
+
+export const ReturnSettlementType = {
+  DUE_DEDUCTION: 'DUE_DEDUCTION',
+  CASH_REFUND: 'CASH_REFUND',
+  PARTIAL: 'PARTIAL'
+} as const
+
+export type ReturnSettlementType = (typeof ReturnSettlementType)[keyof typeof ReturnSettlementType]
+
+
 export const PartnerRelationship = {
   FATHER: 'FATHER',
   UNCLE: 'UNCLE',

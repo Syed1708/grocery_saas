@@ -3,14 +3,18 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth/guard";
-import { CreatePurchasePayload, PERMISSIONS, UpdatePurchasePayload } from "@/types";
+import { PERMISSIONS } from "@/types";
+import {
+  CreatePurchasePayload,
+  UpdatePurchasePayload,
+} from "@/types/purchase";
+import { deleteUploadedFile } from "@/lib/file-storage";
 
 // ==========================================
 // 1. CREATE PURCHASE CHALAN
 // ==========================================
 export async function createPurchaseAction(payload: CreatePurchasePayload) {
   try {
-    // 🛡️ Zero-Trust Guard: Resolve active branch and verify permissions
     const user = await requireAuth({
       requiredPermission: PERMISSIONS.CATALOG_MANAGE,
       requireActiveStatus: true,
@@ -23,6 +27,8 @@ export async function createPurchaseAction(payload: CreatePurchasePayload) {
     const {
       supplierId,
       chalanNo,
+      chalanImageUrl,
+      fromPOId,
       purchaseDate,
       paymentMethod = "cash",
       paidAmount = 0,
@@ -36,37 +42,53 @@ export async function createPurchaseAction(payload: CreatePurchasePayload) {
     const cleanChalanNo = chalanNo.trim();
 
     if (!supplierId || !cleanChalanNo || !items || items.length === 0) {
-      return { success: false, error: "সাপ্লায়ার, চালান নম্বর এবং কমপক্ষে একটি পণ্য আবশ্যক।" };
+      return {
+        success: false,
+        error: "সাপ্লায়ার, চালান নম্বর এবং কমপক্ষে একটি পণ্য আবশ্যক।",
+      };
     }
 
     // Check duplicate chalan number within store
     const existing = await prisma.purchase.findUnique({
-      where: { shopId_chalanNo: { shopId: user.shopId, chalanNo: cleanChalanNo } },
+      where: {
+        shopId_chalanNo: { shopId: user.shopId, chalanNo: cleanChalanNo },
+      },
     });
     if (existing) {
-      return { success: false, error: `চালান #${cleanChalanNo} ইতোমধ্যেই এই দোকানে বিদ্যমান।` };
+      return {
+        success: false,
+        error: `চালান #${cleanChalanNo} ইতোমধ্যেই এই দোকানে বিদ্যমান।`,
+      };
     }
 
     const supplier = await prisma.supplier.findFirst({
       where: { id: supplierId, shopId: user.shopId },
     });
-    if (!supplier) return { success: false, error: "সাপ্লায়ার খুঁজে পাওয়া যায়নি।" };
+    if (!supplier) {
+      return { success: false, error: "সাপ্লায়ার খুঁজে পাওয়া যায়নি।" };
+    }
 
-    // Calculate Chalan Totals
+    // Calculate Totals based on NET GOOD stock accepted
     let subtotal = 0;
     let totalQuantity = 0;
 
     for (const item of items) {
-      const qty = Number(item.quantity);
+      const billed = Number(item.billedQuantity ?? item.quantity);
+      const damaged = Number(item.damagedQuantity || 0);
+      const missing = Number(item.missingQuantity || 0);
+      const netQty = Math.max(0, billed - damaged - missing);
       const cost = Number(item.unitCost);
       const comm = Number(item.commission || 0);
 
-      if (qty <= 0 || cost <= 0) {
-        return { success: false, error: "পণ্যের পরিমাণ এবং ক্রয়মূল্য শূন্যের বেশি হতে হবে।" };
+      if (billed <= 0 || cost <= 0) {
+        return {
+          success: false,
+          error: "পণ্যের পরিমাণ এবং ক্রয়মূল্য শূন্যের বেশি হতে হবে।",
+        };
       }
 
-      subtotal += qty * cost - comm;
-      totalQuantity += qty;
+      subtotal += netQty * cost - comm;
+      totalQuantity += netQty;
     }
 
     const sDiscount = Math.max(0, Number(discount) || 0);
@@ -78,13 +100,9 @@ export async function createPurchaseAction(payload: CreatePurchasePayload) {
     const vatAmount = Math.round(((baseAmount * sVatPercent) / 100) * 100) / 100;
     const grandTotal = Math.round((baseAmount + sTransport + vatAmount) * 100) / 100;
 
-    // 🛡️ ACCURATE KHATA MATH (Fixed previous due explosion!)
     const previousDue = Number(supplier.currentDue || 0);
-    // Chalan-specific due (how much of this invoice remains unpaid)
     const chalanDue = Math.max(0, grandTotal - sPaidAmount);
-    // Status reflects this chalan
     const paymentStatus = chalanDue === 0 ? "PAID" : sPaidAmount > 0 ? "PARTIAL" : "DUE";
-    // Net delta that will be added/subtracted from supplier's overall balance
     const netKhataDelta = grandTotal - sPaidAmount;
 
     // 🚀 ATOMIC DATABASE TRANSACTION
@@ -93,6 +111,7 @@ export async function createPurchaseAction(payload: CreatePurchasePayload) {
       const purchase = await tx.purchase.create({
         data: {
           chalanNo: cleanChalanNo,
+          chalanImageUrl: chalanImageUrl || null,
           subtotal,
           totalQuantity,
           discount: sDiscount,
@@ -108,51 +127,66 @@ export async function createPurchaseAction(payload: CreatePurchasePayload) {
           paymentStatus,
           notes: notes || null,
           supplierId,
-          branchId: user.activeBranchId,
+          branchId: user.activeBranchId!,
           shopId: user.shopId,
         },
       });
 
-      // 2. Process Items: Increment ProductStock & Update Latest Cost
+      // 2. Process Line Items: Increment ProductStock Only for Good Items
       for (const item of items) {
         const comm = Number(item.commission || 0);
-        const lineTotal = item.quantity * item.unitCost - comm;
+        const billedQty = Number(item.billedQuantity ?? item.quantity);
+        const damagedQty = Number(item.damagedQuantity || 0);
+        const missingQty = Number(item.missingQuantity || 0);
+        const netGoodQty = Math.max(0, billedQty - damagedQty - missingQty);
+        const lineTotal = netGoodQty * item.unitCost - comm;
 
         await tx.purchaseItem.create({
           data: {
             purchaseId: purchase.id,
             productId: item.productId,
-            quantity: item.quantity,
+            quantity: netGoodQty,
+            billedQuantity: billedQty,
+            damagedQuantity: damagedQty,
+            missingQuantity: missingQty,
             unitCost: item.unitCost,
             commission: comm,
             lineTotal,
           },
         });
 
-        // Increment stock in ProductStock for active branch
-        await tx.productStock.upsert({
-          where: {
-            productId_branchId: {
-              productId: item.productId,
-              branchId: user.activeBranchId,
-            },
-          },
-          update: { quantity: { increment: item.quantity } },
-          create: {
-            productId: item.productId,
-            branchId: user.activeBranchId,
-            quantity: item.quantity,
-          },
-        });
+        // 🛡️ Atomically mark PO as CONVERTED so it cannot be converted twice
+if (fromPOId) {
+  await tx.purchaseOrder.update({
+    where: { id: fromPOId },
+    data: { status: "CONVERTED" },
+  });
+}
 
-        // Update product's latest purchase cost
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { purchasePrice: item.unitCost },
-        });
+        if (netGoodQty > 0) {
+          await tx.productStock.upsert({
+            where: {
+              productId_branchId: {
+                productId: item.productId,
+                branchId: user.activeBranchId!,
+              },
+            },
+            update: { quantity: { increment: netGoodQty } },
+            create: {
+              productId: item.productId,
+              branchId: user.activeBranchId!,
+              quantity: netGoodQty,
+            },
+          });
+
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { purchasePrice: item.unitCost },
+          });
+        }
       }
 
-      // 3. Record Supplier Payment Voucher
+      // 3. Record Payment Voucher if Money Paid
       if (sPaidAmount > 0) {
         await tx.supplierPayment.create({
           data: {
@@ -163,16 +197,18 @@ export async function createPurchaseAction(payload: CreatePurchasePayload) {
             note: `Payment for purchase chalan #${cleanChalanNo}`,
             supplierId,
             purchaseId: purchase.id,
-            branchId: user.activeBranchId,
+            branchId: user.activeBranchId!,
           },
         });
 
-        // 👈 DEDUCT CASH DRAWER / BANK ACCOUNT (Real Financial Sync)
+        // Deduct Cash Drawer / Bank Account
         const accountType = paymentMethod.toUpperCase();
         const paymentAccount = await tx.account.findFirst({
           where: {
-            branchId: user.activeBranchId,
-            type: ["CASH", "BANK", "BKASH", "NAGAD"].includes(accountType) ? (accountType as any) : "CASH",
+            branchId: user.activeBranchId!,
+            type: ["CASH", "BANK", "BKASH", "NAGAD"].includes(accountType)
+              ? (accountType as any)
+              : "CASH",
             status: "active",
           },
         });
@@ -185,7 +221,7 @@ export async function createPurchaseAction(payload: CreatePurchasePayload) {
         }
       }
 
-      // 4. Update Supplier Current Due (Accurate Net Khata Delta)
+      // 4. Update Supplier Khata Due
       await tx.supplier.update({
         where: { id: supplierId },
         data: { currentDue: { increment: netKhataDelta } },
@@ -201,7 +237,10 @@ export async function createPurchaseAction(payload: CreatePurchasePayload) {
     return { success: true };
   } catch (error: any) {
     console.error("Purchase creation error:", error);
-    return { success: false, error: error.message || "চালান এন্ট্রি সম্পন্ন করা সম্ভব হয়নি।" };
+    return {
+      success: false,
+      error: error.message || "চালান এন্ট্রি সম্পন্ন করা সম্ভব হয়নি।",
+    };
   }
 }
 
@@ -211,7 +250,7 @@ export async function createPurchaseAction(payload: CreatePurchasePayload) {
 export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.FINANCE_LOANS,
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
       requireActiveStatus: true,
     });
 
@@ -219,6 +258,7 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
       id,
       supplierId,
       chalanNo,
+      chalanImageUrl,
       paymentMethod = "cash",
       paidAmount = 0,
       discount = 0,
@@ -246,9 +286,14 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
     let subtotal = 0;
     let totalQuantity = 0;
     for (const item of items) {
+      const billed = Number(item.billedQuantity ?? item.quantity);
+      const damaged = Number(item.damagedQuantity || 0);
+      const missing = Number(item.missingQuantity || 0);
+      const netQty = Math.max(0, billed - damaged - missing);
       const comm = Number(item.commission || 0);
-      subtotal += item.quantity * item.unitCost - comm;
-      totalQuantity += item.quantity;
+
+      subtotal += netQty * item.unitCost - comm;
+      totalQuantity += netQty;
     }
 
     const sDiscount = Math.max(0, Number(discount) || 0);
@@ -263,16 +308,14 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
     const chalanDue = Math.max(0, grandTotal - sPaidAmount);
     const paymentStatus = chalanDue === 0 ? "PAID" : sPaidAmount > 0 ? "PARTIAL" : "DUE";
 
-    // 🛡️ Calculate exact difference between old and new purchase impact on supplier debt
     const oldNetImpact = Number(existingPurchase.grandTotal) - Number(existingPurchase.paidAmount);
     const newNetImpact = grandTotal - sPaidAmount;
     const netDueDelta = newNetImpact - oldNetImpact;
 
-    // Use original purchase branch to prevent cross-branch corruption
-    const purchaseBranchId = existingPurchase.branchId || user.activeBranchId;
+    const purchaseBranchId = existingPurchase.branchId || user.activeBranchId!;
 
     await prisma.$transaction(async (tx) => {
-      // 1. Rollback old stock using the original purchase branch
+      // 1. Rollback old stock using original purchase branch
       for (const oldItem of existingPurchase.items) {
         await tx.productStock.updateMany({
           where: { productId: oldItem.productId, branchId: purchaseBranchId },
@@ -283,41 +326,53 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
       // 2. Delete old items
       await tx.purchaseItem.deleteMany({ where: { purchaseId: id } });
 
-      // 3. Create updated items and apply new stock
+      // 3. Create updated items and apply new net stock
       for (const item of items) {
+        const billed = Number(item.billedQuantity ?? item.quantity);
+        const damaged = Number(item.damagedQuantity || 0);
+        const missing = Number(item.missingQuantity || 0);
+        const netGoodQty = Math.max(0, billed - damaged - missing);
         const comm = Number(item.commission || 0);
-        const lineTotal = item.quantity * item.unitCost - comm;
+        const lineTotal = netGoodQty * item.unitCost - comm;
 
         await tx.purchaseItem.create({
           data: {
             purchaseId: id,
             productId: item.productId,
-            quantity: item.quantity,
+            quantity: netGoodQty,
+            billedQuantity: billed,
+            damagedQuantity: damaged,
+            missingQuantity: missing,
             unitCost: item.unitCost,
             commission: comm,
             lineTotal,
           },
         });
 
-        await tx.productStock.upsert({
-          where: {
-            productId_branchId: { productId: item.productId, branchId: purchaseBranchId },
-          },
-          update: { quantity: { increment: item.quantity } },
-          create: {
-            productId: item.productId,
-            branchId: purchaseBranchId,
-            quantity: item.quantity,
-          },
-        });
+        if (netGoodQty > 0) {
+          await tx.productStock.upsert({
+            where: {
+              productId_branchId: {
+                productId: item.productId,
+                branchId: purchaseBranchId,
+              },
+            },
+            update: { quantity: { increment: netGoodQty } },
+            create: {
+              productId: item.productId,
+              branchId: purchaseBranchId,
+              quantity: netGoodQty,
+            },
+          });
 
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { purchasePrice: item.unitCost },
-        });
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { purchasePrice: item.unitCost },
+          });
+        }
       }
 
-      // 4. Update Supplier currentDue with the exact net delta
+      // 4. Update Supplier currentDue with exact net delta
       if (netDueDelta !== 0) {
         await tx.supplier.update({
           where: { id: supplierId },
@@ -331,6 +386,7 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
         data: {
           supplierId,
           chalanNo: chalanNo.trim(),
+          chalanImageUrl: chalanImageUrl || existingPurchase.chalanImageUrl,
           subtotal,
           totalQuantity,
           discount: sDiscount,
@@ -353,7 +409,10 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
     return { success: true };
   } catch (error: any) {
     console.error("Update purchase error:", error);
-    return { success: false, error: error.message || "চালান আপডেট ব্যর্থ হয়েছে।" };
+    return {
+      success: false,
+      error: error.message || "চালান আপডেট ব্যর্থ হয়েছে।",
+    };
   }
 }
 
@@ -363,13 +422,15 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
 export async function deletePurchaseAction(purchaseId: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.FINANCE_LOANS,
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
       requireActiveStatus: true,
     });
 
-    // Only OWNER can delete purchase chalans
     if (user.role !== "OWNER") {
-      return { success: false, error: "অনুমতি নেই: শুধুমাত্র দোকানের মালিক চালান মুছে ফেলতে পারেন।" };
+      return {
+        success: false,
+        error: "অনুমতি নেই: শুধুমাত্র দোকানের মালিক চালান মুছে ফেলতে পারেন।",
+      };
     }
 
     const purchase = await prisma.purchase.findFirst({
@@ -381,26 +442,27 @@ export async function deletePurchaseAction(purchaseId: string) {
       return { success: false, error: "চালান খুঁজে পাওয়া যায়নি।" };
     }
 
-    const purchaseBranchId = purchase.branchId || user.activeBranchId;
-    // Net debt left by this chalan that must be removed from supplier balance
+    const purchaseBranchId = purchase.branchId || user.activeBranchId!;
     const netDebtToRevert = Number(purchase.grandTotal) - Number(purchase.paidAmount);
     const paidToRevert = Number(purchase.paidAmount);
 
     await prisma.$transaction(async (tx) => {
-      // 1. Revert Branch Stock for every line item
+      // 1. Revert Branch Stock for every good line item
       for (const item of purchase.items) {
-        await tx.productStock.updateMany({
-          where: {
-            productId: item.productId,
-            branchId: purchaseBranchId,
-          },
-          data: {
-            quantity: { decrement: item.quantity },
-          },
-        });
+        if (Number(item.quantity) > 0) {
+          await tx.productStock.updateMany({
+            where: {
+              productId: item.productId,
+              branchId: purchaseBranchId,
+            },
+            data: {
+              quantity: { decrement: item.quantity },
+            },
+          });
+        }
       }
 
-      // 2. Revert Supplier Due (Bakir Khata)
+      // 2. Revert Supplier Due
       if (netDebtToRevert !== 0) {
         await tx.supplier.update({
           where: { id: purchase.supplierId },
@@ -431,6 +493,10 @@ export async function deletePurchaseAction(purchaseId: string) {
         where: { purchaseId: purchase.id },
       });
 
+      if (purchase.chalanImageUrl) {
+        await deleteUploadedFile(purchase.chalanImageUrl);
+      }
+
       await tx.purchase.delete({
         where: { id: purchase.id },
       });
@@ -443,6 +509,9 @@ export async function deletePurchaseAction(purchaseId: string) {
     return { success: true };
   } catch (error: any) {
     console.error("Delete purchase error:", error);
-    return { success: false, error: error.message || "চালান মুছে ফেলা সম্ভব হয়নি।" };
+    return {
+      success: false,
+      error: error.message || "চালান মুছে ফেলা সম্ভব হয়নি।",
+    };
   }
 }

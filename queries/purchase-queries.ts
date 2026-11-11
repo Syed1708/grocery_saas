@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { IPurchaseOrder } from "@/types";
 import { IPurchase } from "@/types/purchase";
 
 /**
@@ -81,5 +82,72 @@ export async function getPurchases(
       lineTotal: Number(item.lineTotal),
     })),
     createdAt: p.createdAt,
+  }));
+}
+
+export async function getPurchaseOrders(
+  shopId: string,
+  branchId?: string | null
+): Promise<IPurchaseOrder[]> {
+  const orders = await prisma.purchaseOrder.findMany({
+    where: {
+      shopId,
+      ...(branchId ? { branchId } : {}),
+    },
+    include: {
+      supplier: {
+        select: {
+          id: true,
+          name: true,
+          companyName: true,
+          phone: true,
+        },
+      },
+      branch: {
+        select: {
+          name: true,
+        },
+      },
+      items: {
+        include: {
+          product: {
+            select: {
+              name: true,
+              barcode: true,
+              unit: { select: { shortCode: true } },
+            },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+  });
+
+  return orders.map((o) => ({
+    id: o.id,
+    orderNo: o.orderNo,
+    orderDate: o.orderDate,
+    status: o.status as any,
+    totalItems: o.totalItems,
+    estimatedTotal: Number(o.estimatedTotal),
+    notes: o.notes,
+    supplierId: o.supplierId,
+    supplierName: o.supplier.name,
+    supplierCompany: o.supplier.companyName || "",
+    supplierPhone: o.supplier.phone || null,
+    branchName: o.branch?.name || "Main Branch",
+    createdAt: o.createdAt,
+    items: o.items.map((i) => ({
+      id: i.id,
+      productId: i.productId,
+      productName: i.product.name,
+      barcode: i.product.barcode,
+      unitCode: i.product.unit?.shortCode || "pcs",
+      currentStock: Number(i.currentStock),
+      quantity: Number(i.quantity),
+      unitCost: Number(i.unitCost),
+      lineTotal: Number(i.lineTotal),
+    })),
   }));
 }

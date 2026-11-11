@@ -314,6 +314,40 @@ export type EnumPaymentStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumPaymentStatusFilter<$PrismaModel>
 }
 
+export type EnumPurchaseOrderStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.PurchaseOrderStatus | Prisma.EnumPurchaseOrderStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PurchaseOrderStatus[]
+  notIn?: $Enums.PurchaseOrderStatus[]
+  not?: Prisma.NestedEnumPurchaseOrderStatusFilter<$PrismaModel> | $Enums.PurchaseOrderStatus
+}
+
+export type EnumPurchaseOrderStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PurchaseOrderStatus | Prisma.EnumPurchaseOrderStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PurchaseOrderStatus[]
+  notIn?: $Enums.PurchaseOrderStatus[]
+  not?: Prisma.NestedEnumPurchaseOrderStatusWithAggregatesFilter<$PrismaModel> | $Enums.PurchaseOrderStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPurchaseOrderStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPurchaseOrderStatusFilter<$PrismaModel>
+}
+
+export type EnumReturnSettlementTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.ReturnSettlementType | Prisma.EnumReturnSettlementTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ReturnSettlementType[]
+  notIn?: $Enums.ReturnSettlementType[]
+  not?: Prisma.NestedEnumReturnSettlementTypeFilter<$PrismaModel> | $Enums.ReturnSettlementType
+}
+
+export type EnumReturnSettlementTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ReturnSettlementType | Prisma.EnumReturnSettlementTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ReturnSettlementType[]
+  notIn?: $Enums.ReturnSettlementType[]
+  not?: Prisma.NestedEnumReturnSettlementTypeWithAggregatesFilter<$PrismaModel> | $Enums.ReturnSettlementType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumReturnSettlementTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumReturnSettlementTypeFilter<$PrismaModel>
+}
+
 export type EnumCustomerTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.CustomerType | Prisma.EnumCustomerTypeFieldRefInput<$PrismaModel>
   in?: $Enums.CustomerType[]
@@ -857,6 +891,40 @@ export type NestedEnumPaymentStatusWithAggregatesFilter<$PrismaModel = never> = 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumPaymentStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumPaymentStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumPurchaseOrderStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.PurchaseOrderStatus | Prisma.EnumPurchaseOrderStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PurchaseOrderStatus[]
+  notIn?: $Enums.PurchaseOrderStatus[]
+  not?: Prisma.NestedEnumPurchaseOrderStatusFilter<$PrismaModel> | $Enums.PurchaseOrderStatus
+}
+
+export type NestedEnumPurchaseOrderStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PurchaseOrderStatus | Prisma.EnumPurchaseOrderStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PurchaseOrderStatus[]
+  notIn?: $Enums.PurchaseOrderStatus[]
+  not?: Prisma.NestedEnumPurchaseOrderStatusWithAggregatesFilter<$PrismaModel> | $Enums.PurchaseOrderStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPurchaseOrderStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPurchaseOrderStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumReturnSettlementTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.ReturnSettlementType | Prisma.EnumReturnSettlementTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ReturnSettlementType[]
+  notIn?: $Enums.ReturnSettlementType[]
+  not?: Prisma.NestedEnumReturnSettlementTypeFilter<$PrismaModel> | $Enums.ReturnSettlementType
+}
+
+export type NestedEnumReturnSettlementTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ReturnSettlementType | Prisma.EnumReturnSettlementTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ReturnSettlementType[]
+  notIn?: $Enums.ReturnSettlementType[]
+  not?: Prisma.NestedEnumReturnSettlementTypeWithAggregatesFilter<$PrismaModel> | $Enums.ReturnSettlementType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumReturnSettlementTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumReturnSettlementTypeFilter<$PrismaModel>
 }
 
 export type NestedEnumCustomerTypeFilter<$PrismaModel = never> = {

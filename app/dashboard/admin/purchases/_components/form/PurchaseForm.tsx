@@ -9,6 +9,7 @@ import { usePurchaseForm } from "./usePurchaseForm";
 import SupplierPicker from "./SupplierPicker";
 import PurchaseItemsTable from "./PurchaseItemsTable";
 import PurchaseSummaryCard from "./PurchaseSummaryCard";
+import ChalanPhotoUploader from "./ChalanPhotoUploader";
 
 interface Props {
   mode?: "create" | "edit";
@@ -132,6 +133,11 @@ export default function PurchaseForm({
 
         {/* 2. Barcode Gun Scanner & Supplier Scope Chip */}
         <div className="bg-blue-50/50 dark:bg-blue-950/20 border-2 border-dashed border-blue-400 dark:border-blue-600 rounded-2xl p-4 shadow-xs space-y-3">
+
+          <ChalanPhotoUploader
+            imageUrl={form.chalanImageUrl}
+            onImageChange={form.setChalanImageUrl}
+          />
           {/* Supplier Focus Indicator & Override Toggle */}
           {form.selectedSupplier && (
             <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-blue-200/60 dark:border-blue-900/60 text-xs">
@@ -147,8 +153,8 @@ export default function PurchaseForm({
                 type="button"
                 onClick={() => form.setFilterBySupplier(!form.filterBySupplier)}
                 className={`px-3 py-1 rounded-full text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${form.filterBySupplier
-                    ? "bg-blue-600 text-white shadow-xs"
-                    : "bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-300"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-300"
                   }`}
               >
                 {form.filterBySupplier ? (

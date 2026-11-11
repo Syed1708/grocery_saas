@@ -3,10 +3,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Receipt, Truck, DollarSign, Plus, PackagePlus } from "lucide-react";
+import { Receipt, Truck, DollarSign, Plus, PackagePlus, RotateCcw, MessageCircle, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
-import FormModal from "@/components/common/FormModal";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 // Modular Tabs
@@ -31,26 +30,37 @@ import {
   deleteSupplierAction,
 } from "@/app/actions/supplier-actions";
 import { IPurchase } from "@/types/purchase";
-import { ISupplier } from "@/types";
-import { Input } from "@/components/common/ui/Input";
+import { IPurchaseOrder, ISupplier } from "@/types";
 import SupplierModal from "./modals/SupplierModal";
+import { IPurchaseReturn } from "@/types/purchase-return";
+import ReturnsTab from "./tabs/returnsTab";
+import { PurchaseReturnPrint } from "./print/purchase-return-print";
+import SROrderModal from "./modals/SROrderModal";
+import OrdersTab from "./tabs/OrdersTab";
 
 interface PurchasesClientProps {
   purchases: IPurchase[];
   suppliers: ISupplier[];
+  returns?: IPurchaseReturn[];
+  orders?: IPurchaseOrder[];
   currencySymbol?: string;
   shopName?: string;
   userRole?: string;
 }
 
+
+
+
 export default function PurchasesClient({
   purchases = [],
   suppliers = [],
+  returns = [],
+  orders = [],
   currencySymbol = "৳",
   shopName = "Grocery Store",
   userRole = "OWNER",
 }: PurchasesClientProps) {
-  const [activeTab, setActiveTab] = useState<"invoices" | "suppliers" | "dues">("invoices");
+  const [activeTab, setActiveTab] = useState<"invoices" | "suppliers" | "dues" | "returns" | "orders">("invoices");
   const [loading, setLoading] = useState(false);
 
   // Modal Targets
@@ -63,29 +73,44 @@ export default function PurchasesClient({
   const [editingSupplier, setEditingSupplier] = useState<ISupplier | null>(null);
   const [deleteSupplierTarget, setDeleteSupplierTarget] = useState<ISupplier | null>(null);
 
+  const [srOrderModalOpen, setSrOrderModalOpen] = useState(false);
+
   // Print Targets
   const [printChalan, setPrintChalan] = useState<IPurchase | null>(null);
   const [printVoucher, setPrintVoucher] = useState<any | null>(null);
 
-const [printFormat, setPrintFormat] = useState<"80mm" | "58mm" | "a4">("80mm");
+  const [printFormat, setPrintFormat] = useState<"80mm" | "58mm" | "a4">("80mm");
 
-const handlePrintInvoice = (inv: IPurchase, format: "80mm" | "58mm" | "a4" = "80mm") => {
+
+  // 2. Add print state alongside your existing printChalan
+  const [printReturn, setPrintReturn] = useState<IPurchaseReturn | null>(null);
+
+  const handlePrintReturn = (ret: IPurchaseReturn, format: "80mm" | "58mm" | "a4" = "80mm") => {
+    setPrintChalan(null);
+    setPrintVoucher(null);
+    setPrintFormat(format);
+    setPrintReturn(ret);
+    requestAnimationFrame(() => {
+      setTimeout(() => window.print(), 80);
+    });
+  };
+  const handlePrintInvoice = (inv: IPurchase, format: "80mm" | "58mm" | "a4" = "80mm") => {
     setPrintVoucher(null); // 👈 Clear any existing voucher!
-  setPrintFormat(format);
-  setPrintChalan(inv);
-  requestAnimationFrame(() => {
-    setTimeout(() => window.print(), 80);
-  });
-};
+    setPrintFormat(format);
+    setPrintChalan(inv);
+    requestAnimationFrame(() => {
+      setTimeout(() => window.print(), 80);
+    });
+  };
 
-const handlePrintVoucher = (details: any, format: "80mm" | "58mm" | "a4" = "80mm") => {
-    setPrintChalan(null); // 👈 Clear any existing chalan!
-  setPrintFormat(format);
-  setPrintVoucher(details);
-  requestAnimationFrame(() => {
-    setTimeout(() => window.print(), 80);
-  });
-};
+  const handlePrintVoucher = (details: any, format: "80mm" | "58mm" | "a4" = "80mm") => {
+    setPrintChalan(null);
+    setPrintFormat(format);
+    setPrintVoucher(details);
+    requestAnimationFrame(() => {
+      setTimeout(() => window.print(), 80);
+    });
+  };
 
   // Delete Purchase Action (Owner Only)
   async function handleDeletePurchaseConfirm() {
@@ -136,7 +161,7 @@ const handlePrintVoucher = (details: any, format: "80mm" | "58mm" | "a4" = "80mm
     }
   }
 
-  
+
 
   return (
     <div className="space-y-6">
@@ -149,8 +174,8 @@ const handlePrintVoucher = (details: any, format: "80mm" | "58mm" | "a4" = "80mm
             type="button"
             onClick={() => setActiveTab("invoices")}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${activeTab === "invoices"
-                ? "bg-blue-600 text-white shadow-xs"
-                : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
+              ? "bg-blue-600 text-white shadow-xs"
+              : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
               }`}
           >
             <Receipt size={14} /> ক্রয় চালান সমূহ ({purchases.length})
@@ -160,8 +185,8 @@ const handlePrintVoucher = (details: any, format: "80mm" | "58mm" | "a4" = "80mm
             type="button"
             onClick={() => setActiveTab("suppliers")}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${activeTab === "suppliers"
-                ? "bg-blue-600 text-white shadow-xs"
-                : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
+              ? "bg-blue-600 text-white shadow-xs"
+              : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
               }`}
           >
             <Truck size={14} /> সরবরাহকারী তালিকা ({suppliers.length})
@@ -171,22 +196,47 @@ const handlePrintVoucher = (details: any, format: "80mm" | "58mm" | "a4" = "80mm
             type="button"
             onClick={() => setActiveTab("dues")}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${activeTab === "dues"
+              ? "bg-blue-600 text-white shadow-xs"
+              : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
+              }`}
+          >
+            <DollarSign size={14} /> মহাজনের দেনা (বাকির খাতা)
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("returns")}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${activeTab === "returns"
+              ? "bg-blue-600 text-white shadow-xs"
+              : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
+              }`}
+          >
+            <RotateCcw size={14} /> পণ্য ফেরত / ডেবিট নোট ({returns.length})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("orders")}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${activeTab === "orders"
                 ? "bg-blue-600 text-white shadow-xs"
                 : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
               }`}
           >
-            <DollarSign size={14} /> মহাজনের দেনা (বাকির খাতা)
+            <ClipboardList size={14} /> ড্রাফট অর্ডার / PO ({orders.length})
           </button>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           {activeTab === "invoices" && (
-            <Link
-              href="/dashboard/admin/purchases/create"
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition"
-            >
-              <PackagePlus size={16} /> নতুন ক্রয় চালান (New Stock-In)
-            </Link>
+            <>
+              <Link
+                href="/dashboard/admin/purchases/create"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition"
+              >
+                <PackagePlus size={16} /> নতুন ক্রয় চালান (New Stock-In)
+              </Link>
+
+            </>
           )}
 
           {activeTab === "suppliers" && (
@@ -201,8 +251,30 @@ const handlePrintVoucher = (details: any, format: "80mm" | "58mm" | "a4" = "80mm
               <Plus size={16} /> নতুন সাপ্লায়ার যোগ
             </button>
           )}
+
+          {activeTab === "returns" && (
+            <Link
+              href="/dashboard/admin/purchases/returns/create"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition"
+            >
+              <RotateCcw size={16} /> নতুন পণ্য ফেরত (New Return)
+            </Link>
+          )}
+          {activeTab === "orders" && (
+
+            <button
+              type="button"
+              onClick={() => setSrOrderModalOpen(true)}
+              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer"
+            >
+              <MessageCircle size={15} /> এসআর ডিমান্ড শিট (SR Order)
+            </button>
+          )}
+
         </div>
       </div>
+
+
 
       {/* 1. Invoices Tab */}
       {activeTab === "invoices" && (
@@ -237,6 +309,24 @@ const handlePrintVoucher = (details: any, format: "80mm" | "58mm" | "a4" = "80mm
           currencySymbol={currencySymbol}
           onPay={(s) => setActiveSupplierForPayment(s)}
           onHistory={(s) => setActiveSupplierForHistory(s)}
+        />
+      )}
+
+      {/* 4. Stock Returns / Debit Notes Tab */}
+      {activeTab === "returns" && (
+        <ReturnsTab
+          returns={returns}
+          currencySymbol={currencySymbol}
+          onPrint={handlePrintReturn}
+        />
+      )}
+
+      {/* 5. Draft Orders / Purchase Orders Tab */}
+      {activeTab === "orders" && (
+        <OrdersTab
+          orders={orders}
+          currencySymbol={currencySymbol}
+          shopName={shopName}
         />
       )}
 
@@ -290,6 +380,13 @@ const handlePrintVoucher = (details: any, format: "80mm" | "58mm" | "a4" = "80mm
         loading={loading}
         currencySymbol={currencySymbol}
       />
+      <SROrderModal
+        isOpen={srOrderModalOpen}
+        onClose={() => setSrOrderModalOpen(false)}
+        suppliers={suppliers}
+        shopName={shopName}
+        currencySymbol={currencySymbol}
+      />
 
       {/* Confirmation Dialog: Delete Purchase */}
       <ConfirmDialog
@@ -326,6 +423,18 @@ const handlePrintVoucher = (details: any, format: "80mm" | "58mm" | "a4" = "80mm
         currencySymbol={currencySymbol}
         format={printFormat}
       />
+
+      {/* Printable Return Chalan Voucher */}
+      <PurchaseReturnPrint
+        data={printReturn}
+        shopName={shopName}
+        currencySymbol={currencySymbol}
+        format={printFormat}
+      />
+
+
     </div>
+
+
   );
 }

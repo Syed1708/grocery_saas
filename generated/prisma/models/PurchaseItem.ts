@@ -28,6 +28,9 @@ export type AggregatePurchaseItem = {
 
 export type PurchaseItemAvgAggregateOutputType = {
   quantity: runtime.Decimal | null
+  billedQuantity: runtime.Decimal | null
+  damagedQuantity: runtime.Decimal | null
+  missingQuantity: runtime.Decimal | null
   unitCost: runtime.Decimal | null
   commission: runtime.Decimal | null
   lineTotal: runtime.Decimal | null
@@ -35,6 +38,9 @@ export type PurchaseItemAvgAggregateOutputType = {
 
 export type PurchaseItemSumAggregateOutputType = {
   quantity: runtime.Decimal | null
+  billedQuantity: runtime.Decimal | null
+  damagedQuantity: runtime.Decimal | null
+  missingQuantity: runtime.Decimal | null
   unitCost: runtime.Decimal | null
   commission: runtime.Decimal | null
   lineTotal: runtime.Decimal | null
@@ -43,6 +49,9 @@ export type PurchaseItemSumAggregateOutputType = {
 export type PurchaseItemMinAggregateOutputType = {
   id: string | null
   quantity: runtime.Decimal | null
+  billedQuantity: runtime.Decimal | null
+  damagedQuantity: runtime.Decimal | null
+  missingQuantity: runtime.Decimal | null
   unitCost: runtime.Decimal | null
   commission: runtime.Decimal | null
   lineTotal: runtime.Decimal | null
@@ -55,6 +64,9 @@ export type PurchaseItemMinAggregateOutputType = {
 export type PurchaseItemMaxAggregateOutputType = {
   id: string | null
   quantity: runtime.Decimal | null
+  billedQuantity: runtime.Decimal | null
+  damagedQuantity: runtime.Decimal | null
+  missingQuantity: runtime.Decimal | null
   unitCost: runtime.Decimal | null
   commission: runtime.Decimal | null
   lineTotal: runtime.Decimal | null
@@ -67,6 +79,9 @@ export type PurchaseItemMaxAggregateOutputType = {
 export type PurchaseItemCountAggregateOutputType = {
   id: number
   quantity: number
+  billedQuantity: number
+  damagedQuantity: number
+  missingQuantity: number
   unitCost: number
   commission: number
   lineTotal: number
@@ -80,6 +95,9 @@ export type PurchaseItemCountAggregateOutputType = {
 
 export type PurchaseItemAvgAggregateInputType = {
   quantity?: true
+  billedQuantity?: true
+  damagedQuantity?: true
+  missingQuantity?: true
   unitCost?: true
   commission?: true
   lineTotal?: true
@@ -87,6 +105,9 @@ export type PurchaseItemAvgAggregateInputType = {
 
 export type PurchaseItemSumAggregateInputType = {
   quantity?: true
+  billedQuantity?: true
+  damagedQuantity?: true
+  missingQuantity?: true
   unitCost?: true
   commission?: true
   lineTotal?: true
@@ -95,6 +116,9 @@ export type PurchaseItemSumAggregateInputType = {
 export type PurchaseItemMinAggregateInputType = {
   id?: true
   quantity?: true
+  billedQuantity?: true
+  damagedQuantity?: true
+  missingQuantity?: true
   unitCost?: true
   commission?: true
   lineTotal?: true
@@ -107,6 +131,9 @@ export type PurchaseItemMinAggregateInputType = {
 export type PurchaseItemMaxAggregateInputType = {
   id?: true
   quantity?: true
+  billedQuantity?: true
+  damagedQuantity?: true
+  missingQuantity?: true
   unitCost?: true
   commission?: true
   lineTotal?: true
@@ -119,6 +146,9 @@ export type PurchaseItemMaxAggregateInputType = {
 export type PurchaseItemCountAggregateInputType = {
   id?: true
   quantity?: true
+  billedQuantity?: true
+  damagedQuantity?: true
+  missingQuantity?: true
   unitCost?: true
   commission?: true
   lineTotal?: true
@@ -218,6 +248,9 @@ export type PurchaseItemGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type PurchaseItemGroupByOutputType = {
   id: string
   quantity: runtime.Decimal
+  billedQuantity: runtime.Decimal
+  damagedQuantity: runtime.Decimal
+  missingQuantity: runtime.Decimal
   unitCost: runtime.Decimal
   commission: runtime.Decimal
   lineTotal: runtime.Decimal
@@ -253,6 +286,9 @@ export type PurchaseItemWhereInput = {
   NOT?: Prisma.PurchaseItemWhereInput | Prisma.PurchaseItemWhereInput[]
   id?: Prisma.StringFilter<"PurchaseItem"> | string
   quantity?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -268,6 +304,9 @@ export type PurchaseItemWhereInput = {
 export type PurchaseItemOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  billedQuantity?: Prisma.SortOrder
+  damagedQuantity?: Prisma.SortOrder
+  missingQuantity?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
@@ -287,6 +326,9 @@ export type PurchaseItemWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.PurchaseItemWhereInput[]
   NOT?: Prisma.PurchaseItemWhereInput | Prisma.PurchaseItemWhereInput[]
   quantity?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -302,6 +344,9 @@ export type PurchaseItemWhereUniqueInput = Prisma.AtLeast<{
 export type PurchaseItemOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  billedQuantity?: Prisma.SortOrder
+  damagedQuantity?: Prisma.SortOrder
+  missingQuantity?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
@@ -322,6 +367,9 @@ export type PurchaseItemScalarWhereWithAggregatesInput = {
   NOT?: Prisma.PurchaseItemScalarWhereWithAggregatesInput | Prisma.PurchaseItemScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"PurchaseItem"> | string
   quantity?: Prisma.DecimalWithAggregatesFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalWithAggregatesFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalWithAggregatesFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalWithAggregatesFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalWithAggregatesFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalWithAggregatesFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalWithAggregatesFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -334,6 +382,9 @@ export type PurchaseItemScalarWhereWithAggregatesInput = {
 export type PurchaseItemCreateInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -346,6 +397,9 @@ export type PurchaseItemCreateInput = {
 export type PurchaseItemUncheckedCreateInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -358,6 +412,9 @@ export type PurchaseItemUncheckedCreateInput = {
 export type PurchaseItemUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -370,6 +427,9 @@ export type PurchaseItemUpdateInput = {
 export type PurchaseItemUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -382,6 +442,9 @@ export type PurchaseItemUncheckedUpdateInput = {
 export type PurchaseItemCreateManyInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -394,6 +457,9 @@ export type PurchaseItemCreateManyInput = {
 export type PurchaseItemUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -403,6 +469,9 @@ export type PurchaseItemUpdateManyMutationInput = {
 export type PurchaseItemUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -431,6 +500,9 @@ export type PurchaseItemOrderByRelevanceInput = {
 export type PurchaseItemCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  billedQuantity?: Prisma.SortOrder
+  damagedQuantity?: Prisma.SortOrder
+  missingQuantity?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
@@ -442,6 +514,9 @@ export type PurchaseItemCountOrderByAggregateInput = {
 
 export type PurchaseItemAvgOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
+  billedQuantity?: Prisma.SortOrder
+  damagedQuantity?: Prisma.SortOrder
+  missingQuantity?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
@@ -450,6 +525,9 @@ export type PurchaseItemAvgOrderByAggregateInput = {
 export type PurchaseItemMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  billedQuantity?: Prisma.SortOrder
+  damagedQuantity?: Prisma.SortOrder
+  missingQuantity?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
@@ -462,6 +540,9 @@ export type PurchaseItemMaxOrderByAggregateInput = {
 export type PurchaseItemMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  billedQuantity?: Prisma.SortOrder
+  damagedQuantity?: Prisma.SortOrder
+  missingQuantity?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
@@ -473,6 +554,9 @@ export type PurchaseItemMinOrderByAggregateInput = {
 
 export type PurchaseItemSumOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
+  billedQuantity?: Prisma.SortOrder
+  damagedQuantity?: Prisma.SortOrder
+  missingQuantity?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
   commission?: Prisma.SortOrder
   lineTotal?: Prisma.SortOrder
@@ -607,6 +691,9 @@ export type PurchaseItemUncheckedUpdateManyWithoutPurchaseNestedInput = {
 export type PurchaseItemCreateWithoutUnitInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -618,6 +705,9 @@ export type PurchaseItemCreateWithoutUnitInput = {
 export type PurchaseItemUncheckedCreateWithoutUnitInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -658,6 +748,9 @@ export type PurchaseItemScalarWhereInput = {
   NOT?: Prisma.PurchaseItemScalarWhereInput | Prisma.PurchaseItemScalarWhereInput[]
   id?: Prisma.StringFilter<"PurchaseItem"> | string
   quantity?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFilter<"PurchaseItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -670,6 +763,9 @@ export type PurchaseItemScalarWhereInput = {
 export type PurchaseItemCreateWithoutProductInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -681,6 +777,9 @@ export type PurchaseItemCreateWithoutProductInput = {
 export type PurchaseItemUncheckedCreateWithoutProductInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -718,6 +817,9 @@ export type PurchaseItemUpdateManyWithWhereWithoutProductInput = {
 export type PurchaseItemCreateWithoutPurchaseInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -729,6 +831,9 @@ export type PurchaseItemCreateWithoutPurchaseInput = {
 export type PurchaseItemUncheckedCreateWithoutPurchaseInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -766,6 +871,9 @@ export type PurchaseItemUpdateManyWithWhereWithoutPurchaseInput = {
 export type PurchaseItemCreateManyUnitInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -777,6 +885,9 @@ export type PurchaseItemCreateManyUnitInput = {
 export type PurchaseItemUpdateWithoutUnitInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -788,6 +899,9 @@ export type PurchaseItemUpdateWithoutUnitInput = {
 export type PurchaseItemUncheckedUpdateWithoutUnitInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -799,6 +913,9 @@ export type PurchaseItemUncheckedUpdateWithoutUnitInput = {
 export type PurchaseItemUncheckedUpdateManyWithoutUnitInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -810,6 +927,9 @@ export type PurchaseItemUncheckedUpdateManyWithoutUnitInput = {
 export type PurchaseItemCreateManyProductInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -821,6 +941,9 @@ export type PurchaseItemCreateManyProductInput = {
 export type PurchaseItemUpdateWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -832,6 +955,9 @@ export type PurchaseItemUpdateWithoutProductInput = {
 export type PurchaseItemUncheckedUpdateWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -843,6 +969,9 @@ export type PurchaseItemUncheckedUpdateWithoutProductInput = {
 export type PurchaseItemUncheckedUpdateManyWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -854,6 +983,9 @@ export type PurchaseItemUncheckedUpdateManyWithoutProductInput = {
 export type PurchaseItemCreateManyPurchaseInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -865,6 +997,9 @@ export type PurchaseItemCreateManyPurchaseInput = {
 export type PurchaseItemUpdateWithoutPurchaseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -876,6 +1011,9 @@ export type PurchaseItemUpdateWithoutPurchaseInput = {
 export type PurchaseItemUncheckedUpdateWithoutPurchaseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -887,6 +1025,9 @@ export type PurchaseItemUncheckedUpdateWithoutPurchaseInput = {
 export type PurchaseItemUncheckedUpdateManyWithoutPurchaseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  billedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  damagedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  missingQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   lineTotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -900,6 +1041,9 @@ export type PurchaseItemUncheckedUpdateManyWithoutPurchaseInput = {
 export type PurchaseItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   quantity?: boolean
+  billedQuantity?: boolean
+  damagedQuantity?: boolean
+  missingQuantity?: boolean
   unitCost?: boolean
   commission?: boolean
   lineTotal?: boolean
@@ -917,6 +1061,9 @@ export type PurchaseItemSelect<ExtArgs extends runtime.Types.Extensions.Internal
 export type PurchaseItemSelectScalar = {
   id?: boolean
   quantity?: boolean
+  billedQuantity?: boolean
+  damagedQuantity?: boolean
+  missingQuantity?: boolean
   unitCost?: boolean
   commission?: boolean
   lineTotal?: boolean
@@ -926,7 +1073,7 @@ export type PurchaseItemSelectScalar = {
   createdAt?: boolean
 }
 
-export type PurchaseItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "quantity" | "unitCost" | "commission" | "lineTotal" | "purchaseId" | "productId" | "unitId" | "createdAt", ExtArgs["result"]["purchaseItem"]>
+export type PurchaseItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "quantity" | "billedQuantity" | "damagedQuantity" | "missingQuantity" | "unitCost" | "commission" | "lineTotal" | "purchaseId" | "productId" | "unitId" | "createdAt", ExtArgs["result"]["purchaseItem"]>
 export type PurchaseItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchase?: boolean | Prisma.PurchaseDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
@@ -943,6 +1090,9 @@ export type $PurchaseItemPayload<ExtArgs extends runtime.Types.Extensions.Intern
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     quantity: runtime.Decimal
+    billedQuantity: runtime.Decimal
+    damagedQuantity: runtime.Decimal
+    missingQuantity: runtime.Decimal
     unitCost: runtime.Decimal
     commission: runtime.Decimal
     lineTotal: runtime.Decimal
@@ -1324,6 +1474,9 @@ export interface Prisma__PurchaseItemClient<T, Null = never, ExtArgs extends run
 export interface PurchaseItemFieldRefs {
   readonly id: Prisma.FieldRef<"PurchaseItem", 'String'>
   readonly quantity: Prisma.FieldRef<"PurchaseItem", 'Decimal'>
+  readonly billedQuantity: Prisma.FieldRef<"PurchaseItem", 'Decimal'>
+  readonly damagedQuantity: Prisma.FieldRef<"PurchaseItem", 'Decimal'>
+  readonly missingQuantity: Prisma.FieldRef<"PurchaseItem", 'Decimal'>
   readonly unitCost: Prisma.FieldRef<"PurchaseItem", 'Decimal'>
   readonly commission: Prisma.FieldRef<"PurchaseItem", 'Decimal'>
   readonly lineTotal: Prisma.FieldRef<"PurchaseItem", 'Decimal'>

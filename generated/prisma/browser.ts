@@ -83,10 +83,30 @@ export type Purchase = Prisma.PurchaseModel
  */
 export type PurchaseItem = Prisma.PurchaseItemModel
 /**
+ * Model PurchaseOrder
+ * 
+ */
+export type PurchaseOrder = Prisma.PurchaseOrderModel
+/**
+ * Model PurchaseOrderItem
+ * 
+ */
+export type PurchaseOrderItem = Prisma.PurchaseOrderItemModel
+/**
  * Model SupplierPayment
  * 
  */
 export type SupplierPayment = Prisma.SupplierPaymentModel
+/**
+ * Model PurchaseReturn
+ * 
+ */
+export type PurchaseReturn = Prisma.PurchaseReturnModel
+/**
+ * Model PurchaseReturnItem
+ * 
+ */
+export type PurchaseReturnItem = Prisma.PurchaseReturnItemModel
 /**
  * Model Customer
  * 

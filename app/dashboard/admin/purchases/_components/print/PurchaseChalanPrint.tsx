@@ -29,6 +29,11 @@ export default function PurchaseChalanPrint({
   const thermalWidth = is80mm ? "78mm" : "56mm";
   const paperWidth = is80mm ? "80mm" : is58mm ? "58mm" : "A4";
 
+  // Check if any items had damage or missing stock at gate
+  const hasGateDiscrepancies = invoice.items.some(
+    (i) => Number(i.damagedQuantity || 0) > 0 || Number(i.missingQuantity || 0) > 0
+  );
+
   return (
     <>
       {/* Dynamic Print CSS Engine */}
@@ -125,42 +130,61 @@ export default function PurchaseChalanPrint({
                 <tr className="bg-neutral-100 border-y border-neutral-300 font-bold text-neutral-700">
                   <th className="py-2.5 px-3 w-12 text-center">#</th>
                   <th className="py-2.5 px-3">পণ্যের বিবরণ (Item)</th>
-                  <th className="py-2.5 px-3 text-center w-24">পরিমাণ (Qty)</th>
+                  <th className="py-2.5 px-3 text-center w-28">পরিমাণ (Qty)</th>
                   <th className="py-2.5 px-3 text-right w-28">ক্রয় দর (Rate)</th>
                   <th className="py-2.5 px-3 text-right w-24">কমিশন</th>
                   <th className="py-2.5 px-3 text-right w-32">মোট মূল্য</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-200">
-                {invoice.items.map((it, idx) => (
-                  <tr key={it.id || idx}>
-                    <td className="py-2.5 px-3 text-center text-neutral-400 font-mono">{idx + 1}</td>
-                    <td className="py-2.5 px-3">
-                      <strong className="text-neutral-900 block font-semibold">{it.productName}</strong>
-                      {it.barcode && <span className="text-[10px] text-neutral-400 font-mono">({it.barcode})</span>}
-                    </td>
-                    <td className="py-2.5 px-3 text-center font-mono font-bold">
-                      {it.quantity} {it.unitCode || "pcs"}
-                    </td>
-                    <td className="py-2.5 px-3 text-right font-mono">
-                      {currencySymbol}{it.unitCost.toFixed(2)}
-                    </td>
-                    <td className="py-2.5 px-3 text-right font-mono text-neutral-500">
-                      {it.commission > 0 ? `-${currencySymbol}${it.commission.toFixed(2)}` : "-"}
-                    </td>
-                    <td className="py-2.5 px-3 text-right font-mono font-bold text-neutral-900">
-                      {currencySymbol}{it.lineTotal.toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
+                {invoice.items.map((it, idx) => {
+                  const billed = Number(it.billedQuantity ?? it.quantity);
+                  const damaged = Number(it.damagedQuantity || 0);
+                  const missing = Number(it.missingQuantity || 0);
+                  const rejected = damaged + missing;
+
+                  return (
+                    <tr key={it.id || idx}>
+                      <td className="py-2.5 px-3 text-center text-neutral-400 font-mono">{idx + 1}</td>
+                      <td className="py-2.5 px-3">
+                        <strong className="text-neutral-900 block font-semibold">{it.productName}</strong>
+                        {it.barcode && <span className="text-[10px] text-neutral-400 font-mono">({it.barcode})</span>}
+                        {rejected > 0 && (
+                          <span className="text-[10px] text-red-600 font-mono block mt-0.5">
+                            * চালান: {billed} টি | বাদ: {rejected} টি ({damaged > 0 ? `${damaged} নষ্ট` : ""}{damaged > 0 && missing > 0 ? ", " : ""}{missing > 0 ? `${missing} শর্ট` : ""})
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3 text-center font-mono font-bold">
+                        {it.quantity} {it.unitCode || "pcs"}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono">
+                        {currencySymbol}{it.unitCost.toFixed(2)}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono text-neutral-500">
+                        {Number(it.commission || 0) > 0 ? `-${currencySymbol}${Number(it.commission).toFixed(2)}` : "-"}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono font-bold text-neutral-900">
+                        {currencySymbol}{it.lineTotal.toFixed(2)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
 
             {/* Calculations Grid */}
             <div className="flex justify-between items-start pt-2">
-              <div className="w-1/2 p-3 bg-neutral-50 rounded-xl text-xs space-y-1">
-                <span className="font-bold block text-neutral-700">বিশেষ মন্তব্য / নোট:</span>
-                <p className="text-neutral-600 italic">{invoice.notes || "কোনো বিশেষ মন্তব্য নেই।"}</p>
+              <div className="w-1/2 space-y-2">
+                <div className="p-3 bg-neutral-50 rounded-xl text-xs space-y-1">
+                  <span className="font-bold block text-neutral-700">বিশেষ মন্তব্য / নোট:</span>
+                  <p className="text-neutral-600 italic">{invoice.notes || "কোনো বিশেষ মন্তব্য নেই।"}</p>
+                </div>
+                {hasGateDiscrepancies && (
+                  <div className="p-2 border border-dashed border-red-300 bg-red-50/50 rounded-xl text-[11px] text-red-700">
+                    * ডেলিভারির সময় নষ্ট/শর্ট হওয়া পণ্য বাদ দিয়ে কেবল গৃহীত ভালো পণ্যের বিল হিসাব করা হয়েছে।
+                  </div>
+                )}
               </div>
 
               <div className="w-80 space-y-1.5 text-xs font-mono">
@@ -207,7 +231,9 @@ export default function PurchaseChalanPrint({
                 <div className="border-t-2 border-neutral-900 pt-1.5 font-bold">মাল গ্রহণকারীর স্বাক্ষর ও সিল (Store Inward)</div>
               </div>
               <div>
-                <div className="border-t-2 border-neutral-900 pt-1.5 font-bold">সরবরাহকারীর প্রতিনিধি স্বাক্ষর (Supplier SR)</div>
+                <div className="border-t-2 border-neutral-900 pt-1.5 font-bold">
+                  {hasGateDiscrepancies ? "সরবরাহকারীর প্রতিনিধি (ঘাটতি/ক্ষতি নিশ্চিতকরণ)" : "সরবরাহকারীর প্রতিনিধি স্বাক্ষর (Supplier SR)"}
+                </div>
               </div>
             </div>
           </div>
@@ -239,15 +265,27 @@ export default function PurchaseChalanPrint({
                 <span>পণ্য (Item)</span>
                 <span>মোট</span>
               </div>
-              {invoice.items.map((it, idx) => (
-                <div key={idx} className="space-y-0.5 text-[9px]">
-                  <span className="font-bold block truncate">{it.productName}</span>
-                  <div className="flex justify-between text-neutral-800">
-                    <span>{it.quantity} {it.unitCode || "pcs"} x {currencySymbol}{it.unitCost.toFixed(2)}</span>
-                    <span className="font-bold">{currencySymbol}{it.lineTotal.toFixed(2)}</span>
+              {invoice.items.map((it, idx) => {
+                const billed = Number(it.billedQuantity ?? it.quantity);
+                const damaged = Number(it.damagedQuantity || 0);
+                const missing = Number(it.missingQuantity || 0);
+                const rejected = damaged + missing;
+
+                return (
+                  <div key={idx} className="space-y-0.5 text-[9px]">
+                    <span className="font-bold block truncate">{it.productName}</span>
+                    {rejected > 0 && (
+                      <span className="text-[8px] text-neutral-700 block">
+                        (চালান: {billed}, বাদ: {rejected})
+                      </span>
+                    )}
+                    <div className="flex justify-between text-neutral-800">
+                      <span>{it.quantity} {it.unitCode || "pcs"} x {currencySymbol}{it.unitCost.toFixed(2)}</span>
+                      <span className="font-bold">{currencySymbol}{it.lineTotal.toFixed(2)}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="py-1.5 border-b-2 border-black space-y-0.5 text-[10px]">
@@ -281,9 +319,19 @@ export default function PurchaseChalanPrint({
               </div>
             </div>
 
+            {hasGateDiscrepancies && (
+              <p className="text-[8px] text-center pt-1 border-b border-dotted border-black pb-1">
+                * ডেলিভারি ঘাটতি/ক্ষতি বাদ দিয়ে হিসাব করা হয়েছে।
+              </p>
+            )}
+
             <div className="grid grid-cols-2 gap-4 text-center text-[8px] pt-8">
               <div><p className="border-t border-dotted border-black pt-1">মাল গ্রহণকারীর স্বাক্ষর</p></div>
-              <div><p className="border-t border-dotted border-black pt-1">সরবরাহকারীর স্বাক্ষর</p></div>
+              <div>
+                <p className="border-t border-dotted border-black pt-1">
+                  {hasGateDiscrepancies ? "এসআর (ঘাটতি নিশ্চিতকরণ)" : "সরবরাহকারীর স্বাক্ষর"}
+                </p>
+              </div>
             </div>
           </div>
         )}

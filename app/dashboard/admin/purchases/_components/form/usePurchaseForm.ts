@@ -16,7 +16,10 @@ export interface PurchaseRow {
   barcode: string;
   unit: string;
   stock: number;
-  quantity: number;
+  quantity: number; // Net good quantity that enters physical inventory
+  billedQuantity: number; // Quantity written on paper memo
+  damagedQuantity: number; // Broken / damaged at gate
+  missingQuantity: number; // Short / missing in delivery
   unitCost: number;
   commission: number;
 }
@@ -39,7 +42,14 @@ export function usePurchaseForm({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-// 1. Supplier state (Direct lazy initialization without cascading renders)
+  // Chalan physical photo proof
+  const [chalanImageUrl, setChalanImageUrl] = useState<string | null>(
+    initialData?.chalanImageUrl || null
+  );
+  const fromPOId = initialData?.fromPOId || null;
+
+
+  // Supplier state
   const [selectedSupplierId, setSelectedSupplierId] = useState(
     initialData?.supplierId || ""
   );
@@ -49,6 +59,7 @@ export function usePurchaseForm({
     const s = suppliers.find((sup) => sup.id === initialData.supplierId);
     return s ? `${s.name} (${s.companyName || "Vendor"})` : "";
   });
+
 
   const [showSupplierDropdown, setShowSupplierDropdown] = useState(false);
 
@@ -68,32 +79,27 @@ export function usePurchaseForm({
   const [purchaseDate, setPurchaseDate] = useState(
     initialData?.purchaseDate
       ? new Date(initialData.purchaseDate).toISOString().split("T")[0]
-      : new Date().toISOString().split("T")[0],
+      : new Date().toISOString().split("T")[0]
   );
 
   // Barcode & Product search
   const [barcodeSearch, setBarcodeSearch] = useState("");
   const [showProductSuggestions, setShowProductSuggestions] = useState(false);
   const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
-
-  // Inside app/dashboard/admin/purchases/_components/form/usePurchaseForm.ts
-
-  // Add this state inside usePurchaseForm:
   const [filterBySupplier, setFilterBySupplier] = useState<boolean>(true);
 
-  // 1. Resolve currently selected supplier object
+  // Resolve currently selected supplier
   const selectedSupplier = useMemo(() => {
     return suppliers.find((s) => s.id === selectedSupplierId) || null;
   }, [suppliers, selectedSupplierId]);
 
-  // 2. Extract brand keywords from supplier (e.g. "PRAN", "Unilever", "Square", "Akij", "Fresh", "Nestle")
+  // Extract brand keywords
   const supplierKeywords = useMemo(() => {
     if (!selectedSupplier) return [];
     const text =
       `${selectedSupplier.companyName || ""} ${selectedSupplier.name || ""}`.toLowerCase();
 
-    // Clean punctuation and common distributor words
-    const words = text
+    return text
       .replace(/[(),.\-—]/g, " ")
       .split(/\s+/)
       .filter(
@@ -107,20 +113,13 @@ export function usePurchaseForm({
             "supply",
             "enterprise",
             "foods",
-          ].includes(w),
+          ].includes(w)
       );
-
-    return words;
   }, [selectedSupplier]);
 
-  // 3. Filter products matching this company's brands
+  // Filter products by company
   const supplierFilteredProducts = useMemo(() => {
-    // If toggle is OFF or no supplier selected, show all products
-    if (
-      !filterBySupplier ||
-      !selectedSupplier ||
-      supplierKeywords.length === 0
-    ) {
+    if (!filterBySupplier || !selectedSupplier || supplierKeywords.length === 0) {
       return products;
     }
 
@@ -129,54 +128,48 @@ export function usePurchaseForm({
       const productName = (p.name || "").toLowerCase();
       const productEn = (p.nameEn || "").toLowerCase();
 
-      // Check if product brand or name matches any supplier keyword
       return supplierKeywords.some(
         (kw) =>
           brandName.includes(kw) ||
           productName.includes(kw) ||
-          productEn.includes(kw),
+          productEn.includes(kw)
       );
     });
 
-    // Fallback: If no products match this vendor yet, gracefully show all products
     return matched.length > 0 ? matched : products;
   }, [products, filterBySupplier, selectedSupplier, supplierKeywords]);
 
-  // 4. Update Barcode/Search to search strictly within this company's products
   const filteredProducts = useMemo(() => {
     if (!barcodeSearch.trim()) return [];
     const q = barcodeSearch.toLowerCase().trim();
 
-    // Searches within supplierFilteredProducts
     return supplierFilteredProducts.filter(
       (p) =>
         p.barcode?.toLowerCase() === q ||
         p.name?.toLowerCase().includes(q) ||
         p.nameEn?.toLowerCase().includes(q) ||
-        p.sku?.toLowerCase().includes(q),
+        p.sku?.toLowerCase().includes(q)
     );
   }, [supplierFilteredProducts, barcodeSearch]);
 
-  // 5. Update handleBarcodeKeyDown to match within company products first
   function handleBarcodeKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       e.preventDefault();
       const code = barcodeSearch.trim().toLowerCase();
       if (!code) return;
 
-      // Search in supplier catalog first, fallback to all products
       const matched =
         supplierFilteredProducts.find(
           (p) =>
             p.barcode?.toLowerCase() === code ||
             p.sku?.toLowerCase() === code ||
-            p.name?.toLowerCase() === code,
+            p.name?.toLowerCase() === code
         ) ||
         products.find(
           (p) =>
             p.barcode?.toLowerCase() === code ||
             p.sku?.toLowerCase() === code ||
-            p.name?.toLowerCase() === code,
+            p.name?.toLowerCase() === code
         );
 
       if (matched) {
@@ -186,20 +179,31 @@ export function usePurchaseForm({
       }
     }
   }
-  // Initial Rows
+
+  // Initial Rows with Discrepancy Support
   const [items, setItems] = useState<PurchaseRow[]>(() => {
     if (initialData?.items && initialData.items.length > 0) {
-      return initialData.items.map((it: any) => ({
-        rowId: `row-${it.id || it.productId}`,
-        productId: it.productId,
-        name: it.productName || it.name || it.product?.name,
-        barcode: it.barcode || it.product?.barcode || "",
-        unit: it.unitCode || it.unit || it.product?.unit?.shortCode || "pcs",
-        stock: it.stock || it.product?.stocks?.[0]?.quantity || 0,
-        quantity: Number(it.quantity),
-        unitCost: Number(it.unitCost),
-        commission: Number(it.commission || 0),
-      }));
+      return initialData.items.map((it: any) => {
+        const billed = Number(it.billedQuantity ?? it.quantity);
+        const damaged = Number(it.damagedQuantity || 0);
+        const missing = Number(it.missingQuantity || 0);
+        const netQty = Math.max(0, billed - damaged - missing);
+
+        return {
+          rowId: `row-${it.id || it.productId}`,
+          productId: it.productId,
+          name: it.productName || it.name || it.product?.name,
+          barcode: it.barcode || it.product?.barcode || "",
+          unit: it.unitCode || it.unit || it.product?.unit?.shortCode || "pcs",
+          stock: it.stock || it.product?.stocks?.[0]?.quantity || 0,
+          quantity: netQty,
+          billedQuantity: billed,
+          damagedQuantity: damaged,
+          missingQuantity: missing,
+          unitCost: Number(it.unitCost),
+          commission: Number(it.commission || 0),
+        };
+      });
     }
     return [
       {
@@ -210,6 +214,9 @@ export function usePurchaseForm({
         unit: "pcs",
         stock: 0,
         quantity: 1,
+        billedQuantity: 1,
+        damagedQuantity: 0,
+        missingQuantity: 0,
         unitCost: 0,
         commission: 0,
       },
@@ -218,36 +225,32 @@ export function usePurchaseForm({
 
   // Financial States
   const [paymentMethod, setPaymentMethod] = useState(
-    initialData?.paymentMethod || "cash",
+    initialData?.paymentMethod || "cash"
   );
   const [notes, setNotes] = useState(initialData?.notes || "");
   const [discount, setDiscount] = useState<number>(
-    Number(initialData?.discount || 0),
+    Number(initialData?.discount || 0)
   );
   const [transportCost, setTransportCost] = useState<number>(
-    Number(initialData?.transportCost || 0),
+    Number(initialData?.transportCost || 0)
   );
   const [vatPercent, setVatPercent] = useState<number>(
-    Number(initialData?.vatPercent || 0),
+    Number(initialData?.vatPercent || 0)
   );
   const [paidAmount, setPaidAmount] = useState<number>(
-    Number(initialData?.paidAmount || 0),
+    Number(initialData?.paidAmount || 0)
   );
 
   const sanitizeNumber = (val: any) => Math.max(0, Number(val) || 0);
 
-  // Auto-focus barcode on mount
   useEffect(() => {
     onFocusBarcode?.();
   }, [onFocusBarcode]);
 
-
- 
-
   function handleSelectSupplier(supplier: any) {
     setSelectedSupplierId(supplier.id);
     setSupplierSearchQuery(
-      `${supplier.name} (${supplier.phone || supplier.companyName || "Vendor"})`,
+      `${supplier.name} (${supplier.phone || supplier.companyName || "Vendor"})`
     );
     setSupplierPreviousDue(Number(supplier.currentDue ?? 0));
     setShowSupplierDropdown(false);
@@ -264,6 +267,9 @@ export function usePurchaseForm({
         unit: "pcs",
         stock: 0,
         quantity: 1,
+        billedQuantity: 1,
+        damagedQuantity: 0,
+        missingQuantity: 0,
         unitCost: 0,
         commission: 0,
       },
@@ -272,15 +278,23 @@ export function usePurchaseForm({
 
   function addOrIncrementProduct(product: any) {
     const existingIndex = items.findIndex(
-      (i) => i.productId && i.productId === product.id,
+      (i) => i.productId && i.productId === product.id
     );
 
     if (existingIndex > -1) {
       setItems((prev) => {
         const next = [...prev];
+        const target = next[existingIndex];
+        const newBilled = target.billedQuantity + 1;
+        const newNet = Math.max(
+          0,
+          newBilled - target.damagedQuantity - target.missingQuantity
+        );
+
         next[existingIndex] = {
-          ...next[existingIndex],
-          quantity: next[existingIndex].quantity + 1,
+          ...target,
+          billedQuantity: newBilled,
+          quantity: newNet,
         };
         return next;
       });
@@ -288,20 +302,24 @@ export function usePurchaseForm({
       setTimeout(() => setHighlightedRowId(null), 600);
     } else {
       const blankIndex = items.findIndex((i) => !i.productId);
+      const rowData = {
+        productId: product.id,
+        name: product.name,
+        barcode: product.barcode,
+        unit: product.unitCode || product.unit?.shortCode || "pcs",
+        stock: product.stockQuantity || product.stock || 0,
+        quantity: 1,
+        billedQuantity: 1,
+        damagedQuantity: 0,
+        missingQuantity: 0,
+        unitCost: Number(product.costPrice ?? product.purchasePrice ?? 0),
+        commission: 0,
+      };
+
       if (blankIndex > -1) {
         setItems((prev) => {
           const next = [...prev];
-          next[blankIndex] = {
-            ...next[blankIndex],
-            productId: product.id,
-            name: product.name,
-            barcode: product.barcode,
-            unit: product.unitCode || product.unit?.shortCode || "pcs",
-            stock: product.stockQuantity || product.stock || 0,
-            quantity: 1,
-            unitCost: Number(product.costPrice ?? product.purchasePrice ?? 0),
-            commission: 0,
-          };
+          next[blankIndex] = { ...next[blankIndex], ...rowData };
           return next;
         });
         setHighlightedRowId(items[blankIndex].rowId);
@@ -309,17 +327,7 @@ export function usePurchaseForm({
       } else {
         setItems((prev) => [
           ...prev,
-          {
-            rowId: `row-${Date.now()}-${Math.random()}`,
-            productId: product.id,
-            name: product.name,
-            barcode: product.barcode,
-            unit: product.unitCode || product.unit?.shortCode || "pcs",
-            stock: product.stockQuantity || product.stock || 0,
-            quantity: 1,
-            unitCost: Number(product.costPrice ?? product.purchasePrice ?? 0),
-            commission: 0,
-          },
+          { rowId: `row-${Date.now()}-${Math.random()}`, ...rowData },
         ]);
       }
     }
@@ -328,13 +336,15 @@ export function usePurchaseForm({
     onFocusBarcode?.();
   }
 
+  // Reactive row update with auto-calculated net good quantity
   function updateRow(rowId: string, field: keyof PurchaseRow, value: any) {
     setItems((prev) =>
       prev.map((r) => {
         if (r.rowId !== rowId) return r;
+
         if (field === "productId") {
           const selected = products.find((p) => p.id === value);
-          if (!selected)
+          if (!selected) {
             return {
               ...r,
               productId: "",
@@ -343,6 +353,7 @@ export function usePurchaseForm({
               stock: 0,
               unitCost: 0,
             };
+          }
           return {
             ...r,
             productId: selected.id,
@@ -353,8 +364,23 @@ export function usePurchaseForm({
             unitCost: Number(selected.costPrice ?? selected.purchasePrice ?? 0),
           };
         }
-        return { ...r, [field]: value };
-      }),
+
+        const updated = { ...r, [field]: value };
+
+        // Real-time calculation: Net Good Stock = Billed - Damaged - Missing
+        if (
+          field === "billedQuantity" ||
+          field === "damagedQuantity" ||
+          field === "missingQuantity"
+        ) {
+          const billed = Number(updated.billedQuantity || 0);
+          const damaged = Number(updated.damagedQuantity || 0);
+          const missing = Number(updated.missingQuantity || 0);
+          updated.quantity = Math.max(0, billed - damaged - missing);
+        }
+
+        return updated;
+      })
     );
   }
 
@@ -369,6 +395,9 @@ export function usePurchaseForm({
           unit: "pcs",
           stock: 0,
           quantity: 1,
+          billedQuantity: 1,
+          damagedQuantity: 0,
+          missingQuantity: 0,
           unitCost: 0,
           commission: 0,
         },
@@ -378,7 +407,7 @@ export function usePurchaseForm({
     setItems((prev) => prev.filter((r) => r.rowId !== rowId));
   }
 
-  // Reactive Math
+  // Reactive Math calculated strictly on NET GOOD STOCK
   const subtotal = useMemo(() => {
     return items.reduce((sum, item) => {
       if (!item.productId) return sum;
@@ -387,7 +416,7 @@ export function usePurchaseForm({
         Math.max(
           0,
           Number(item.quantity) * Number(item.unitCost) -
-            Number(item.commission || 0),
+            Number(item.commission || 0)
         )
       );
     }, 0);
@@ -397,7 +426,7 @@ export function usePurchaseForm({
     return items.reduce(
       (sum, item) =>
         item.productId ? sum + (Number(item.quantity) || 0) : sum,
-      0,
+      0
     );
   }, [items]);
 
@@ -415,7 +444,7 @@ export function usePurchaseForm({
     if (!chalanNo.trim()) return toast.error("চালান নম্বর লিখুন।");
 
     const validItems = items.filter(
-      (i) => i.productId && i.productId.trim() !== "",
+      (i) => i.productId && i.productId.trim() !== ""
     );
     if (validItems.length === 0)
       return toast.error("অন্তত একটি পণ্য সিলেক্ট করুন।");
@@ -426,6 +455,8 @@ export function usePurchaseForm({
       ...(mode === "edit" ? { id: initialData.id } : {}),
       supplierId: selectedSupplierId,
       chalanNo: chalanNo.trim(),
+      fromPOId,
+      chalanImageUrl,
       purchaseDate,
       paymentMethod,
       paidAmount: sanitizeNumber(paidAmount),
@@ -435,9 +466,12 @@ export function usePurchaseForm({
       notes,
       items: validItems.map((i) => ({
         productId: i.productId,
-        quantity: sanitizeNumber(i.quantity),
+        quantity: sanitizeNumber(i.quantity), // Net good stock
+        billedQuantity: sanitizeNumber(i.billedQuantity ?? i.quantity),
+        damagedQuantity: sanitizeNumber(i.damagedQuantity || 0),
+        missingQuantity: sanitizeNumber(i.missingQuantity || 0),
         unitCost: sanitizeNumber(i.unitCost),
-        commission: sanitizeNumber(i.commission),
+        commission: sanitizeNumber(i.commission || 0),
       })),
     };
 
@@ -451,7 +485,7 @@ export function usePurchaseForm({
       toast.success(
         mode === "edit"
           ? "চালান আপডেট সম্পন্ন হয়েছে!"
-          : "পণ্য ক্রয় ও স্টক সম্পন্ন হয়েছে!",
+          : "পণ্য ক্রয় ও স্টক সম্পন্ন হয়েছে!"
       );
       router.push("/dashboard/admin/purchases");
       router.refresh();
@@ -489,7 +523,7 @@ export function usePurchaseForm({
     selectedSupplier,
     filterBySupplier,
     setFilterBySupplier,
-    supplierFilteredProducts, // 👈 Used by table dropdowns & search
+    supplierFilteredProducts,
     filteredProducts,
     handleBarcodeKeyDown,
     addOrIncrementProduct,
@@ -509,6 +543,8 @@ export function usePurchaseForm({
     setPaidAmount,
     sanitizeNumber,
     loading,
+    chalanImageUrl,
+    setChalanImageUrl,
     handleSubmit,
   };
 }

@@ -7,6 +7,8 @@ export * from "./product";
 export * from "./customer";
 export * from "./supplier";
 export * from "./purchase";
+export * from "./purchase-return";
+export * from "./purchase-order"; // 👈 Add export
 export * from "./sale";
 export * from "./account"; // 👈 Add export
 export * from "./finance"; // 👈 Add export
@@ -15,7 +17,6 @@ export * from "./report"; // 👈 Add export
 export * from "./closing"; // 👈 Add export
 export * from "./customer-due"; // 👈 Add export
 export * from "./stock";
-export * from "./purchases";
 export * from "./profit-loss";
 export * from "./expenses";
 export * from "./settings";

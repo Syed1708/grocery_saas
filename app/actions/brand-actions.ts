@@ -1,22 +1,22 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
+import { PERMISSIONS } from "@/types/rbac";
 import { revalidatePath } from "next/cache";
 
-async function getAuthenticatedUser() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.shopId) throw new Error("Unauthorized");
-  if (session.user.role !== "OWNER" && session.user.role !== "MANAGER" && session.user.role !== "ADMIN") {
-    throw new Error("Forbidden: Only Owners and Managers can manage brands.");
-  }
-  return session.user;
-}
+
 
 export async function createBrandAction(formData: FormData) {
   try {
-    const user = await getAuthenticatedUser();
+       const user = await requireAuth({
+         requiredPermission: PERMISSIONS.POS_ACCESS,
+         requireActiveStatus: true,
+       });
+   
+       if (!user.activeBranchId) {
+         return { success: false, error: "সক্রিয় ব্রাঞ্চ পাওয়া যায়নি।" };
+       }
     const name = formData.get("name")?.toString().trim();
     const companyName = formData.get("companyName")?.toString().trim() || null;
     const contactPerson = formData.get("contactPerson")?.toString().trim() || null;
@@ -46,7 +46,14 @@ export async function createBrandAction(formData: FormData) {
 // 👈 Added Update Brand Action
 export async function updateBrandAction(formData: FormData) {
   try {
-    const user = await getAuthenticatedUser();
+       const user = await requireAuth({
+         requiredPermission: PERMISSIONS.POS_ACCESS,
+         requireActiveStatus: true,
+       });
+   
+       if (!user.activeBranchId) {
+         return { success: false, error: "সক্রিয় ব্রাঞ্চ পাওয়া যায়নি।" };
+       }
     const id = formData.get("id")?.toString();
     const name = formData.get("name")?.toString().trim();
     const companyName = formData.get("companyName")?.toString().trim() || null;
@@ -76,7 +83,14 @@ export async function updateBrandAction(formData: FormData) {
 
 export async function deleteBrandAction(id: string) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.POS_ACCESS,
+      requireActiveStatus: true,
+    });
+
+    if (!user.activeBranchId) {
+      return { success: false, error: "সক্রিয় ব্রাঞ্চ পাওয়া যায়নি।" };
+    }
 
     const productCount = await prisma.product.count({
       where: { brandId: id, shopId: user.shopId },
