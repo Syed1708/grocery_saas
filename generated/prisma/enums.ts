@@ -160,6 +160,27 @@ export const PurchaseOrderStatus = {
 export type PurchaseOrderStatus = (typeof PurchaseOrderStatus)[keyof typeof PurchaseOrderStatus]
 
 
+export const WastageReason = {
+  ROTTEN_PERISHABLE: 'ROTTEN_PERISHABLE',
+  BROKEN_DAMAGED: 'BROKEN_DAMAGED',
+  EXPIRED_NO_RETURN: 'EXPIRED_NO_RETURN',
+  PEST_DAMAGE: 'PEST_DAMAGE',
+  INTERNAL_STORE_USE: 'INTERNAL_STORE_USE',
+  OTHER: 'OTHER'
+} as const
+
+export type WastageReason = (typeof WastageReason)[keyof typeof WastageReason]
+
+
+export const TransferStatus = {
+  DISPATCHED: 'DISPATCHED',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type TransferStatus = (typeof TransferStatus)[keyof typeof TransferStatus]
+
+
 export const ReturnSettlementType = {
   DUE_DEDUCTION: 'DUE_DEDUCTION',
   CASH_REFUND: 'CASH_REFUND',

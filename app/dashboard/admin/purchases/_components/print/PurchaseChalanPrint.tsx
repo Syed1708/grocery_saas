@@ -256,7 +256,7 @@ export default function PurchaseChalanPrint({
               </div>
               <div className="flex justify-between font-bold">
                 <span>সাপ্লায়ার:</span>
-                <span className="truncate max-w-[130px]">{invoice.supplierCompany || invoice.supplierName}</span>
+                <span className="truncate max-w-32.5">{invoice.supplierCompany || invoice.supplierName}</span>
               </div>
             </div>
 

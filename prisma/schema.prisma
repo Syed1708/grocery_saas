@@ -162,6 +162,8 @@ model Shop {
   partnerRations      PartnerRation[]
   purchaseReturns PurchaseReturn[]
   purchaseOrders PurchaseOrder[]
+  stockWastages StockWastage[]
+  stockTransfers StockTransfer[]
 
   @@map("shops")
 }
@@ -210,6 +212,9 @@ model Branch {
   partnerRations      PartnerRation[]
   purchaseReturns PurchaseReturn[]
   purchaseOrders PurchaseOrder[]
+  stockWastages StockWastage[]
+  transfersSent StockTransfer[] @relation("TransfersSent")
+  transfersReceived StockTransfer[] @relation("TransfersReceived")
 
   @@unique([shopId, code])
   @@index([shopId])
@@ -402,6 +407,8 @@ model Product {
   partnerRationItems PartnerRationItem[]
   returnItems PurchaseReturnItem[]
   purchaseOrderItems PurchaseOrderItem[]
+  wastageItems StockWastageItem[]
+  transferItems StockTransferItem[]
 
   @@unique([shopId, barcode])
   @@unique([shopId, sku])
@@ -607,6 +614,117 @@ model SupplierPayment {
   @@map("supplier_payments")
 }
 
+enum WastageReason {
+  ROTTEN_PERISHABLE   // পচে নষ্ট (ফলমূল, শাকসবজি)
+  BROKEN_DAMAGED      // ভেঙে নষ্ট (বোতল, প্যাকেট লিক)
+  EXPIRED_NO_RETURN   // মেয়াদোত্তীর্ণ (কোম্পানি ফেরত নেয় না)
+  PEST_DAMAGE         // ইঁদুর বা পোকামাকড়ের ক্ষতি
+  INTERNAL_STORE_USE  // দোকানের নিজস্ব কাজে ব্যবহার
+  OTHER               // অন্যান্য
+}
+
+model StockWastage {
+  id            String        @id @default(cuid())
+  wastageNo     String        // e.g. WST-202611-0001
+  date          DateTime      @default(now())
+  totalQuantity Decimal       @db.Decimal(10, 2)
+  totalCost     Decimal       @db.Decimal(10, 2) // Loss at wholesale cost
+  reason        WastageReason @default(ROTTEN_PERISHABLE)
+  notes         String?       @db.Text
+
+  branchId      String
+  branch        Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  shopId        String
+  shop          Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  items         StockWastageItem[]
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([shopId, wastageNo])
+  @@index([shopId])
+  @@index([branchId])
+  @@map("stock_wastages")
+}
+
+model StockWastageItem {
+  id          String        @id @default(cuid())
+  wastageId   String
+  wastage     StockWastage  @relation(fields: [wastageId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  quantity    Decimal       @db.Decimal(10, 2)
+  unitCost    Decimal       @db.Decimal(10, 2)
+  lineCost    Decimal       @db.Decimal(10, 2)
+  reason      WastageReason @default(ROTTEN_PERISHABLE)
+
+  createdAt   DateTime      @default(now())
+
+  @@index([wastageId])
+  @@index([productId])
+  @@map("stock_wastage_items")
+}
+
+enum TransferStatus {
+  DISPATCHED   // Sent from source, on the delivery van
+  COMPLETED    // Received & verified at destination branch
+  CANCELLED    // Cancelled and rolled back to source branch
+}
+
+model StockTransfer {
+  id              String         @id @default(cuid())
+  transferNo      String         // e.g. TR-202611-0001
+  dispatchDate    DateTime       @default(now())
+  receiveDate     DateTime?
+  status          TransferStatus @default(DISPATCHED)
+  totalItems      Int            @default(0)
+  totalQuantity   Decimal        @db.Decimal(10, 2)
+  totalCost       Decimal        @db.Decimal(10, 2)
+  notes           String?        @db.Text
+  driverName      String?
+  driverPhone     String?
+  vehicleNo       String?
+
+  fromBranchId    String
+  fromBranch      Branch         @relation("TransfersSent", fields: [fromBranchId], references: [id], onDelete: Restrict)
+  toBranchId      String
+  toBranch        Branch         @relation("TransfersReceived", fields: [toBranchId], references: [id], onDelete: Restrict)
+  shopId          String
+  shop            Shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  items           StockTransferItem[]
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@unique([shopId, transferNo])
+  @@index([shopId])
+  @@index([fromBranchId])
+  @@index([toBranchId])
+  @@map("stock_transfers")
+}
+
+model StockTransferItem {
+  id               String        @id @default(cuid())
+  transferId       String
+  transfer         StockTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  productId        String
+  product          Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  quantitySent     Decimal       @db.Decimal(10, 2)
+  quantityReceived Decimal?      @db.Decimal(10, 2)
+  transitDamage    Decimal       @default(0.00) @db.Decimal(10, 2)
+  unitCost         Decimal       @db.Decimal(10, 2)
+  lineCost         Decimal       @db.Decimal(10, 2)
+
+  createdAt        DateTime      @default(now())
+
+  @@index([transferId])
+  @@index([productId])
+  @@map("stock_transfer_items")
+}
 // ==========================================
 // STOCK RETURN TO SUPPLIER (PURCHASE RETURN)
 // ==========================================

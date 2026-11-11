@@ -67,6 +67,10 @@ export const ModelName = {
   PurchaseOrder: 'PurchaseOrder',
   PurchaseOrderItem: 'PurchaseOrderItem',
   SupplierPayment: 'SupplierPayment',
+  StockWastage: 'StockWastage',
+  StockWastageItem: 'StockWastageItem',
+  StockTransfer: 'StockTransfer',
+  StockTransferItem: 'StockTransferItem',
   PurchaseReturn: 'PurchaseReturn',
   PurchaseReturnItem: 'PurchaseReturnItem',
   Customer: 'Customer',
@@ -412,6 +416,75 @@ export const SupplierPaymentScalarFieldEnum = {
 } as const
 
 export type SupplierPaymentScalarFieldEnum = (typeof SupplierPaymentScalarFieldEnum)[keyof typeof SupplierPaymentScalarFieldEnum]
+
+
+export const StockWastageScalarFieldEnum = {
+  id: 'id',
+  wastageNo: 'wastageNo',
+  date: 'date',
+  totalQuantity: 'totalQuantity',
+  totalCost: 'totalCost',
+  reason: 'reason',
+  notes: 'notes',
+  branchId: 'branchId',
+  shopId: 'shopId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StockWastageScalarFieldEnum = (typeof StockWastageScalarFieldEnum)[keyof typeof StockWastageScalarFieldEnum]
+
+
+export const StockWastageItemScalarFieldEnum = {
+  id: 'id',
+  wastageId: 'wastageId',
+  productId: 'productId',
+  quantity: 'quantity',
+  unitCost: 'unitCost',
+  lineCost: 'lineCost',
+  reason: 'reason',
+  createdAt: 'createdAt'
+} as const
+
+export type StockWastageItemScalarFieldEnum = (typeof StockWastageItemScalarFieldEnum)[keyof typeof StockWastageItemScalarFieldEnum]
+
+
+export const StockTransferScalarFieldEnum = {
+  id: 'id',
+  transferNo: 'transferNo',
+  dispatchDate: 'dispatchDate',
+  receiveDate: 'receiveDate',
+  status: 'status',
+  totalItems: 'totalItems',
+  totalQuantity: 'totalQuantity',
+  totalCost: 'totalCost',
+  notes: 'notes',
+  driverName: 'driverName',
+  driverPhone: 'driverPhone',
+  vehicleNo: 'vehicleNo',
+  fromBranchId: 'fromBranchId',
+  toBranchId: 'toBranchId',
+  shopId: 'shopId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StockTransferScalarFieldEnum = (typeof StockTransferScalarFieldEnum)[keyof typeof StockTransferScalarFieldEnum]
+
+
+export const StockTransferItemScalarFieldEnum = {
+  id: 'id',
+  transferId: 'transferId',
+  productId: 'productId',
+  quantitySent: 'quantitySent',
+  quantityReceived: 'quantityReceived',
+  transitDamage: 'transitDamage',
+  unitCost: 'unitCost',
+  lineCost: 'lineCost',
+  createdAt: 'createdAt'
+} as const
+
+export type StockTransferItemScalarFieldEnum = (typeof StockTransferItemScalarFieldEnum)[keyof typeof StockTransferItemScalarFieldEnum]
 
 
 export const PurchaseReturnScalarFieldEnum = {
@@ -1223,6 +1296,50 @@ export const SupplierPaymentOrderByRelevanceFieldEnum = {
 } as const
 
 export type SupplierPaymentOrderByRelevanceFieldEnum = (typeof SupplierPaymentOrderByRelevanceFieldEnum)[keyof typeof SupplierPaymentOrderByRelevanceFieldEnum]
+
+
+export const StockWastageOrderByRelevanceFieldEnum = {
+  id: 'id',
+  wastageNo: 'wastageNo',
+  notes: 'notes',
+  branchId: 'branchId',
+  shopId: 'shopId'
+} as const
+
+export type StockWastageOrderByRelevanceFieldEnum = (typeof StockWastageOrderByRelevanceFieldEnum)[keyof typeof StockWastageOrderByRelevanceFieldEnum]
+
+
+export const StockWastageItemOrderByRelevanceFieldEnum = {
+  id: 'id',
+  wastageId: 'wastageId',
+  productId: 'productId'
+} as const
+
+export type StockWastageItemOrderByRelevanceFieldEnum = (typeof StockWastageItemOrderByRelevanceFieldEnum)[keyof typeof StockWastageItemOrderByRelevanceFieldEnum]
+
+
+export const StockTransferOrderByRelevanceFieldEnum = {
+  id: 'id',
+  transferNo: 'transferNo',
+  notes: 'notes',
+  driverName: 'driverName',
+  driverPhone: 'driverPhone',
+  vehicleNo: 'vehicleNo',
+  fromBranchId: 'fromBranchId',
+  toBranchId: 'toBranchId',
+  shopId: 'shopId'
+} as const
+
+export type StockTransferOrderByRelevanceFieldEnum = (typeof StockTransferOrderByRelevanceFieldEnum)[keyof typeof StockTransferOrderByRelevanceFieldEnum]
+
+
+export const StockTransferItemOrderByRelevanceFieldEnum = {
+  id: 'id',
+  transferId: 'transferId',
+  productId: 'productId'
+} as const
+
+export type StockTransferItemOrderByRelevanceFieldEnum = (typeof StockTransferItemOrderByRelevanceFieldEnum)[keyof typeof StockTransferItemOrderByRelevanceFieldEnum]
 
 
 export const PurchaseReturnOrderByRelevanceFieldEnum = {

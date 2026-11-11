@@ -344,6 +344,8 @@ export type ShopWhereInput = {
   partnerRations?: Prisma.PartnerRationListRelationFilter
   purchaseReturns?: Prisma.PurchaseReturnListRelationFilter
   purchaseOrders?: Prisma.PurchaseOrderListRelationFilter
+  stockWastages?: Prisma.StockWastageListRelationFilter
+  stockTransfers?: Prisma.StockTransferListRelationFilter
 }
 
 export type ShopOrderByWithRelationInput = {
@@ -396,6 +398,8 @@ export type ShopOrderByWithRelationInput = {
   partnerRations?: Prisma.PartnerRationOrderByRelationAggregateInput
   purchaseReturns?: Prisma.PurchaseReturnOrderByRelationAggregateInput
   purchaseOrders?: Prisma.PurchaseOrderOrderByRelationAggregateInput
+  stockWastages?: Prisma.StockWastageOrderByRelationAggregateInput
+  stockTransfers?: Prisma.StockTransferOrderByRelationAggregateInput
   _relevance?: Prisma.ShopOrderByRelevanceInput
 }
 
@@ -452,6 +456,8 @@ export type ShopWhereUniqueInput = Prisma.AtLeast<{
   partnerRations?: Prisma.PartnerRationListRelationFilter
   purchaseReturns?: Prisma.PurchaseReturnListRelationFilter
   purchaseOrders?: Prisma.PurchaseOrderListRelationFilter
+  stockWastages?: Prisma.StockWastageListRelationFilter
+  stockTransfers?: Prisma.StockTransferListRelationFilter
 }, "id">
 
 export type ShopOrderByWithAggregationInput = {
@@ -552,6 +558,8 @@ export type ShopCreateInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateInput = {
@@ -604,6 +612,8 @@ export type ShopUncheckedCreateInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopUpdateInput = {
@@ -656,6 +666,8 @@ export type ShopUpdateInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateInput = {
@@ -708,6 +720,8 @@ export type ShopUncheckedUpdateInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateManyInput = {
@@ -1025,6 +1039,34 @@ export type ShopUpdateOneRequiredWithoutPurchaseOrdersNestedInput = {
   upsert?: Prisma.ShopUpsertWithoutPurchaseOrdersInput
   connect?: Prisma.ShopWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutPurchaseOrdersInput, Prisma.ShopUpdateWithoutPurchaseOrdersInput>, Prisma.ShopUncheckedUpdateWithoutPurchaseOrdersInput>
+}
+
+export type ShopCreateNestedOneWithoutStockWastagesInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutStockWastagesInput, Prisma.ShopUncheckedCreateWithoutStockWastagesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutStockWastagesInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutStockWastagesNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutStockWastagesInput, Prisma.ShopUncheckedCreateWithoutStockWastagesInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutStockWastagesInput
+  upsert?: Prisma.ShopUpsertWithoutStockWastagesInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutStockWastagesInput, Prisma.ShopUpdateWithoutStockWastagesInput>, Prisma.ShopUncheckedUpdateWithoutStockWastagesInput>
+}
+
+export type ShopCreateNestedOneWithoutStockTransfersInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutStockTransfersInput, Prisma.ShopUncheckedCreateWithoutStockTransfersInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutStockTransfersInput
+  connect?: Prisma.ShopWhereUniqueInput
+}
+
+export type ShopUpdateOneRequiredWithoutStockTransfersNestedInput = {
+  create?: Prisma.XOR<Prisma.ShopCreateWithoutStockTransfersInput, Prisma.ShopUncheckedCreateWithoutStockTransfersInput>
+  connectOrCreate?: Prisma.ShopCreateOrConnectWithoutStockTransfersInput
+  upsert?: Prisma.ShopUpsertWithoutStockTransfersInput
+  connect?: Prisma.ShopWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutStockTransfersInput, Prisma.ShopUpdateWithoutStockTransfersInput>, Prisma.ShopUncheckedUpdateWithoutStockTransfersInput>
 }
 
 export type ShopCreateNestedOneWithoutPurchaseReturnsInput = {
@@ -1370,6 +1412,8 @@ export type ShopCreateWithoutBranchesInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutBranchesInput = {
@@ -1421,6 +1465,8 @@ export type ShopUncheckedCreateWithoutBranchesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutBranchesInput = {
@@ -1488,6 +1534,8 @@ export type ShopUpdateWithoutBranchesInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutBranchesInput = {
@@ -1539,6 +1587,8 @@ export type ShopUncheckedUpdateWithoutBranchesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutLicensesInput = {
@@ -1590,6 +1640,8 @@ export type ShopCreateWithoutLicensesInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutLicensesInput = {
@@ -1641,6 +1693,8 @@ export type ShopUncheckedCreateWithoutLicensesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutLicensesInput = {
@@ -1708,6 +1762,8 @@ export type ShopUpdateWithoutLicensesInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutLicensesInput = {
@@ -1759,6 +1815,8 @@ export type ShopUncheckedUpdateWithoutLicensesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutUsersInput = {
@@ -1810,6 +1868,8 @@ export type ShopCreateWithoutUsersInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutUsersInput = {
@@ -1861,6 +1921,8 @@ export type ShopUncheckedCreateWithoutUsersInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutUsersInput = {
@@ -1928,6 +1990,8 @@ export type ShopUpdateWithoutUsersInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutUsersInput = {
@@ -1979,6 +2043,8 @@ export type ShopUncheckedUpdateWithoutUsersInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutUnitsInput = {
@@ -2030,6 +2096,8 @@ export type ShopCreateWithoutUnitsInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutUnitsInput = {
@@ -2081,6 +2149,8 @@ export type ShopUncheckedCreateWithoutUnitsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutUnitsInput = {
@@ -2148,6 +2218,8 @@ export type ShopUpdateWithoutUnitsInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutUnitsInput = {
@@ -2199,6 +2271,8 @@ export type ShopUncheckedUpdateWithoutUnitsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutSectionsInput = {
@@ -2250,6 +2324,8 @@ export type ShopCreateWithoutSectionsInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutSectionsInput = {
@@ -2301,6 +2377,8 @@ export type ShopUncheckedCreateWithoutSectionsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutSectionsInput = {
@@ -2368,6 +2446,8 @@ export type ShopUpdateWithoutSectionsInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutSectionsInput = {
@@ -2419,6 +2499,8 @@ export type ShopUncheckedUpdateWithoutSectionsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutCategoriesInput = {
@@ -2470,6 +2552,8 @@ export type ShopCreateWithoutCategoriesInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutCategoriesInput = {
@@ -2521,6 +2605,8 @@ export type ShopUncheckedCreateWithoutCategoriesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutCategoriesInput = {
@@ -2588,6 +2674,8 @@ export type ShopUpdateWithoutCategoriesInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutCategoriesInput = {
@@ -2639,6 +2727,8 @@ export type ShopUncheckedUpdateWithoutCategoriesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutBrandsInput = {
@@ -2690,6 +2780,8 @@ export type ShopCreateWithoutBrandsInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutBrandsInput = {
@@ -2741,6 +2833,8 @@ export type ShopUncheckedCreateWithoutBrandsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutBrandsInput = {
@@ -2808,6 +2902,8 @@ export type ShopUpdateWithoutBrandsInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutBrandsInput = {
@@ -2859,6 +2955,8 @@ export type ShopUncheckedUpdateWithoutBrandsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutProductsInput = {
@@ -2910,6 +3008,8 @@ export type ShopCreateWithoutProductsInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutProductsInput = {
@@ -2961,6 +3061,8 @@ export type ShopUncheckedCreateWithoutProductsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutProductsInput = {
@@ -3028,6 +3130,8 @@ export type ShopUpdateWithoutProductsInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutProductsInput = {
@@ -3079,6 +3183,8 @@ export type ShopUncheckedUpdateWithoutProductsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutSuppliersInput = {
@@ -3130,6 +3236,8 @@ export type ShopCreateWithoutSuppliersInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutSuppliersInput = {
@@ -3181,6 +3289,8 @@ export type ShopUncheckedCreateWithoutSuppliersInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutSuppliersInput = {
@@ -3248,6 +3358,8 @@ export type ShopUpdateWithoutSuppliersInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutSuppliersInput = {
@@ -3299,6 +3411,8 @@ export type ShopUncheckedUpdateWithoutSuppliersInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutPurchasesInput = {
@@ -3350,6 +3464,8 @@ export type ShopCreateWithoutPurchasesInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutPurchasesInput = {
@@ -3401,6 +3517,8 @@ export type ShopUncheckedCreateWithoutPurchasesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutPurchasesInput = {
@@ -3468,6 +3586,8 @@ export type ShopUpdateWithoutPurchasesInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutPurchasesInput = {
@@ -3519,6 +3639,8 @@ export type ShopUncheckedUpdateWithoutPurchasesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutPurchaseOrdersInput = {
@@ -3570,6 +3692,8 @@ export type ShopCreateWithoutPurchaseOrdersInput = {
   partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutShopInput
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutPurchaseOrdersInput = {
@@ -3621,6 +3745,8 @@ export type ShopUncheckedCreateWithoutPurchaseOrdersInput = {
   partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutShopInput
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutPurchaseOrdersInput = {
@@ -3688,6 +3814,8 @@ export type ShopUpdateWithoutPurchaseOrdersInput = {
   partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutShopNestedInput
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutPurchaseOrdersInput = {
@@ -3739,6 +3867,464 @@ export type ShopUncheckedUpdateWithoutPurchaseOrdersInput = {
   partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutShopNestedInput
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutStockWastagesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+  partners?: Prisma.PartnerCreateNestedManyWithoutShopInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutShopInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
+  purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
+  purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutStockWastagesInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+  partners?: Prisma.PartnerUncheckedCreateNestedManyWithoutShopInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
+  purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
+  purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutStockWastagesInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutStockWastagesInput, Prisma.ShopUncheckedCreateWithoutStockWastagesInput>
+}
+
+export type ShopUpsertWithoutStockWastagesInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutStockWastagesInput, Prisma.ShopUncheckedUpdateWithoutStockWastagesInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutStockWastagesInput, Prisma.ShopUncheckedCreateWithoutStockWastagesInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutStockWastagesInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutStockWastagesInput, Prisma.ShopUncheckedUpdateWithoutStockWastagesInput>
+}
+
+export type ShopUpdateWithoutStockWastagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+  partners?: Prisma.PartnerUpdateManyWithoutShopNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutShopNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
+  purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
+  purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutStockWastagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+  partners?: Prisma.PartnerUncheckedUpdateManyWithoutShopNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
+  purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
+  purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
+}
+
+export type ShopCreateWithoutStockTransfersInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchCreateNestedManyWithoutShopInput
+  users?: Prisma.UserCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseCreateNestedManyWithoutShopInput
+  partners?: Prisma.PartnerCreateNestedManyWithoutShopInput
+  partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutShopInput
+  partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
+  purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
+  purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+}
+
+export type ShopUncheckedCreateWithoutStockTransfersInput = {
+  id?: string
+  name: string
+  nameEn?: string | null
+  phone: string
+  email?: string | null
+  address?: string | null
+  tradeLicense?: string | null
+  binVatNumber?: string | null
+  currencySymbol?: string
+  vatPercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: boolean
+  thermalWidth?: string
+  invoiceHeader?: string | null
+  invoiceFooter?: string | null
+  banglaReceipt?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutShopInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutShopInput
+  categories?: Prisma.CategoryUncheckedCreateNestedManyWithoutShopInput
+  brands?: Prisma.BrandUncheckedCreateNestedManyWithoutShopInput
+  sections?: Prisma.ProductSectionUncheckedCreateNestedManyWithoutShopInput
+  units?: Prisma.UnitUncheckedCreateNestedManyWithoutShopInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutShopInput
+  suppliers?: Prisma.SupplierUncheckedCreateNestedManyWithoutShopInput
+  purchases?: Prisma.PurchaseUncheckedCreateNestedManyWithoutShopInput
+  sales?: Prisma.SaleUncheckedCreateNestedManyWithoutShopInput
+  saleReturns?: Prisma.SaleReturnUncheckedCreateNestedManyWithoutShopInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutShopInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutShopInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutShopInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutShopInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedCreateNestedManyWithoutShopInput
+  departments?: Prisma.DepartmentUncheckedCreateNestedManyWithoutShopInput
+  staffProfiles?: Prisma.StaffProfileUncheckedCreateNestedManyWithoutShopInput
+  payrolls?: Prisma.PayrollUncheckedCreateNestedManyWithoutShopInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedCreateNestedManyWithoutShopInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutShopInput
+  bankCheques?: Prisma.BankChequeUncheckedCreateNestedManyWithoutShopInput
+  companyAssets?: Prisma.CompanyAssetUncheckedCreateNestedManyWithoutShopInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  cashRegisters?: Prisma.CashRegisterUncheckedCreateNestedManyWithoutShopInput
+  licenses?: Prisma.LicenseUncheckedCreateNestedManyWithoutShopInput
+  partners?: Prisma.PartnerUncheckedCreateNestedManyWithoutShopInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutShopInput
+  partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
+  purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
+  purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+}
+
+export type ShopCreateOrConnectWithoutStockTransfersInput = {
+  where: Prisma.ShopWhereUniqueInput
+  create: Prisma.XOR<Prisma.ShopCreateWithoutStockTransfersInput, Prisma.ShopUncheckedCreateWithoutStockTransfersInput>
+}
+
+export type ShopUpsertWithoutStockTransfersInput = {
+  update: Prisma.XOR<Prisma.ShopUpdateWithoutStockTransfersInput, Prisma.ShopUncheckedUpdateWithoutStockTransfersInput>
+  create: Prisma.XOR<Prisma.ShopCreateWithoutStockTransfersInput, Prisma.ShopUncheckedCreateWithoutStockTransfersInput>
+  where?: Prisma.ShopWhereInput
+}
+
+export type ShopUpdateToOneWithWhereWithoutStockTransfersInput = {
+  where?: Prisma.ShopWhereInput
+  data: Prisma.XOR<Prisma.ShopUpdateWithoutStockTransfersInput, Prisma.ShopUncheckedUpdateWithoutStockTransfersInput>
+}
+
+export type ShopUpdateWithoutStockTransfersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUpdateManyWithoutShopNestedInput
+  partners?: Prisma.PartnerUpdateManyWithoutShopNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutShopNestedInput
+  partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
+  purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
+  purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+}
+
+export type ShopUncheckedUpdateWithoutStockTransfersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeLicense?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  binVatNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currencySymbol?: Prisma.StringFieldUpdateOperationsInput | string
+  vatPercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  enableVat?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  thermalWidth?: Prisma.StringFieldUpdateOperationsInput | string
+  invoiceHeader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banglaReceipt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutShopNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutShopNestedInput
+  categories?: Prisma.CategoryUncheckedUpdateManyWithoutShopNestedInput
+  brands?: Prisma.BrandUncheckedUpdateManyWithoutShopNestedInput
+  sections?: Prisma.ProductSectionUncheckedUpdateManyWithoutShopNestedInput
+  units?: Prisma.UnitUncheckedUpdateManyWithoutShopNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutShopNestedInput
+  suppliers?: Prisma.SupplierUncheckedUpdateManyWithoutShopNestedInput
+  purchases?: Prisma.PurchaseUncheckedUpdateManyWithoutShopNestedInput
+  sales?: Prisma.SaleUncheckedUpdateManyWithoutShopNestedInput
+  saleReturns?: Prisma.SaleReturnUncheckedUpdateManyWithoutShopNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutShopNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutShopNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutShopNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutShopNestedInput
+  otherIncomes?: Prisma.OtherIncomeUncheckedUpdateManyWithoutShopNestedInput
+  departments?: Prisma.DepartmentUncheckedUpdateManyWithoutShopNestedInput
+  staffProfiles?: Prisma.StaffProfileUncheckedUpdateManyWithoutShopNestedInput
+  payrolls?: Prisma.PayrollUncheckedUpdateManyWithoutShopNestedInput
+  salaryAdvances?: Prisma.SalaryAdvanceUncheckedUpdateManyWithoutShopNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutShopNestedInput
+  bankCheques?: Prisma.BankChequeUncheckedUpdateManyWithoutShopNestedInput
+  companyAssets?: Prisma.CompanyAssetUncheckedUpdateManyWithoutShopNestedInput
+  ownerTransactions?: Prisma.OwnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  cashRegisters?: Prisma.CashRegisterUncheckedUpdateManyWithoutShopNestedInput
+  licenses?: Prisma.LicenseUncheckedUpdateManyWithoutShopNestedInput
+  partners?: Prisma.PartnerUncheckedUpdateManyWithoutShopNestedInput
+  partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutShopNestedInput
+  partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
+  purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
+  purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutPurchaseReturnsInput = {
@@ -3790,6 +4376,8 @@ export type ShopCreateWithoutPurchaseReturnsInput = {
   partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutShopInput
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutPurchaseReturnsInput = {
@@ -3841,6 +4429,8 @@ export type ShopUncheckedCreateWithoutPurchaseReturnsInput = {
   partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutShopInput
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutPurchaseReturnsInput = {
@@ -3908,6 +4498,8 @@ export type ShopUpdateWithoutPurchaseReturnsInput = {
   partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutShopNestedInput
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutPurchaseReturnsInput = {
@@ -3959,6 +4551,8 @@ export type ShopUncheckedUpdateWithoutPurchaseReturnsInput = {
   partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutShopNestedInput
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutCustomersInput = {
@@ -4010,6 +4604,8 @@ export type ShopCreateWithoutCustomersInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutCustomersInput = {
@@ -4061,6 +4657,8 @@ export type ShopUncheckedCreateWithoutCustomersInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutCustomersInput = {
@@ -4128,6 +4726,8 @@ export type ShopUpdateWithoutCustomersInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutCustomersInput = {
@@ -4179,6 +4779,8 @@ export type ShopUncheckedUpdateWithoutCustomersInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutSalesInput = {
@@ -4230,6 +4832,8 @@ export type ShopCreateWithoutSalesInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutSalesInput = {
@@ -4281,6 +4885,8 @@ export type ShopUncheckedCreateWithoutSalesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutSalesInput = {
@@ -4348,6 +4954,8 @@ export type ShopUpdateWithoutSalesInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutSalesInput = {
@@ -4399,6 +5007,8 @@ export type ShopUncheckedUpdateWithoutSalesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutSaleReturnsInput = {
@@ -4450,6 +5060,8 @@ export type ShopCreateWithoutSaleReturnsInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutSaleReturnsInput = {
@@ -4501,6 +5113,8 @@ export type ShopUncheckedCreateWithoutSaleReturnsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutSaleReturnsInput = {
@@ -4568,6 +5182,8 @@ export type ShopUpdateWithoutSaleReturnsInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutSaleReturnsInput = {
@@ -4619,6 +5235,8 @@ export type ShopUncheckedUpdateWithoutSaleReturnsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutQuotationsInput = {
@@ -4670,6 +5288,8 @@ export type ShopCreateWithoutQuotationsInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutQuotationsInput = {
@@ -4721,6 +5341,8 @@ export type ShopUncheckedCreateWithoutQuotationsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutQuotationsInput = {
@@ -4788,6 +5410,8 @@ export type ShopUpdateWithoutQuotationsInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutQuotationsInput = {
@@ -4839,6 +5463,8 @@ export type ShopUncheckedUpdateWithoutQuotationsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutAccountsInput = {
@@ -4890,6 +5516,8 @@ export type ShopCreateWithoutAccountsInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutAccountsInput = {
@@ -4941,6 +5569,8 @@ export type ShopUncheckedCreateWithoutAccountsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutAccountsInput = {
@@ -5008,6 +5638,8 @@ export type ShopUpdateWithoutAccountsInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutAccountsInput = {
@@ -5059,6 +5691,8 @@ export type ShopUncheckedUpdateWithoutAccountsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutBankChequesInput = {
@@ -5110,6 +5744,8 @@ export type ShopCreateWithoutBankChequesInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutBankChequesInput = {
@@ -5161,6 +5797,8 @@ export type ShopUncheckedCreateWithoutBankChequesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutBankChequesInput = {
@@ -5228,6 +5866,8 @@ export type ShopUpdateWithoutBankChequesInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutBankChequesInput = {
@@ -5279,6 +5919,8 @@ export type ShopUncheckedUpdateWithoutBankChequesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutLoansInput = {
@@ -5330,6 +5972,8 @@ export type ShopCreateWithoutLoansInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutLoansInput = {
@@ -5381,6 +6025,8 @@ export type ShopUncheckedCreateWithoutLoansInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutLoansInput = {
@@ -5448,6 +6094,8 @@ export type ShopUpdateWithoutLoansInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutLoansInput = {
@@ -5499,6 +6147,8 @@ export type ShopUncheckedUpdateWithoutLoansInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutExpenseCategoriesInput = {
@@ -5550,6 +6200,8 @@ export type ShopCreateWithoutExpenseCategoriesInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutExpenseCategoriesInput = {
@@ -5601,6 +6253,8 @@ export type ShopUncheckedCreateWithoutExpenseCategoriesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutExpenseCategoriesInput = {
@@ -5668,6 +6322,8 @@ export type ShopUpdateWithoutExpenseCategoriesInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutExpenseCategoriesInput = {
@@ -5719,6 +6375,8 @@ export type ShopUncheckedUpdateWithoutExpenseCategoriesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutExpensesInput = {
@@ -5770,6 +6428,8 @@ export type ShopCreateWithoutExpensesInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutExpensesInput = {
@@ -5821,6 +6481,8 @@ export type ShopUncheckedCreateWithoutExpensesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutExpensesInput = {
@@ -5888,6 +6550,8 @@ export type ShopUpdateWithoutExpensesInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutExpensesInput = {
@@ -5939,6 +6603,8 @@ export type ShopUncheckedUpdateWithoutExpensesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutOtherIncomesInput = {
@@ -5990,6 +6656,8 @@ export type ShopCreateWithoutOtherIncomesInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutOtherIncomesInput = {
@@ -6041,6 +6709,8 @@ export type ShopUncheckedCreateWithoutOtherIncomesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutOtherIncomesInput = {
@@ -6108,6 +6778,8 @@ export type ShopUpdateWithoutOtherIncomesInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutOtherIncomesInput = {
@@ -6159,6 +6831,8 @@ export type ShopUncheckedUpdateWithoutOtherIncomesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutCompanyAssetsInput = {
@@ -6210,6 +6884,8 @@ export type ShopCreateWithoutCompanyAssetsInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutCompanyAssetsInput = {
@@ -6261,6 +6937,8 @@ export type ShopUncheckedCreateWithoutCompanyAssetsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutCompanyAssetsInput = {
@@ -6328,6 +7006,8 @@ export type ShopUpdateWithoutCompanyAssetsInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutCompanyAssetsInput = {
@@ -6379,6 +7059,8 @@ export type ShopUncheckedUpdateWithoutCompanyAssetsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutOwnerTransactionsInput = {
@@ -6430,6 +7112,8 @@ export type ShopCreateWithoutOwnerTransactionsInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutOwnerTransactionsInput = {
@@ -6481,6 +7165,8 @@ export type ShopUncheckedCreateWithoutOwnerTransactionsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutOwnerTransactionsInput = {
@@ -6548,6 +7234,8 @@ export type ShopUpdateWithoutOwnerTransactionsInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutOwnerTransactionsInput = {
@@ -6599,6 +7287,8 @@ export type ShopUncheckedUpdateWithoutOwnerTransactionsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutDepartmentsInput = {
@@ -6650,6 +7340,8 @@ export type ShopCreateWithoutDepartmentsInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutDepartmentsInput = {
@@ -6701,6 +7393,8 @@ export type ShopUncheckedCreateWithoutDepartmentsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutDepartmentsInput = {
@@ -6768,6 +7462,8 @@ export type ShopUpdateWithoutDepartmentsInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutDepartmentsInput = {
@@ -6819,6 +7515,8 @@ export type ShopUncheckedUpdateWithoutDepartmentsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutStaffProfilesInput = {
@@ -6870,6 +7568,8 @@ export type ShopCreateWithoutStaffProfilesInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutStaffProfilesInput = {
@@ -6921,6 +7621,8 @@ export type ShopUncheckedCreateWithoutStaffProfilesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutStaffProfilesInput = {
@@ -6988,6 +7690,8 @@ export type ShopUpdateWithoutStaffProfilesInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutStaffProfilesInput = {
@@ -7039,6 +7743,8 @@ export type ShopUncheckedUpdateWithoutStaffProfilesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutSalaryAdvancesInput = {
@@ -7090,6 +7796,8 @@ export type ShopCreateWithoutSalaryAdvancesInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutSalaryAdvancesInput = {
@@ -7141,6 +7849,8 @@ export type ShopUncheckedCreateWithoutSalaryAdvancesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutSalaryAdvancesInput = {
@@ -7208,6 +7918,8 @@ export type ShopUpdateWithoutSalaryAdvancesInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutSalaryAdvancesInput = {
@@ -7259,6 +7971,8 @@ export type ShopUncheckedUpdateWithoutSalaryAdvancesInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutPayrollsInput = {
@@ -7310,6 +8024,8 @@ export type ShopCreateWithoutPayrollsInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutPayrollsInput = {
@@ -7361,6 +8077,8 @@ export type ShopUncheckedCreateWithoutPayrollsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutPayrollsInput = {
@@ -7428,6 +8146,8 @@ export type ShopUpdateWithoutPayrollsInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutPayrollsInput = {
@@ -7479,6 +8199,8 @@ export type ShopUncheckedUpdateWithoutPayrollsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutCashRegistersInput = {
@@ -7530,6 +8252,8 @@ export type ShopCreateWithoutCashRegistersInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutCashRegistersInput = {
@@ -7581,6 +8305,8 @@ export type ShopUncheckedCreateWithoutCashRegistersInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutCashRegistersInput = {
@@ -7648,6 +8374,8 @@ export type ShopUpdateWithoutCashRegistersInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutCashRegistersInput = {
@@ -7699,6 +8427,8 @@ export type ShopUncheckedUpdateWithoutCashRegistersInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutPartnersInput = {
@@ -7750,6 +8480,8 @@ export type ShopCreateWithoutPartnersInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutPartnersInput = {
@@ -7801,6 +8533,8 @@ export type ShopUncheckedCreateWithoutPartnersInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutPartnersInput = {
@@ -7868,6 +8602,8 @@ export type ShopUpdateWithoutPartnersInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutPartnersInput = {
@@ -7919,6 +8655,8 @@ export type ShopUncheckedUpdateWithoutPartnersInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutPartnerTransactionsInput = {
@@ -7970,6 +8708,8 @@ export type ShopCreateWithoutPartnerTransactionsInput = {
   partnerRations?: Prisma.PartnerRationCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutPartnerTransactionsInput = {
@@ -8021,6 +8761,8 @@ export type ShopUncheckedCreateWithoutPartnerTransactionsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutPartnerTransactionsInput = {
@@ -8088,6 +8830,8 @@ export type ShopUpdateWithoutPartnerTransactionsInput = {
   partnerRations?: Prisma.PartnerRationUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutPartnerTransactionsInput = {
@@ -8139,6 +8883,8 @@ export type ShopUncheckedUpdateWithoutPartnerTransactionsInput = {
   partnerRations?: Prisma.PartnerRationUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 export type ShopCreateWithoutPartnerRationsInput = {
@@ -8190,6 +8936,8 @@ export type ShopCreateWithoutPartnerRationsInput = {
   partnerTransactions?: Prisma.PartnerTransactionCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferCreateNestedManyWithoutShopInput
 }
 
 export type ShopUncheckedCreateWithoutPartnerRationsInput = {
@@ -8241,6 +8989,8 @@ export type ShopUncheckedCreateWithoutPartnerRationsInput = {
   partnerTransactions?: Prisma.PartnerTransactionUncheckedCreateNestedManyWithoutShopInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedCreateNestedManyWithoutShopInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedCreateNestedManyWithoutShopInput
+  stockWastages?: Prisma.StockWastageUncheckedCreateNestedManyWithoutShopInput
+  stockTransfers?: Prisma.StockTransferUncheckedCreateNestedManyWithoutShopInput
 }
 
 export type ShopCreateOrConnectWithoutPartnerRationsInput = {
@@ -8308,6 +9058,8 @@ export type ShopUpdateWithoutPartnerRationsInput = {
   partnerTransactions?: Prisma.PartnerTransactionUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUpdateManyWithoutShopNestedInput
 }
 
 export type ShopUncheckedUpdateWithoutPartnerRationsInput = {
@@ -8359,6 +9111,8 @@ export type ShopUncheckedUpdateWithoutPartnerRationsInput = {
   partnerTransactions?: Prisma.PartnerTransactionUncheckedUpdateManyWithoutShopNestedInput
   purchaseReturns?: Prisma.PurchaseReturnUncheckedUpdateManyWithoutShopNestedInput
   purchaseOrders?: Prisma.PurchaseOrderUncheckedUpdateManyWithoutShopNestedInput
+  stockWastages?: Prisma.StockWastageUncheckedUpdateManyWithoutShopNestedInput
+  stockTransfers?: Prisma.StockTransferUncheckedUpdateManyWithoutShopNestedInput
 }
 
 
@@ -8399,6 +9153,8 @@ export type ShopCountOutputType = {
   partnerRations: number
   purchaseReturns: number
   purchaseOrders: number
+  stockWastages: number
+  stockTransfers: number
 }
 
 export type ShopCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -8434,6 +9190,8 @@ export type ShopCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   partnerRations?: boolean | ShopCountOutputTypeCountPartnerRationsArgs
   purchaseReturns?: boolean | ShopCountOutputTypeCountPurchaseReturnsArgs
   purchaseOrders?: boolean | ShopCountOutputTypeCountPurchaseOrdersArgs
+  stockWastages?: boolean | ShopCountOutputTypeCountStockWastagesArgs
+  stockTransfers?: boolean | ShopCountOutputTypeCountStockTransfersArgs
 }
 
 /**
@@ -8670,6 +9428,20 @@ export type ShopCountOutputTypeCountPurchaseOrdersArgs<ExtArgs extends runtime.T
   where?: Prisma.PurchaseOrderWhereInput
 }
 
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountStockWastagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StockWastageWhereInput
+}
+
+/**
+ * ShopCountOutputType without action
+ */
+export type ShopCountOutputTypeCountStockTransfersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StockTransferWhereInput
+}
+
 
 export type ShopSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -8721,6 +9493,8 @@ export type ShopSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   partnerRations?: boolean | Prisma.Shop$partnerRationsArgs<ExtArgs>
   purchaseReturns?: boolean | Prisma.Shop$purchaseReturnsArgs<ExtArgs>
   purchaseOrders?: boolean | Prisma.Shop$purchaseOrdersArgs<ExtArgs>
+  stockWastages?: boolean | Prisma.Shop$stockWastagesArgs<ExtArgs>
+  stockTransfers?: boolean | Prisma.Shop$stockTransfersArgs<ExtArgs>
   _count?: boolean | Prisma.ShopCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["shop"]>
 
@@ -8780,6 +9554,8 @@ export type ShopInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   partnerRations?: boolean | Prisma.Shop$partnerRationsArgs<ExtArgs>
   purchaseReturns?: boolean | Prisma.Shop$purchaseReturnsArgs<ExtArgs>
   purchaseOrders?: boolean | Prisma.Shop$purchaseOrdersArgs<ExtArgs>
+  stockWastages?: boolean | Prisma.Shop$stockWastagesArgs<ExtArgs>
+  stockTransfers?: boolean | Prisma.Shop$stockTransfersArgs<ExtArgs>
   _count?: boolean | Prisma.ShopCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -8818,6 +9594,8 @@ export type $ShopPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     partnerRations: Prisma.$PartnerRationPayload<ExtArgs>[]
     purchaseReturns: Prisma.$PurchaseReturnPayload<ExtArgs>[]
     purchaseOrders: Prisma.$PurchaseOrderPayload<ExtArgs>[]
+    stockWastages: Prisma.$StockWastagePayload<ExtArgs>[]
+    stockTransfers: Prisma.$StockTransferPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -9209,6 +9987,8 @@ export interface Prisma__ShopClient<T, Null = never, ExtArgs extends runtime.Typ
   partnerRations<T extends Prisma.Shop$partnerRationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$partnerRationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PartnerRationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   purchaseReturns<T extends Prisma.Shop$purchaseReturnsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$purchaseReturnsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PurchaseReturnPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   purchaseOrders<T extends Prisma.Shop$purchaseOrdersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$purchaseOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PurchaseOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stockWastages<T extends Prisma.Shop$stockWastagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$stockWastagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StockWastagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stockTransfers<T extends Prisma.Shop$stockTransfersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Shop$stockTransfersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StockTransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10368,6 +11148,54 @@ export type Shop$purchaseOrdersArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.PurchaseOrderScalarFieldEnum | Prisma.PurchaseOrderScalarFieldEnum[]
+}
+
+/**
+ * Shop.stockWastages
+ */
+export type Shop$stockWastagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StockWastage
+   */
+  select?: Prisma.StockWastageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StockWastage
+   */
+  omit?: Prisma.StockWastageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StockWastageInclude<ExtArgs> | null
+  where?: Prisma.StockWastageWhereInput
+  orderBy?: Prisma.StockWastageOrderByWithRelationInput | Prisma.StockWastageOrderByWithRelationInput[]
+  cursor?: Prisma.StockWastageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StockWastageScalarFieldEnum | Prisma.StockWastageScalarFieldEnum[]
+}
+
+/**
+ * Shop.stockTransfers
+ */
+export type Shop$stockTransfersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StockTransfer
+   */
+  select?: Prisma.StockTransferSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StockTransfer
+   */
+  omit?: Prisma.StockTransferOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StockTransferInclude<ExtArgs> | null
+  where?: Prisma.StockTransferWhereInput
+  orderBy?: Prisma.StockTransferOrderByWithRelationInput | Prisma.StockTransferOrderByWithRelationInput[]
+  cursor?: Prisma.StockTransferWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StockTransferScalarFieldEnum | Prisma.StockTransferScalarFieldEnum[]
 }
 
 /**

@@ -122,6 +122,26 @@ export type PurchaseOrderItem = Prisma.PurchaseOrderItemModel
  */
 export type SupplierPayment = Prisma.SupplierPaymentModel
 /**
+ * Model StockWastage
+ * 
+ */
+export type StockWastage = Prisma.StockWastageModel
+/**
+ * Model StockWastageItem
+ * 
+ */
+export type StockWastageItem = Prisma.StockWastageItemModel
+/**
+ * Model StockTransfer
+ * 
+ */
+export type StockTransfer = Prisma.StockTransferModel
+/**
+ * Model StockTransferItem
+ * 
+ */
+export type StockTransferItem = Prisma.StockTransferItemModel
+/**
  * Model PurchaseReturn
  * 
  */

@@ -331,6 +331,40 @@ export type EnumPurchaseOrderStatusWithAggregatesFilter<$PrismaModel = never> = 
   _max?: Prisma.NestedEnumPurchaseOrderStatusFilter<$PrismaModel>
 }
 
+export type EnumWastageReasonFilter<$PrismaModel = never> = {
+  equals?: $Enums.WastageReason | Prisma.EnumWastageReasonFieldRefInput<$PrismaModel>
+  in?: $Enums.WastageReason[]
+  notIn?: $Enums.WastageReason[]
+  not?: Prisma.NestedEnumWastageReasonFilter<$PrismaModel> | $Enums.WastageReason
+}
+
+export type EnumWastageReasonWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WastageReason | Prisma.EnumWastageReasonFieldRefInput<$PrismaModel>
+  in?: $Enums.WastageReason[]
+  notIn?: $Enums.WastageReason[]
+  not?: Prisma.NestedEnumWastageReasonWithAggregatesFilter<$PrismaModel> | $Enums.WastageReason
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWastageReasonFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWastageReasonFilter<$PrismaModel>
+}
+
+export type EnumTransferStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.TransferStatus | Prisma.EnumTransferStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TransferStatus[]
+  notIn?: $Enums.TransferStatus[]
+  not?: Prisma.NestedEnumTransferStatusFilter<$PrismaModel> | $Enums.TransferStatus
+}
+
+export type EnumTransferStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TransferStatus | Prisma.EnumTransferStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TransferStatus[]
+  notIn?: $Enums.TransferStatus[]
+  not?: Prisma.NestedEnumTransferStatusWithAggregatesFilter<$PrismaModel> | $Enums.TransferStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTransferStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTransferStatusFilter<$PrismaModel>
+}
+
 export type EnumReturnSettlementTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.ReturnSettlementType | Prisma.EnumReturnSettlementTypeFieldRefInput<$PrismaModel>
   in?: $Enums.ReturnSettlementType[]
@@ -908,6 +942,40 @@ export type NestedEnumPurchaseOrderStatusWithAggregatesFilter<$PrismaModel = nev
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumPurchaseOrderStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumPurchaseOrderStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumWastageReasonFilter<$PrismaModel = never> = {
+  equals?: $Enums.WastageReason | Prisma.EnumWastageReasonFieldRefInput<$PrismaModel>
+  in?: $Enums.WastageReason[]
+  notIn?: $Enums.WastageReason[]
+  not?: Prisma.NestedEnumWastageReasonFilter<$PrismaModel> | $Enums.WastageReason
+}
+
+export type NestedEnumWastageReasonWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WastageReason | Prisma.EnumWastageReasonFieldRefInput<$PrismaModel>
+  in?: $Enums.WastageReason[]
+  notIn?: $Enums.WastageReason[]
+  not?: Prisma.NestedEnumWastageReasonWithAggregatesFilter<$PrismaModel> | $Enums.WastageReason
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWastageReasonFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWastageReasonFilter<$PrismaModel>
+}
+
+export type NestedEnumTransferStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.TransferStatus | Prisma.EnumTransferStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TransferStatus[]
+  notIn?: $Enums.TransferStatus[]
+  not?: Prisma.NestedEnumTransferStatusFilter<$PrismaModel> | $Enums.TransferStatus
+}
+
+export type NestedEnumTransferStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TransferStatus | Prisma.EnumTransferStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TransferStatus[]
+  notIn?: $Enums.TransferStatus[]
+  not?: Prisma.NestedEnumTransferStatusWithAggregatesFilter<$PrismaModel> | $Enums.TransferStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTransferStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTransferStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumReturnSettlementTypeFilter<$PrismaModel = never> = {
