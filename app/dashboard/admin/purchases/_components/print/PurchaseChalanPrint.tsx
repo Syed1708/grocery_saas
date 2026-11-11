@@ -324,7 +324,7 @@ export default function PurchaseChalanPrint({
                 * ডেলিভারি ঘাটতি/ক্ষতি বাদ দিয়ে হিসাব করা হয়েছে।
               </p>
             )}
-
+ 
             <div className="grid grid-cols-2 gap-4 text-center text-[8px] pt-8">
               <div><p className="border-t border-dotted border-black pt-1">মাল গ্রহণকারীর স্বাক্ষর</p></div>
               <div>
