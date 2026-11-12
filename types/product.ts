@@ -24,7 +24,7 @@ export interface IProduct {
   bulkUnitName?: string | null;
   conversionFactor: number;
   image?: string | null;
-  status: "active" | "inactive"; // 👈 "active" | "inactive"
+  status: "active" | "inactive" | string; // 👈 "active" | "inactive"
   createdAt: Date;
 }
 

@@ -5,21 +5,20 @@ import { prisma } from "@/lib/prisma";
 import { PERMISSIONS } from "@/types/rbac";
 import { revalidatePath } from "next/cache";
 
-
-
 export async function createBrandAction(formData: FormData) {
   try {
-       const user = await requireAuth({
-         requiredPermission: PERMISSIONS.POS_ACCESS,
-         requireActiveStatus: true,
-       });
-   
-       if (!user.activeBranchId) {
-         return { success: false, error: "সক্রিয় ব্রাঞ্চ পাওয়া যায়নি।" };
-       }
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.POS_ACCESS,
+      requireActiveStatus: true,
+    });
+
+    if (!user.activeBranchId) {
+      return { success: false, error: "সক্রিয় ব্রাঞ্চ পাওয়া যায়নি।" };
+    }
     const name = formData.get("name")?.toString().trim();
     const companyName = formData.get("companyName")?.toString().trim() || null;
-    const contactPerson = formData.get("contactPerson")?.toString().trim() || null;
+    const contactPerson =
+      formData.get("contactPerson")?.toString().trim() || null;
     const phone = formData.get("phone")?.toString().trim() || null;
     const status = formData.get("status")?.toString() || "active";
 
@@ -39,29 +38,34 @@ export async function createBrandAction(formData: FormData) {
     revalidatePath("/dashboard/admin/products");
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to create brand." };
+    return {
+      success: false,
+      error: error.message || "Failed to create brand.",
+    };
   }
 }
 
 // 👈 Added Update Brand Action
 export async function updateBrandAction(formData: FormData) {
   try {
-       const user = await requireAuth({
-         requiredPermission: PERMISSIONS.POS_ACCESS,
-         requireActiveStatus: true,
-       });
-   
-       if (!user.activeBranchId) {
-         return { success: false, error: "সক্রিয় ব্রাঞ্চ পাওয়া যায়নি।" };
-       }
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.POS_ACCESS,
+      requireActiveStatus: true,
+    });
+
+    if (!user.activeBranchId) {
+      return { success: false, error: "সক্রিয় ব্রাঞ্চ পাওয়া যায়নি।" };
+    }
     const id = formData.get("id")?.toString();
     const name = formData.get("name")?.toString().trim();
     const companyName = formData.get("companyName")?.toString().trim() || null;
-    const contactPerson = formData.get("contactPerson")?.toString().trim() || null;
+    const contactPerson =
+      formData.get("contactPerson")?.toString().trim() || null;
     const phone = formData.get("phone")?.toString().trim() || null;
     const status = formData.get("status")?.toString() || "active";
 
-    if (!id || !name) return { success: false, error: "Missing required fields." };
+    if (!id || !name)
+      return { success: false, error: "Missing required fields." };
 
     await prisma.brand.update({
       where: { id, shopId: user.shopId },
@@ -77,7 +81,10 @@ export async function updateBrandAction(formData: FormData) {
     revalidatePath("/dashboard/admin/products");
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to update brand." };
+    return {
+      success: false,
+      error: error.message || "Failed to update brand.",
+    };
   }
 }
 
@@ -108,6 +115,9 @@ export async function deleteBrandAction(id: string) {
     revalidatePath("/dashboard/admin/products");
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || "Failed to delete brand." };
+    return {
+      success: false,
+      error: error.message || "Failed to delete brand.",
+    };
   }
 }

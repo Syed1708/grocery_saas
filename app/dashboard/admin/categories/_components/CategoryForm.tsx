@@ -12,7 +12,7 @@ interface CategoryFormProps {
 
 export default function CategoryForm({ editingCategory }: CategoryFormProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-10">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input
           label="Category Name"

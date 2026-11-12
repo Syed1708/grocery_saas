@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 interface FormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void;
   title: string;
   description?: string;
   children: React.ReactNode;

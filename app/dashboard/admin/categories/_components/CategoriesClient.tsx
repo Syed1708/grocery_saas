@@ -2,6 +2,7 @@
 "use no memo";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -15,23 +16,27 @@ import { DataTable } from "@/components/common/data-table/DataTable";
 import { DataTableViewOptions } from "@/components/common/data-table/DataTableViewOptions";
 import FormModal from "@/components/common/FormModal";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
-import CategoryForm from "./CategoryForm"; // 👈 Clean extracted form
+import Breadcrumbs from "@/components/common/Breadcrumbs";
+import { PermissionGate } from "@/components/common/PermissionGate";
+import CategoryForm from "./CategoryForm";
 import {
   createCategoryAction,
   updateCategoryAction,
   deleteCategoryAction,
 } from "@/app/actions/category-actions";
 import { ICategory, PERMISSIONS } from "@/types";
-import Image from "next/image";
-import { PermissionGate } from "@/components/common/PermissionGate";
 
-export default function CategoriesClient({ data }: { data: ICategory[] }) {
+interface Props {
+  data: ICategory[];
+  userRole?: string;
+}
+
+export default function CategoriesClient({ data = [], userRole = "OWNER" }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ICategory | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ICategory | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Table Filter States
   const [globalFilter, setGlobalFilter] = useState("");
   const [columnVisibility, setColumnVisibility] = useState({});
 
@@ -45,7 +50,7 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
     setModalOpen(true);
   }
 
-  async function handleFormSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleFormSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
 
@@ -62,13 +67,12 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
 
     if (res.success) {
       toast.success(
-        editingCategory
-          ? "Category updated successfully!"
-          : "Category created successfully!"
+        editingCategory ? "ক্যাটাগরি আপডেট সম্পন্ন হয়েছে!" : "নতুন ক্যাটাগরি তৈরি হয়েছে!"
       );
       setModalOpen(false);
+      setEditingCategory(null);
     } else {
-      toast.error(res.error || "Operation failed.");
+      toast.error(res.error || "অপারেশন ব্যর্থ হয়েছে।");
     }
   }
 
@@ -80,28 +84,29 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
     setLoading(false);
 
     if (res.success) {
-      toast.success(`"${deleteTarget.name}" deleted successfully!`);
+      toast.success(`"${deleteTarget.name}" ক্যাটাগরি সফলভাবে মুছে ফেলা হয়েছে!`);
       setDeleteTarget(null);
     } else {
-      toast.error(res.error || "Failed to delete category.");
+      toast.error(res.error || "মুছে ফেলা সম্ভব হয়নি।");
     }
   }
 
   const columns: ColumnDef<ICategory>[] = [
     {
       accessorKey: "image",
-      header: "Photo",
+      header: "ছবি",
       enableHiding: false,
       cell: ({ row }) => {
         const image = row.getValue("image") as string | null;
         return (
-          <div className="w-10 h-10 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0">
             {image ? (
-              <Image 
+              <Image
                 src={image}
                 alt="Category"
                 width={40}
                 height={40}
+                sizes="40px"
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -113,60 +118,70 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
     },
     {
       accessorKey: "name",
-      header: "Category Name",
+      header: "ক্যাটাগরির নাম",
       cell: ({ row }) => (
-        <span className="font-semibold text-neutral-900 dark:text-neutral-100">
+        <span className="font-semibold text-neutral-900 dark:text-neutral-100 text-xs">
           {row.getValue("name")}
         </span>
       ),
     },
     {
       accessorKey: "description",
-      header: "Description",
+      header: "বিবরণ",
       cell: ({ row }) => (
-        <span className="text-neutral-500 dark:text-neutral-400 truncate max-w-xs block">
+        <span className="text-neutral-500 dark:text-neutral-400 truncate max-w-xs block text-xs">
           {row.getValue("description") || "—"}
         </span>
       ),
     },
     {
       accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => (
-        <span className="text-neutral-500 dark:text-neutral-400 truncate max-w-xs block">
-          {row.getValue("status") || "—"}
-        </span>
-      ),
+      header: "স্ট্যাটাস",
+      cell: ({ row }) => {
+        const status = row.getValue("status") as string;
+        const isActive = status === "active" || status === "ACTIVE";
+        return (
+          <span
+            className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase inline-block ${isActive
+                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400"
+                : "bg-neutral-100 text-neutral-500 dark:bg-neutral-800"
+              }`}
+          >
+            {isActive ? "সক্রিয়" : "নিষ্ক্রিয়"}
+          </span>
+        );
+      },
     },
     {
       id: "actions",
-      header: "Actions",
+      header: "অ্যাকশন",
       enableHiding: false,
       cell: ({ row }) => {
         const cat = row.original;
         return (
           <PermissionGate permission={PERMISSIONS.CATALOG_MANAGE}>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => openEdit(cat)}
+                className="p-1.5 rounded-lg text-neutral-500 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
+                title="সম্পাদনা করুন"
+              >
+                <Edit2 size={15} />
+              </button>
 
-          
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => openEdit(cat)}
-              className="p-1.5 rounded-lg text-neutral-500 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
-              title="Edit"
-            >
-              <Edit2 size={15} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setDeleteTarget(cat)}
-              className="p-1.5 rounded-lg text-neutral-500 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
-              title="Delete"
-            >
-              <Trash2 size={15} />
-            </button>
-          </div>
-
+              {/* 🛡️ Delete is strictly gated to the Store OWNER */}
+              {userRole === "OWNER" && (
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(cat)}
+                  className="p-1.5 rounded-lg text-neutral-500 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
+                  title="মুছে ফেলুন"
+                >
+                  <Trash2 size={15} />
+                </button>
+              )}
+            </div>
           </PermissionGate>
         );
       },
@@ -176,10 +191,7 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
   const table = useReactTable({
     data,
     columns,
-    state: {
-      globalFilter,
-      columnVisibility,
-    },
+    state: { globalFilter, columnVisibility },
     onGlobalFilterChange: setGlobalFilter,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
@@ -188,26 +200,30 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
   });
 
   return (
-    <div className="space-y-4">
-      {/* Top Header */}
+    <div className="space-y-6">
+      <Breadcrumbs items={[{ label: "পণ্য ক্যাটাগরি" }]} />
+
+      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">
-            Categories
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">
+            পণ্য ক্যাটাগরি (Product Categories)
           </h1>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-            Organize products with photos for rapid barcode scanning and POS lookups
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+            পিওএস স্ক্রিনে দ্রুত পণ্য খুঁজে পেতে ক্যাটাগরি ও ছবি নির্ধারণ করুন
           </p>
         </div>
         <div className="flex items-center gap-2">
           <DataTableViewOptions table={table} />
-          <button
-            type="button"
-            onClick={openCreate}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer"
-          >
-            <Plus size={16} /> Add Category
-          </button>
+          <PermissionGate permission={PERMISSIONS.CATALOG_MANAGE}>
+            <button
+              type="button"
+              onClick={openCreate}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer"
+            >
+              <Plus size={16} /> নতুন ক্যাটাগরি যোগ
+            </button>
+          </PermissionGate>
         </div>
       </div>
 
@@ -219,7 +235,7 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
             type="text"
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            placeholder="Search categories by name..."
+            placeholder="ক্যাটাগরির নাম দিয়ে খুঁজুন..."
             className="w-full pl-9 pr-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-neutral-900 dark:text-neutral-100"
           />
         </div>
@@ -227,13 +243,17 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
 
       <DataTable table={table} columns={columns} />
 
-      {/* Reusable FormModal with Clean Form Component */}
+      {/* 🛡️ Key-reset prevents stale CategoryForm uncontrolled state */}
       <FormModal
+        key={editingCategory?.id || "new-category-modal"}
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingCategory(null);
+        }}
         onSubmit={handleFormSubmit}
-        title={editingCategory ? "Edit Category" : "New Category"}
-        description="Categories group products together on the POS cash register."
+        title={editingCategory ? "ক্যাটাগরি সম্পাদনা" : "নতুন ক্যাটাগরি তৈরি"}
+        description="ক্যাটাগরির নাম, ছবি ও বিবরণ নির্ধারণ করুন।"
         isEditing={Boolean(editingCategory)}
         loading={loading}
       >
@@ -244,9 +264,9 @@ export default function CategoriesClient({ data }: { data: ICategory[] }) {
         isOpen={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
-        title="Delete Category"
-        message={`Are you sure you want to delete "${deleteTarget?.name}"? Its image file will also be permanently removed from disk.`}
-        confirmLabel="Delete Category"
+        title="ক্যাটাগরি মুছে ফেলুন"
+        message={`আপনি কি নিশ্চিতভাবে "${deleteTarget?.name}" মুছে ফেলতে চান? ডিস্ক থেকে এর ছবিও মুছে ফেলা হবে।`}
+        confirmLabel="ক্যাটাগরি মুছুন"
         loading={loading}
       />
     </div>

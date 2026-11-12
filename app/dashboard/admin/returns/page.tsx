@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth/guard";
 import { IPosShopConfig, PERMISSIONS } from "@/types";
 import { getSaleReturns } from "@/queries/return-queries";

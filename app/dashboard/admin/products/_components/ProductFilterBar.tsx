@@ -2,7 +2,7 @@
 
 import { Search, Filter, X } from "lucide-react";
 import { ExtraOption } from "./ProductsClient";
-import { ICategoryOption } from "@/types";
+import { ICategoryOption, IUnitOption } from "@/types";
 
 export type StockStatusFilter = "ALL" | "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK";
 
@@ -20,6 +20,7 @@ interface ProductFilterBarProps {
   categories: ICategoryOption[];
   brands: ExtraOption[];
   sections: ExtraOption[];
+  units: IUnitOption[];
   onReset: () => void;
   isFiltered: boolean;
 }
@@ -80,7 +81,8 @@ export default function ProductFilterBar({
           <option value="">সকল ব্র্যান্ড / কোম্পানি (All Brands)</option>
           {brands.map((b) => (
             <option key={b.id} value={b.id}>
-              {b.name} {b.companyName ? `(${b.companyName})` : ""}
+              {b.name} {b.companyName ? `(${b.companyName})` : ""}{" "}
+              {b.status === "inactive" ? "[নিষ্ক্রিয়]" : ""}
             </option>
           ))}
         </select>
@@ -118,11 +120,10 @@ export default function ProductFilterBar({
                 key={pill.value}
                 type="button"
                 onClick={() => onStockStatusChange(pill.value as StockStatusFilter)}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition shrink-0 cursor-pointer ${
-                  isActive
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition shrink-0 cursor-pointer ${isActive
                     ? "bg-blue-600 text-white font-semibold shadow-xs"
                     : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
-                }`}
+                  }`}
               >
                 {pill.label}
               </button>

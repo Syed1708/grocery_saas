@@ -1,29 +1,37 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { prisma } from "@/lib/prisma";
 import BranchesClient from "./_components/BranchesClient";
+import { IBranchWithCounts } from "@/types";
 
 export default async function BranchesPage() {
-  const session = await getServerSession(authOptions);
+  // 🛡️ Zero-Trust Guard: Enforce permissions and active status
+  const user = await requireAuth({
+    requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+    requireActiveStatus: true,
+  });
 
-  if (!session?.user?.shopId) {
-    redirect("/login");
-  }
- 
+  const { shopId, role } = user;
+
   const branches = await prisma.branch.findMany({
-    where: { shopId: session.user.shopId },
+    where: { shopId },
     include: {
       _count: {
         select: { users: true, sales: true },
       },
     },
-    orderBy: { isMain: "desc" },
+    orderBy: [
+      { isMain: "desc" },
+      { createdAt: "asc" },
+    ],
   });
 
   return (
     <div className="max-w-7xl mx-auto">
-      <BranchesClient data={branches as any} />
+      <BranchesClient
+        data={branches as IBranchWithCounts[]}
+        userRole={role}
+      />
     </div>
   );
 }

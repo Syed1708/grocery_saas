@@ -6,10 +6,17 @@ export interface IBranch {
   email?: string | null;
   address?: string | null;
   isMain: boolean;
-  status: string;
+  status: "active" | "inactive" | string;
   shopId: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface IBranchWithCounts extends IBranch {
+  _count: {
+    users: number;
+    sales: number;
+  };
 }
 
 export interface IBranchOption {

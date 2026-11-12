@@ -1,5 +1,3 @@
-// queries/product-queries.ts
-
 import { prisma } from "@/lib/prisma";
 import { IProduct, ICategoryOption, IUnitOption } from "@/types";
 
@@ -8,7 +6,10 @@ export interface ItemWithCount {
   name: string;
   code?: string | null;
   companyName?: string | null;
+  contactPerson?: string | null;
   phone?: string | null;
+  description?: string | null;
+  status?: string;
   _count: { products: number };
 }
 
@@ -50,7 +51,7 @@ export async function getProducts(
       wholesalePrice: p.wholesalePrice ? Number(p.wholesalePrice) : null,
       vatPercent: p.vatPercent ? Number(p.vatPercent) : 0,
       expiryDate: p.expiryDate ? p.expiryDate.toISOString().split("T")[0] : null,
-      stockQuantity: currentStock,
+      stockQuantity: currentStock, // 👈 Real branch stock
       minStockAlert: Number(p.alertQuantity),
       unitId: p.unitId,
       unitName: p.unit.name,
@@ -100,12 +101,14 @@ export async function getUnitsForSelect(shopId: string): Promise<IUnitOption[]> 
 
 export async function getBrandsForSelect(shopId: string): Promise<ItemWithCount[]> {
   return await prisma.brand.findMany({
-    where: { shopId, status: "active" },
+    where: { shopId },
     select: {
       id: true,
       name: true,
       companyName: true,
+      contactPerson: true, // 👈 Added
       phone: true,
+      status: true,        // 👈 Added
       _count: { select: { products: true } },
     },
     orderBy: { name: "asc" },
@@ -114,11 +117,12 @@ export async function getBrandsForSelect(shopId: string): Promise<ItemWithCount[
 
 export async function getSectionsForSelect(shopId: string): Promise<ItemWithCount[]> {
   return await prisma.productSection.findMany({
-    where: { shopId, status: "active" },
+    where: { shopId },
     select: {
       id: true,
       name: true,
       code: true,
+      description: true, // 👈 Added
       _count: { select: { products: true } },
     },
     orderBy: { name: "asc" },
