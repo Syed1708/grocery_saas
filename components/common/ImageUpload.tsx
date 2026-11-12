@@ -13,7 +13,6 @@ interface ImageUploadProps {
 export default function ImageUpload({
   name,
   defaultImage,
-  label = "Upload Image",
 }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(defaultImage || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,11 +34,7 @@ export default function ImageUpload({
 
   return (
     <div>
-      {label && (
-        <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          {label}
-        </label>
-      )}
+      
 
       {preview ? (
         <div className="relative w-full h-40 rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 group">

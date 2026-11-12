@@ -1,51 +1,59 @@
 "use client";
 
-import { Input } from "@/components/common/ui/Input";
-import { Select } from "@/components/common/ui/Select";
-import { Textarea } from "@/components/common/ui/Textarea";
-import ImageUpload from "@/components/common/ImageUpload";
+import React from "react";
 import { ICategory } from "@/types";
+import { FormField } from "@/components/common/ui/form/FormField";
 
-interface CategoryFormProps {
-  editingCategory?: ICategory | null;
+interface Props {
+  category: ICategory | null;
+  errors?: Record<string, string>; // 👈 Accept errors from useCrudModal
 }
 
-export default function CategoryForm({ editingCategory }: CategoryFormProps) {
+export default function CategoryForm({ category, errors = {} }: Props) {
   return (
-    <div className="space-y-10">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Input
-          label="Category Name"
-          name="name"
-          required
-          defaultValue={editingCategory?.name || ""}
-          placeholder="e.g. Dairy & Eggs"
-        />
-
-        {/* 👈 Added Status Dropdown */}
-        <Select
-          label="Status"
-          name="status"
-          defaultValue={editingCategory?.status || "active"}
-          options={[
-            { label: "Active (Visible on POS)", value: "active" },
-            { label: "Inactive (Hidden)", value: "inactive" },
-          ]}
-        />
-      </div>
-
-      <Textarea
-        label="Description (Optional)"
-        name="description"
-        rows={2}
-        defaultValue={editingCategory?.description || ""}
-        placeholder="Short details about this item group..."
+    <div className="space-y-4">
+      {/* Name Input with Error Binding */}
+      <FormField
+        type="text"
+        label="ক্যাটাগরির নাম"
+        name="name"
+        required
+        defaultValue={category?.name}
+        placeholder="যেমন: ডেইরি ও ডিম"
+        error={errors.name} // 👈 Turns border red & shows error message!
       />
 
-      <ImageUpload
+      {/* Status Dropdown */}
+      <FormField
+        type="select"
+        label="স্ট্যাটাস"
+        name="status"
+        defaultValue={category?.status || "active"}
+        error={errors.status}
+        options={[
+          { label: "সক্রিয় (Active)", value: "active" },
+          { label: "নিষ্ক্রিয় (Inactive)", value: "inactive" },
+        ]}
+      />
+
+      {/* Description Textarea */}
+      <FormField
+        type="textarea"
+        label="বিবরণ"
+        name="description"
+        defaultValue={category?.description}
+        placeholder="সংক্ষিপ্ত বিবরণ লিখুন..."
+        error={errors.description}
+      />
+
+      {/* Image Upload (Single clean label + error check) */}
+      <FormField
+        type="image"
+        label="ক্যাটাগরির ছবি"
         name="image"
-        defaultImage={editingCategory?.image}
-        label="Category Thumbnail Photo"
+        defaultValue={category?.image}
+        hint="সর্বোচ্চ ৫ মেগাবাইট (JPG, PNG, WEBP)"
+        error={errors.image} // 👈 Highlights if image size exceeds limit
       />
     </div>
   );

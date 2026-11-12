@@ -1,8 +1,7 @@
-
-import { getCategories } from "@/queries/category-queries";
-import CategoriesClient from "./_components/CategoriesClient";
 import { requireAuth } from "@/lib/auth/guard";
-import { ICategory, PERMISSIONS } from "@/types";
+import { PERMISSIONS } from "@/types";
+import { getCategories } from "@/queries/category-queries"; 
+import CategoriesClient from "./_components/CategoriesClient";
 
 export default async function CategoriesPage() {
   // 🛡️ Zero-Trust Guard: Enforce permissions and active account status
@@ -17,7 +16,7 @@ export default async function CategoriesPage() {
   return (
     <div className="max-w-7xl mx-auto">
       <CategoriesClient
-        data={categories as ICategory[]}
+        data={categories} // 👈 Clean: no `as any` or casting needed if getCategories returns ICategory[]
         userRole={role}
       />
     </div>
