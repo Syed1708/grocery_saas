@@ -1,25 +1,15 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 
 import FamilyLedgerClient from "./_components/FamilyLedgerClient";
 import { getPartnerRations, getPartners, getPartnerTransactions } from "@/queries/partner-queries";
 
 export default async function FamilyLedgerPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.shopId) {
-    redirect("/login");
-  }
-
-  // Zero-Trust Security: Family Ledger is strictly locked to OWNER
-  if (session.user.role !== "OWNER") {
-    redirect("/dashboard");
-  }
-
-  const shopId = session.user.shopId as string;
-  const branchId = session.user.branchId || undefined;
+  // 🛡️ Zero-Trust Guard: Family Ledger is strictly locked to OWNER
+  const { shopId, activeBranchId: branchId } = await requireAuth({
+    allowedRoles: ["OWNER"],
+    requireActiveStatus: true,
+  });
 
   // Parallel data fetching matching your AccountsPage pattern
   const [partnersRes, transactionsRes, rationsRes, accountsRaw, productsRaw, shop] = await Promise.all([

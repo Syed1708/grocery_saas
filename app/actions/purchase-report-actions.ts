@@ -1,17 +1,16 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types/rbac";
 import { getPurchaseChalanItems } from "@/queries/purchase-report-queries";
 
 export async function fetchPurchaseChalanItemsAction(purchaseId: string) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.shopId) {
-    return { success: false, error: "Unauthorized access" };
-  }
-
   try {
-    const items = await getPurchaseChalanItems(purchaseId, session.user.shopId);
+    const { shopId } = await requireAuth({
+      requiredPermission: PERMISSIONS.PURCHASES_VIEW,
+      requireActiveStatus: true,
+    });
+    const items = await getPurchaseChalanItems(purchaseId, shopId);
     return { success: true, data: items };
   } catch (error) {
     console.error("Failed to fetch chalan items:", error);

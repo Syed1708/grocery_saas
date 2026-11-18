@@ -1,7 +1,6 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { 
   shopProfileSchema, 
@@ -15,21 +14,13 @@ import { revalidatePath } from "next/cache";
 // RBAC & MULTI-TENANCY GUARD
 // ==========================================
 async function verifyShopAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.shopId) {
-    throw new Error("Unauthorized access: Session required.");
-  }
-  const role = session.user.role;
-  if (role !== "OWNER" && role !== "MANAGER") {
-    throw new Error("Permission denied. Only Owner or Manager can modify store settings.");
-  }
+  const { shopId, userId, activeBranchId } = await requireAuth({
+    allowedRoles: ["OWNER", "MANAGER"],
+    requireActiveStatus: true,
+  });
 
   // 👈 Return active branchId as well
-  return { 
-    shopId: session.user.shopId, 
-    userId: session.user.id,
-    branchId: session.user.branchId || null
-  };
+  return { shopId, userId, branchId: activeBranchId };
 }
 
 // ==========================================
@@ -38,18 +29,11 @@ async function verifyShopAdmin() {
 
 export async function updateShopProfileAction(rawInput: unknown) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.shopId) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const { shopId, branchId, role } = session.user;
+    const { shopId, activeBranchId: branchId, role } = await requireAuth({
+      allowedRoles: ["OWNER", "MANAGER"],
+      requireActiveStatus: true,
+    });
     const isOwner = role === "OWNER";
-    const isManager = role === "MANAGER";
-
-    if (!isOwner && !isManager) {
-      return { success: false, error: "Permission denied." };
-    }
 
     const parsed = shopProfileSchema.safeParse(rawInput);
     if (!parsed.success) {

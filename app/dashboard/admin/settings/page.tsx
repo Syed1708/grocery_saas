@@ -1,19 +1,14 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
+import { requireAuth } from "@/lib/auth/guard";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import SettingsClient from "./_components/SettingsClient";
 import { IShopSettings, IBranchSettings } from "@/types/settings";
 
 export default async function SettingsPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.shopId) {
-    redirect("/login");
-  }
-
-  const { shopId } = session.user;
-  const activeBranchId = session.user.branchId;
+  const { shopId, activeBranchId, role } = await requireAuth({
+    allowedRoles: ["OWNER", "MANAGER"],
+    requireActiveStatus: true,
+  });
 
   const [shop, branches] = await Promise.all([
     prisma.shop.findUnique({
@@ -56,7 +51,7 @@ export default async function SettingsPage() {
         shop={formattedShop}
         branches={formattedBranches}
         activeBranch={activeBranch}
-        userRole={session.user.role} // 👈 Pass userRole here
+        userRole={role} // 👈 Pass userRole here
       />
     </div>
   );

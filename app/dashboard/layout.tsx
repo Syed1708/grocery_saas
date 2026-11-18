@@ -1,6 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import DashboardShell from "./_components/DashboardShell";
 
@@ -9,14 +7,18 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
-
   // 1. Authentication & Active Status Guard
-  if (!session?.user?.shopId) {
-    redirect("/login");
-  }
+  const { shopId, role, userId, activeBranchId: branchId } = await requireAuth({
+    requireActiveStatus: true,
+  });
 
-  const { shopId, role, name, shopName, branchId } = session.user;
+  // 2. Resolve display names for the shell
+  const [profile, shop] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId }, select: { name: true } }),
+    prisma.shop.findUnique({ where: { id: shopId }, select: { name: true } }),
+  ]);
+  const name = profile?.name;
+  const shopName = shop?.name;
 
   // 2. Zero-Trust Branch Query:
   // - OWNER: Can switch between all branches.

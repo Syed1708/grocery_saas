@@ -1,17 +1,14 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 async function getAuthenticatedUser() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.shopId) throw new Error("Unauthorized");
-  if (session.user.role !== "OWNER" && session.user.role !== "MANAGER") {
-    throw new Error("Forbidden: Only Owners and Managers can manage sections.");
-  }
-  return session.user;
+  return requireAuth({
+    allowedRoles: ["OWNER", "MANAGER"],
+    requireActiveStatus: true,
+  });
 }
 
 export async function createSectionAction(formData: FormData) {

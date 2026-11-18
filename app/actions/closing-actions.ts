@@ -1,7 +1,6 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
@@ -19,15 +18,10 @@ export async function createClosingAction(payload: {
   totalInvoices: number;
   notes?: string;
 }) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.shopId || !session?.user?.branchId) {
-    return { success: false, error: "Unauthorized access: Active branch required." };
-  }
-
-  const { shopId, branchId, id: userId } = session.user;
-
   try {
+    const { shopId, activeBranchId: branchId, userId } = await requireAuth({
+      requireActiveStatus: true,
+    });
     const now = new Date();
     const timeString = now.toTimeString().split(" ")[0]; // "HH:MM:SS"
 

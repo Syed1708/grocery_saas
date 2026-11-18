@@ -1,6 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { getPurchaseReportData } from "@/queries/purchase-report-queries";
 import PurchaseReportClient from "./_components/PurchaseReportClient";
@@ -11,13 +9,9 @@ interface PageProps {
 }
 
 export default async function PurchaseReportPage({ searchParams }: PageProps) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.shopId || !session?.user?.branchId) {
-    redirect("/login");
-  }
-
-  const { shopId, branchId } = session.user;
+  const { shopId, activeBranchId: branchId } = await requireAuth({
+    requireActiveStatus: true,
+  });
   const filters = await searchParams;
 
   const [purchaseData, suppliers, shop, branch] = await Promise.all([

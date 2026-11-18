@@ -1,7 +1,6 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -18,12 +17,7 @@ const branchSchema = z.object({
 });
 
 async function getAdminUser() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.shopId) throw new Error("Unauthorized");
-  if (session.user.role !== "OWNER") {
-    throw new Error("Forbidden: Only store owners can manage branches.");
-  }
-  return session.user;
+  return requireAuth({ allowedRoles: ["OWNER"], requireActiveStatus: true });
 }
 
 export async function createBranchAction(formData: FormData) {

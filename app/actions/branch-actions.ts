@@ -1,35 +1,23 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 export async function switchBranchAction(branchId: string) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.shopId) {
-      return { success: false, error: "Unauthorized access." };
-    }
-
-    const role = session.user.role;
-    const canSwitch = role === "OWNER";
-
-    // 🛑 BLOCK: Managers and Cashiers are locked to their assigned branch
-    if (!canSwitch) {
-      return { 
-        success: false, 
-        error: "Permission denied: Branch Managers and Cashiers cannot switch outlets." 
-      };
-    }
+    // 🛑 Only OWNER can switch outlets; non-owners throw (caught below).
+    const { shopId, userId } = await requireAuth({
+      allowedRoles: ["OWNER"],
+      requireActiveStatus: true,
+    });
 
     // Verify branch belongs to user's shop and is active
     const branch = await prisma.branch.findFirst({
       where: { 
         id: branchId, 
-        shopId: session.user.shopId, 
+        shopId, 
         status: "active" 
       },
     });
@@ -40,7 +28,7 @@ export async function switchBranchAction(branchId: string) {
 
     // 1. Update user's active branch in MySQL
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: userId },
       data: { branchId: branch.id },
     });
 

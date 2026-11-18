@@ -1,7 +1,6 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
@@ -26,8 +25,7 @@ const passwordSchema = z
 
 export async function updateProfileAction(formData: FormData) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) throw new Error("Unauthorized");
+    const { userId } = await requireAuth();
 
     const validated = profileSchema.safeParse({
       name: formData.get("name")?.toString().trim(),
@@ -39,7 +37,7 @@ export async function updateProfileAction(formData: FormData) {
     }
 
     const { name, phone } = validated.data;
-    const currentUser = await prisma.user.findUnique({ where: { id: session.user.id } });
+    const currentUser = await prisma.user.findUnique({ where: { id: userId } });
 
     // Handle Profile Image Upload
     const imageFile = formData.get("profileImage") as File | null;
@@ -53,7 +51,7 @@ export async function updateProfileAction(formData: FormData) {
     }
 
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: userId },
       data: { name, phone, profileImage: imageUrl },
     });
 
@@ -67,8 +65,7 @@ export async function updateProfileAction(formData: FormData) {
 
 export async function updatePasswordAction(formData: FormData) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) throw new Error("Unauthorized");
+    const { userId } = await requireAuth();
 
     const validated = passwordSchema.safeParse({
       currentPassword: formData.get("currentPassword")?.toString(),
@@ -82,7 +79,7 @@ export async function updatePasswordAction(formData: FormData) {
 
     const { currentPassword, newPassword } = validated.data;
 
-    const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+    const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new Error("User not found");
 
     const isValid = await bcrypt.compare(currentPassword, user.password);
@@ -92,7 +89,7 @@ export async function updatePasswordAction(formData: FormData) {
 
     const hashed = await bcrypt.hash(newPassword, 10);
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: userId },
       data: { password: hashed },
     });
 

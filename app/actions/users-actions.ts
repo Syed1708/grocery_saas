@@ -8,16 +8,13 @@ import { revalidatePath } from "next/cache";
 import { userSchema } from "@/lib/validations/user";
 import { ZodError } from "zod";
 import { DEFAULT_ROLE_PERMISSIONS, UserRole } from "@/types/rbac";
-import { authOptions } from "@/services/authOptions";
-import { getServerSession } from "next-auth";
 
 export async function getMyPermissionsAction() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) return { success: false, permissions: [] };
+    const { userId } = await requireAuth();
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { role: true, customPermissions: true, isActive: true },
     });
 
@@ -38,7 +35,8 @@ export async function getMyPermissionsAction() {
 export async function saveUserAction(input: any) {
   try {
     const { shopId } = await requireAuth({
-      allowedRoles: ["OWNER", "ADMIN", "SUPER_ADMIN" as any],
+      allowedRoles: ["OWNER"],
+      requireActiveStatus: true,
     });
 
     let rawData: Record<string, any> = {};
@@ -143,7 +141,8 @@ export async function saveUserAction(input: any) {
 
 export async function toggleUserStatusAction(userId: string, currentStatus: boolean) {
   const { shopId, userId: actorId } = await requireAuth({
-    allowedRoles: ["OWNER", "ADMIN", "SUPER_ADMIN" as any],
+    allowedRoles: ["OWNER"],
+    requireActiveStatus: true,
   });
 
   if (userId === actorId) {

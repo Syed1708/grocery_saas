@@ -1,16 +1,10 @@
 import { ReactNode } from "react";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth/guard";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
 import { ReportsNavTabs } from "./common/reports-nav-tabs";
 
 export default async function ReportsLayout({ children }: { children: ReactNode }) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.shopId || !session?.user?.branchId) {
-    redirect("/login");
-  }
+  await requireAuth({ requireActiveStatus: true });
 
   return (
     <div className="max-w-7xl mx-auto space-y-4">

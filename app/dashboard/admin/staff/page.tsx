@@ -1,6 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth/guard";
 import {
   getDepartments,
   getStaffList,
@@ -11,13 +9,10 @@ import StaffClient from "./_components/StaffClient";
 import { prisma } from "@/lib/prisma";
 
 export default async function StaffPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.shopId) {
-    redirect("/login");
-  }
-
-  const { shopId } = session.user;
+  const { shopId } = await requireAuth({
+    allowedRoles: ["OWNER", "MANAGER"],
+    requireActiveStatus: true,
+  });
 
   // 🚀 Fast parallel server queries
   const [departments, staff, advances, payrolls, shop] = await Promise.all([

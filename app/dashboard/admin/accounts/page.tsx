@@ -1,19 +1,12 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { getAccounts, getBankCheques, getLoans } from "@/queries/account-queries"; // adjust path
 import AccountsClient from "./_components/AccountsClient";
 
 export default async function AccountsPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.shopId) {
-    redirect("/login");
-  }
-
-  const shopId = session.user.shopId as string;
-  const branchId = session.user.branchId || undefined;
+  const { shopId, activeBranchId: branchId } = await requireAuth({
+    requireActiveStatus: true,
+  });
 
   const [accounts, cheques, loans, shop] = await Promise.all([
     getAccounts(shopId, branchId),    // 👈 Pass branchId

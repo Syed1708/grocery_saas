@@ -1,18 +1,12 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth/guard";
 import { getSuppliers } from "@/queries/supplier-queries";
 import SuppliersClient from "./_components/SuppliersClient";
 import { prisma } from "@/lib/prisma";
 
 export default async function SuppliersPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.shopId) {
-    redirect("/login");
-  }
-
-  const { shopId, branchId } = session.user;
+  const { shopId, activeBranchId: branchId } = await requireAuth({
+    requireActiveStatus: true,
+  });
 
   const [suppliers, shop] = await Promise.all([
     getSuppliers(shopId, branchId),

@@ -1,18 +1,12 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { getPastClosings, getCurrentShiftSummary } from "@/queries/closing-queries";
 import ClosingsClient from "./_components/ClosingsClient";
 
 export default async function ClosingsPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.shopId || !session?.user?.branchId) {
-    redirect("/login");
-  }
-
-  const { shopId, branchId } = session.user;
+  const { shopId, activeBranchId: branchId } = await requireAuth({
+    requireActiveStatus: true,
+  });
 
   const [closings, shiftSummary, shop, branch] = await Promise.all([
     getPastClosings(shopId, branchId),
