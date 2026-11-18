@@ -17,31 +17,38 @@ export async function requireAuth(options: AuthGuardOptions = {}) {
     throw new Error("UNAUTHORIZED: Please log in to perform this action.");
   }
 
-  const { id: userId, shopId, role, branchId: activeBranchId } = session.user;
+  const { id: userId, shopId, role: tokenRole, branchId: activeBranchId } = session.user;
 
   // 1. Ensure a branch context exists
   if (!activeBranchId) {
-    throw new Error(
-      "FORBIDDEN: No active branch associated with this session.",
-    );
+    throw new Error("FORBIDDEN: No active branch associated with this session.");
   }
 
-  // 2. Coarse Role Check
-  if (options.allowedRoles && !options.allowedRoles.includes(role)) {
-    throw new Error(
-      `FORBIDDEN: Requires one of [${options.allowedRoles.join(", ")}].`,
-    );
-  }
+  // 2. Re-validate identity against the DB whenever the guard actually needs
+  // trust (role checks, permissions, or active status). The role in the JWT can
+  // be stale after a promotion/demotion or deactivation, so we never rely on it
+  // for authorization decisions.
+  const needsDbCheck =
+    Boolean(options.allowedRoles) ||
+    options.requireActiveStatus === true ||
+    Boolean(options.requiredPermission);
 
-  // 3. Fast DB verification for sensitive mutations / custom permissions
-  if (options.requireActiveStatus || options.requiredPermission) {
+  let role: UserRole = tokenRole;
+
+  if (needsDbCheck) {
     const dbUser = await prisma.user.findUnique({
       where: { id: userId },
-      select: { isActive: true, customPermissions: true },
+      select: { role: true, isActive: true, customPermissions: true },
     });
 
     if (!dbUser || !dbUser.isActive) {
       throw new Error("FORBIDDEN: User account is inactive or revoked.");
+    }
+
+    role = dbUser.role as UserRole;
+
+    if (options.allowedRoles && !options.allowedRoles.includes(role)) {
+      throw new Error(`FORBIDDEN: Requires one of [${options.allowedRoles.join(", ")}].`);
     }
 
     if (options.requiredPermission && role !== "OWNER") {
@@ -53,14 +60,10 @@ export async function requireAuth(options: AuthGuardOptions = {}) {
       // If explicit permissions are saved, use them. Otherwise use role defaults.
       const activePermissions =
         storedPermissions !== null ? storedPermissions : basePermissions;
-      const hasPermission = activePermissions.includes(
-        options.requiredPermission,
-      );
+      const hasPermission = activePermissions.includes(options.requiredPermission);
 
       if (!hasPermission) {
-        throw new Error(
-          `FORBIDDEN: Missing permission [${options.requiredPermission}].`,
-        );
+        throw new Error(`FORBIDDEN: Missing permission [${options.requiredPermission}].`);
       }
     }
   }

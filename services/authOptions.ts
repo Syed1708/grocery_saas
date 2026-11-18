@@ -4,6 +4,17 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/types";
+import {
+  getClientIp,
+  isRateLimited,
+  rateLimitMessage,
+  registerFailure,
+  resetRateLimit,
+} from "@/lib/auth/rate-limit";
+
+const LOGIN_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_EMAIL_ATTEMPTS = 5;
+const MAX_IP_ATTEMPTS = 25;
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -17,12 +28,31 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Please enter both email and password.");
         }
 
         const email = credentials.email.toLowerCase().trim();
+        const ip = getClientIp(req);
+
+        // 🛡️ Brute-force protection: throttle per email and per source IP.
+        const emailKey = `login:email:${email}`;
+        const ipKey = `login:ip:${ip}`;
+
+        const emailLimit = isRateLimited(emailKey, MAX_EMAIL_ATTEMPTS);
+        if (emailLimit.limited) {
+          throw new Error(rateLimitMessage(emailLimit.retryAfterMs));
+        }
+        const ipLimit = isRateLimited(ipKey, MAX_IP_ATTEMPTS);
+        if (ipLimit.limited) {
+          throw new Error(rateLimitMessage(ipLimit.retryAfterMs));
+        }
+
+        const registerFailureFor = () => {
+          registerFailure(emailKey, LOGIN_WINDOW_MS);
+          registerFailure(ipKey, LOGIN_WINDOW_MS);
+        };
 
         const user = await prisma.user.findUnique({
           where: { email },
@@ -33,17 +63,23 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user) {
+          registerFailureFor();
           throw new Error("Invalid email or password.");
         }
 
         if (!user.isActive) {
+          registerFailureFor();
           throw new Error("Your account has been deactivated. Contact your store owner.");
         }
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) {
+          registerFailureFor();
           throw new Error("Invalid email or password.");
         }
+
+        // Successful login clears the email throttle.
+        resetRateLimit(emailKey);
 
         // Branch Resolution Logic:
         // Cashier/Manager -> uses their assigned branch
