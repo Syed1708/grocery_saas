@@ -5,6 +5,21 @@ import { revalidatePath } from "next/cache";
 import { unitSchema } from "@/lib/validations";
 import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types/rbac";
+import { getErrorMessage } from "@/lib/utils";
+
+const UNIT_REVALIDATE_PATHS = ["/dashboard/admin/products"];
+
+function revalidateUnitPaths() {
+  for (const path of UNIT_REVALIDATE_PATHS) revalidatePath(path);
+}
+
+/** Map a unit form to the shape `unitSchema` expects. */
+function formToUnitInput(formData: FormData) {
+  return {
+    name: formData.get("name")?.toString().trim(),
+    code: formData.get("code")?.toString().toLowerCase().trim(),
+  };
+}
 
 async function getUnitManager() {
   // 🛡️ Zero-Trust Guard: Enforce catalog management permission
@@ -18,18 +33,13 @@ export async function createUnitAction(formData: FormData) {
   try {
     const user = await getUnitManager();
 
-    const validated = unitSchema.safeParse({
-      name: formData.get("name")?.toString().trim(),
-      code: formData.get("code")?.toString().toLowerCase().trim(),
-    });
-
-    if (!validated.success) {
-      return { success: false, error: validated.error.issues[0].message };
+    const parsed = unitSchema.safeParse(formToUnitInput(formData));
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
     }
 
-    const { name, code } = validated.data;
+    const { name, code } = parsed.data;
 
-    // Check unique on shopId_shortCode
     const existing = await prisma.unit.findUnique({
       where: { shopId_shortCode: { shopId: user.shopId, shortCode: code } },
     });
@@ -40,15 +50,15 @@ export async function createUnitAction(formData: FormData) {
     await prisma.unit.create({
       data: {
         name,
-        shortCode: code, // 👈 Saved as shortCode
+        shortCode: code,
         shopId: user.shopId,
       },
     });
 
-    revalidatePath("/dashboard/admin/products");
+    revalidateUnitPaths();
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to create unit." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to create unit.") };
   }
 }
 
@@ -82,10 +92,10 @@ export async function seedDefaultUnitsAction() {
       });
     }
 
-    revalidatePath("/dashboard/admin/products");
+    revalidateUnitPaths();
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to load default units." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to load default units.") };
   }
 }
 
@@ -106,9 +116,9 @@ export async function deleteUnitAction(id: string) {
 
     await prisma.unit.delete({ where: { id } });
 
-    revalidatePath("/dashboard/admin/products");
+    revalidateUnitPaths();
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to delete unit." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to delete unit.") };
   }
 }

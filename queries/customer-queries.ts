@@ -9,13 +9,28 @@ export async function getCustomers(
     where: {
       shopId,
       status: "active",
-       // 👈 STRICT: Only show customers registered at THIS branch!
+      // 👈 STRICT: Only show customers registered at THIS branch!
       ...(branchId ? { branchId } : {}),
     },
-    include: {
-      branch: {
-        select: { id: true, name: true, code: true },
-      },
+    // Project only the columns the table needs (faster payloads)
+    select: {
+      id: true,
+      name: true,
+      phone: true,
+      email: true,
+      address: true,
+      type: true,
+      village: true,
+      district: true,
+      creditLimit: true,
+      openingDue: true,
+      currentDue: true,
+      status: true,
+      shopId: true,
+      branchId: true,
+      createdAt: true,
+      updatedAt: true,
+      branch: { select: { id: true, name: true, code: true } },
     },
     orderBy: { createdAt: "desc" },
   });

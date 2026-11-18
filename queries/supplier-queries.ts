@@ -1,4 +1,3 @@
-
 import { prisma } from "@/lib/prisma";
 import { ISupplier } from "@/types";
 
@@ -13,21 +12,28 @@ export async function getSuppliers(
       // 👈 Shows active branch suppliers + Global suppliers (branchId: null)
       ...(branchId
         ? {
-            OR: [
-              { branchId: branchId },
-              { branchId: null }, // Global distributors (PRAN, Unilever)
-            ],
+            OR: [{ branchId }, { branchId: null }],
           }
         : {}),
     },
-    include: {
-      branch: {
-        select: {
-          id: true,
-          name: true,
-          code: true,
-        },
-      },
+    // Project only the columns the table needs (faster payloads)
+    select: {
+      id: true,
+      name: true,
+      companyName: true,
+      phone: true,
+      email: true,
+      village: true,
+      district: true,
+      address: true,
+      contactPerson: true,
+      openingDue: true,
+      currentDue: true,
+      status: true,
+      shopId: true,
+      branchId: true,
+      createdAt: true,
+      branch: { select: { id: true, name: true, code: true } },
     },
     orderBy: { name: "asc" },
   });

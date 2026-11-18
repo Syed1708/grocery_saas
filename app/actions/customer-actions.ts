@@ -5,6 +5,66 @@ import { revalidatePath } from "next/cache";
 import { customerSchema } from "@/lib/validations";
 import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types";
+import { getErrorMessage } from "@/lib/utils";
+
+// ==========================================
+// SHARED HELPERS
+// ==========================================
+const CUSTOMER_REVALIDATE_PATHS = [
+  "/dashboard/admin/customers",
+  "/reports/customers-due",
+];
+
+function revalidateCustomerPaths(extra: string[] = []) {
+  for (const path of [...CUSTOMER_REVALIDATE_PATHS, ...extra]) revalidatePath(path);
+}
+
+/** Map a customer form to the shape `customerSchema` expects. */
+function formToCustomerInput(formData: FormData, includeOpeningBalance = false) {
+  return {
+    id: formData.get("id")?.toString(),
+    name: formData.get("name")?.toString().trim(),
+    phone: formData.get("phone")?.toString().trim() || null,
+    email: formData.get("email")?.toString().trim() || null,
+    type: formData.get("type")?.toString() || "PERMANENT",
+    village: formData.get("village")?.toString().trim() || null,
+    district: formData.get("district")?.toString().trim() || null,
+    addressLine: formData.get("addressLine")?.toString().trim() || null,
+    creditLimit: formData.get("creditLimit") || (includeOpeningBalance ? 5000 : 0),
+    ...(includeOpeningBalance ? { openingBalance: formData.get("openingBalance") || 0 } : {}),
+  };
+}
+
+interface CustomerFieldsInput {
+  name: string;
+  phone?: string | null;
+  email?: string | null;
+  type: "WALK_IN" | "PERMANENT";
+  village?: string | null;
+  district?: string | null;
+  addressLine?: string | null;
+  creditLimit: number;
+}
+
+/** Columns shared by create + update. */
+function customerFields(data: CustomerFieldsInput) {
+  return {
+    name: data.name,
+    phone: data.phone,
+    email: data.email || null,
+    type: data.type,
+    village: data.village,
+    district: data.district,
+    address: data.addressLine,
+    creditLimit: data.creditLimit,
+  };
+}
+
+/** Non-owners may only touch customers in their active branch. */
+function nonOwnerBranchScope(user: { role: string; activeBranchId: string }) {
+  if (user.role === "OWNER") return {};
+  return { branchId: user.activeBranchId };
+}
 
 // ==========================================
 // 1. CREATE CUSTOMER
@@ -20,23 +80,12 @@ export async function createCustomerAction(formData: FormData) {
       return { success: false, error: "সক্রিয় ব্রাঞ্চ পাওয়া যায়নি।" };
     }
 
-    const validated = customerSchema.safeParse({
-      name: formData.get("name")?.toString().trim(),
-      phone: formData.get("phone")?.toString().trim() || null,
-      email: formData.get("email")?.toString().trim() || null,
-      type: formData.get("type")?.toString() || "PERMANENT",
-      village: formData.get("village")?.toString().trim() || null,
-      district: formData.get("district")?.toString().trim() || null,
-      addressLine: formData.get("addressLine")?.toString().trim() || null,
-      creditLimit: formData.get("creditLimit") || 5000,
-      openingBalance: formData.get("openingBalance") || 0,
-    });
-
-    if (!validated.success) {
-      return { success: false, error: validated.error.issues[0].message };
+    const parsed = customerSchema.safeParse(formToCustomerInput(formData, true));
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
     }
 
-    const data = validated.data;
+    const data = parsed.data;
 
     if (data.phone) {
       const existing = await prisma.customer.findFirst({
@@ -53,14 +102,7 @@ export async function createCustomerAction(formData: FormData) {
 
     const customer = await prisma.customer.create({
       data: {
-        name: data.name,
-        phone: data.phone,
-        email: data.email || null,
-        type: data.type,
-        village: data.village,
-        district: data.district,
-        address: data.addressLine,
-        creditLimit: data.creditLimit,
+        ...customerFields(data),
         openingDue: data.openingBalance,
         currentDue: data.openingBalance,
         shopId: user.shopId,
@@ -69,26 +111,19 @@ export async function createCustomerAction(formData: FormData) {
       },
     });
 
-    revalidatePath("/dashboard/admin/customers");
-    revalidatePath("/pos");
-    revalidatePath("/reports/customers-due");
-
+    revalidateCustomerPaths(["/pos"]);
     return { success: true, customerId: customer.id };
   } catch (error) {
     console.error("createCustomerAction error:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to create customer.",
-    };
+    return { success: false, error: getErrorMessage(error, "Failed to create customer.") };
   }
 }
 
 // ==========================================
-// 2. UPDATE CUSTOMER (Fixed Permission Key!)
+// 2. UPDATE CUSTOMER
 // ==========================================
 export async function updateCustomerAction(formData: FormData) {
   try {
-    // 🛡️ FIX: Replaced CATALOG_VIEW with proper POS_ACCESS permission
     const user = await requireAuth({
       requiredPermission: PERMISSIONS.POS_ACCESS,
       requireActiveStatus: true,
@@ -97,58 +132,29 @@ export async function updateCustomerAction(formData: FormData) {
     const id = formData.get("id")?.toString();
     if (!id) return { success: false, error: "Missing customer ID." };
 
-    const validated = customerSchema.safeParse({
-      id,
-      name: formData.get("name")?.toString().trim(),
-      phone: formData.get("phone")?.toString().trim() || null,
-      email: formData.get("email")?.toString().trim() || null,
-      type: formData.get("type")?.toString() || "PERMANENT",
-      village: formData.get("village")?.toString().trim() || null,
-      district: formData.get("district")?.toString().trim() || null,
-      addressLine: formData.get("addressLine")?.toString().trim() || null,
-      creditLimit: formData.get("creditLimit") || 0,
-    });
-
-    if (!validated.success) {
-      return { success: false, error: validated.error.issues[0].message };
+    const parsed = customerSchema.safeParse(formToCustomerInput(formData));
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
     }
 
-    const data = validated.data;
+    const data = parsed.data;
 
     const existing = await prisma.customer.findFirst({
-      where: {
-        id,
-        shopId: user.shopId,
-        ...(user.role !== "OWNER" && user.activeBranchId ? { branchId: user.activeBranchId } : {}),
-      },
+      where: { id, shopId: user.shopId, ...nonOwnerBranchScope(user) },
     });
-
     if (!existing) {
       return { success: false, error: "Customer not found or unauthorized for this branch." };
     }
 
     await prisma.customer.update({
       where: { id },
-      data: {
-        name: data.name,
-        phone: data.phone,
-        email: data.email || null,
-        type: data.type,
-        village: data.village,
-        district: data.district,
-        address: data.addressLine,
-        creditLimit: data.creditLimit,
-      },
+      data: customerFields(data),
     });
 
-    revalidatePath("/dashboard/admin/customers");
-    revalidatePath("/reports/customers-due");
+    revalidateCustomerPaths();
     return { success: true };
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to update customer.",
-    };
+    return { success: false, error: getErrorMessage(error, "Failed to update customer.") };
   }
 }
 
@@ -156,7 +162,7 @@ export async function updateCustomerAction(formData: FormData) {
 // 3. RECORD PAYMENT
 // ==========================================
 export async function recordCustomerPaymentAction(
-  customerId: string, 
+  customerId: string,
   amount: number,
   paymentMethod: string = "cash",
   note?: string
@@ -176,11 +182,7 @@ export async function recordCustomerPaymentAction(
     }
 
     const customer = await prisma.customer.findFirst({
-      where: { 
-        id: customerId, 
-        shopId: user.shopId,
-        ...(user.role !== "OWNER" ? { branchId: user.activeBranchId } : {}),
-      },
+      where: { id: customerId, shopId: user.shopId, ...nonOwnerBranchScope(user) },
     });
     if (!customer) return { success: false, error: "Customer not found in this branch." };
 
@@ -219,21 +221,16 @@ export async function recordCustomerPaymentAction(
       }
     });
 
-    revalidatePath("/dashboard/admin/customers");
-    revalidatePath("/reports/customers-due");
-    revalidatePath("/reports/closings");
+    revalidateCustomerPaths(["/reports/closings"]);
     return { success: true, receiptNo };
   } catch (error) {
     console.error("recordCustomerPaymentAction error:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to record payment.",
-    };
+    return { success: false, error: getErrorMessage(error, "Failed to record payment.") };
   }
 }
 
 // ==========================================
-// 4. DELETE CUSTOMER (Owner Only Security!)
+// 4. DELETE CUSTOMER (Owner Only)
 // ==========================================
 export async function deleteCustomerAction(id: string) {
   try {
@@ -242,7 +239,6 @@ export async function deleteCustomerAction(id: string) {
       requireActiveStatus: true,
     });
 
-    // 🛡️ FIX: Replaced FINANCE_LOANS with strict OWNER role check
     if (user.role !== "OWNER") {
       return {
         success: false,
@@ -251,11 +247,7 @@ export async function deleteCustomerAction(id: string) {
     }
 
     const customer = await prisma.customer.findFirst({
-      where: { 
-        id, 
-        shopId: user.shopId,
-        ...(user.activeBranchId ? { branchId: user.activeBranchId } : {}),
-      },
+      where: { id, shopId: user.shopId, branchId: user.activeBranchId },
       include: {
         _count: { select: { sales: true } },
       },
@@ -279,13 +271,9 @@ export async function deleteCustomerAction(id: string) {
 
     await prisma.customer.delete({ where: { id } });
 
-    revalidatePath("/dashboard/admin/customers");
-    revalidatePath("/reports/customers-due");
+    revalidateCustomerPaths();
     return { success: true };
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to delete customer.",
-    };
+    return { success: false, error: getErrorMessage(error, "Failed to delete customer.") };
   }
 }

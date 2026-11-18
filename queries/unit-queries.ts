@@ -3,7 +3,10 @@ import { prisma } from "@/lib/prisma";
 export async function getUnits(shopId: string) {
   const units = await prisma.unit.findMany({
     where: { shopId },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      shortCode: true,
       _count: { select: { products: true } },
     },
     orderBy: { name: "asc" },
@@ -12,7 +15,7 @@ export async function getUnits(shopId: string) {
   return units.map((u) => ({
     id: u.id,
     name: u.name,
-    code: u.shortCode, // 👈 Map shortCode to code
+    code: u.shortCode,
     _count: u._count,
   }));
 }

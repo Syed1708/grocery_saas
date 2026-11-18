@@ -8,29 +8,25 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  Plus,
-  Edit2,
-  Trash2,
-  Phone,
-  Building2,
-  Search,
-  Globe,
-  GitBranch,
-} from "lucide-react";
+import { Phone, Building2, Globe, GitBranch } from "lucide-react";
 import { toast } from "sonner";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { DataTableViewOptions } from "@/components/common/data-table/DataTableViewOptions";
 import FormModal from "@/components/common/FormModal";
 import Modal from "@/components/common/Modal";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { ModuleHeader } from "@/components/common/ModuleHeader";
+import { SearchFilterBar } from "@/components/common/SearchFilterBar";
+import { TableActions } from "@/components/common/ui/table/TableHelpers";
+import { useCrudModal } from "@/hooks/useCrudModal";
 import {
   createSupplierAction,
   updateSupplierAction,
   deleteSupplierAction,
   recordSupplierPaymentAction,
 } from "@/app/actions/supplier-actions";
-import { ISupplier } from "@/types";
+import { ISupplier, PERMISSIONS } from "@/types";
+import SupplierForm from "./SupplierForm";
 
 export default function SuppliersClient({
   data,
@@ -39,12 +35,18 @@ export default function SuppliersClient({
   data: ISupplier[];
   currencySymbol?: string;
 }) {
-  const [modalOpen, setModalOpen] = useState(false);
+  // Universal CRUD state & mutation engine
+  const crud = useCrudModal<ISupplier>({
+    createAction: createSupplierAction,
+    updateAction: updateSupplierAction,
+    deleteAction: deleteSupplierAction,
+    entityName: "সাপ্লায়ার",
+  });
+
+  // Payment modal (one-off custom action)
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [editingSupplier, setEditingSupplier] = useState<ISupplier | null>(null);
   const [activeSupplierForPayment, setActiveSupplierForPayment] = useState<ISupplier | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<ISupplier | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [columnVisibility, setColumnVisibility] = useState({});
@@ -62,80 +64,28 @@ export default function SuppliersClient({
     });
   }, [data, searchQuery]);
 
-  function openCreate() {
-    setEditingSupplier(null);
-    setModalOpen(true);
-  }
-
-  function openEdit(supplier: ISupplier) {
-    setEditingSupplier(supplier);
-    setModalOpen(true);
-  }
-
   function openPaymentModal(supplier: ISupplier) {
     setActiveSupplierForPayment(supplier);
     setPaymentModalOpen(true);
-  }
-
-  async function handleSupplierSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-
-    const formData = new FormData(e.currentTarget);
-    if (editingSupplier) {
-      formData.append("id", editingSupplier.id);
-    }
-
-    const res = editingSupplier
-      ? await updateSupplierAction(formData)
-      : await createSupplierAction(formData);
-
-    setLoading(false);
-
-    if (res.success) {
-      toast.success(
-        editingSupplier
-          ? "Supplier profile updated!"
-          : "Supplier registered successfully!"
-      );
-      setModalOpen(false);
-    } else {
-      toast.error(res.error || "Operation failed.");
-    }
   }
 
   async function handlePaymentSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!activeSupplierForPayment) return;
 
-    setLoading(true);
+    setPaymentLoading(true);
     const formData = new FormData(e.currentTarget);
     const amount = parseFloat(formData.get("amount")?.toString() || "0");
     const paymentMethod = formData.get("paymentMethod")?.toString() || "cash";
 
     const res = await recordSupplierPaymentAction(activeSupplierForPayment.id, amount, paymentMethod);
-    setLoading(false);
+    setPaymentLoading(false);
 
     if (res.success) {
       toast.success(`Payment of ${currencySymbol}${amount} recorded successfully!`);
       setPaymentModalOpen(false);
     } else {
       toast.error(res.error || "Failed to record payment.");
-    }
-  }
-
-  async function handleDeleteConfirm() {
-    if (!deleteTarget) return;
-    setLoading(true);
-
-    const res = await deleteSupplierAction(deleteTarget.id);
-    setLoading(false);
-
-    if (res.success) {
-      toast.success(`Supplier "${deleteTarget.companyName}" deleted.`);
-      setDeleteTarget(null);
-    } else {
-      toast.error(res.error || "Failed to delete.");
     }
   }
 
@@ -154,7 +104,7 @@ export default function SuppliersClient({
                 <Building2 size={13} className="text-neutral-400" />
                 {row.original.companyName || row.original.name}
               </span>
-              
+
               {/* 👈 Visual Branch Scope Badge */}
               {isGlobal ? (
                 <span className="flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
@@ -188,8 +138,7 @@ export default function SuppliersClient({
       accessorKey: "currentDue",
       header: "Payable Debt (দোকানের দেনা)",
       cell: ({ row }) => {
-        // Safe access for currentDue or payableBalance
-        const debt = Number(row.original.currentDue ?? (row.original as any).payableBalance ?? 0);
+        const debt = Number(row.original.currentDue ?? 0);
         const hasDebt = debt > 0;
 
         return (
@@ -219,29 +168,16 @@ export default function SuppliersClient({
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => {
-        const supplier = row.original;
-        return (
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => openEdit(supplier)}
-              className="p-1.5 rounded-lg text-neutral-500 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
-              title="Edit Profile"
-            >
-              <Edit2 size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setDeleteTarget(supplier)}
-              className="p-1.5 rounded-lg text-neutral-500 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
-              title="Delete"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1.5">
+          <TableActions
+            onEdit={() => crud.openEdit(row.original)}
+            editPermission={PERMISSIONS.CATALOG_MANAGE}
+            onDelete={() => crud.setDeleteTarget(row.original)}
+            deletePermission={PERMISSIONS.CATALOG_MANAGE}
+          />
+        </div>
+      ),
     },
   ];
 
@@ -257,147 +193,40 @@ export default function SuppliersClient({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">
-            Suppliers &amp; Distributors (মহাজন ও ডিস্ট্রিবিউটর)
-          </h1>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-            Manage product vendors, corporate distributors, and payable accounts
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <DataTableViewOptions table={table} />
-          <button
-            onClick={openCreate}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer"
-          >
-            <Plus size={16} /> Add Supplier
-          </button>
-        </div>
-      </div>
+      <ModuleHeader
+        title="Suppliers & Distributors (মহাজন ও ডিস্ট্রিবিউটর)"
+        subtitle="Manage product vendors, corporate distributors, and payable accounts"
+        actions={<DataTableViewOptions table={table} />}
+        onAdd={crud.openCreate}
+        addLabel="Add Supplier"
+        addPermission={PERMISSIONS.CATALOG_MANAGE}
+      />
 
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-3 rounded-2xl shadow-xs">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 text-neutral-400" size={16} />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search company, contact, or phone..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-neutral-900 dark:text-neutral-100"
-          />
-        </div>
-      </div>
+      <SearchFilterBar
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        placeholder="Search company, contact, or phone..."
+      />
 
       <DataTable table={table} columns={columns} />
 
       {/* Supplier Form Modal */}
       <FormModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSubmit={handleSupplierSubmit}
-        title={editingSupplier ? "Edit Supplier" : "Register New Supplier"}
+        key={crud.editingItem?.id || "new-supplier-modal"}
+        isOpen={crud.isOpen}
+        onClose={crud.closeModal}
+        onSubmit={crud.handleSubmit}
+        title={crud.editingItem ? "Edit Supplier" : "Register New Supplier"}
         description="Add company and contact details for stock inward purchases."
-        isEditing={Boolean(editingSupplier)}
-        loading={loading}
+        isEditing={Boolean(crud.editingItem)}
+        loading={crud.loading}
         maxWidth="lg"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Distributor / Company Name *
-            </label>
-            <input
-              type="text"
-              name="companyName"
-              required
-              defaultValue={editingSupplier?.companyName || ""}
-              placeholder="e.g. Unilever Bangladesh Ltd."
-              className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Contact Person / SR Name *
-            </label>
-            <input
-              type="text"
-              name="name"
-              required
-              defaultValue={editingSupplier?.name || ""}
-              placeholder="e.g. Tariqul Islam (SR)"
-              className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Phone Number *
-            </label>
-            <input
-              type="text"
-              name="phone"
-              required
-              defaultValue={editingSupplier?.phone || ""}
-              placeholder="01700000000"
-              className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          {!editingSupplier && (
-            <div>
-              <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Opening Debt Owed ({currencySymbol})
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                name="openingBalance"
-                defaultValue={0}
-                placeholder="0.00"
-                className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-            Address / Office Location
-          </label>
-          <input
-            type="text"
-            name="addressLine"
-            defaultValue={editingSupplier?.address || ""}
-            placeholder="Warehouse #14, Tejgaon Industrial Area..."
-            className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* 👈 Multi-Branch Scope Toggle */}
-        <div className="pt-2 border-t border-neutral-100 dark:border-neutral-800">
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              name="isGlobal"
-              value="true"
-              defaultChecked={editingSupplier ? !editingSupplier.branchId : false}
-              className="w-4 h-4 text-blue-600 rounded cursor-pointer"
-            />
-            <div>
-              <span className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 block">
-                সকল শাখার জন্য প্রযোজ্য (Global Corporate Supplier)
-              </span>
-              <span className="text-[10px] text-neutral-400 block">
-                Enable for major brands (Unilever, Pran) so all branches can purchase from this vendor
-              </span>
-            </div>
-          </label>
-        </div>
+        <SupplierForm
+          supplier={crud.editingItem}
+          currencySymbol={currencySymbol}
+          errors={crud.errors}
+        />
       </FormModal>
 
       {/* Pay Supplier Modal */}
@@ -412,7 +241,7 @@ export default function SuppliersClient({
           <div className="p-3 bg-neutral-50 dark:bg-neutral-800/60 rounded-xl border border-neutral-200 dark:border-neutral-700 flex justify-between items-center text-xs">
             <span className="text-neutral-500 dark:text-neutral-400">Total Owed Debt:</span>
             <span className="font-bold font-mono text-amber-600 dark:text-amber-400">
-              {currencySymbol}{Number(activeSupplierForPayment?.currentDue ?? (activeSupplierForPayment as any)?.payableBalance ?? 0).toFixed(2)}
+              {currencySymbol}{Number(activeSupplierForPayment?.currentDue ?? 0).toFixed(2)}
             </span>
           </div>
 
@@ -425,8 +254,8 @@ export default function SuppliersClient({
               step="0.01"
               name="amount"
               required
-              max={Number(activeSupplierForPayment?.currentDue ?? (activeSupplierForPayment as any)?.payableBalance ?? 0) || undefined}
-              defaultValue={Number(activeSupplierForPayment?.currentDue ?? (activeSupplierForPayment as any)?.payableBalance ?? 0) || ""}
+              max={Number(activeSupplierForPayment?.currentDue ?? 0) || undefined}
+              defaultValue={Number(activeSupplierForPayment?.currentDue ?? 0) || ""}
               placeholder="0.00"
               className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500 font-mono"
             />
@@ -458,23 +287,23 @@ export default function SuppliersClient({
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={paymentLoading}
               className="px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition disabled:opacity-50 cursor-pointer"
             >
-              {loading ? "Recording..." : "Confirm Payment"}
+              {paymentLoading ? "Recording..." : "Confirm Payment"}
             </button>
           </div>
         </form>
       </Modal>
 
       <ConfirmDialog
-        isOpen={Boolean(deleteTarget)}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={handleDeleteConfirm}
+        isOpen={Boolean(crud.deleteTarget)}
+        onClose={() => crud.setDeleteTarget(null)}
+        onConfirm={crud.handleDeleteConfirm}
         title="Delete Supplier Profile"
-        message={`Are you sure you want to delete "${deleteTarget?.companyName || deleteTarget?.name}"?`}
+        message={`Are you sure you want to delete "${crud.deleteTarget?.companyName || crud.deleteTarget?.name}"?`}
         confirmLabel="Delete Supplier"
-        loading={loading}
+        loading={crud.loading}
       />
     </div>
   );

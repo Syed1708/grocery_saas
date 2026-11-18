@@ -10,15 +10,21 @@ export interface CategoryWithCount extends ICategory {
 /**
  * 1. GET CATEGORIES FOR DATA TABLE
  * - Scoped strictly to shopId
- * - Includes product count for each category
+ * - Includes product count for each category (projected select)
  */
 export async function getCategories(shopId: string): Promise<CategoryWithCount[]> {
   const categories = await prisma.category.findMany({
     where: { shopId },
-    include: {
-      _count: {
-        select: { products: true },
-      },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      image: true,
+      status: true,
+      shopId: true,
+      createdAt: true,
+      updatedAt: true,
+      _count: { select: { products: true } },
     },
     orderBy: { createdAt: "desc" },
   });

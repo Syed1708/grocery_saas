@@ -1,10 +1,12 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { getSuppliers } from "@/queries/supplier-queries";
 import SuppliersClient from "./_components/SuppliersClient";
 import { prisma } from "@/lib/prisma";
 
 export default async function SuppliersPage() {
   const { shopId, activeBranchId: branchId } = await requireAuth({
+    requiredPermission: PERMISSIONS.PURCHASES_VIEW,
     requireActiveStatus: true,
   });
 

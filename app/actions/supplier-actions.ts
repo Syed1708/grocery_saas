@@ -5,6 +5,63 @@ import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types";
 import { supplierSchema } from "@/lib/validations";
+import { getErrorMessage } from "@/lib/utils";
+
+// ==========================================
+// SHARED HELPERS
+// ==========================================
+const SUPPLIER_REVALIDATE_PATHS = [
+  "/dashboard/admin/suppliers",
+  "/dashboard/admin/purchases",
+];
+
+function revalidateSupplierPaths() {
+  for (const path of SUPPLIER_REVALIDATE_PATHS) revalidatePath(path);
+}
+
+/** Map a supplier form to the shape `supplierSchema` expects. */
+function formToSupplierInput(formData: FormData, includeOpeningBalance = false) {
+  return {
+    id: formData.get("id")?.toString(),
+    name: formData.get("name")?.toString().trim(),
+    companyName: formData.get("companyName")?.toString().trim(),
+    phone: formData.get("phone")?.toString().trim(),
+    email: formData.get("email")?.toString().trim() || null,
+    village: formData.get("village")?.toString().trim() || null,
+    district: formData.get("district")?.toString().trim() || null,
+    addressLine: formData.get("addressLine")?.toString().trim() || null,
+    ...(includeOpeningBalance ? { openingBalance: formData.get("openingBalance") || 0 } : {}),
+  };
+}
+
+interface SupplierFieldsInput {
+  name: string;
+  companyName: string;
+  phone: string;
+  email?: string | null;
+  village?: string | null;
+  district?: string | null;
+  addressLine?: string | null;
+}
+
+/** Columns shared by create + update. */
+function supplierFields(data: SupplierFieldsInput) {
+  return {
+    name: data.name,
+    companyName: data.companyName,
+    phone: data.phone,
+    email: data.email || null,
+    village: data.village,
+    district: data.district,
+    address: data.addressLine,
+  };
+}
+
+/** Non-owners may only see/modify suppliers in their branch or global suppliers. */
+function branchScope(user: { role: string; activeBranchId: string }) {
+  if (user.role === "OWNER") return {};
+  return { OR: [{ branchId: user.activeBranchId }, { branchId: null }] };
+}
 
 // ==========================================
 // 1. CREATE SUPPLIER (Branch Scoped or Global)
@@ -12,37 +69,21 @@ import { supplierSchema } from "@/lib/validations";
 export async function createSupplierAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.PURCHASES_MANAGE,
       requireActiveStatus: true,
     });
 
-    const validated = supplierSchema.safeParse({
-      name: formData.get("name")?.toString().trim(),
-      companyName: formData.get("companyName")?.toString().trim(),
-      phone: formData.get("phone")?.toString().trim(),
-      email: formData.get("email")?.toString().trim() || null,
-      village: formData.get("village")?.toString().trim() || null,
-      district: formData.get("district")?.toString().trim() || null,
-      addressLine: formData.get("addressLine")?.toString().trim() || null,
-      openingBalance: formData.get("openingBalance") || 0,
-    });
-
-    if (!validated.success) {
-      return { success: false, error: validated.error.issues[0].message };
+    const parsed = supplierSchema.safeParse(formToSupplierInput(formData, true));
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
     }
 
-    const data = validated.data;
+    const data = parsed.data;
     const isGlobal = formData.get("isGlobal") === "true";
 
     const supplier = await prisma.supplier.create({
       data: {
-        name: data.name,
-        companyName: data.companyName,
-        phone: data.phone,
-        email: data.email || null,
-        village: data.village,
-        district: data.district,
-        address: data.addressLine,
+        ...supplierFields(data),
         openingDue: data.openingBalance,
         currentDue: data.openingBalance,
         shopId: user.shopId,
@@ -50,12 +91,14 @@ export async function createSupplierAction(formData: FormData) {
       },
     });
 
-    revalidatePath("/dashboard/admin/suppliers");
-    revalidatePath("/purchases");
+    revalidateSupplierPaths();
     return { success: true, supplierId: supplier.id };
-  } catch (error: any) {
+  } catch (error) {
     console.error("createSupplierAction error:", error);
-    return { success: false, error: error.message || "সরবরাহকারী যোগ করা সম্ভব হয়নি।" };
+    return {
+      success: false,
+      error: getErrorMessage(error, "সরবরাহকারী যোগ করা সম্ভব হয়নি।"),
+    };
   }
 }
 
@@ -65,54 +108,42 @@ export async function createSupplierAction(formData: FormData) {
 export async function updateSupplierAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.PURCHASES_MANAGE,
       requireActiveStatus: true,
     });
 
     const id = formData.get("id")?.toString();
     if (!id) return { success: false, error: "সাপ্লায়ার আইডি দেওয়া হয়নি।" };
 
-    const validated = supplierSchema.safeParse({
-      id,
-      name: formData.get("name")?.toString().trim(),
-      companyName: formData.get("companyName")?.toString().trim(),
-      phone: formData.get("phone")?.toString().trim(),
-      email: formData.get("email")?.toString().trim() || null,
-      village: formData.get("village")?.toString().trim() || null,
-      district: formData.get("district")?.toString().trim() || null,
-      addressLine: formData.get("addressLine")?.toString().trim() || null,
-    });
-
-    if (!validated.success) {
-      return { success: false, error: validated.error.issues[0].message };
+    const parsed = supplierSchema.safeParse(formToSupplierInput(formData));
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
     }
 
-    const data = validated.data;
+    const data = parsed.data;
     const isGlobal = formData.get("isGlobal") === "true";
 
+    // 🛡️ Verify ownership (and branch scope for non-owners) before mutating
+    const existing = await prisma.supplier.findFirst({
+      where: { id, shopId: user.shopId, ...branchScope(user) },
+      select: { id: true },
+    });
+    if (!existing) {
+      return { success: false, error: "সাপ্লায়ার পাওয়া যায়নি বা এই শাখার জন্য অনুমোদিত নয়।" };
+    }
 
     await prisma.supplier.update({
-      where: { 
-        id, 
-        shopId: user.shopId 
-      },
-      data: {
-        name: data.name,
-        companyName: data.companyName,
-        phone: data.phone,
-        email: data.email || null,
-        village: data.village,
-        district: data.district,
-        address: data.addressLine,
-        branchId: isGlobal ? null : user.activeBranchId,
-      },
+      where: { id },
+      data: { ...supplierFields(data), branchId: isGlobal ? null : user.activeBranchId },
     });
 
-    revalidatePath("/dashboard/admin/suppliers");
-    revalidatePath("/purchases");
+    revalidateSupplierPaths();
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "সাপ্লায়ার আপডেট ব্যর্থ হয়েছে।" };
+  } catch (error) {
+    return {
+      success: false,
+      error: getErrorMessage(error, "সাপ্লায়ার আপডেট ব্যর্থ হয়েছে।"),
+    };
   }
 }
 
@@ -122,7 +153,7 @@ export async function updateSupplierAction(formData: FormData) {
 export async function deleteSupplierAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.PURCHASES_MANAGE,
       requireActiveStatus: true,
     });
 
@@ -155,11 +186,13 @@ export async function deleteSupplierAction(id: string) {
 
     await prisma.supplier.delete({ where: { id } });
 
-    revalidatePath("/dashboard/admin/suppliers");
-    revalidatePath("/purchases");
+    revalidateSupplierPaths();
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "সাপ্লায়ার মুছে ফেলা সম্ভব হয়নি।" };
+  } catch (error) {
+    return {
+      success: false,
+      error: getErrorMessage(error, "সাপ্লায়ার মুছে ফেলা সম্ভব হয়নি।"),
+    };
   }
 }
 
@@ -181,7 +214,7 @@ export async function recordSupplierPaymentAction(
 ) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.SUPPLIERS_PAY,
       requireActiveStatus: true,
     });
 
@@ -206,7 +239,7 @@ export async function recordSupplierPaymentAction(
     }
 
     const supplier = await prisma.supplier.findFirst({
-      where: { id: supplierId, shopId: user.shopId },
+      where: { id: supplierId, shopId: user.shopId, ...branchScope(user) },
     });
     if (!supplier) return { success: false, error: "সাপ্লায়ার পাওয়া যায়নি।" };
 
@@ -237,12 +270,17 @@ export async function recordSupplierPaymentAction(
         },
       });
 
-      // 3. 👈 DEDUCT CASH FROM DRAWER / BANK ACCOUNT (Real Financial Sync)
+      // 3. DEDUCT CASH FROM DRAWER / BANK ACCOUNT (Real Financial Sync)
       const accountType = paymentMethod.toUpperCase();
+      const paymentAccountType: "CASH" | "BANK" | "BKASH" | "NAGAD" =
+        accountType === "BANK" || accountType === "BKASH" || accountType === "NAGAD"
+          ? accountType
+          : "CASH";
+
       const paymentAccount = await tx.account.findFirst({
         where: {
           branchId: user.activeBranchId,
-          type: ["CASH", "BANK", "BKASH", "NAGAD"].includes(accountType) ? (accountType as any) : "CASH",
+          type: paymentAccountType,
           status: "active",
         },
       });
@@ -257,10 +295,9 @@ export async function recordSupplierPaymentAction(
       return p;
     });
 
-    revalidatePath("/purchases");
-    revalidatePath("/dashboard/admin/suppliers");
-    revalidatePath("/reports/closings"); // 👈 Realtime Z-Report cashSupplierPaid update!
-    revalidatePath("/reports/purchases");
+    revalidateSupplierPaths();
+    revalidatePath("/dashboard/admin/reports/closings"); // Realtime Z-Report cashSupplierPaid update!
+    revalidatePath("/dashboard/admin/reports/purchases");
 
     return {
       success: true,
@@ -275,9 +312,12 @@ export async function recordSupplierPaymentAction(
       reference,
       paymentDate: payment.createdAt,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Supplier payment error:", error);
-    return { success: false, error: error.message || "পেমেন্ট সম্পন্ন করা সম্ভব হয়নি।" };
+    return {
+      success: false,
+      error: getErrorMessage(error, "পেমেন্ট সম্পন্ন করা সম্ভব হয়নি।"),
+    };
   }
 }
 
@@ -286,12 +326,17 @@ export async function recordSupplierPaymentAction(
 // ==========================================
 export async function getSupplierPaymentHistoryAction(supplierId: string) {
   try {
-    const user = await requireAuth();
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.PURCHASES_VIEW,
+      requireActiveStatus: true,
+    });
 
     const payments = await prisma.supplierPayment.findMany({
       where: {
         supplierId,
-        supplier: { shopId: user.shopId },
+        supplier: {
+          is: { shopId: user.shopId, ...branchScope(user) },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -308,7 +353,10 @@ export async function getSupplierPaymentHistoryAction(supplierId: string) {
         createdAt: p.createdAt,
       })),
     };
-  } catch (error: any) {
-    return { success: false, error: error.message || "পেমেন্ট লেজার লোড ব্যর্থ হয়েছে।" };
+  } catch (error) {
+    return {
+      success: false,
+      error: getErrorMessage(error, "পেমেন্ট লেজার লোড ব্যর্থ হয়েছে।"),
+    };
   }
 }

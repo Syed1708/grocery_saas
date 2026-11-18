@@ -70,15 +70,17 @@ guaranteed string. It throws on failure (dashboard error boundary), so do not ad
 ## Layer 2 — queries
 
 Shop-scoped, branch-aware, return plain serializable objects (convert Prisma `Decimal` with
-`Number(...)`). Never trust the client for `shopId`/`branchId`.
+`Number(...)`). Never trust the client for `shopId`/`branchId`. Project only the columns the UI
+needs with `select` (faster payloads) rather than fetching whole rows.
 
 ```ts
 export async function getThings(shopId: string, branchId?: string | null): Promise<IThing[]> {
   const rows = await prisma.thing.findMany({
     where: { shopId, ...(branchId ? { branchId } : {}) },
+    select: { id: true, name: true, status: true, branchId: true, createdAt: true },
     orderBy: { createdAt: "desc" },
   });
-  return rows.map((r) => ({ /* explicit fields, Number() decimals */ }));
+  return rows.map((r) => ({ ...r, /* Number() decimals */ }));
 }
 ```
 
@@ -116,6 +118,41 @@ export async function createThingAction(formData: FormData) {
 
 Delete actions: verify ownership with `findFirst({ where: { id, shopId } })` before mutating.
 If the module needs owner-only deletion, check `user.role !== "OWNER"` and return a clear error.
+
+### Shared server helpers (DRY)
+
+Extract these once per action module instead of repeating them:
+
+```ts
+import { getErrorMessage } from "@/lib/utils"; // unknown -> string, no `any`
+
+const THING_REVALIDATE_PATHS = ["/dashboard/admin/things", "/pos"];
+function revalidateThingPaths() {
+  for (const p of THING_REVALIDATE_PATHS) revalidatePath(p);
+}
+
+/** One form -> zod mapper shared by create + update. */
+function formToThingInput(formData: FormData, includeOpening = false) {
+  return {
+    id: formData.get("id")?.toString(),
+    name: formData.get("name")?.toString().trim(),
+    // ...
+    ...(includeOpening ? { openingBalance: formData.get("openingBalance") || 0 } : {}),
+  };
+}
+
+/** Shared Prisma columns for create + update. */
+function thingFields(data: { name: string }) {
+  return { name: data.name /* ... */ };
+}
+```
+
+- Use `getErrorMessage(error, fallback)` in every `catch` — never `catch (error: any)`.
+- Branch-scope non-owners with a helper:
+  `function branchScope(user) { return user.role === "OWNER" ? {} : { OR: [{ branchId: user.activeBranchId }, { branchId: null }] }; }`
+  (use `{ branchId: user.activeBranchId }` when global/shared records don't apply).
+- Verify ownership before mutating: `findFirst({ where: { id, shopId, ...branchScope(user) } })`.
+- Keep a module-level `*_REVALIDATE_PATHS` list and a `revalidate*Paths()` helper.
 
 ## Layer 4 — `<Module>Client.tsx`
 
@@ -242,6 +279,18 @@ For a KPI grid: `<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 
 - Middleware `proxy.ts` guards `/dashboard/:path*`; CASHIER is limited to POS/closings/profile.
   A page's `requireAuth` permission is the real enforcement.
 
+### Permission mapping (defaults)
+
+| Domain | View | Mutate |
+|---|---|---|
+| Catalog (categories, units, products, sections) | `CATALOG_VIEW` | `CATALOG_MANAGE` |
+| Procurement (suppliers, purchases) | `PURCHASES_VIEW` | `PURCHASES_MANAGE`; supplier payout → `SUPPLIERS_PAY` |
+| POS / customers | `POS_ACCESS` | `POS_ACCESS` (customer delete is OWNER-only) |
+| Finance / accounts | `FINANCE_*` | `FINANCE_*` |
+| Staff / users | — | `USERS_MANAGE`, `STAFF_PAYROLL` |
+
+Owner-only deletes: check `user.role !== "OWNER"` and return a localized error.
+
 ## UI preservation rules
 
 - Don't change column order, headers, badges, or copy unless asked.
@@ -267,10 +316,12 @@ warning is pre-existing and acceptable); build succeeds.
 ## Checklist before finishing
 
 - [ ] Page and every action use `requireAuth` (no `getServerSession`).
-- [ ] Permissions/roles match intent; owner-only deletes gated server-side.
-- [ ] Queries scoped to `shopId`/`activeBranchId`; decimals converted.
+- [ ] Permissions/roles match intent (see mapping); owner-only deletes gated server-side.
+- [ ] Queries scoped to `shopId`/`activeBranchId`; `select` only needed fields; decimals converted.
+- [ ] Actions share `formToXInput`, `xFields`, `revalidateXPaths`, and branch scope — no duplication.
+- [ ] All `catch` blocks use `getErrorMessage(error, fallback)`; never `catch (error: any)`.
 - [ ] Client uses `useCrudModal`; columns are `ColumnDef<T>[]`; row actions use `TableActions`.
 - [ ] Form uses `FormField` only and receives `errors`.
-- [ ] No `any` introduced; catches narrow with `instanceof Error`.
+- [ ] No `any` introduced anywhere.
 - [ ] UI text/layout unchanged (unless requested).
 - [ ] `tsc`, `eslint`, `build` pass.
