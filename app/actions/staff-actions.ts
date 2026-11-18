@@ -10,6 +10,69 @@ import {
   payrollSchema,
 } from "@/lib/validations";
 import { PERMISSIONS } from "@/types";
+import { getErrorMessage } from "@/lib/utils";
+
+// ==========================================
+// SHARED HELPERS
+// ==========================================
+const STAFF_REVALIDATE_PATHS = ["/dashboard/admin/staff"];
+
+function revalidateStaffPaths() {
+  for (const path of STAFF_REVALIDATE_PATHS) revalidatePath(path);
+}
+
+function formToDepartmentInput(formData: FormData) {
+  return {
+    name: formData.get("name")?.toString().trim(),
+    code: formData.get("code")?.toString().trim(),
+    description: formData.get("description")?.toString().trim() || null,
+    status: formData.get("status")?.toString() || "active",
+  };
+}
+
+function formToStaffInput(formData: FormData) {
+  return {
+    name: formData.get("name")?.toString().trim(),
+    phone: formData.get("phone")?.toString().trim(),
+    emergencyPhone: formData.get("emergencyPhone")?.toString().trim() || null,
+    nidNumber: formData.get("nidNumber")?.toString().trim() || null,
+    departmentId: formData.get("departmentId")?.toString(),
+    designation: formData.get("designation")?.toString().trim(),
+    joiningDate: formData.get("joiningDate")?.toString(),
+    basicSalary: formData.get("basicSalary"),
+    dailyAllowance: formData.get("dailyAllowance") || 0,
+    overtimeRate: formData.get("overtimeRate") || 0,
+    address: formData.get("address")?.toString().trim() || null,
+    status: formData.get("status")?.toString() || "ACTIVE",
+  };
+}
+
+function formToAdvanceInput(formData: FormData) {
+  return {
+    staffId: formData.get("staffId")?.toString(),
+    advanceDate: formData.get("advanceDate")?.toString(),
+    amount: formData.get("amount"),
+    paymentMethod: formData.get("paymentMethod")?.toString() || "cash",
+    purpose: formData.get("purpose")?.toString().trim() || null,
+    notes: formData.get("notes")?.toString().trim() || null,
+  };
+}
+
+function formToPayrollInput(formData: FormData) {
+  return {
+    staffId: formData.get("staffId")?.toString(),
+    month: formData.get("month")?.toString(),
+    year: formData.get("year"),
+    salaryDate: formData.get("salaryDate")?.toString(),
+    basicSalary: formData.get("basicSalary"),
+    allowance: formData.get("allowance") || 0,
+    overtimeAmount: formData.get("overtimeAmount") || 0,
+    advanceDeduction: formData.get("advanceDeduction") || 0,
+    penaltyDeduction: formData.get("penaltyDeduction") || 0,
+    paymentMethod: formData.get("paymentMethod")?.toString() || "cash",
+    notes: formData.get("notes")?.toString().trim() || null,
+  };
+}
 
 // ==========================================
 // 1. DEPARTMENTS CRUD
@@ -18,20 +81,15 @@ import { PERMISSIONS } from "@/types";
 export async function createOrUpdateDepartmentAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.STAFF_MANAGE,
       requireActiveStatus: true,
     });
     const id = formData.get("id")?.toString();
 
-    const validated = departmentSchema.safeParse({
-      name: formData.get("name")?.toString().trim(),
-      code: formData.get("code")?.toString().trim(),
-      description: formData.get("description")?.toString().trim() || null,
-      status: formData.get("status")?.toString() || "active",
-    });
-
-    if (!validated.success)
+    const validated = departmentSchema.safeParse(formToDepartmentInput(formData));
+    if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
+    }
     const data = validated.data;
 
     if (id) {
@@ -45,20 +103,17 @@ export async function createOrUpdateDepartmentAction(formData: FormData) {
       });
     }
 
-    revalidatePath("/dashboard/admin/staff");
+    revalidateStaffPaths();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to save department.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to save department.") };
   }
 }
 
 export async function deleteDepartmentAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.STAFF_MANAGE,
       requireActiveStatus: true,
     });
     const dept = await prisma.department.findFirst({
@@ -74,13 +129,10 @@ export async function deleteDepartmentAction(id: string) {
     }
 
     await prisma.department.delete({ where: { id } });
-    revalidatePath("/dashboard/admin/staff");
+    revalidateStaffPaths();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to delete department.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to delete department.") };
   }
 }
 
@@ -91,33 +143,36 @@ export async function deleteDepartmentAction(id: string) {
 export async function createOrUpdateStaffAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.STAFF_MANAGE,
       requireActiveStatus: true,
     });
     const id = formData.get("id")?.toString();
 
-    const validated = staffSchema.safeParse({
-      name: formData.get("name")?.toString().trim(),
-      phone: formData.get("phone")?.toString().trim(),
-      emergencyPhone: formData.get("emergencyPhone")?.toString().trim() || null,
-      nidNumber: formData.get("nidNumber")?.toString().trim() || null,
-      departmentId: formData.get("departmentId")?.toString(),
-      designation: formData.get("designation")?.toString().trim(),
-      joiningDate: formData.get("joiningDate")?.toString(),
-      basicSalary: formData.get("basicSalary"),
-      dailyAllowance: formData.get("dailyAllowance") || 0,
-      overtimeRate: formData.get("overtimeRate") || 0,
-      address: formData.get("address")?.toString().trim() || null,
-      status: formData.get("status")?.toString() || "ACTIVE",
-    });
-
-    if (!validated.success)
+    const validated = staffSchema.safeParse(formToStaffInput(formData));
+    if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
+    }
     const data = validated.data;
 
+    const department = await prisma.department.findFirst({
+      where: { id: data.departmentId, shopId: user.shopId },
+      select: { id: true },
+    });
+    if (!department) {
+      return { success: false, error: "Department not found." };
+    }
+
     if (id) {
+      const existing = await prisma.staffProfile.findFirst({
+        where: { id, shopId: user.shopId, branchId: user.activeBranchId },
+        select: { id: true },
+      });
+      if (!existing) {
+        return { success: false, error: "Staff profile not found in this branch." };
+      }
+
       await prisma.staffProfile.update({
-        where: { id, shopId: user.shopId },
+        where: { id },
         data: {
           ...data,
           joiningDate: new Date(data.joiningDate),
@@ -128,30 +183,27 @@ export async function createOrUpdateStaffAction(formData: FormData) {
         data: {
           ...data,
           joiningDate: new Date(data.joiningDate),
-          branchId: user.activeBranchId!,
+          branchId: user.activeBranchId,
           shopId: user.shopId,
         },
       });
     }
 
-    revalidatePath("/dashboard/admin/staff");
+    revalidateStaffPaths();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to save staff profile.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to save staff profile.") };
   }
 }
 
 export async function deleteStaffAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.STAFF_MANAGE,
       requireActiveStatus: true,
     });
     const staff = await prisma.staffProfile.findFirst({
-      where: { id, shopId: user.shopId },
+      where: { id, shopId: user.shopId, branchId: user.activeBranchId },
       include: { _count: { select: { payrolls: true } } },
     });
     if (!staff) return { success: false, error: "Staff profile not found." };
@@ -164,13 +216,10 @@ export async function deleteStaffAction(id: string) {
     }
 
     await prisma.staffProfile.delete({ where: { id } });
-    revalidatePath("/dashboard/admin/staff");
+    revalidateStaffPaths();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to delete staff profile.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to delete staff profile.") };
   }
 }
 
@@ -181,28 +230,29 @@ export async function deleteStaffAction(id: string) {
 export async function createAdvanceAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.STAFF_PAYROLL,
       requireActiveStatus: true,
     });
-    const validated = advanceSchema.safeParse({
-      staffId: formData.get("staffId")?.toString(),
-      advanceDate: formData.get("advanceDate")?.toString(),
-      amount: formData.get("amount"),
-      paymentMethod: formData.get("paymentMethod")?.toString() || "cash",
-      purpose: formData.get("purpose")?.toString().trim() || null,
-      notes: formData.get("notes")?.toString().trim() || null,
-    });
-
-    if (!validated.success)
+    const validated = advanceSchema.safeParse(formToAdvanceInput(formData));
+    if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
+    }
     const data = validated.data;
+
+    const staffMember = await prisma.staffProfile.findFirst({
+      where: { id: data.staffId, shopId: user.shopId, branchId: user.activeBranchId },
+      select: { id: true },
+    });
+    if (!staffMember) {
+      return { success: false, error: "Staff member not found in this branch." };
+    }
 
     await prisma.$transaction(async (tx) => {
       await tx.salaryAdvance.create({
         data: {
           ...data,
           advanceDate: new Date(data.advanceDate),
-          branchId: user.activeBranchId!,
+          branchId: user.activeBranchId,
           shopId: user.shopId,
         },
       });
@@ -210,7 +260,7 @@ export async function createAdvanceAction(formData: FormData) {
       const cashAcc = await tx.account.findFirst({
         where: {
           shopId: user.shopId,
-          branchId: user.activeBranchId!,
+          branchId: user.activeBranchId,
           type: "CASH",
         },
       });
@@ -223,24 +273,21 @@ export async function createAdvanceAction(formData: FormData) {
       }
     });
 
-    revalidatePath("/dashboard/admin/staff");
+    revalidateStaffPaths();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to issue advance.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to issue advance.") };
   }
 }
 
 export async function deleteAdvanceAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.STAFF_PAYROLL,
       requireActiveStatus: true,
     });
     const adv = await prisma.salaryAdvance.findFirst({
-      where: { id, shopId: user.shopId },
+      where: { id, shopId: user.shopId, branchId: user.activeBranchId },
     });
     if (!adv) return { success: false, error: "Advance record not found." };
     if (adv.isDeducted) {
@@ -252,13 +299,10 @@ export async function deleteAdvanceAction(id: string) {
     }
 
     await prisma.salaryAdvance.delete({ where: { id } });
-    revalidatePath("/dashboard/admin/staff");
+    revalidateStaffPaths();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to delete advance.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to delete advance.") };
   }
 }
 
@@ -269,26 +313,22 @@ export async function deleteAdvanceAction(id: string) {
 export async function createPayrollAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.STAFF_PAYROLL,
       requireActiveStatus: true,
     });
-    const validated = payrollSchema.safeParse({
-      staffId: formData.get("staffId")?.toString(),
-      month: formData.get("month")?.toString(),
-      year: formData.get("year"),
-      salaryDate: formData.get("salaryDate")?.toString(),
-      basicSalary: formData.get("basicSalary"),
-      allowance: formData.get("allowance") || 0,
-      overtimeAmount: formData.get("overtimeAmount") || 0,
-      advanceDeduction: formData.get("advanceDeduction") || 0,
-      penaltyDeduction: formData.get("penaltyDeduction") || 0,
-      paymentMethod: formData.get("paymentMethod")?.toString() || "cash",
-      notes: formData.get("notes")?.toString().trim() || null,
-    });
-
-    if (!validated.success)
+    const validated = payrollSchema.safeParse(formToPayrollInput(formData));
+    if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
+    }
     const data = validated.data;
+
+    const staffMember = await prisma.staffProfile.findFirst({
+      where: { id: data.staffId, shopId: user.shopId, branchId: user.activeBranchId },
+      select: { id: true },
+    });
+    if (!staffMember) {
+      return { success: false, error: "Staff member not found in this branch." };
+    }
 
     const existing = await prisma.payroll.findFirst({
       where: {
@@ -330,7 +370,7 @@ export async function createPayrollAction(formData: FormData) {
           paymentMethod: data.paymentMethod,
           paymentStatus: "paid",
           notes: data.notes,
-          branchId: user.activeBranchId!,
+          branchId: user.activeBranchId,
           staffId: data.staffId,
           shopId: user.shopId,
         },
@@ -350,7 +390,7 @@ export async function createPayrollAction(formData: FormData) {
       const cashAcc = await tx.account.findFirst({
         where: {
           shopId: user.shopId,
-          branchId: user.activeBranchId!,
+          branchId: user.activeBranchId,
           type: "CASH",
         },
       });
@@ -363,29 +403,31 @@ export async function createPayrollAction(formData: FormData) {
       }
     });
 
-    revalidatePath("/dashboard/admin/staff");
+    revalidateStaffPaths();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to generate payroll.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to generate payroll.") };
   }
 }
 
 export async function deletePayrollAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.STAFF_PAYROLL,
       requireActiveStatus: true,
     });
-    await prisma.payroll.delete({ where: { id, shopId: user.shopId } });
-    revalidatePath("/dashboard/admin/staff");
+    const payroll = await prisma.payroll.findFirst({
+      where: { id, shopId: user.shopId, branchId: user.activeBranchId },
+      select: { id: true },
+    });
+    if (!payroll) {
+      return { success: false, error: "Payroll record not found in this branch." };
+    }
+
+    await prisma.payroll.delete({ where: { id } });
+    revalidateStaffPaths();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to delete payroll record.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to delete payroll record.") };
   }
 }

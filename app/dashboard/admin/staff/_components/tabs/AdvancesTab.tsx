@@ -1,9 +1,9 @@
 "use client";
 "use no memo";
 import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { Trash2 } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
-import { ISalaryAdvance } from "@/types";
+import { TableActions } from "@/components/common/ui/table/TableHelpers";
+import { ISalaryAdvance, PERMISSIONS } from "@/types";
 
 export default function AdvancesTab({ advances, currencySymbol, onDelete }: { advances: ISalaryAdvance[]; currencySymbol: string; onDelete: (a: ISalaryAdvance) => void }) {
   const columns: ColumnDef<ISalaryAdvance>[] = [
@@ -22,16 +22,12 @@ export default function AdvancesTab({ advances, currencySymbol, onDelete }: { ad
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-        return (
-          !item.isDeducted && (
-            <button onClick={() => onDelete(item)} className="p-1.5 text-neutral-500 hover:text-red-600 rounded-lg transition cursor-pointer" title="Delete Advance">
-              <Trash2 size={15} />
-            </button>
-          )
-        );
-      },
+      cell: ({ row }) => (
+        <TableActions
+          onDelete={row.original.isDeducted ? undefined : () => onDelete(row.original)}
+          deletePermission={PERMISSIONS.STAFF_PAYROLL}
+        />
+      ),
     },
   ];
   const table = useReactTable({ data: advances, columns, getCoreRowModel: getCoreRowModel() });

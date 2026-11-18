@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { toast } from "sonner";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { useCrudModal } from "@/hooks/useCrudModal";
 import StaffTab from "./tabs/StaffTab";
 import DepartmentsTab from "./tabs/DepartmentsTab";
 import AdvancesTab from "./tabs/AdvancesTab";
@@ -42,37 +42,35 @@ export default function StaffClient({
 }) {
   const [activeTab, setActiveTab] = useState<"staff" | "payrolls" | "advances" | "departments">("staff");
 
-  const [staffModalOpen, setStaffModalOpen] = useState(false);
-  const [payrollModalOpen, setPayrollModalOpen] = useState(false);
-  const [advanceModalOpen, setAdvanceModalOpen] = useState(false);
-  const [deptModalOpen, setDeptModalOpen] = useState(false);
+  // One universal CRUD engine per entity
+  const staffCrud = useCrudModal<IStaff>({
+    createAction: createOrUpdateStaffAction,
+    updateAction: createOrUpdateStaffAction,
+    deleteAction: deleteStaffAction,
+    entityName: "কর্মচারী",
+  });
 
-  const [editingStaff, setEditingStaff] = useState<IStaff | null>(null);
-  const [editingDept, setEditingDept] = useState<IDepartment | null>(null);
+  const deptCrud = useCrudModal<IDepartment>({
+    createAction: createOrUpdateDepartmentAction,
+    updateAction: createOrUpdateDepartmentAction,
+    deleteAction: deleteDepartmentAction,
+    entityName: "বিভাগ",
+  });
 
-  const [deleteStaffTarget, setDeleteStaffTarget] = useState<IStaff | null>(null);
-  const [deleteDeptTarget, setDeleteDeptTarget] = useState<IDepartment | null>(null);
-  const [deleteAdvanceTarget, setDeleteAdvanceTarget] = useState<ISalaryAdvance | null>(null);
-  const [deletePayrollTarget, setDeletePayrollTarget] = useState<IPayroll | null>(null);
+  const advanceCrud = useCrudModal<ISalaryAdvance>({
+    createAction: createAdvanceAction,
+    deleteAction: deleteAdvanceAction,
+    entityName: "অগ্রিম বেতন",
+  });
 
-  const [loading, setLoading] = useState(false);
+  const payrollCrud = useCrudModal<IPayroll>({
+    createAction: createPayrollAction,
+    deleteAction: deletePayrollAction,
+    entityName: "বেতন",
+  });
 
   const totalPayrollMonth = payrolls.filter(p => new Date(p.salaryDate).getMonth() === new Date().getMonth()).reduce((sum, p) => sum + p.netSalary, 0);
   const pendingAdvances = advances.filter(a => !a.isDeducted).reduce((sum, a) => sum + a.amount, 0);
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>, action: (fd: FormData) => Promise<any>, successMsg: string, setter: (b: boolean) => void) {
-    e.preventDefault();
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    const res = await action(formData);
-    setLoading(false);
-    if (res.success) {
-      toast.success(successMsg);
-      setter(false);
-    } else {
-      toast.error(res.error || "Operation failed.");
-    }
-  }
 
   return (
     <div className="space-y-6">
@@ -113,44 +111,106 @@ export default function StaffClient({
 
         <div className="flex items-center gap-2 shrink-0">
           {activeTab === "staff" && (
-            <button onClick={() => { setEditingStaff(null); setStaffModalOpen(true); }} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl shadow-xs cursor-pointer">
+            <button onClick={staffCrud.openCreate} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl shadow-xs cursor-pointer">
               <Plus size={15} /> Add Employee
             </button>
           )}
           {activeTab === "payrolls" && (
-            <button onClick={() => setPayrollModalOpen(true)} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl shadow-xs cursor-pointer">
+            <button onClick={payrollCrud.openCreate} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl shadow-xs cursor-pointer">
               <Plus size={15} /> Generate Salary
             </button>
           )}
           {activeTab === "advances" && (
-            <button onClick={() => setAdvanceModalOpen(true)} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl shadow-xs cursor-pointer">
+            <button onClick={advanceCrud.openCreate} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl shadow-xs cursor-pointer">
               <Plus size={15} /> Issue Advance
             </button>
           )}
           {activeTab === "departments" && (
-            <button onClick={() => { setEditingDept(null); setDeptModalOpen(true); }} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl shadow-xs cursor-pointer">
+            <button onClick={deptCrud.openCreate} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl shadow-xs cursor-pointer">
               <Plus size={15} /> Add Department
             </button>
           )}
         </div>
       </div>
 
-      {activeTab === "staff" && <StaffTab staff={staff} onEdit={(s) => { setEditingStaff(s); setStaffModalOpen(true); }} onDelete={setDeleteStaffTarget} />}
-      {activeTab === "payrolls" && <PayrollsTab payrolls={payrolls} currencySymbol={currencySymbol} onDelete={setDeletePayrollTarget} />}
-      {activeTab === "advances" && <AdvancesTab advances={advances} currencySymbol={currencySymbol} onDelete={setDeleteAdvanceTarget} />}
-      {activeTab === "departments" && <DepartmentsTab departments={departments} onEdit={(d) => { setEditingDept(d); setDeptModalOpen(true); }} onDelete={setDeleteDeptTarget} />}
+      {activeTab === "staff" && <StaffTab staff={staff} onEdit={staffCrud.openEdit} onDelete={staffCrud.setDeleteTarget} />}
+      {activeTab === "payrolls" && <PayrollsTab payrolls={payrolls} currencySymbol={currencySymbol} onDelete={payrollCrud.setDeleteTarget} />}
+      {activeTab === "advances" && <AdvancesTab advances={advances} currencySymbol={currencySymbol} onDelete={advanceCrud.setDeleteTarget} />}
+      {activeTab === "departments" && <DepartmentsTab departments={departments} onEdit={deptCrud.openEdit} onDelete={deptCrud.setDeleteTarget} />}
 
       {/* MODALS */}
-      <DepartmentModal isOpen={deptModalOpen} onClose={() => { setDeptModalOpen(false); setEditingDept(null); }} onSubmit={(e) => handleSubmit(e, createOrUpdateDepartmentAction, "Department saved!", setDeptModalOpen)} loading={loading} department={editingDept} />
-      <StaffModal isOpen={staffModalOpen} onClose={() => { setStaffModalOpen(false); setEditingStaff(null); }} onSubmit={(e) => handleSubmit(e, createOrUpdateStaffAction, "Staff profile saved!", setStaffModalOpen)} loading={loading} staff={editingStaff} departments={departments} />
-      <AdvanceModal isOpen={advanceModalOpen} onClose={() => setAdvanceModalOpen(false)} onSubmit={(e) => handleSubmit(e, createAdvanceAction, "Advance issued!", setAdvanceModalOpen)} loading={loading} staff={staff} currencySymbol={currencySymbol} />
-      <PayrollModal isOpen={payrollModalOpen} onClose={() => setPayrollModalOpen(false)} onSubmit={(e) => handleSubmit(e, createPayrollAction, "Payroll generated!", setPayrollModalOpen)} loading={loading} staff={staff} />
+      <DepartmentModal
+        key={deptCrud.editingItem?.id || `dept-${deptCrud.isOpen}`}
+        isOpen={deptCrud.isOpen}
+        onClose={deptCrud.closeModal}
+        onSubmit={deptCrud.handleSubmit}
+        loading={deptCrud.loading}
+        department={deptCrud.editingItem}
+        errors={deptCrud.errors}
+      />
+      <StaffModal
+        key={staffCrud.editingItem?.id || `staff-${staffCrud.isOpen}`}
+        isOpen={staffCrud.isOpen}
+        onClose={staffCrud.closeModal}
+        onSubmit={staffCrud.handleSubmit}
+        loading={staffCrud.loading}
+        staff={staffCrud.editingItem}
+        departments={departments}
+        errors={staffCrud.errors}
+      />
+      <AdvanceModal
+        key={`advance-${advanceCrud.isOpen}`}
+        isOpen={advanceCrud.isOpen}
+        onClose={advanceCrud.closeModal}
+        onSubmit={advanceCrud.handleSubmit}
+        loading={advanceCrud.loading}
+        staff={staff}
+        currencySymbol={currencySymbol}
+        errors={advanceCrud.errors}
+      />
+      <PayrollModal
+        key={`payroll-${payrollCrud.isOpen}`}
+        isOpen={payrollCrud.isOpen}
+        onClose={payrollCrud.closeModal}
+        onSubmit={payrollCrud.handleSubmit}
+        loading={payrollCrud.loading}
+        staff={staff}
+        errors={payrollCrud.errors}
+      />
 
       {/* CONFIRMATION DIALOGS */}
-      <ConfirmDialog isOpen={Boolean(deleteStaffTarget)} onClose={() => setDeleteStaffTarget(null)} onConfirm={async () => { setLoading(true); await deleteStaffAction(deleteStaffTarget!.id); setLoading(false); setDeleteStaffTarget(null); toast.success("Staff profile deleted."); }} title="Delete Employee" message={`Delete staff profile for ${deleteStaffTarget?.name}?`} loading={loading} />
-      <ConfirmDialog isOpen={Boolean(deleteDeptTarget)} onClose={() => setDeleteDeptTarget(null)} onConfirm={async () => { setLoading(true); const res = await deleteDepartmentAction(deleteDeptTarget!.id); setLoading(false); setDeleteDeptTarget(null); if(res.success) toast.success("Department deleted."); else toast.error(res.error); }} title="Delete Department" message={`Delete department "${deleteDeptTarget?.name}"?`} loading={loading} />
-      <ConfirmDialog isOpen={Boolean(deleteAdvanceTarget)} onClose={() => setDeleteAdvanceTarget(null)} onConfirm={async () => { setLoading(true); await deleteAdvanceAction(deleteAdvanceTarget!.id); setLoading(false); setDeleteAdvanceTarget(null); toast.success("Advance deleted."); }} title="Delete Advance" message="Delete this salary advance record?" loading={loading} />
-      <ConfirmDialog isOpen={Boolean(deletePayrollTarget)} onClose={() => setDeletePayrollTarget(null)} onConfirm={async () => { setLoading(true); await deletePayrollAction(deletePayrollTarget!.id); setLoading(false); setDeletePayrollTarget(null); toast.success("Payslip deleted."); }} title="Delete Payslip" message="Delete this payroll record?" loading={loading} />
+      <ConfirmDialog
+        isOpen={Boolean(staffCrud.deleteTarget)}
+        onClose={() => staffCrud.setDeleteTarget(null)}
+        onConfirm={staffCrud.handleDeleteConfirm}
+        title="Delete Employee"
+        message={`Delete staff profile for ${staffCrud.deleteTarget?.name}?`}
+        loading={staffCrud.loading}
+      />
+      <ConfirmDialog
+        isOpen={Boolean(deptCrud.deleteTarget)}
+        onClose={() => deptCrud.setDeleteTarget(null)}
+        onConfirm={deptCrud.handleDeleteConfirm}
+        title="Delete Department"
+        message={`Delete department "${deptCrud.deleteTarget?.name}"?`}
+        loading={deptCrud.loading}
+      />
+      <ConfirmDialog
+        isOpen={Boolean(advanceCrud.deleteTarget)}
+        onClose={() => advanceCrud.setDeleteTarget(null)}
+        onConfirm={advanceCrud.handleDeleteConfirm}
+        title="Delete Advance"
+        message="Delete this salary advance record?"
+        loading={advanceCrud.loading}
+      />
+      <ConfirmDialog
+        isOpen={Boolean(payrollCrud.deleteTarget)}
+        onClose={() => payrollCrud.setDeleteTarget(null)}
+        onConfirm={payrollCrud.handleDeleteConfirm}
+        title="Delete Payslip"
+        message="Delete this payroll record?"
+        loading={payrollCrud.loading}
+      />
     </div>
   );
 }

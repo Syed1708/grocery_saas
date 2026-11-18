@@ -1,9 +1,9 @@
 "use client";
 "use no memo";
 import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { Edit2, Trash2 } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
-import { IDepartment } from "@/types";
+import { TableActions } from "@/components/common/ui/table/TableHelpers";
+import { IDepartment, PERMISSIONS } from "@/types";
 
 export default function DepartmentsTab({ departments, onEdit, onDelete }: { departments: IDepartment[]; onEdit: (d: IDepartment) => void; onDelete: (d: IDepartment) => void }) {
   const columns: ColumnDef<IDepartment>[] = [
@@ -13,15 +13,15 @@ export default function DepartmentsTab({ departments, onEdit, onDelete }: { depa
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-        return (
-          <div className="flex items-center gap-1.5">
-            <button onClick={() => onEdit(item)} className="p-1.5 text-neutral-500 hover:text-blue-600 rounded-lg transition cursor-pointer" title="Edit"><Edit2 size={15} /></button>
-            <button onClick={() => onDelete(item)} disabled={(item._count?.staff || 0) > 0} className="p-1.5 text-neutral-500 hover:text-red-600 disabled:opacity-30 rounded-lg transition cursor-pointer" title="Delete"><Trash2 size={15} /></button>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableActions
+          onEdit={() => onEdit(row.original)}
+          editPermission={PERMISSIONS.STAFF_MANAGE}
+          onDelete={() => onDelete(row.original)}
+          canDelete={(row.original._count?.staff || 0) === 0}
+          deletePermission={PERMISSIONS.STAFF_MANAGE}
+        />
+      ),
     },
   ];
   const table = useReactTable({ data: departments, columns, getCoreRowModel: getCoreRowModel() });

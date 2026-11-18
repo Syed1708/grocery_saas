@@ -18,9 +18,12 @@ export async function getDepartments(shopId: string): Promise<IDepartment[]> {
   }));
 }
 
-export async function getStaffList(shopId: string): Promise<IStaff[]> {
+export async function getStaffList(
+  shopId: string,
+  branchId?: string | null
+): Promise<IStaff[]> {
   const staff = await prisma.staffProfile.findMany({
-    where: { shopId },
+    where: { shopId, ...(branchId ? { branchId } : {}) },
     include: {
       department: { select: { name: true } },
       branch: { select: { name: true } },
@@ -46,9 +49,12 @@ export async function getStaffList(shopId: string): Promise<IStaff[]> {
   }));
 }
 
-export async function getAdvances(shopId: string): Promise<ISalaryAdvance[]> {
+export async function getAdvances(
+  shopId: string,
+  branchId?: string | null
+): Promise<ISalaryAdvance[]> {
   const advs = await prisma.salaryAdvance.findMany({
-    where: { shopId },
+    where: { shopId, ...(branchId ? { branchId } : {}) },
     include: { staff: { select: { name: true } } },
     orderBy: { advanceDate: "desc" },
   });
@@ -65,9 +71,12 @@ export async function getAdvances(shopId: string): Promise<ISalaryAdvance[]> {
   }));
 }
 
-export async function getPayrolls(shopId: string): Promise<IPayroll[]> {
+export async function getPayrolls(
+  shopId: string,
+  branchId?: string | null
+): Promise<IPayroll[]> {
   const pay = await prisma.payroll.findMany({
-    where: { shopId },
+    where: { shopId, ...(branchId ? { branchId } : {}) },
     include: { staff: { select: { name: true, designation: true } } },
     orderBy: { salaryDate: "desc" },
   });

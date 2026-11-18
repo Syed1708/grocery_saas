@@ -1,9 +1,9 @@
 "use client";
 "use no memo";
 import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { Trash2 } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
-import { IPayroll } from "@/types";
+import { TableActions } from "@/components/common/ui/table/TableHelpers";
+import { IPayroll, PERMISSIONS } from "@/types";
 
 export default function PayrollsTab({ payrolls, currencySymbol, onDelete }: { payrolls: IPayroll[]; currencySymbol: string; onDelete: (p: IPayroll) => void }) {
   const columns: ColumnDef<IPayroll>[] = [
@@ -23,14 +23,12 @@ export default function PayrollsTab({ payrolls, currencySymbol, onDelete }: { pa
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-        return (
-          <button onClick={() => onDelete(item)} className="p-1.5 text-neutral-500 hover:text-red-600 rounded-lg transition cursor-pointer" title="Delete Payslip">
-            <Trash2 size={15} />
-          </button>
-        );
-      },
+      cell: ({ row }) => (
+        <TableActions
+          onDelete={() => onDelete(row.original)}
+          deletePermission={PERMISSIONS.STAFF_PAYROLL}
+        />
+      ),
     },
   ];
   const table = useReactTable({ data: payrolls, columns, getCoreRowModel: getCoreRowModel() });

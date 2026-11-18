@@ -1,20 +1,19 @@
 "use client";
 import FormModal from "@/components/common/FormModal";
-import { Input } from "@/components/common/ui/Input";
-import { Select } from "@/components/common/ui/Select";
-import { Textarea } from "@/components/common/ui/Textarea";
+import { FormField } from "@/components/common/ui/form/FormField";
+import type { IStaff } from "@/types";
 
-export default function AdvanceModal({ isOpen, onClose, onSubmit, loading, staff, currencySymbol }: { isOpen: boolean; onClose: () => void; onSubmit: (e: any) => void; loading: boolean; staff: any[]; currencySymbol: string }) {
+export default function AdvanceModal({ isOpen, onClose, onSubmit, loading, staff, currencySymbol, errors = {} }: { isOpen: boolean; onClose: () => void; onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void; loading: boolean; staff: IStaff[]; currencySymbol: string; errors?: Record<string, string> }) {
   const staffOptions = staff.map(s => ({ label: `${s.name} (${s.designation})`, value: s.id }));
   return (
     <FormModal isOpen={isOpen} onClose={onClose} onSubmit={onSubmit} title="Issue Salary Advance (অগ্রিম বেতন / হাওলাত)" description="Give mid-month cash advance to staff, auto-deducted from payroll." loading={loading} submitLabel="Issue Advance">
-      <Select label="Employee *" name="staffId" required options={staffOptions} placeholder="Select staff member" />
+      <FormField type="select" label="Employee" name="staffId" required placeholder="Select staff member" options={staffOptions} error={errors.staffId} />
       <div className="grid grid-cols-2 gap-3">
-        <Input label={`Amount (${currencySymbol}) *`} name="amount" type="number" step="0.01" required placeholder="0.00" />
-        <Input label="Date *" name="advanceDate" type="date" required defaultValue={new Date().toISOString().split("T")[0]} />
+        <FormField type="number" label={`Amount (${currencySymbol})`} name="amount" step="0.01" required placeholder="0.00" error={errors.amount} />
+        <FormField type="date" label="Date" name="advanceDate" required defaultValue={new Date().toISOString().split("T")[0]} error={errors.advanceDate} />
       </div>
-      <Input label="Purpose / Reason" name="purpose" placeholder="e.g. Medical emergency" />
-      <Textarea label="Notes" name="notes" rows={2} />
+      <FormField type="text" label="Purpose / Reason" name="purpose" placeholder="e.g. Medical emergency" error={errors.purpose} />
+      <FormField type="textarea" label="Notes" name="notes" rows={2} error={errors.notes} />
     </FormModal>
   );
 }
