@@ -33,6 +33,15 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
       { key: PERMISSIONS.CATALOG_MANAGE, label: "Manage Catalog", desc: "Create & edit items/categories" },
       { key: PERMISSIONS.INVENTORY_ADJUST, label: "Stock Adjustment", desc: "Stock in/out correction" },
       { key: PERMISSIONS.INVENTORY_VALUATION_VIEW, label: "View Valuation", desc: "See cost prices & assets" },
+      { key: PERMISSIONS.INVENTORY_TRANSFER, label: "Branch Transfers", desc: "Move stock between outlets" },
+      { key: PERMISSIONS.INVENTORY_WASTAGE, label: "Record Wastage", desc: "Log spoilage & damages" },
+    ],
+  },
+  {
+    category: "🧾 Customers & Khata",
+    items: [
+      { key: PERMISSIONS.CUSTOMERS_VIEW, label: "View Customers", desc: "Browse khata & balances" },
+      { key: PERMISSIONS.CUSTOMERS_MANAGE, label: "Manage Customers", desc: "Create, edit & collect dues" },
     ],
   },
   {
@@ -40,6 +49,8 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
     items: [
       { key: PERMISSIONS.PURCHASES_VIEW, label: "View Purchases", desc: "Inspect supplier chalans" },
       { key: PERMISSIONS.PURCHASES_MANAGE, label: "Receive Purchases", desc: "Record new supplier stock" },
+      { key: PERMISSIONS.SUPPLIERS_VIEW, label: "View Suppliers", desc: "Browse vendor profiles" },
+      { key: PERMISSIONS.SUPPLIERS_MANAGE, label: "Manage Suppliers", desc: "Create & edit vendors" },
       { key: PERMISSIONS.SUPPLIERS_PAY, label: "Pay Suppliers", desc: "Disburse vendor balances" },
     ],
   },
@@ -54,14 +65,20 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
   {
     category: "👥 Staff & Payroll",
     items: [
-      { key: PERMISSIONS.STAFF_PAYROLL, label: "Staff & Payroll", desc: "Manage salaries & salary advances" },
+      { key: PERMISSIONS.STAFF_MANAGE, label: "Staff Profiles", desc: "Create & manage staff members" },
+      { key: PERMISSIONS.STAFF_PAYROLL, label: "Payroll", desc: "Manage salaries & salary advances" },
     ],
   },
   {
     category: "📊 Reports & Analytics",
     items: [
+      { key: PERMISSIONS.REPORTS_OVERVIEW, label: "Reports Overview", desc: "Business intelligence home" },
       { key: PERMISSIONS.REPORTS_CLOSING_Z, label: "Shift & Z-Report", desc: "Print counter day-end slip" },
       { key: PERMISSIONS.REPORTS_SALES, label: "Sales Reports", desc: "Detailed sales volume breakdown" },
+      { key: PERMISSIONS.REPORTS_PURCHASES, label: "Purchase Reports", desc: "Supplier chalan registers" },
+      { key: PERMISSIONS.REPORTS_STOCK, label: "Stock Reports", desc: "Inventory valuation & movement" },
+      { key: PERMISSIONS.REPORTS_CUSTOMER_DUE, label: "Customer Due Reports", desc: "Outstanding khata balances" },
+      { key: PERMISSIONS.REPORTS_EXPENSES, label: "Expense Reports", desc: "OPEX breakdown by category" },
       { key: PERMISSIONS.REPORTS_PL_PROFIT, label: "P&L Financial Reports", desc: "Net profit & margins" },
       { key: PERMISSIONS.REPORTS_EXPORT, label: "Export PDF/CSV", desc: "Download master registers" },
     ],
@@ -71,7 +88,9 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
     items: [
       { key: PERMISSIONS.SETTINGS_STORE, label: "Store Settings", desc: "Outlet profiles & VAT config" },
       { key: PERMISSIONS.USERS_MANAGE, label: "Users & RBAC", desc: "Manage staff accounts & permissions" },
+      { key: PERMISSIONS.BRANCH_MANAGE, label: "Manage Branches", desc: "Create & edit outlets" },
       { key: PERMISSIONS.BRANCH_SWITCH, label: "Branch Switcher", desc: "Switch active outlet context" },
+      { key: PERMISSIONS.FAMILY_LEDGER_ACCESS, label: "Family Ledger", desc: "Partner equity & drawings" },
     ],
   },
 ];

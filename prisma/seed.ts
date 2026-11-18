@@ -14,6 +14,17 @@ const DEFAULT_UNITS = [
   { name: "Bag", shortCode: "bag", allowDecimal: true },
 ];
 
+type SeedUserRole = "OWNER" | "MANAGER" | "CASHIER";
+type SeedCustomerType = "WALK_IN" | "PERMANENT";
+type SeedPaymentStatus = "PAID" | "PARTIAL" | "DUE";
+
+interface SeedProduct {
+  id: string;
+  unitId: string;
+  purchasePrice: number;
+  sellingPrice: number;
+}
+
 async function cleanDatabase() {
   console.log("🧹 [0/12] Cleaning previous database records...");
   
@@ -120,7 +131,13 @@ async function main() {
   console.log("👥 [2/12] Seeding RBAC Users across Branches...");
   const hashedPassword = await bcrypt.hash("123456", 10);
 
-  const users = [
+  const users: Array<{
+    email: string;
+    name: string;
+    role: SeedUserRole;
+    branchId: string;
+    phone: string;
+  }> = [
     { email: "owner@grocery.com", name: "Haji Mohammad Selim (Owner)", role: "OWNER", branchId: mainBranch.id, phone: "01700000000" },
     { email: "manager@grocery.com", name: "Kazi Faruk (Main Manager)", role: "MANAGER", branchId: mainBranch.id, phone: "01800000001" },
     { email: "cashier@grocery.com", name: "Rafiqul Islam (Main Cashier)", role: "CASHIER", branchId: mainBranch.id, phone: "01900000001" },
@@ -136,7 +153,7 @@ async function main() {
         email: u.email,
         password: hashedPassword,
         phone: u.phone,
-        role: u.role as any,
+        role: u.role,
         shopId: shop.id,
         branchId: u.branchId,
         isActive: true,
@@ -253,7 +270,7 @@ async function main() {
     { name: "ডানো ডেইলি পুষ্টি মিল্ক পাউডার ৫০০ গ্রাম", nameEn: "Dano Daily Pushti 500g", barcode: "890100100132", sku: "MILK-003", purchasePrice: 380, sellingPrice: 430, wholesalePrice: 405, vat: 0, expDays: 365, alert: 10, stockMain: 30, stockMirpur: 15, u: "pkt", cat: "dairy-milk", b: "Pran Foods", sec: "SH-01" },
   ];
 
-  const productList: any[] = [];
+  const productList: SeedProduct[] = [];
   for (const p of rawProducts) {
     const unitId = unitMap.get(p.u);
     const categoryId = categoryMap.get(p.cat);
@@ -287,7 +304,12 @@ async function main() {
       },
     });
 
-    productList.push(product);
+    productList.push({
+      id: product.id,
+      unitId: product.unitId,
+      purchasePrice: Number(product.purchasePrice),
+      sellingPrice: Number(product.sellingPrice),
+    });
 
     // Stock for Main Branch
     await prisma.productStock.create({
@@ -332,7 +354,15 @@ async function main() {
     supplierMap.set(s.id, supp);
   }
 
-  const chalans = [
+  const chalans: Array<{
+    no: string;
+    daysAgo: number;
+    sub: number;
+    paid: number;
+    due: number;
+    supp: string;
+    status: SeedPaymentStatus;
+  }> = [
     { no: "CH-PRAN-901", daysAgo: 25, sub: 45000, paid: 35000, due: 10000, supp: "supp-pran", status: "PARTIAL" },
     { no: "CH-UNI-902", daysAgo: 20, sub: 60000, paid: 60000, due: 0, supp: "supp-unilever", status: "PAID" },
     { no: "CH-SQR-903", daysAgo: 15, sub: 52000, paid: 40000, due: 12000, supp: "supp-square", status: "PARTIAL" },
@@ -354,7 +384,7 @@ async function main() {
         paidAmount: ch.paid,
         dueAmount: ch.due + 400,
         paymentMethod: "bank",
-        paymentStatus: ch.status as any,
+        paymentStatus: ch.status,
         branchId: mainBranch.id,
         supplierId: supplierMap.get(ch.supp)!.id,
         shopId: shop.id,
@@ -384,7 +414,15 @@ async function main() {
   // 6. CUSTOMERS (STRICT BRANCH ISOLATION)
   // ==========================================
   console.log("👤 [6/12] Seeding Customers with Strict Branch Ownership...");
-  const customersData = [
+  const customersData: Array<{
+    id: string;
+    name: string;
+    phone: string;
+    type: SeedCustomerType;
+    due: number;
+    limit: number;
+    branchId: string;
+  }> = [
     // Main Branch Customers
     { id: "cust-walkin-main", name: "নগদ ক্রেতা (Main Counter)", phone: "01500000000", type: "WALK_IN", due: 0, limit: 0, branchId: mainBranch.id },
     { id: "cust-tushi", name: "মোসাঃ তুশি আক্তার", phone: "01711998877", type: "PERMANENT", due: 10865, limit: 15000, branchId: mainBranch.id },
@@ -407,7 +445,7 @@ async function main() {
         id: c.id,
         name: c.name,
         phone: c.phone,
-        type: c.type as any,
+        type: c.type,
         village: "কাওরান বাজার",
         district: "ঢাকা",
         address: "বাসা নং ১২, রোড ৩",
@@ -468,7 +506,7 @@ async function main() {
       }
 
       const numItems = 2 + (i % 3);
-      const selectedProducts: any[] = [];
+      const selectedProducts: SeedProduct[] = [];
       for (let k = 0; k < numItems; k++) {
         const prodIndex = (daysAgo * 3 + i * 2 + k) % productList.length;
         selectedProducts.push(productList[prodIndex]);
@@ -637,7 +675,17 @@ async function main() {
     expenseCatMap.set(ec.code, cat.id);
   }
 
-  const expensesToSeed: any[] = [];
+  const expensesToSeed: Array<{
+    voucherNo: string;
+    expenseDate: Date;
+    amount: number;
+    paymentMethod: string;
+    reference: string;
+    note: string;
+    categoryId: string;
+    branchId: string;
+    shopId: string;
+  }> = [];
   for (let d = 28; d >= 0; d -= 2) {
     const expDate = new Date();
     expDate.setDate(expDate.getDate() - d);

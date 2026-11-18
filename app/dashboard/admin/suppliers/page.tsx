@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 
 export default async function SuppliersPage() {
   const { shopId, activeBranchId: branchId } = await requireAuth({
-    requiredPermission: PERMISSIONS.PURCHASES_VIEW,
+    requiredPermission: PERMISSIONS.SUPPLIERS_VIEW,
     requireActiveStatus: true,
   });
 

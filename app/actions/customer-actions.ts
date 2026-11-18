@@ -72,7 +72,7 @@ function nonOwnerBranchScope(user: { role: string; activeBranchId: string }) {
 export async function createCustomerAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.POS_ACCESS,
+      requiredPermission: PERMISSIONS.CUSTOMERS_MANAGE,
       requireActiveStatus: true,
     });
 
@@ -125,7 +125,7 @@ export async function createCustomerAction(formData: FormData) {
 export async function updateCustomerAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.POS_ACCESS,
+      requiredPermission: PERMISSIONS.CUSTOMERS_MANAGE,
       requireActiveStatus: true,
     });
 
@@ -169,7 +169,7 @@ export async function recordCustomerPaymentAction(
 ) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.POS_ACCESS,
+      requiredPermission: PERMISSIONS.CUSTOMERS_MANAGE,
       requireActiveStatus: true,
     });
 
@@ -235,7 +235,7 @@ export async function recordCustomerPaymentAction(
 export async function deleteCustomerAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.POS_ACCESS,
+      requiredPermission: PERMISSIONS.CUSTOMERS_MANAGE,
       requireActiveStatus: true,
     });
 

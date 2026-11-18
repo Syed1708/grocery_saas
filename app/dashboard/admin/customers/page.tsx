@@ -8,7 +8,7 @@ import CustomersClient from "./_components/CustomersClient";
 export default async function CustomersPage() {
   // 🛡️ Zero-Trust Guard: Enforce permissions and active status
   const user = await requireAuth({
-    requiredPermission: PERMISSIONS.POS_ACCESS,
+    requiredPermission: PERMISSIONS.CUSTOMERS_VIEW,
     requireActiveStatus: true,
   });
 

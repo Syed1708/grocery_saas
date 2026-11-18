@@ -283,11 +283,14 @@ For a KPI grid: `<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 
 
 | Domain | View | Mutate |
 |---|---|---|
-| Catalog (categories, units, products, sections) | `CATALOG_VIEW` | `CATALOG_MANAGE` |
-| Procurement (suppliers, purchases) | `PURCHASES_VIEW` | `PURCHASES_MANAGE`; supplier payout → `SUPPLIERS_PAY` |
-| POS / customers | `POS_ACCESS` | `POS_ACCESS` (customer delete is OWNER-only) |
+| Catalog & inventory | `CATALOG_VIEW` | `CATALOG_MANAGE`, `INVENTORY_ADJUST`, `INVENTORY_TRANSFER`, `INVENTORY_WASTAGE` |
+| Customers & khata | `CUSTOMERS_VIEW` | `CUSTOMERS_MANAGE` (delete OWNER-only) |
+| Purchases | `PURCHASES_VIEW` | `PURCHASES_MANAGE` |
+| Suppliers | `SUPPLIERS_VIEW` | `SUPPLIERS_MANAGE`; payout → `SUPPLIERS_PAY` |
+| POS | `POS_ACCESS` | `POS_DISCOUNT_OVERRIDE`, `POS_PRICE_EDIT`, `POS_REFUND_RETURN`, `POS_DRAWER_OPEN` |
 | Finance / accounts | `FINANCE_*` | `FINANCE_*` |
-| Staff / users | — | `USERS_MANAGE`, `STAFF_PAYROLL` |
+| Reports | `REPORTS_OVERVIEW`, `REPORTS_SALES`, `REPORTS_PURCHASES`, `REPORTS_STOCK`, `REPORTS_CUSTOMER_DUE`, `REPORTS_EXPENSES`, `REPORTS_CLOSING_Z`, `REPORTS_PL_PROFIT`, `REPORTS_EXPORT` | — |
+| Administration | — | `STAFF_MANAGE`, `STAFF_PAYROLL`, `USERS_MANAGE`, `SETTINGS_STORE`, `BRANCH_MANAGE`, `BRANCH_SWITCH`, `FAMILY_LEDGER_ACCESS` |
 
 Owner-only deletes: check `user.role !== "OWNER"` and return a localized error.
 

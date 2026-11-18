@@ -69,7 +69,7 @@ function branchScope(user: { role: string; activeBranchId: string }) {
 export async function createSupplierAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.PURCHASES_MANAGE,
+      requiredPermission: PERMISSIONS.SUPPLIERS_MANAGE,
       requireActiveStatus: true,
     });
 
@@ -108,7 +108,7 @@ export async function createSupplierAction(formData: FormData) {
 export async function updateSupplierAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.PURCHASES_MANAGE,
+      requiredPermission: PERMISSIONS.SUPPLIERS_MANAGE,
       requireActiveStatus: true,
     });
 
@@ -153,7 +153,7 @@ export async function updateSupplierAction(formData: FormData) {
 export async function deleteSupplierAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.PURCHASES_MANAGE,
+      requiredPermission: PERMISSIONS.SUPPLIERS_MANAGE,
       requireActiveStatus: true,
     });
 
@@ -327,7 +327,7 @@ export async function recordSupplierPaymentAction(
 export async function getSupplierPaymentHistoryAction(supplierId: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.PURCHASES_VIEW,
+      requiredPermission: PERMISSIONS.SUPPLIERS_VIEW,
       requireActiveStatus: true,
     });
 
