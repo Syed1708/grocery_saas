@@ -2,11 +2,11 @@
 "use no memo";
 
 import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { Plus, Scale } from "lucide-react";
+import { Scale } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import FormModal from "@/components/common/FormModal";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
-import { PermissionGate } from "@/components/common/PermissionGate";
+import { ModuleHeader } from "@/components/common/ModuleHeader";
 import { useCrudModal } from "@/hooks/useCrudModal";
 import { createUnitAction, deleteUnitAction } from "@/app/actions/unit-actions";
 import { PERMISSIONS } from "@/types";
@@ -78,24 +78,13 @@ export default function UnitsClient({ data }: { data: UnitData[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">
-            Units of Measurement
-          </h1>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-            Manage measurement units and bulk packaging conversions
-          </p>
-        </div>
-        <PermissionGate permission={PERMISSIONS.CATALOG_MANAGE}>
-          <button
-            onClick={crud.openCreate}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer"
-          >
-            <Plus size={16} /> Add Unit
-          </button>
-        </PermissionGate>
-      </div>
+      <ModuleHeader
+        title="Units of Measurement"
+        subtitle="Manage measurement units and bulk packaging conversions"
+        onAdd={crud.openCreate}
+        addLabel="Add Unit"
+        addPermission={PERMISSIONS.CATALOG_MANAGE}
+      />
 
       <DataTable table={table} columns={columns} />
 

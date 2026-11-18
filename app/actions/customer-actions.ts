@@ -74,9 +74,12 @@ export async function createCustomerAction(formData: FormData) {
     revalidatePath("/reports/customers-due");
 
     return { success: true, customerId: customer.id };
-  } catch (error: any) {
+  } catch (error) {
     console.error("createCustomerAction error:", error);
-    return { success: false, error: error.message || "Failed to create customer." };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to create customer.",
+    };
   }
 }
 
@@ -141,8 +144,11 @@ export async function updateCustomerAction(formData: FormData) {
     revalidatePath("/dashboard/admin/customers");
     revalidatePath("/reports/customers-due");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to update customer." };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to update customer.",
+    };
   }
 }
 
@@ -217,9 +223,12 @@ export async function recordCustomerPaymentAction(
     revalidatePath("/reports/customers-due");
     revalidatePath("/reports/closings");
     return { success: true, receiptNo };
-  } catch (error: any) {
+  } catch (error) {
     console.error("recordCustomerPaymentAction error:", error);
-    return { success: false, error: error.message || "Failed to record payment." };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to record payment.",
+    };
   }
 }
 
@@ -273,7 +282,10 @@ export async function deleteCustomerAction(id: string) {
     revalidatePath("/dashboard/admin/customers");
     revalidatePath("/reports/customers-due");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to delete customer." };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to delete customer.",
+    };
   }
 }

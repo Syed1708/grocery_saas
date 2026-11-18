@@ -16,16 +16,19 @@ export interface FormFieldProps {
   name: string;
   required?: boolean;
   defaultValue?: string | number | boolean | null;
-  value?: any;
-  onChange?: (e: any) => void;
+  value?: string | number | boolean;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   placeholder?: string;
   options?: SelectOption[];
   rows?: number;
-  hint?: string;        // 👈 Fixed: added hint support
-  helperText?: string;  // 👈 Supported alias
+  hint?: string;
+  helperText?: string;
   error?: string;
   className?: string;
   disabled?: boolean;
+  step?: string | number;
+  min?: string | number;
+  max?: string | number;
 }
 
 export function FormField({
@@ -44,9 +47,13 @@ export function FormField({
   error,
   className = "",
   disabled = false,
+  step,
+  min,
+  max,
 }: FormFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
   const displayHint = hint || helperText;
+  const scalarValue = typeof value === "boolean" ? undefined : value;
 
   const baseInputStyles = cn(
     "w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500 transition disabled:opacity-50",
@@ -69,7 +76,7 @@ export function FormField({
             name={name}
             required={required}
             defaultValue={defaultValue ? String(defaultValue) : undefined}
-            value={value}
+            value={scalarValue}
             onChange={onChange}
             placeholder={placeholder}
             disabled={disabled}
@@ -89,7 +96,7 @@ export function FormField({
           name={name}
           required={required}
           defaultValue={defaultValue ? String(defaultValue) : undefined}
-          value={value}
+          value={scalarValue}
           onChange={onChange}
           placeholder={placeholder}
           rows={rows}
@@ -101,7 +108,7 @@ export function FormField({
           name={name}
           required={required}
           defaultValue={defaultValue !== null && defaultValue !== undefined ? String(defaultValue) : ""}
-          value={value}
+          value={scalarValue}
           onChange={onChange}
           disabled={disabled}
           className={cn(baseInputStyles, "cursor-pointer")}
@@ -126,7 +133,7 @@ export function FormField({
             name={name}
             value="true"
             defaultChecked={Boolean(defaultValue)}
-            checked={value}
+            checked={typeof value === "boolean" ? value : undefined}
             onChange={onChange}
             disabled={disabled}
             className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
@@ -141,10 +148,13 @@ export function FormField({
           name={name}
           required={required}
           defaultValue={defaultValue !== null && defaultValue !== undefined ? String(defaultValue) : undefined}
-          value={value}
+          value={scalarValue}
           onChange={onChange}
           placeholder={placeholder}
           disabled={disabled}
+          step={step}
+          min={min}
+          max={max}
           className={baseInputStyles}
         />
       )}

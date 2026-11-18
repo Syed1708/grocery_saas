@@ -1,0 +1,276 @@
+---
+name: nextjs-saas-module-pattern
+description: Build or refactor an admin CRUD module in the grocery-pos-saas Next.js app using the standard module pattern — requireAuth server guards with RBAC permissions, Prisma queries, useCrudModal, FormField forms, DataTable + TableHelpers, and the StatCard / ModuleHeader / SearchFilterBar generics — while preserving the existing UI. Use when adding a new admin module (page, actions, client, form) or converting an existing one to the codebase conventions.
+---
+
+# Next.js SaaS Module Pattern (grocery-pos-saas)
+
+This skill is the canonical way to build or refactor an admin module in this repo. The
+`app/dashboard/admin/categories` module is the reference implementation; `customers` and
+`units` follow it too. Match it exactly so code stays small and consistent.
+
+## Non-negotiables
+
+1. **Security first.** Every page and every server action starts with `requireAuth(...)`.
+   Never call `getServerSession(authOptions)` outside `lib/auth/guard.ts`. Prefer a
+   permission over a role; use roles only when the rule is truly role-based.
+2. **Preserve the UI.** The user cares about visuals. Keep titles, copy, colors, spacing, and
+   column content identical unless explicitly asked to change them. Reuse shared primitives so
+   the rendered markup is the same.
+3. **No `any`.** Never introduce `any`. Type Prisma results, use `unknown` + narrowing in
+   `catch`, and give generic helpers real prop types.
+4. **Verify before finishing.** Run typecheck + build (see Verification). Fix anything you break.
+
+## Module file layout
+
+```
+app/dashboard/admin/<module>/
+  page.tsx                     # server: requireAuth + query + render client
+  _components/
+    <Module>Client.tsx         # client: useCrudModal + table + modals
+    <Module>Form.tsx           # client: FormField-only form
+app/actions/<module>-actions.ts # server actions: requireAuth on every mutation
+queries/<module>-queries.ts     # Prisma, shop/branch scoped, typed payloads
+types/<module>.ts               # interfaces
+lib/validations/...             # zod schema (already used by the actions)
+```
+
+## Layer 1 — `page.tsx`
+
+```tsx
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
+import { getThings } from "@/queries/thing-queries";
+import { prisma } from "@/lib/prisma";
+import ThingsClient from "./_components/ThingsClient";
+
+export default async function ThingsPage() {
+  const { shopId, activeBranchId, role } = await requireAuth({
+    requiredPermission: PERMISSIONS.CATALOG_VIEW, // or the relevant permission
+    requireActiveStatus: true,
+  });
+
+  const [things, shop] = await Promise.all([
+    getThings(shopId, activeBranchId),
+    prisma.shop.findUnique({ where: { id: shopId }, select: { currencySymbol: true } }),
+  ]);
+
+  return (
+    <div className="max-w-7xl mx-auto">
+      <ThingsClient data={things} currencySymbol={shop?.currencySymbol || "৳"} userRole={role} />
+    </div>
+  );
+}
+```
+
+`requireAuth` returns `{ userId, shopId, role, activeBranchId }`. `activeBranchId` is a
+guaranteed string. It throws on failure (dashboard error boundary), so do not add
+`redirect("/login")`. Pages that are OWNER/MANAGER-only pass `allowedRoles`.
+
+## Layer 2 — queries
+
+Shop-scoped, branch-aware, return plain serializable objects (convert Prisma `Decimal` with
+`Number(...)`). Never trust the client for `shopId`/`branchId`.
+
+```ts
+export async function getThings(shopId: string, branchId?: string | null): Promise<IThing[]> {
+  const rows = await prisma.thing.findMany({
+    where: { shopId, ...(branchId ? { branchId } : {}) },
+    orderBy: { createdAt: "desc" },
+  });
+  return rows.map((r) => ({ /* explicit fields, Number() decimals */ }));
+}
+```
+
+## Layer 3 — server actions
+
+Every exported action begins with `requireAuth` using the mutation permission. Wrap body in
+`try/catch`; narrow the error, never `catch (error: any)`.
+
+```ts
+"use server";
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
+import { thingSchema } from "@/lib/validations";
+
+export async function createThingAction(formData: FormData) {
+  try {
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requireActiveStatus: true,
+    });
+
+    const parsed = thingSchema.safeParse({ name: formData.get("name")?.toString().trim() });
+    if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+
+    await prisma.thing.create({ data: { ...parsed.data, shopId: user.shopId } });
+    revalidatePath("/dashboard/admin/things");
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : "Failed to create thing." };
+  }
+}
+```
+
+Delete actions: verify ownership with `findFirst({ where: { id, shopId } })` before mutating.
+If the module needs owner-only deletion, check `user.role !== "OWNER"` and return a clear error.
+
+## Layer 4 — `<Module>Client.tsx`
+
+```tsx
+"use client";
+"use no memo";
+
+import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { DataTable } from "@/components/common/data-table/DataTable";
+import FormModal from "@/components/common/FormModal";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { ModuleHeader } from "@/components/common/ModuleHeader";
+import { TableActions } from "@/components/common/ui/table/TableHelpers";
+import { useCrudModal } from "@/hooks/useCrudModal";
+import { createThingAction, updateThingAction, deleteThingAction } from "@/app/actions/thing-actions";
+import { PERMISSIONS } from "@/types";
+import ThingForm from "./ThingForm";
+
+export default function ThingsClient({ data, userRole }: Props) {
+  const crud = useCrudModal<IThing>({
+    createAction: createThingAction,
+    updateAction: updateThingAction,
+    deleteAction: deleteThingAction,
+    entityName: "পণ্য", // Bangla entity name -> standardized toasts
+  });
+
+  // Declare columns exactly like categories:
+  const columns: ColumnDef<IThing>[] = [
+    { accessorKey: "name", header: "নাম", cell: ({ row }) => <span className="font-semibold text-neutral-900 dark:text-neutral-100 text-xs">{row.getValue("name")}</span> },
+    {
+      id: "actions",
+      header: "অ্যাকশন",
+      enableHiding: false,
+      cell: ({ row }) => (
+        <TableActions
+          onEdit={() => crud.openEdit(row.original)}
+          editPermission={PERMISSIONS.CATALOG_MANAGE}
+          onDelete={() => crud.setDeleteTarget(row.original)}
+          canDelete={userRole === "OWNER"} // omit if everyone may delete
+          deletePermission={PERMISSIONS.CATALOG_MANAGE}
+        />
+      ),
+    },
+  ];
+
+  const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
+
+  return (
+    <div className="space-y-6">
+      <ModuleHeader
+        title="…"
+        subtitle="…"
+        actions={/* optional <DataTableViewOptions table={table} /> */}
+        onAdd={crud.openCreate}
+        addLabel="নতুন যোগ"
+        addPermission={PERMISSIONS.CATALOG_MANAGE}
+      />
+
+      <DataTable table={table} columns={columns} />
+
+      <FormModal
+        key={crud.editingItem?.id || "new-modal"}
+        isOpen={crud.isOpen}
+        onClose={crud.closeModal}
+        onSubmit={crud.handleSubmit}
+        title={crud.editingItem ? "সম্পাদনা" : "নতুন"}
+        isEditing={Boolean(crud.editingItem)}
+        loading={crud.loading}
+        submitLabel={crud.editingItem ? "আপডেট করুন" : "যোগ করুন"}
+      >
+        <ThingForm thing={crud.editingItem} errors={crud.errors} />
+      </FormModal>
+
+      <ConfirmDialog
+        isOpen={Boolean(crud.deleteTarget)}
+        onClose={() => crud.setDeleteTarget(null)}
+        onConfirm={crud.handleDeleteConfirm}
+        title="মুছে ফেলুন"
+        message={`আপনি কি নিশ্চিত "${crud.deleteTarget?.name}" মুছে ফেলতে চান?`}
+        confirmLabel="মুছুন"
+        loading={crud.loading}
+      />
+    </div>
+  );
+}
+```
+
+`useCrudModal` gives: `isOpen, editingItem, deleteTarget, loading, errors, setErrors,
+openCreate, openEdit, closeModal, setDeleteTarget, handleSubmit, handleDeleteConfirm`, plus
+optional `viewingItem/openView/closeView` and `printingItem/openPrint/closePrint`.
+
+## Layer 5 — `<Module>Form.tsx`
+
+Markup only, all inputs via `FormField` (supports `text|number|email|password|date|textarea|select|image|checkbox`, plus `step/min/max/hint/error`). Pass `errors` from the hook.
+
+```tsx
+<FormField type="text" label="নাম" name="name" required defaultValue={thing?.name} error={errors.name} />
+<FormField type="select" label="স্ট্যাটাস" name="status" defaultValue={thing?.status || "active"}
+  options={[{ label: "সক্রিয়", value: "active" }, { label: "নিষ্ক্রিয়", value: "inactive" }]} />
+```
+
+## Shared UI generics (use these, don't hand-roll)
+
+| Component | Path | Use |
+|---|---|---|
+| `StatCard` | `@/components/common/StatCard` | KPI/summary cards. `tone`: neutral/rose/emerald/info/blue/amber. |
+| `ModuleHeader` | `@/components/common/ModuleHeader` | Title + subtitle + right actions + Add button. `titleClassName` overrides size. |
+| `SearchFilterBar` | `@/components/common/SearchFilterBar` | Search box + optional filter pills. |
+| `Breadcrumbs` | `@/components/common/Breadcrumbs` | `items={[{ label, href? }]}`. |
+| `TableActions` | `@/components/common/ui/table/TableHelpers` | Row edit/delete/view/print with `PermissionGate`. |
+| `StatusBadge` / `TableImage` | same file | Status pills and image thumbs. |
+| `DataTable` + `DataTableViewOptions` | `@/components/common/data-table/*` | Table render + column visibility. |
+| `PermissionGate` | `@/components/common/PermissionGate` | Wrap UI by permission. |
+| `FormModal` / `ConfirmDialog` / `Modal` | `@/components/common/*` | Modals. |
+
+For a KPI grid: `<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">` with
+`StatCard`s.
+
+## RBAC
+
+- `UserRole` = `"OWNER" | "MANAGER" | "CASHIER"` (`types/rbac.ts`). Never compare against
+  `ADMIN`/`SUPER_ADMIN` — they do not exist.
+- Permissions: `PERMISSIONS.*` in `types/rbac.ts`; `DEFAULT_ROLE_PERMISSIONS` maps roles.
+- Middleware `proxy.ts` guards `/dashboard/:path*`; CASHIER is limited to POS/closings/profile.
+  A page's `requireAuth` permission is the real enforcement.
+
+## UI preservation rules
+
+- Don't change column order, headers, badges, or copy unless asked.
+- Don't swap a custom-colored button for the default blue one; keep one-off action modals
+  (e.g. a green payment modal) as-is.
+- When extracting a repeated block into a generic, reproduce the original markup exactly and
+  verify the module still renders the same.
+- Keep Bangla copy verbatim (copy from the file, don't retype from memory).
+
+## Verification (Windows)
+
+`npm.ps1` is blocked by execution policy — use `npm.cmd`.
+
+```powershell
+npm.cmd exec -- tsc --noEmit
+npm.cmd exec -- eslint <touched files/dirs>
+npm.cmd run build
+```
+
+Expected: typecheck 0 errors; eslint 0 errors (the TanStack `react-hooks/incompatible-library`
+warning is pre-existing and acceptable); build succeeds.
+
+## Checklist before finishing
+
+- [ ] Page and every action use `requireAuth` (no `getServerSession`).
+- [ ] Permissions/roles match intent; owner-only deletes gated server-side.
+- [ ] Queries scoped to `shopId`/`activeBranchId`; decimals converted.
+- [ ] Client uses `useCrudModal`; columns are `ColumnDef<T>[]`; row actions use `TableActions`.
+- [ ] Form uses `FormField` only and receives `errors`.
+- [ ] No `any` introduced; catches narrow with `instanceof Error`.
+- [ ] UI text/layout unchanged (unless requested).
+- [ ] `tsc`, `eslint`, `build` pass.
