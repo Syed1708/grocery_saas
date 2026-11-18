@@ -61,8 +61,8 @@ export default function BranchSwitcher({
       toast.success(`Switched to ${branch.name}`);
       setOpen(false);
       
-      // Update NextAuth JWT token and reload clean state
-      await update({ branchId: branch.id, branchName: branch.name });
+      // Update NextAuth JWT token (server re-validates the branch against the shop)
+      await update({ branchId: branch.id });
       window.location.reload();
     } else {
       setLoading(false);
@@ -84,7 +84,7 @@ export default function BranchSwitcher({
         ) : (
           <GitBranch size={13} className="text-blue-600" />
         )}
-        <span className="truncate max-w-[140px]">
+        <span className="truncate max-w-35">
           {currentBranchName || "Select Outlet"}
         </span>
         <ChevronDown size={12} className="text-neutral-400 shrink-0" />

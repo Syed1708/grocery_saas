@@ -1,79 +1,33 @@
 "use client";
 "use no memo";
 
-import { useState } from "react";
 import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { Plus, Edit2, Trash2, MapPin, Phone, Users, ShieldCheck } from "lucide-react";
-import { toast } from "sonner";
+import { MapPin, Phone, Users, ShieldCheck } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import FormModal from "@/components/common/FormModal";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
+import { ModuleHeader } from "@/components/common/ModuleHeader";
+import { TableActions } from "@/components/common/ui/table/TableHelpers";
+import { useCrudModal } from "@/hooks/useCrudModal";
 
 import { IBranchWithCounts } from "@/types/branch";
+import { PERMISSIONS } from "@/types";
 import { createBranchAction, deleteBranchAction, updateBranchAction } from "@/app/actions/branch-crud-actions";
+import BranchForm from "./BranchForm";
 
 interface Props {
   data: IBranchWithCounts[];
-  userRole?: string;
 }
 
-export default function BranchesClient({ data = [], userRole = "OWNER" }: Props) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingBranch, setEditingBranch] = useState<IBranchWithCounts | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<IBranchWithCounts | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const canManage = userRole === "OWNER" || userRole === "MANAGER";
-
-  function openCreate() {
-    setEditingBranch(null);
-    setModalOpen(true);
-  }
-
-  function openEdit(branch: IBranchWithCounts) {
-    setEditingBranch(branch);
-    setModalOpen(true);
-  }
-
-  async function handleBranchSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-
-    const formData = new FormData(e.currentTarget);
-    if (editingBranch) {
-      formData.append("id", editingBranch.id);
-    }
-
-    const res = editingBranch
-      ? await updateBranchAction(formData)
-      : await createBranchAction(formData);
-
-    setLoading(false);
-
-    if (res.success) {
-      toast.success(editingBranch ? "শাখার তথ্য আপডেট হয়েছে!" : "নতুন শাখা যুক্ত হয়েছে!");
-      setModalOpen(false);
-      setEditingBranch(null);
-    } else {
-      toast.error(res.error || "অপারেশন ব্যর্থ হয়েছে।");
-    }
-  }
-
-  async function handleDeleteConfirm() {
-    if (!deleteTarget) return;
-    setLoading(true);
-
-    const res = await deleteBranchAction(deleteTarget.id);
-    setLoading(false);
-
-    if (res.success) {
-      toast.success(`শাখা "${deleteTarget.name}" মুছে ফেলা হয়েছে।`);
-      setDeleteTarget(null);
-    } else {
-      toast.error(res.error || "মুছে ফেলা সম্ভব হয়নি।");
-    }
-  }
+export default function BranchesClient({ data = [] }: Props) {
+  // Universal CRUD state & mutation engine
+  const crud = useCrudModal<IBranchWithCounts>({
+    createAction: createBranchAction,
+    updateAction: updateBranchAction,
+    deleteAction: deleteBranchAction,
+    entityName: "শাখা",
+  });
 
   const columns: ColumnDef<IBranchWithCounts>[] = [
     {
@@ -97,7 +51,7 @@ export default function BranchesClient({ data = [], userRole = "OWNER" }: Props)
                   : "bg-neutral-100 text-neutral-500 dark:bg-neutral-800"
               }`}
             >
-              {row.original.status === "active" ? "সক্রিয়" : "নিষ্ক্রিয়"}
+              {row.original.status === "active" ? "সক্রিয়" : "নিষ্ক্রিয়"}
             </span>
           </div>
           <span className="font-mono text-[10px] text-neutral-400">কোড: [{row.original.code}]</span>
@@ -137,33 +91,18 @@ export default function BranchesClient({ data = [], userRole = "OWNER" }: Props)
     {
       id: "actions",
       header: "অ্যাকশন",
-      cell: ({ row }) => {
-        const branch = row.original;
-        if (!canManage) return <span className="text-neutral-400 text-xs">—</span>;
-
-        return (
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => openEdit(branch)}
-              className="p-1.5 rounded-lg text-neutral-500 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
-              title="সম্পাদনা করুন"
-            >
-              <Edit2 size={15} />
-            </button>
-            {!branch.isMain && userRole === "OWNER" && (
-              <button
-                type="button"
-                onClick={() => setDeleteTarget(branch)}
-                className="p-1.5 rounded-lg text-neutral-500 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
-                title="শাখা মুছুন"
-              >
-                <Trash2 size={15} />
-              </button>
-            )}
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableActions
+          onEdit={() => crud.openEdit(row.original)}
+          editPermission={PERMISSIONS.BRANCH_MANAGE}
+          onDelete={
+            row.original.isMain
+              ? undefined
+              : () => crud.setDeleteTarget(row.original)
+          }
+          deletePermission={PERMISSIONS.BRANCH_MANAGE}
+        />
+      ),
     },
   ];
 
@@ -177,138 +116,39 @@ export default function BranchesClient({ data = [], userRole = "OWNER" }: Props)
     <div className="space-y-6">
       <Breadcrumbs items={[{ label: "স্টোর সেটিংস" }, { label: "শাখা ও আউটলেট ব্যবস্থাপনা" }]} />
 
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">
-            শাখা ও আউটলেট ব্যবস্থাপনা (Branches & Outlets)
-          </h1>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-            দোকানের বিভিন্ন আউটলেট, ওয়্যারহাউস এবং শাখাভিত্তিক কার্যক্রম নিয়ন্ত্রণ করুন
-          </p>
-        </div>
-        {canManage && (
-          <button
-            type="button"
-            onClick={openCreate}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition cursor-pointer"
-          >
-            <Plus size={16} /> নতুন শাখা যোগ
-          </button>
-        )}
-      </div>
+      <ModuleHeader
+        title="শাখা ও আউটলেট ব্যবস্থাপনা (Branches & Outlets)"
+        subtitle="দোকানের বিভিন্ন আউটলেট, ওয়্যারহাউস এবং শাখাভিত্তিক কার্যক্রম নিয়ন্ত্রণ করুন"
+        titleClassName="text-xl"
+        onAdd={crud.openCreate}
+        addLabel="নতুন শাখা যোগ"
+        addPermission={PERMISSIONS.BRANCH_MANAGE}
+      />
 
       <DataTable table={table} columns={columns} />
 
       {/* 🛡️ Key-reset prevents stale defaultValue React bug */}
       <FormModal
-        key={editingBranch?.id || "new-branch-modal"}
-        isOpen={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setEditingBranch(null);
-        }}
-        onSubmit={handleBranchSubmit}
-        title={editingBranch ? "শাখা তথ্য সম্পাদনা" : "নতুন শাখা / আউটলেট যুক্ত করুন"}
+        key={crud.editingItem?.id || "new-branch-modal"}
+        isOpen={crud.isOpen}
+        onClose={crud.closeModal}
+        onSubmit={crud.handleSubmit}
+        title={crud.editingItem ? "শাখা তথ্য সম্পাদনা" : "নতুন শাখা / আউটলেট যুক্ত করুন"}
         description="শাখার নাম, কোড এবং যোগাযোগের ঠিকানা নির্ধারণ করুন।"
-        isEditing={Boolean(editingBranch)}
-        loading={loading}
+        isEditing={Boolean(crud.editingItem)}
+        loading={crud.loading}
       >
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              শাখার নাম *
-            </label>
-            <input
-              type="text"
-              name="name"
-              required
-              defaultValue={editingBranch?.name || ""}
-              placeholder="e.g. ধানমন্ডি আউটলেট"
-              className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              শাখা কোড *
-            </label>
-            <input
-              type="text"
-              name="code"
-              required
-              defaultValue={editingBranch?.code || ""}
-              placeholder="e.g. DHN-01"
-              className="w-full px-3 py-2 text-xs font-mono uppercase border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              যোগাযোগ মোবাইল
-            </label>
-            <input
-              type="text"
-              name="phone"
-              defaultValue={editingBranch?.phone || ""}
-              placeholder="017xxxxxxxx"
-              className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              স্ট্যাটাস
-            </label>
-            <select
-              name="status"
-              defaultValue={editingBranch?.status || "active"}
-              className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="active">সক্রিয় (Active)</option>
-              <option value="inactive">নিষ্ক্রিয় (Inactive)</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-            শাখার ঠিকানা
-          </label>
-          <input
-            type="text"
-            name="address"
-            defaultValue={editingBranch?.address || ""}
-            placeholder="বাড়ি ১২, রোড ২৭, ধানমন্ডি, ঢাকা"
-            className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div className="pt-2">
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              name="isMain"
-              value="true"
-              defaultChecked={editingBranch?.isMain || false}
-              className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
-            />
-            <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-              প্রধান শাখা হিসেবে নির্ধারণ করুন (Principal Main Branch)
-            </span>
-          </label>
-        </div>
+        <BranchForm branch={crud.editingItem} errors={crud.errors} />
       </FormModal>
 
       <ConfirmDialog
-        isOpen={Boolean(deleteTarget)}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={handleDeleteConfirm}
+        isOpen={Boolean(crud.deleteTarget)}
+        onClose={() => crud.setDeleteTarget(null)}
+        onConfirm={crud.handleDeleteConfirm}
         title="শাখা মুছে ফেলুন"
-        message={`আপনি কি নিশ্চিতভাবে "${deleteTarget?.name}" মুছে ফেলতে চান?`}
+        message={`আপনি কি নিশ্চিতভাবে "${crud.deleteTarget?.name}" মুছে ফেলতে চান?`}
         confirmLabel="শাখা মুছুন"
-        loading={loading}
+        loading={crud.loading}
       />
     </div>
   );

@@ -96,9 +96,20 @@ export const authOptions: NextAuthOptions = {
 
       // 2. Dynamic Branch Switching (Only OWNER can switch branches)
       if (trigger === "update" && session?.branchId) {
-        if (token.role === "OWNER") {
-          token.branchId = session.branchId;
-          token.branchName = session.branchName || token.branchName;
+        if (token.role === "OWNER" && token.shopId) {
+          // 🛡️ Never trust a client-supplied branch id: verify it belongs to this shop
+          // and is active before putting it in the JWT.
+          const requestedBranch = await prisma.branch.findFirst({
+            where: { id: session.branchId, shopId: token.shopId, status: "active" },
+            select: { id: true, name: true },
+          });
+
+          if (requestedBranch) {
+            token.branchId = requestedBranch.id;
+            token.branchName = requestedBranch.name;
+          } else {
+            console.warn(`[RBAC] Ignored invalid branch switch for user ${token.id}.`);
+          }
         } else {
           // Silently discard or reject attempt by Cashier/Manager to switch branches
           console.warn(`[RBAC Violation Attempt] User ${token.id} tried to switch branch.`);

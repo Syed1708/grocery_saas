@@ -1,91 +1,21 @@
 "use client";
 
-import { useState } from "react";
 import FormModal from "@/components/common/FormModal";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
-import { Input } from "@/components/common/ui/Input";
+import { FormField } from "@/components/common/ui/form/FormField";
 import { IBranchSettings } from "@/types/settings";
-import { upsertBranchAction, deleteBranchAction } from "@/app/actions/settings-actions";
-import { toast } from "sonner";
+import { createBranchAction, updateBranchAction, deleteBranchAction } from "@/app/actions/branch-crud-actions";
+import { useCrudModal } from "@/hooks/useCrudModal";
 import { GitBranch, Plus, Edit2, Trash2, Phone, MapPin, Users, ShoppingBag } from "lucide-react";
 
 export default function BranchManagementTab({ branches }: { branches: IBranchSettings[] }) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<IBranchSettings | null>(null);
-  const [editingBranch, setEditingBranch] = useState<IBranchSettings | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const [form, setForm] = useState({
-    name: "",
-    code: "",
-    phone: "",
-    email: "",
-    address: "",
-    isMain: false,
-    status: "active" as "active" | "inactive",
+  // Same CRUD engine + actions as the dedicated Branches module
+  const crud = useCrudModal<IBranchSettings>({
+    createAction: createBranchAction,
+    updateAction: updateBranchAction,
+    deleteAction: deleteBranchAction,
+    entityName: "শাখা",
   });
-
-  const handleOpenAdd = () => {
-    setEditingBranch(null);
-    setForm({
-      name: "",
-      code: "",
-      phone: "",
-      email: "",
-      address: "",
-      isMain: branches.length === 0, // First branch defaults to main
-      status: "active",
-    });
-    setModalOpen(true);
-  };
-
-  const handleOpenEdit = (b: IBranchSettings) => {
-    setEditingBranch(b);
-    setForm({
-      name: b.name,
-      code: b.code,
-      phone: b.phone || "",
-      email: b.email || "",
-      address: b.address || "",
-      isMain: b.isMain,
-      status: (b.status as "active" | "inactive") || "active",
-    });
-    setModalOpen(true);
-  };
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-
-    const payload = {
-      id: editingBranch?.id,
-      ...form,
-    };
-
-    const res = await upsertBranchAction(payload);
-    setLoading(false);
-
-    if (res.success) {
-      toast.success(editingBranch ? "Branch updated successfully!" : "New branch created!");
-      setModalOpen(false);
-    } else {
-      toast.error(res.error || "Failed to save branch.");
-    }
-  }
-
-  async function handleDeleteConfirm() {
-    if (!deleteTarget) return;
-    setLoading(true);
-    const res = await deleteBranchAction(deleteTarget.id);
-    setLoading(false);
-
-    if (res.success) {
-      toast.success(`Branch "${deleteTarget.name}" deleted successfully.`);
-      setDeleteTarget(null);
-    } else {
-      toast.error(res.error || "Failed to delete branch.");
-    }
-  }
 
   return (
     <div className="space-y-4">
@@ -103,7 +33,7 @@ export default function BranchManagementTab({ branches }: { branches: IBranchSet
 
         <button
           type="button"
-          onClick={handleOpenAdd}
+          onClick={crud.openCreate}
           className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition cursor-pointer"
         >
           <Plus size={14} /> নতুন শাখা যোগ করুন
@@ -148,7 +78,7 @@ export default function BranchManagementTab({ branches }: { branches: IBranchSet
               <div className="flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={() => handleOpenEdit(b)}
+                  onClick={() => crud.openEdit(b)}
                   className="p-1.5 rounded-lg text-neutral-500 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
                   title="Edit"
                 >
@@ -157,7 +87,7 @@ export default function BranchManagementTab({ branches }: { branches: IBranchSet
                 {!b.isMain && (
                   <button
                     type="button"
-                    onClick={() => setDeleteTarget(b)}
+                    onClick={() => crud.setDeleteTarget(b)}
                     className="p-1.5 rounded-lg text-neutral-500 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
                     title="Delete"
                   >
@@ -196,100 +126,100 @@ export default function BranchManagementTab({ branches }: { branches: IBranchSet
 
       {/* Add / Edit Form Modal */}
       <FormModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSubmit={handleSubmit}
-        title={editingBranch ? `শাখা সম্পাদনা: ${editingBranch.name}` : "নতুন শাখা যুক্ত করুন"}
+        key={crud.editingItem?.id || "new-branch-modal"}
+        isOpen={crud.isOpen}
+        onClose={crud.closeModal}
+        onSubmit={crud.handleSubmit}
+        title={crud.editingItem ? `শাখা সম্পাদনা: ${crud.editingItem.name}` : "নতুন শাখা যুক্ত করুন"}
         description="Configure branch identity, unique code, contact details, and main outlet status."
-        loading={loading}
-        submitLabel={editingBranch ? "আপডেট সংরক্ষণ করুন" : "শাখা তৈরি করুন"}
+        isEditing={Boolean(crud.editingItem)}
+        loading={crud.loading}
+        submitLabel={crud.editingItem ? "আপডেট সংরক্ষণ করুন" : "শাখা তৈরি করুন"}
         maxWidth="md"
       >
         <div className="space-y-3.5">
           <div className="grid grid-cols-2 gap-3">
-            <Input
-              label="শাখার নাম (Branch Name) *"
+            <FormField
+              type="text"
+              label="শাখার নাম (Branch Name)"
+              name="name"
               required
+              defaultValue={crud.editingItem?.name || ""}
               placeholder="e.g. কাওরান বাজার ব্রাঞ্চ"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              error={crud.errors.name}
             />
-            <Input
-              label="শাখা কোড (Code) *"
+            <FormField
+              type="text"
+              label="শাখা কোড (Code)"
+              name="code"
               required
+              defaultValue={crud.editingItem?.code || ""}
               placeholder="e.g. KB-01"
-              value={form.code}
-              onChange={(e) => setForm({ ...form, code: e.target.value })}
+              className="font-mono uppercase"
+              error={crud.errors.code}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Input
+            <FormField
+              type="text"
               label="মোবাইল নম্বর"
+              name="phone"
+              defaultValue={crud.editingItem?.phone || ""}
               placeholder="01700000000"
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              error={crud.errors.phone}
             />
-            <Input
-              label="ইমেইল (Optional)"
+            <FormField
               type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              label="ইমেইল (Optional)"
+              name="email"
+              defaultValue={crud.editingItem?.email || ""}
+              error={crud.errors.email}
             />
           </div>
 
-          <Input
+          <FormField
+            type="text"
             label="শারীরিক ঠিকানা (Address)"
+            name="address"
+            defaultValue={crud.editingItem?.address || ""}
             placeholder="দোকান নং ১২, রোড নং ৫..."
-            value={form.address}
-            onChange={(e) => setForm({ ...form, address: e.target.value })}
+            error={crud.errors.address}
           />
 
-          <div>
-            <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              শাখার অবস্থা (Status)
-            </label>
-            <select
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value as "active" | "inactive" })}
-              className="w-full text-xs px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none"
-            >
-              <option value="active">সচল (Active)</option>
-              <option value="inactive">স্থগিত (Inactive)</option>
-            </select>
-          </div>
+          <FormField
+            type="select"
+            label="শাখার অবস্থা (Status)"
+            name="status"
+            defaultValue={crud.editingItem?.status || "active"}
+            options={[
+              { label: "সচল (Active)", value: "active" },
+              { label: "স্থগিত (Inactive)", value: "inactive" },
+            ]}
+            error={crud.errors.status}
+          />
 
-          {/* 👈 The Missing isMain Checkbox */}
           <div className="pt-2 border-t border-neutral-100 dark:border-neutral-800">
-            <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={form.isMain}
-                onChange={(e) => setForm({ ...form, isMain: e.target.checked })}
-                className="w-4 h-4 text-blue-600 rounded cursor-pointer"
-              />
-              <div>
-                <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200 block">
-                  প্রধান প্রধান শাখা নির্ধারণ করুন (Set as Principal Main Branch)
-                </span>
-                <span className="text-[10px] text-neutral-400 block">
-                  Primary outlet for store registration and central inventory
-                </span>
-              </div>
-            </label>
+            <FormField
+              type="checkbox"
+              label="প্রধান শাখা নির্ধারণ করুন (Set as Principal Main Branch)"
+              name="isMain"
+              defaultValue={crud.editingItem?.isMain || false}
+              error={crud.errors.isMain}
+            />
           </div>
         </div>
       </FormModal>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
-        isOpen={Boolean(deleteTarget)}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={handleDeleteConfirm}
+        isOpen={Boolean(crud.deleteTarget)}
+        onClose={() => crud.setDeleteTarget(null)}
+        onConfirm={crud.handleDeleteConfirm}
         title="শাখা মুছে ফেলা (Delete Outlet)"
-        message={`আপনি কি নিশ্চিত যে "${deleteTarget?.name}" শাখাটি মুছে ফেলতে চান?`}
+        message={`আপনি কি নিশ্চিত যে "${crud.deleteTarget?.name}" শাখাটি মুছে ফেলতে চান?`}
         confirmLabel="শাখা ডিলিট করুন"
-        loading={loading}
+        loading={crud.loading}
       />
     </div>
   );

@@ -24,7 +24,7 @@ export default function SettingsClient({
 ) {
   const [activeTab, setActiveTab] = useState<"profile" | "receipt" | "vat" | "branches">("profile");
 
-  const isOwner = userRole === "OWNER" || userRole === "SUPER_ADMIN" || userRole === "ADMIN";
+  const isOwner = userRole === "OWNER";
   // Branch Managers only see Profile & Receipt configuration
   const tabs = [
     { id: "profile" as const, label: "আউটলেট প্রোফাইল (Outlet Profile)", icon: Store, show: true },

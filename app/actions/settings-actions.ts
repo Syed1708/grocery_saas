@@ -2,17 +2,26 @@
 
 import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
-import { 
-  shopProfileSchema, 
-  receiptSettingsSchema, 
-  vatSettingsSchema, 
-  branchSchema 
+import {
+  shopProfileSchema,
+  receiptSettingsSchema,
+  vatSettingsSchema,
 } from "@/lib/validations/settings";
 import { revalidatePath } from "next/cache";
+import { getErrorMessage } from "@/lib/utils";
 
 // ==========================================
 // RBAC & MULTI-TENANCY GUARD
 // ==========================================
+const SETTINGS_REVALIDATE_PATHS = [
+  "/dashboard/admin/settings",
+  "/dashboard/admin/reports",
+];
+
+function revalidateSettings(extra: string[] = []) {
+  for (const path of [...SETTINGS_REVALIDATE_PATHS, ...extra]) revalidatePath(path);
+}
+
 async function verifyShopAdmin() {
   const { shopId, userId, activeBranchId } = await requireAuth({
     allowedRoles: ["OWNER", "MANAGER"],
@@ -26,7 +35,6 @@ async function verifyShopAdmin() {
 // ==========================================
 // 1. UPDATE GENERAL STORE & ACTIVE BRANCH PROFILE
 // ==========================================
-
 export async function updateShopProfileAction(rawInput: unknown) {
   try {
     const { shopId, activeBranchId: branchId, role } = await requireAuth({
@@ -37,10 +45,10 @@ export async function updateShopProfileAction(rawInput: unknown) {
 
     const parsed = shopProfileSchema.safeParse(rawInput);
     if (!parsed.success) {
-      return { 
-        success: false, 
-        error: "Validation failed", 
-        fieldErrors: parsed.error.flatten().fieldErrors 
+      return {
+        success: false,
+        error: "Validation failed",
+        fieldErrors: parsed.error.flatten().fieldErrors,
       };
     }
 
@@ -75,27 +83,26 @@ export async function updateShopProfileAction(rawInput: unknown) {
       }
     });
 
-    revalidatePath("/admin/settings");
-    revalidatePath("/reports");
+    revalidateSettings(["/dashboard/admin/branches"]);
     return { success: true };
-  } catch (err: any) {
+  } catch (err) {
     console.error("updateShopProfileAction error:", err);
-    return { success: false, error: err.message || "Failed to update profile." };
+    return { success: false, error: getErrorMessage(err, "Failed to update profile.") };
   }
 }
 
 // ==========================================
-// 2. UPDATE POS RECEIPT & THERMAL PRINTER (100% OK)
+// 2. UPDATE POS RECEIPT & THERMAL PRINTER
 // ==========================================
 export async function updateReceiptSettingsAction(rawInput: unknown) {
   try {
     const { shopId } = await verifyShopAdmin();
     const parsed = receiptSettingsSchema.safeParse(rawInput);
     if (!parsed.success) {
-      return { 
-        success: false, 
-        error: "Validation failed", 
-        fieldErrors: parsed.error.flatten().fieldErrors 
+      return {
+        success: false,
+        error: "Validation failed",
+        fieldErrors: parsed.error.flatten().fieldErrors,
       };
     }
 
@@ -110,27 +117,30 @@ export async function updateReceiptSettingsAction(rawInput: unknown) {
       },
     });
 
-    revalidatePath("/admin/settings");
-    revalidatePath("/reports/closings");
+    revalidateSettings(["/dashboard/admin/reports/closings"]);
     return { success: true };
-  } catch (err: any) {
+  } catch (err) {
     console.error("updateReceiptSettingsAction error:", err);
-    return { success: false, error: err.message || "Failed to update receipt settings." };
+    return { success: false, error: getErrorMessage(err, "Failed to update receipt settings.") };
   }
 }
 
 // ==========================================
-// 3. UPDATE VAT & NBR TAX CONFIGURATION (100% OK)
+// 3. UPDATE VAT & NBR TAX CONFIGURATION (Owner only)
 // ==========================================
 export async function updateVatSettingsAction(rawInput: unknown) {
   try {
-    const { shopId } = await verifyShopAdmin();
+    const { shopId } = await requireAuth({
+      allowedRoles: ["OWNER"],
+      requireActiveStatus: true,
+    });
+
     const parsed = vatSettingsSchema.safeParse(rawInput);
     if (!parsed.success) {
-      return { 
-        success: false, 
-        error: "Validation failed", 
-        fieldErrors: parsed.error.flatten().fieldErrors 
+      return {
+        success: false,
+        error: "Validation failed",
+        fieldErrors: parsed.error.flatten().fieldErrors,
       };
     }
 
@@ -144,158 +154,10 @@ export async function updateVatSettingsAction(rawInput: unknown) {
       },
     });
 
-    revalidatePath("/admin/settings");
+    revalidateSettings();
     return { success: true };
-  } catch (err: any) {
+  } catch (err) {
     console.error("updateVatSettingsAction error:", err);
-    return { success: false, error: err.message || "Failed to update VAT settings." };
-  }
-}
-
-// ==========================================
-// 4. UPSERT BRANCH (ATOMIC isMain + AUTO CASH DRAWER)
-// ==========================================
-export async function upsertBranchAction(rawInput: unknown) {
-  try {
-    const { shopId } = await verifyShopAdmin();
-    const parsed = branchSchema.safeParse(rawInput);
-    if (!parsed.success) {
-      return { 
-        success: false, 
-        error: "Validation failed", 
-        fieldErrors: parsed.error.flatten().fieldErrors 
-      };
-    }
-
-    const data = parsed.data;
-    const code = data.code.trim().toUpperCase();
-
-    // Prevent duplicate branch codes in the same shop
-    const existing = await prisma.branch.findFirst({
-      where: {
-        shopId,
-        code,
-        ...(data.id ? { NOT: { id: data.id } } : {}),
-      },
-    });
-
-    if (existing) {
-      return { success: false, error: `Branch code '${code}' is already used by another outlet.` };
-    }
-
-    // Atomic transaction: Main branch swap + Branch save + Auto Cash Drawer
-    await prisma.$transaction(async (tx) => {
-      if (data.isMain) {
-        await tx.branch.updateMany({
-          where: { shopId, isMain: true },
-          data: { isMain: false },
-        });
-      }
-
-      if (data.id) {
-        // Edit existing branch
-        await tx.branch.update({
-          where: { id: data.id, shopId },
-          data: {
-            name: data.name,
-            code,
-            phone: data.phone || null,
-            email: data.email || null,
-            address: data.address || null,
-            isMain: data.isMain,
-            status: data.status,
-          },
-        });
-      } else {
-        // 1. Create new branch
-        const newBranch = await tx.branch.create({
-          data: {
-            name: data.name,
-            code,
-            phone: data.phone || null,
-            email: data.email || null,
-            address: data.address || null,
-            isMain: data.isMain,
-            status: data.status,
-            shopId,
-          },
-        });
-
-        // 2. 👈 AUTO-CREATE Cash Drawer for the new branch (Option 1 Requirement)
-        await tx.account.create({
-          data: {
-            name: `ক্যাশ ড্রয়ার (${data.name})`,
-            type: "CASH",
-            openingBalance: 0,
-            currentBalance: 0,
-            status: "active",
-            branchId: newBranch.id,
-            shopId,
-          },
-        });
-      }
-    });
-
-    revalidatePath("/admin/settings");
-    revalidatePath("/admin/accounts");
-    return { success: true };
-  } catch (err: any) {
-    console.error("upsertBranchAction error:", err);
-    return { success: false, error: err.message || "Failed to save branch." };
-  }
-}
-
-// ==========================================
-// 5. SAFE DELETE BRANCH (Comprehensive Audit Guard)
-// ==========================================
-export async function deleteBranchAction(branchId: string) {
-  try {
-    const { shopId } = await verifyShopAdmin();
-
-    const branch = await prisma.branch.findUnique({
-      where: { id: branchId, shopId },
-      include: {
-        _count: {
-          select: { 
-            sales: true, 
-            purchases: true, 
-            expenses: true, 
-            users: true 
-          },
-        },
-      },
-    });
-
-    if (!branch) {
-      return { success: false, error: "Branch not found." };
-    }
-
-    if (branch.isMain) {
-      return { success: false, error: "Cannot delete the principal main branch." };
-    }
-
-    // Comprehensive Financial Guard
-    const hasFinancialRecords =
-      branch._count.sales > 0 ||
-      branch._count.purchases > 0 ||
-      branch._count.expenses > 0;
-
-    if (hasFinancialRecords) {
-      return {
-        success: false,
-        error: `Cannot delete branch with active transaction history (${branch._count.sales} sales, ${branch._count.purchases} purchases, ${branch._count.expenses} expenses). Deactivate it instead.`,
-      };
-    }
-
-    await prisma.branch.delete({
-      where: { id: branchId },
-    });
-
-    revalidatePath("/admin/settings");
-    revalidatePath("/admin/accounts");
-    return { success: true };
-  } catch (err: any) {
-    console.error("deleteBranchAction error:", err);
-    return { success: false, error: err.message || "Failed to delete branch." };
+    return { success: false, error: getErrorMessage(err, "Failed to update VAT settings.") };
   }
 }

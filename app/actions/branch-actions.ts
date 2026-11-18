@@ -3,7 +3,7 @@
 import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { getErrorMessage } from "@/lib/utils";
 
 export async function switchBranchAction(branchId: string) {
   try {
@@ -15,38 +15,30 @@ export async function switchBranchAction(branchId: string) {
 
     // Verify branch belongs to user's shop and is active
     const branch = await prisma.branch.findFirst({
-      where: { 
-        id: branchId, 
-        shopId, 
-        status: "active" 
-      },
+      where: { id: branchId, shopId, status: "active" },
     });
 
     if (!branch) {
       return { success: false, error: "Branch not found or inactive." };
     }
 
-    // 1. Update user's active branch in MySQL
+    // Persist the active branch for this user in MySQL
     await prisma.user.update({
       where: { id: userId },
       data: { branchId: branch.id },
     });
 
-    // 2. Set an active branch cookie as fail-safe
-    const cookieStore = await cookies();
-    cookieStore.set("active_branch_id", branch.id, { path: "/", httpOnly: false });
-
-    // 3. Clear cache across all server routes
+    // Clear cache across all server routes
     revalidatePath("/", "layout");
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       branchId: branch.id,
       branchName: branch.name,
-      branchCode: branch.code 
+      branchCode: branch.code,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("switchBranchAction error:", error);
-    return { success: false, error: error.message || "Failed to switch branch." };
+    return { success: false, error: getErrorMessage(error, "Failed to switch branch.") };
   }
 }

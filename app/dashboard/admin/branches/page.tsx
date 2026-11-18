@@ -7,11 +7,11 @@ import { IBranchWithCounts } from "@/types";
 export default async function BranchesPage() {
   // 🛡️ Zero-Trust Guard: Enforce permissions and active status
   const user = await requireAuth({
-    requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+    requiredPermission: PERMISSIONS.BRANCH_MANAGE,
     requireActiveStatus: true,
   });
 
-  const { shopId, role } = user;
+  const { shopId } = user;
 
   const branches = await prisma.branch.findMany({
     where: { shopId },
@@ -30,7 +30,6 @@ export default async function BranchesPage() {
     <div className="max-w-7xl mx-auto">
       <BranchesClient
         data={branches as IBranchWithCounts[]}
-        userRole={role}
       />
     </div>
   );

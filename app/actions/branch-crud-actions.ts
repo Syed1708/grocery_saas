@@ -4,6 +4,8 @@ import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { PERMISSIONS } from "@/types";
+import { getErrorMessage } from "@/lib/utils";
 
 const branchSchema = z.object({
   id: z.string().optional(),
@@ -16,29 +18,67 @@ const branchSchema = z.object({
   status: z.enum(["active", "inactive"]).default("active"),
 });
 
+const BRANCH_REVALIDATE_PATHS = ["/dashboard/admin/branches"];
+
+function revalidateBranchPaths() {
+  for (const path of BRANCH_REVALIDATE_PATHS) revalidatePath(path);
+  revalidatePath("/", "layout");
+}
+
+/** Map a branch form to the shape `branchSchema` expects. */
+function formToBranchInput(formData: FormData) {
+  return {
+    id: formData.get("id")?.toString(),
+    name: formData.get("name")?.toString().trim(),
+    code: formData.get("code")?.toString().trim(),
+    phone: formData.get("phone")?.toString().trim() || null,
+    email: formData.get("email")?.toString().trim() || null,
+    address: formData.get("address")?.toString().trim() || null,
+    isMain: formData.get("isMain") === "true",
+    status: formData.get("status")?.toString() || "active",
+  };
+}
+
+interface BranchFieldsInput {
+  name: string;
+  code: string;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  isMain: boolean;
+  status: "active" | "inactive";
+}
+
+/** Columns shared by create + update. */
+function branchFields(data: BranchFieldsInput) {
+  return {
+    name: data.name,
+    code: data.code,
+    phone: data.phone,
+    email: data.email || null,
+    address: data.address,
+    isMain: data.isMain,
+    status: data.status,
+  };
+}
+
 async function getAdminUser() {
-  return requireAuth({ allowedRoles: ["OWNER"], requireActiveStatus: true });
+  return requireAuth({
+    requiredPermission: PERMISSIONS.BRANCH_MANAGE,
+    requireActiveStatus: true,
+  });
 }
 
 export async function createBranchAction(formData: FormData) {
   try {
     const user = await getAdminUser();
 
-    const validated = branchSchema.safeParse({
-      name: formData.get("name")?.toString().trim(),
-      code: formData.get("code")?.toString().trim(),
-      phone: formData.get("phone")?.toString().trim() || null,
-      email: formData.get("email")?.toString().trim() || null,
-      address: formData.get("address")?.toString().trim() || null,
-      isMain: formData.get("isMain") === "true",
-      status: formData.get("status")?.toString() || "active",
-    });
-
-    if (!validated.success) {
-      return { success: false, error: validated.error.issues[0].message };
+    const parsed = branchSchema.safeParse(formToBranchInput(formData));
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
     }
 
-    const data = validated.data;
+    const data = parsed.data;
 
     // Check unique branch code within store
     const existing = await prisma.branch.findUnique({
@@ -57,20 +97,28 @@ export async function createBranchAction(formData: FormData) {
         });
       }
 
-      await tx.branch.create({
+      const newBranch = await tx.branch.create({
+        data: { ...branchFields(data), shopId: user.shopId },
+      });
+
+      // Auto-create the branch cash drawer
+      await tx.account.create({
         data: {
-          ...data,
-          email: data.email || null,
+          name: `ক্যাশ ড্রয়ার (${data.name})`,
+          type: "CASH",
+          openingBalance: 0,
+          currentBalance: 0,
+          status: "active",
+          branchId: newBranch.id,
           shopId: user.shopId,
         },
       });
     });
 
-    revalidatePath("/dashboard/admin/branches");
-    revalidatePath("/", "layout");
+    revalidateBranchPaths();
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to create branch." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to create branch.") };
   }
 }
 
@@ -80,22 +128,19 @@ export async function updateBranchAction(formData: FormData) {
     const id = formData.get("id")?.toString();
     if (!id) return { success: false, error: "Missing branch ID." };
 
-    const validated = branchSchema.safeParse({
-      id,
-      name: formData.get("name")?.toString().trim(),
-      code: formData.get("code")?.toString().trim(),
-      phone: formData.get("phone")?.toString().trim() || null,
-      email: formData.get("email")?.toString().trim() || null,
-      address: formData.get("address")?.toString().trim() || null,
-      isMain: formData.get("isMain") === "true",
-      status: formData.get("status")?.toString() || "active",
-    });
-
-    if (!validated.success) {
-      return { success: false, error: validated.error.issues[0].message };
+    const parsed = branchSchema.safeParse(formToBranchInput(formData));
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
     }
 
-    const data = validated.data;
+    // 🛡️ Verify the branch belongs to this shop before mutating
+    const existing = await prisma.branch.findFirst({
+      where: { id, shopId: user.shopId },
+      select: { id: true },
+    });
+    if (!existing) return { success: false, error: "Branch not found." };
+
+    const data = parsed.data;
 
     await prisma.$transaction(async (tx) => {
       if (data.isMain) {
@@ -107,18 +152,14 @@ export async function updateBranchAction(formData: FormData) {
 
       await tx.branch.update({
         where: { id },
-        data: {
-          ...data,
-          email: data.email || null,
-        },
+        data: branchFields(data),
       });
     });
 
-    revalidatePath("/dashboard/admin/branches");
-    revalidatePath("/", "layout");
+    revalidateBranchPaths();
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to update branch." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to update branch.") };
   }
 }
 
@@ -130,7 +171,7 @@ export async function deleteBranchAction(id: string) {
       where: { id, shopId: user.shopId },
       include: {
         _count: {
-          select: { users: true, productStocks: true, sales: true },
+          select: { users: true, productStocks: true, sales: true, purchases: true, expenses: true },
         },
       },
     });
@@ -145,16 +186,23 @@ export async function deleteBranchAction(id: string) {
       return { success: false, error: "Cannot delete: Staff are assigned to this branch. Reassign them first." };
     }
 
-    if (branch._count.sales > 0) {
-      return { success: false, error: "Cannot delete: This branch has sales records. Set status to inactive instead." };
+    const hasFinancialRecords =
+      branch._count.sales > 0 ||
+      branch._count.purchases > 0 ||
+      branch._count.expenses > 0;
+
+    if (hasFinancialRecords) {
+      return {
+        success: false,
+        error: `Cannot delete: This branch has transaction history (${branch._count.sales} sales, ${branch._count.purchases} purchases, ${branch._count.expenses} expenses). Set status to inactive instead.`,
+      };
     }
 
     await prisma.branch.delete({ where: { id } });
 
-    revalidatePath("/dashboard/admin/branches");
-    revalidatePath("/", "layout");
+    revalidateBranchPaths();
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to delete branch." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to delete branch.") };
   }
 }
