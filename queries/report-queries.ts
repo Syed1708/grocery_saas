@@ -11,6 +11,8 @@ export async function getPastClosings(shopId: string, branchId?: string | null):
   return closings.map((c) => ({
     id: c.id,
     closingDate: c.closingDate,
+    openingTime: c.openingTime,
+    closingTime: c.closingTime,
     openingCash: Number(c.openingCash),
     cashSales: Number(c.cashSales),
     cashDueCollected: Number(c.cashDueCollected),
@@ -24,6 +26,9 @@ export async function getPastClosings(shopId: string, branchId?: string | null):
     totalInvoices: c.totalInvoices,
     notes: c.notes,
     status: c.status,
+    branchId: c.branchId,
+    shopId: c.shopId,
+    userId: c.userId,
     cashierName: c.user?.name || "Cashier",
     createdAt: c.createdAt,
   }));

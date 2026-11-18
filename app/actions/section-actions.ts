@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 async function getAuthenticatedUser() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.shopId) throw new Error("Unauthorized");
-  if (session.user.role !== "OWNER" && session.user.role !== "MANAGER" && session.user.role !== "ADMIN") {
+  if (session.user.role !== "OWNER" && session.user.role !== "MANAGER") {
     throw new Error("Forbidden: Only Owners and Managers can manage sections.");
   }
   return session.user;

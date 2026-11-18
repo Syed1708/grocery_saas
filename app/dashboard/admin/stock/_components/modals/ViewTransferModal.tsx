@@ -80,7 +80,7 @@ export default function ViewTransferModal({
                   </td>
                   {hasDamage && (
                     <td className="py-2 px-2 text-center text-red-600 font-bold">
-                      {i.transitDamage > 0 ? i.transitDamage : "0"}
+                      {(i.transitDamage ?? 0) > 0 ? i.transitDamage : "0"}
                     </td>
                   )}
                   <td className="py-2 px-3 text-right">{currencySymbol}{i.unitCost.toFixed(2)}</td>

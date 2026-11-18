@@ -1,22 +1,22 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { unitSchema } from "@/lib/validations";
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types/rbac";
 
-async function getAuthenticatedUser() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.shopId) {
-    throw new Error("Unauthorized");
-  }
-  return session.user;
+async function getUnitManager() {
+  // 🛡️ Zero-Trust Guard: Enforce catalog management permission
+  return requireAuth({
+    requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+    requireActiveStatus: true,
+  });
 }
 
 export async function createUnitAction(formData: FormData) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await getUnitManager();
 
     const validated = unitSchema.safeParse({
       name: formData.get("name")?.toString().trim(),
@@ -54,7 +54,7 @@ export async function createUnitAction(formData: FormData) {
 
 export async function seedDefaultUnitsAction() {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await getUnitManager();
 
     const defaultUnits = [
       { name: "Piece", shortCode: "pcs", allowDecimal: false },
@@ -91,7 +91,7 @@ export async function seedDefaultUnitsAction() {
 
 export async function deleteUnitAction(id: string) {
   try {
-    const user = await getAuthenticatedUser();
+    const user = await getUnitManager();
 
     const productCount = await prisma.product.count({
       where: { unitId: id, shopId: user.shopId },

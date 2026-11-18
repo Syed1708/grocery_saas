@@ -60,6 +60,7 @@ export async function createCategoryAction(formData: FormData) {
 
     revalidatePath("/dashboard/admin/categories");
     revalidatePath("/dashboard/admin/products");
+    revalidatePath("/pos");
     return { success: true };
   } catch (error: any) {
     console.error("Create category error:", error);
@@ -121,6 +122,7 @@ export async function updateCategoryAction(formData: FormData) {
 
     revalidatePath("/dashboard/admin/categories");
     revalidatePath("/dashboard/admin/products");
+    revalidatePath("/pos");
     return { success: true };
   } catch (error: any) {
     console.error("Update category error:", error);
@@ -161,6 +163,7 @@ export async function deleteCategoryAction(id: string) {
 
     revalidatePath("/dashboard/admin/categories");
     revalidatePath("/dashboard/admin/products");
+    revalidatePath("/pos");
     return { success: true };
   } catch (error: any) {
     console.error("Delete category error:", error);

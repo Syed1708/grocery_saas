@@ -20,7 +20,7 @@ async function verifyShopAdmin() {
     throw new Error("Unauthorized access: Session required.");
   }
   const role = session.user.role;
-  if (role !== "OWNER" && role !== "MANAGER" && role !== "ADMIN" && role !== "SUPER_ADMIN") {
+  if (role !== "OWNER" && role !== "MANAGER") {
     throw new Error("Permission denied. Only Owner or Manager can modify store settings.");
   }
 
@@ -44,7 +44,7 @@ export async function updateShopProfileAction(rawInput: unknown) {
     }
 
     const { shopId, branchId, role } = session.user;
-    const isOwner = role === "OWNER" || role === "ADMIN" || role === "SUPER_ADMIN";
+    const isOwner = role === "OWNER";
     const isManager = role === "MANAGER";
 
     if (!isOwner && !isManager) {

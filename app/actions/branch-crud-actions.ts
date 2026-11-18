@@ -20,7 +20,7 @@ const branchSchema = z.object({
 async function getAdminUser() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.shopId) throw new Error("Unauthorized");
-  if (session.user.role !== "OWNER" && session.user.role !== "SUPER_ADMIN" && session.user.role !== "ADMIN") {
+  if (session.user.role !== "OWNER") {
     throw new Error("Forbidden: Only store owners can manage branches.");
   }
   return session.user;

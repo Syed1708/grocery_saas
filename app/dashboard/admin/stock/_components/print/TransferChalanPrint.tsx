@@ -66,7 +66,7 @@ export default function TransferChalanPrint({
                 <td className="py-2 px-2">{idx + 1}</td>
                 <td className="py-2 px-2 font-sans font-medium">
                   {it.productName}
-                  {it.transitDamage > 0 && (
+                  {(it.transitDamage ?? 0) > 0 && (
                     <span className="text-[9px] text-red-600 block">
                       * {it.transitDamage} টি নষ্ট ([{data.fromBranchName}] থেকে আগত)
                     </span>
@@ -78,7 +78,7 @@ export default function TransferChalanPrint({
                 </td>
                 {hasDamage && (
                   <td className="py-2 px-2 text-center text-red-600 font-bold">
-                    {it.transitDamage > 0 ? it.transitDamage : "0"}
+                    {(it.transitDamage ?? 0) > 0 ? it.transitDamage : "0"}
                   </td>
                 )}
                 <td className="py-2 px-2 text-right">{currencySymbol}{it.unitCost.toFixed(2)}</td>

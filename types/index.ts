@@ -7,6 +7,7 @@ export * from "./product";
 export * from "./customer";
 export * from "./supplier";
 export * from "./purchase";
+export type { IPurchaseReportRow } from "./purchases";
 export * from "./purchase-return";
 export * from "./purchase-order"; // 👈 Add export
 export * from "./sale";

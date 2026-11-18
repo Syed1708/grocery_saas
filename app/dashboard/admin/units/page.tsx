@@ -1,17 +1,16 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/services/authOptions";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { getUnits } from "@/queries/unit-queries";
 import UnitsClient from "./_components/UnitsClient";
 
 export default async function UnitsPage() {
-  const session = await getServerSession(authOptions);
+  // 🛡️ Zero-Trust Guard: Enforce permission and active account status
+  const user = await requireAuth({
+    requiredPermission: PERMISSIONS.CATALOG_VIEW,
+    requireActiveStatus: true,
+  });
 
-  if (!session?.user?.shopId) {
-    redirect("/login");
-  }
-
-  const units = await getUnits(session.user.shopId);
+  const units = await getUnits(user.shopId);
 
   return (
     <div className="max-w-7xl mx-auto">

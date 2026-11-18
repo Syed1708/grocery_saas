@@ -29,6 +29,7 @@ export default function SupplierPaymentModal({
   if (!supplier) return null;
 
   const currentDue = Number(supplier.currentDue || 0);
+  const supplierId = supplier.id;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -38,7 +39,7 @@ export default function SupplierPaymentModal({
     const formData = new FormData(e.currentTarget);
 
     const res = await recordSupplierPaymentAction({
-      supplierId: supplier.id,
+      supplierId,
       amount,
       paymentMethod: formData.get("paymentMethod")?.toString() || "cash",
       reference: formData.get("reference")?.toString() || undefined,

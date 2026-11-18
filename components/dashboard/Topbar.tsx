@@ -33,8 +33,6 @@ export default function Topbar({
   currentBranchName,
   onToggleSidebar,
 }: TopbarProps) {
-  const isCashier = role === "CASHIER";
-
   return (
     <header className="h-16 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 transition-colors">
       <div className="flex items-center gap-2 sm:gap-3">
@@ -61,7 +59,7 @@ export default function Topbar({
             branches={branches}
             currentBranchId={currentBranchId}
             currentBranchName={currentBranchName}
-            isCashier={isCashier}
+            userRole={role}
           />
         </div>
       </div>
