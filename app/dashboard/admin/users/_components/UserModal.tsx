@@ -1,12 +1,12 @@
 // app/(dashboard)/admin/users/_components/UserModal.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import FormModal from "@/components/common/FormModal";
 import { Input } from "@/components/common/ui/Input";
 import { Select } from "@/components/common/ui/Select";
 import { PrivilegeMatrix } from "./PrivilegeMatrix";
-import { IUserItem } from "./UsersTable";
+import type { IUserItem } from "@/types";
 import { DEFAULT_ROLE_PERMISSIONS, UserRole } from "@/types/rbac";
 import { Shield, KeyRound, Lock } from "lucide-react";
 
@@ -32,26 +32,17 @@ export default function UserModal({
   branches: BranchOption[];
 }) {
   const isEditing = Boolean(user);
-  const [tab, setTab] = useState<"account" | "pin" | "privileges">("account");
-  const [selectedRole, setSelectedRole] = useState<UserRole>(user?.role || "CASHIER");
-  
-  // 👈 Stores the active set of checkboxes for this user
-  const [permissions, setPermissions] = useState<string[]>([]);
+  const initialRole = user?.role || "CASHIER";
 
-  useEffect(() => {
-    if (isOpen) {
-      setTab("account");
-      const initialRole = user?.role || "CASHIER";
-      setSelectedRole(initialRole);
-      
-      // If editing and custom permissions exist, use them. Otherwise load role defaults.
-      if (user?.customPermissions && user.customPermissions.length > 0) {
-        setPermissions(user.customPermissions);
-      } else {
-        setPermissions(DEFAULT_ROLE_PERMISSIONS[initialRole] || []);
-      }
-    }
-  }, [isOpen, user]);
+  const [tab, setTab] = useState<"account" | "pin" | "privileges">("account");
+  const [selectedRole, setSelectedRole] = useState<UserRole>(initialRole);
+
+  // 👈 Stores the active set of checkboxes for this user
+  const [permissions, setPermissions] = useState<string[]>(
+    user?.customPermissions && user.customPermissions.length > 0
+      ? user.customPermissions
+      : DEFAULT_ROLE_PERMISSIONS[initialRole] || []
+  );
 
   // When role changes on create/edit, reset permissions to new role's defaults
   const handleRoleChange = (newRole: UserRole) => {
@@ -127,7 +118,7 @@ export default function UserModal({
               { label: "MANAGER (Branch Lead)", value: "MANAGER" },
               { label: "OWNER (Full Access)", value: "OWNER" },
             ]}
-            onChange={(e: any) => handleRoleChange(e.target.value as UserRole)}
+            onChange={(e) => handleRoleChange(e.target.value as UserRole)}
           />
 
           {selectedRole === "OWNER" ? (

@@ -6,20 +6,8 @@ import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table
 import { Edit2, Trash2, KeyRound } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { Switch } from "@/components/common/ui/Switch";
-import { DEFAULT_ROLE_PERMISSIONS, UserRole } from "@/types/rbac";
-
-export interface IUserItem {
-  id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  role: UserRole;
-  isActive: boolean;
-  branchId: string | null;
-  branchName: string;
-  hasSupervisorPin: boolean;
-  customPermissions: string[];
-}
+import { DEFAULT_ROLE_PERMISSIONS } from "@/types/rbac";
+import type { IUserItem } from "@/types";
 
 interface UsersTableProps {
   users: IUserItem[];

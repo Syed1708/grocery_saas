@@ -10,6 +10,7 @@ export const metadata = {
 export default async function AdminUsersPage() {
   const { shopId } = await requireAuth({
     allowedRoles: ["OWNER"],
+    requireActiveStatus: true,
   });
 
   const [users, branches] = await Promise.all([

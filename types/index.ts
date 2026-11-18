@@ -2,6 +2,7 @@
 export * from "./branch";
 export * from "./unit";
 export * from "./rbac";
+export * from "./user";
 export * from "./category";
 export * from "./product";
 export * from "./customer";

@@ -7,7 +7,27 @@ import { requireAuth } from "@/lib/auth/guard";
 import { revalidatePath } from "next/cache";
 import { userSchema } from "@/lib/validations/user";
 import { ZodError } from "zod";
-import { DEFAULT_ROLE_PERMISSIONS, UserRole } from "@/types/rbac";
+import { DEFAULT_ROLE_PERMISSIONS, PERMISSIONS, UserRole } from "@/types/rbac";
+import { getErrorMessage } from "@/lib/utils";
+
+const USERS_REVALIDATE_PATH = "/dashboard/admin/users";
+const VALID_PERMISSIONS = new Set<string>(Object.values(PERMISSIONS));
+
+/** Normalize the various ways a form can reach a server action. */
+function toRawData(input: unknown): Record<string, unknown> {
+  if (input instanceof FormData) {
+    return Object.fromEntries(input.entries());
+  }
+  if (input && typeof input === "object" && !Array.isArray(input)) {
+    return input as Record<string, unknown>;
+  }
+  return {};
+}
+
+/** Keep only permission keys that exist in the RBAC catalog. */
+function sanitizePermissions(permissions: string[]): string[] {
+  return permissions.filter((permission) => VALID_PERMISSIONS.has(permission));
+}
 
 export async function getMyPermissionsAction() {
   try {
@@ -21,7 +41,9 @@ export async function getMyPermissionsAction() {
     if (!user || !user.isActive) return { success: false, permissions: [] };
 
     const base = DEFAULT_ROLE_PERMISSIONS[user.role as UserRole] || [];
-    const custom = Array.isArray(user.customPermissions) ? (user.customPermissions as string[]) : null;
+    const custom = Array.isArray(user.customPermissions)
+      ? (user.customPermissions as string[])
+      : null;
 
     return {
       success: true,
@@ -32,25 +54,14 @@ export async function getMyPermissionsAction() {
   }
 }
 
-export async function saveUserAction(input: any) {
+export async function saveUserAction(input: unknown) {
   try {
     const { shopId } = await requireAuth({
       allowedRoles: ["OWNER"],
       requireActiveStatus: true,
     });
 
-    let rawData: Record<string, any> = {};
-    if (input instanceof FormData) {
-      rawData = Object.fromEntries(input.entries());
-    } else if (input && typeof input === "object" && "nativeEvent" in input) {
-      const form = input.currentTarget as HTMLFormElement;
-      const formData = new FormData(form);
-      rawData = Object.fromEntries(formData.entries());
-    } else if (input && typeof input === "object") {
-      rawData = input;
-    }
-
-    const parsed = userSchema.parse(rawData);
+    const parsed = userSchema.parse(toRawData(input));
 
     const duplicate = await prisma.user.findFirst({
       where: {
@@ -81,6 +92,10 @@ export async function saveUserAction(input: any) {
 
     const finalBranchId = parsed.role === "OWNER" ? null : parsed.branchId;
 
+    // Owners always have full access; custom permission overrides are for staff only.
+    const customPermissions =
+      parsed.role === "OWNER" ? [] : sanitizePermissions(parsed.customPermissions);
+
     if (parsed.id) {
       const currentUser = await prisma.user.findUnique({ where: { id: parsed.id } });
       if (currentUser?.role === "OWNER" && (parsed.role !== "OWNER" || !parsed.isActive)) {
@@ -101,7 +116,7 @@ export async function saveUserAction(input: any) {
           role: parsed.role,
           isActive: parsed.isActive,
           branchId: finalBranchId,
-          customPermissions: parsed.customPermissions,
+          customPermissions,
           ...(passwordHash ? { password: passwordHash } : {}),
           ...(pinHash !== undefined ? { supervisorPin: pinHash } : {}),
         },
@@ -117,25 +132,21 @@ export async function saveUserAction(input: any) {
           role: parsed.role,
           isActive: parsed.isActive,
           branchId: finalBranchId,
-          customPermissions: parsed.customPermissions,
+          customPermissions,
           supervisorPin: pinHash ?? null,
         },
       });
     }
 
-    revalidatePath("/admin/users");
+    revalidatePath(USERS_REVALIDATE_PATH);
     return { success: true };
-  } catch (error: any) {
- // 🛡️ Bulletproof Zod & standard error parser
-    const issues = error?.errors || error?.issues;
-    if (error instanceof ZodError || Array.isArray(issues)) {
-      const firstError = issues?.[0];
-      if (firstError) {
-        const fieldName = firstError.path?.join(".") || "";
-        throw new Error(fieldName ? `${fieldName}: ${firstError.message}` : firstError.message);
-      }
+  } catch (error) {
+    if (error instanceof ZodError) {
+      const firstError = error.issues[0];
+      const fieldName = firstError.path.join(".");
+      throw new Error(fieldName ? `${fieldName}: ${firstError.message}` : firstError.message);
     }
-    throw new Error(error.message || "An unexpected error occurred while saving the user.");
+    throw new Error(getErrorMessage(error, "An unexpected error occurred while saving the user."));
   }
 }
 
@@ -149,21 +160,30 @@ export async function toggleUserStatusAction(userId: string, currentStatus: bool
     throw new Error("You cannot change the status of your own account.");
   }
 
+  const target = await prisma.user.findFirst({
+    where: { id: userId, shopId },
+    select: { role: true },
+  });
+
+  if (!target) throw new Error("Staff member not found.");
+  if (target.role === "OWNER") {
+    throw new Error("Owner accounts cannot be deactivated from staff management.");
+  }
+
   await prisma.user.update({
     where: { id: userId, shopId },
     data: { isActive: !currentStatus },
   });
 
-  revalidatePath("/admin/users");
+  revalidatePath(USERS_REVALIDATE_PATH);
   return { success: true };
 }
-
-// Add this inside actions/users.ts
 
 export async function deleteUserAction(userId: string) {
   try {
     const { shopId, userId: actorId } = await requireAuth({
-      allowedRoles: ["OWNER", "ADMIN", "SUPER_ADMIN" as any],
+      allowedRoles: ["OWNER"],
+      requireActiveStatus: true,
     });
 
     if (userId === actorId) {
@@ -178,7 +198,6 @@ export async function deleteUserAction(userId: string) {
       throw new Error("Staff member not found.");
     }
 
-    // Protect admin / owner accounts from being deleted here
     if (targetUser.role === "OWNER") {
       throw new Error("Store Owner / Admin accounts cannot be deleted from staff management.");
     }
@@ -187,9 +206,9 @@ export async function deleteUserAction(userId: string) {
       where: { id: userId, shopId },
     });
 
-    revalidatePath("/admin/users");
+    revalidatePath(USERS_REVALIDATE_PATH);
     return { success: true };
-  } catch (error: any) {
-    throw new Error(error.message || "Failed to delete user.");
+  } catch (error) {
+    throw new Error(getErrorMessage(error, "Failed to delete user."));
   }
 }

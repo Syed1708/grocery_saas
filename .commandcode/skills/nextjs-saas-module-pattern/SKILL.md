@@ -291,6 +291,23 @@ For a KPI grid: `<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 
 
 Owner-only deletes: check `user.role !== "OWNER"` and return a localized error.
 
+### Navigation & permission UI
+
+- `components/dashboard/Sidebar.tsx` builds `navItems` as
+  `{ label, href, icon: LucideIcon, roles: UserRole[], permission?: PermissionKey }[]`.
+  Filter by **both** role and `hasPermission`; OWNER bypasses permission checks.
+- Keep the sidebar's CASHIER allow-list in sync with `proxy.ts`
+  (`/dashboard/pos`, `/dashboard/admin/closings`, `/dashboard/profile`).
+- `hooks/usePermission.ts` initializes from session overrides only when they exist, else
+  `null` so it falls back to `DEFAULT_ROLE_PERMISSIONS` (avoids an empty-permissions flash).
+
+### Users / RBAC module
+
+- `admin/users` is **OWNER-only** (`requireAuth({ allowedRoles: ["OWNER"], requireActiveStatus: true })`).
+- Hide the master Owner from the staff list (`role: { not: "OWNER" }`).
+- Sanitize submitted `customPermissions` against `Object.values(PERMISSIONS)`; store `[]` for OWNER.
+- Protect the sole active Owner from demotion/deactivation; block toggling/deleting OWNER accounts.
+
 ## UI preservation rules
 
 - Don't change column order, headers, badges, or copy unless asked.

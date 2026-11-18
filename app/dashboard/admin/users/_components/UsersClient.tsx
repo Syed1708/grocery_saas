@@ -4,8 +4,10 @@
 import { useState } from "react";
 import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import UsersTable, { IUserItem } from "./UsersTable";
+import UsersTable from "./UsersTable";
 import UserModal from "./UserModal";
+import type { IUserItem } from "@/types";
+import { getErrorMessage } from "@/lib/utils";
 import { saveUserAction, toggleUserStatusAction, deleteUserAction } from "@/app/actions/users-actions";
 
 interface Props {
@@ -36,8 +38,8 @@ export default function UsersClientView({ initialUsers, branches }: Props) {
       await saveUserAction(formData);
       toast.success(selectedUser ? "Staff member updated." : "Staff member created.");
       setIsModalOpen(false);
-    } catch (err: any) {
-      toast.error(err.message || "Operation failed.");
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Operation failed."));
     } finally {
       setLoading(false);
     }
@@ -47,8 +49,8 @@ export default function UsersClientView({ initialUsers, branches }: Props) {
     try {
       await toggleUserStatusAction(userId, currentStatus);
       toast.success("User status updated.");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update status.");
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to update status."));
     }
   };
 
@@ -60,8 +62,8 @@ export default function UsersClientView({ initialUsers, branches }: Props) {
     try {
       await deleteUserAction(userId);
       toast.success("Staff member deleted successfully.");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete user.");
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to delete user."));
     }
   };
 
@@ -93,6 +95,7 @@ export default function UsersClientView({ initialUsers, branches }: Props) {
       />
 
       <UserModal
+        key={`${isModalOpen ? "open" : "closed"}-${selectedUser?.id ?? "new"}`}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleSubmit}

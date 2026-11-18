@@ -16,6 +16,7 @@ import {
   Settings,
   X,
   GitBranch,
+  LucideIcon,
 } from "lucide-react";
 import { UserRole } from "@/types";
 import { usePermission } from "@/hooks/usePermission";
@@ -40,11 +41,11 @@ export default function Sidebar({
   const navItems: Array<{
     label: string;
     href: string;
-    icon: any;
-    roles: string[];
+    icon: LucideIcon;
+    roles: UserRole[];
     permission?: PermissionKey;
   }> = [
-    { label: "Overview", href: "/dashboard", icon: LayoutDashboard, roles: ["OWNER", "MANAGER", "CASHIER"] },
+    { label: "Overview", href: "/dashboard", icon: LayoutDashboard, roles: ["OWNER", "MANAGER"] },
     { label: "Users", href: "/dashboard/admin/users", icon: Package, roles: ["OWNER", "MANAGER", "CASHIER"], permission: PERMISSIONS.USERS_MANAGE },
     { label: "POS Terminal", href: "/dashboard/pos", icon: ShoppingCart, roles: ["OWNER", "MANAGER", "CASHIER"], permission: PERMISSIONS.POS_ACCESS },
     { label: "Categories", href: "/dashboard/admin/categories", icon: Tags, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.CATALOG_MANAGE },
@@ -52,14 +53,14 @@ export default function Sidebar({
     { label: "Sales & Invoices", href: "/dashboard/admin/sales", icon: Receipt, roles: ["OWNER", "MANAGER", "CASHIER"], permission: PERMISSIONS.REPORTS_SALES },
     { label: "Sales Returns", href: "/dashboard/admin/returns", icon: RotateCcw, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.POS_REFUND_RETURN },
     { label: "Branches & Outlets", href: "/dashboard/admin/branches", icon: GitBranch, roles: ["OWNER"], permission: PERMISSIONS.BRANCH_SWITCH },
-    { label: "Customers", href: "/dashboard/admin/customers", icon: Users, roles: ["OWNER", "MANAGER", "CASHIER"], permission: PERMISSIONS.CATALOG_VIEW },
+    { label: "Customers", href: "/dashboard/admin/customers", icon: Users, roles: ["OWNER", "MANAGER", "CASHIER"], permission: PERMISSIONS.POS_ACCESS },
     { label: "Suppliers", href: "/dashboard/admin/suppliers", icon: Truck, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.PURCHASES_VIEW },
     { label: "Purchases", href: "/dashboard/admin/purchases", icon: TrendingDown, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.PURCHASES_VIEW },
     { label: "Accounts", href: "/dashboard/admin/accounts", icon: Settings, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.FINANCE_BANKING },
     { label: "Expenses", href: "/dashboard/admin/expenses", icon: TrendingDown, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.FINANCE_EXPENSES },
     { label: "Stocks", href: "/dashboard/admin/stock", icon: TrendingDown, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.CATALOG_MANAGE },
-    { label: "Staffs", href: "/dashboard/admin/staff", icon: TrendingDown, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.FINANCE_EXPENSES },
-    { label: "Day-End Closings", href: "/dashboard/admin/closings", icon: Receipt, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.REPORTS_CLOSING_Z },
+    { label: "Staffs", href: "/dashboard/admin/staff", icon: TrendingDown, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.STAFF_PAYROLL },
+    { label: "Day-End Closings", href: "/dashboard/admin/closings", icon: Receipt, roles: ["OWNER", "MANAGER", "CASHIER"], permission: PERMISSIONS.REPORTS_CLOSING_Z },
     { label: "Reports", href: "/dashboard/admin/reports", icon: Receipt, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.REPORTS_SALES },
     { label: "Family Ledger", href: "/dashboard/familyledger", icon: Receipt, roles: ["OWNER"], permission: PERMISSIONS.REPORTS_SALES },
     { label: "Store Settings", href: "/dashboard/admin/settings", icon: Settings, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.SETTINGS_STORE },

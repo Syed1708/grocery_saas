@@ -11,9 +11,13 @@ export function usePermission() {
   const role = session?.user?.role as UserRole;
   const isOwner = role === "OWNER";
 
-  // Initialize with session token fallback for instant first render
+  // Start from session overrides only when they exist; otherwise null triggers
+  // the DEFAULT_ROLE_PERMISSIONS fallback (avoids an empty-array flash).
+  const sessionPermissions = session?.user?.customPermissions as string[] | undefined;
   const [permissions, setPermissions] = useState<string[] | null>(
-    (session?.user?.customPermissions as string[]) || null
+    Array.isArray(sessionPermissions) && sessionPermissions.length > 0
+      ? sessionPermissions
+      : null
   );
   const [loading, setLoading] = useState(true);
 
