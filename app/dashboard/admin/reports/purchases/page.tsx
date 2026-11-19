@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { prisma } from "@/lib/prisma";
 import { getPurchaseReportData } from "@/queries/purchase-report-queries";
 import PurchaseReportClient from "./_components/PurchaseReportClient";
@@ -10,6 +11,7 @@ interface PageProps {
 
 export default async function PurchaseReportPage({ searchParams }: PageProps) {
   const { shopId, activeBranchId: branchId } = await requireAuth({
+    requiredPermission: PERMISSIONS.REPORTS_PURCHASES,
     requireActiveStatus: true,
   });
   const filters = await searchParams;

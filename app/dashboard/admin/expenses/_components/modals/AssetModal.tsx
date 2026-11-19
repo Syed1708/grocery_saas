@@ -1,18 +1,21 @@
 "use client";
+import { useState } from "react";
 import FormModal from "@/components/common/FormModal";
 import { Input } from "@/components/common/ui/Input";
 import { Select } from "@/components/common/ui/Select";
 import { Textarea } from "@/components/common/ui/Textarea";
 import { ICompanyAsset } from "@/types";
 
-export default function AssetModal({ isOpen, onClose, onSubmit, loading, asset, currencySymbol }: { isOpen: boolean; onClose: () => void; onSubmit: (e: any) => void; loading: boolean; asset?: ICompanyAsset | null; currencySymbol: string }) {
+export default function AssetModal({ isOpen, onClose, onSubmit, loading, asset, currencySymbol }: { isOpen: boolean; onClose: () => void; onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void; loading: boolean; asset?: ICompanyAsset | null; currencySymbol: string }) {
   const isEditing = Boolean(asset);
+  const [defaultAssetCode] = useState(() => `AST-${Date.now().toString().slice(-4)}`);
+
   return (
     <FormModal isOpen={isOpen} onClose={onClose} onSubmit={onSubmit} title={isEditing ? "Edit Company Asset" : "Add Company Asset (স্থায়ী সম্পদ)"} description="Track store furniture, refrigerators, scales, and computers." loading={loading} isEditing={isEditing} maxWidth="lg">
       {asset && <input type="hidden" name="id" value={asset.id} />}
       <div className="grid grid-cols-2 gap-3">
         <Input label="Asset Name *" name="name" required defaultValue={asset?.name || ""} placeholder="e.g. Deep Freezer 300L" />
-        <Input label="Asset Code *" name="assetCode" required defaultValue={asset?.assetCode || `AST-${Date.now().toString().slice(-4)}`} />
+        <Input label="Asset Code *" name="assetCode" required defaultValue={asset?.assetCode || defaultAssetCode} />
       </div>
       <div className="grid grid-cols-3 gap-3">
         <Input label="Purchase Date *" name="purchaseDate" type="date" required defaultValue={asset?.purchaseDate ? new Date(asset.purchaseDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]} />

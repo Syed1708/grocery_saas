@@ -5,7 +5,7 @@ import { Select } from "@/components/common/ui/Select";
 import { Textarea } from "@/components/common/ui/Textarea";
 import { IExpenseCategory } from "@/types";
 
-export default function ExpenseCategoryModal({ isOpen, onClose, onSubmit, loading, category }: { isOpen: boolean; onClose: () => void; onSubmit: (e: any) => void; loading: boolean; category?: IExpenseCategory | null }) {
+export default function ExpenseCategoryModal({ isOpen, onClose, onSubmit, loading, category }: { isOpen: boolean; onClose: () => void; onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void; loading: boolean; category?: IExpenseCategory | null }) {
   const isEditing = Boolean(category);
   return (
     <FormModal isOpen={isOpen} onClose={onClose} onSubmit={onSubmit} title={isEditing ? "Edit Expense Type" : "Add Expense Type (খরচের খাত)"} description="Create category for daily shop costs (e.g. Electricity, Rent)." loading={loading} isEditing={isEditing}>

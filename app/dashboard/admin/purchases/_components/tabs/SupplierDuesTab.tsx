@@ -2,7 +2,7 @@
 "use no memo";
 
 import { useMemo } from "react";
-import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { DollarSign, History, AlertCircle } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { ISupplier } from "@/types";
@@ -88,6 +88,7 @@ export default function SupplierDuesTab({
     data: suppliersWithDues,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (

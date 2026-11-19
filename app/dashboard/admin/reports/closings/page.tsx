@@ -1,10 +1,12 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { prisma } from "@/lib/prisma";
 import { getPastClosings, getCurrentShiftSummary } from "@/queries/closing-queries";
 import ClosingsClient from "./_components/ClosingsClient";
 
 export default async function ClosingsPage() {
   const { shopId, activeBranchId: branchId } = await requireAuth({
+    requiredPermission: PERMISSIONS.REPORTS_CLOSING_Z,
     requireActiveStatus: true,
   });
 

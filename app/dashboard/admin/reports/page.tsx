@@ -1,10 +1,12 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { prisma } from "@/lib/prisma";
 import { getReportsOverviewStats } from "@/queries/reports-overview-queries";
 import ReportsOverviewClient from "./overview/reports-overview-client";
 
 export default async function ReportsRootPage() {
   const { shopId, activeBranchId: branchId } = await requireAuth({
+    requiredPermission: PERMISSIONS.REPORTS_OVERVIEW,
     requireActiveStatus: true,
   });
 

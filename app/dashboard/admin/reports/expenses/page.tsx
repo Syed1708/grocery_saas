@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { prisma } from "@/lib/prisma";
 import { getExpenseReportData } from "@/queries/expense-report-queries";
 import ExpenseReportClient from "./_components/ExpenseReportClient";
@@ -10,6 +11,7 @@ interface PageProps {
 
 export default async function ExpenseReportPage({ searchParams }: PageProps) {
   const { shopId, activeBranchId: branchId } = await requireAuth({
+    requiredPermission: PERMISSIONS.REPORTS_EXPENSES,
     requireActiveStatus: true,
   });
   const filters = await searchParams;

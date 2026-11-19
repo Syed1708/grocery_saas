@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { Users, AlertTriangle, ShieldAlert, CreditCard, Download, Printer, Store } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
@@ -97,14 +97,14 @@ export default function CustomersDueClient({
   };
 
   const columns = getCustomerDueColumns(currencySymbol, (c) => setActiveCustomer(c));
-  const table = useReactTable({ data: customers, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({ data: customers, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() });
 
   return (
     <div className="space-y-4">
       {/* Header with Active Branch Badge */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <Breadcrumbs items={[{ label: "রিপোর্ট হাব", href: "/reports" }, { label: "কাস্টমার বাকি ও খাতা এজিং" }]} />
+          <Breadcrumbs items={[{ label: "রিপোর্ট হাব", href: "/dashboard/admin/reports" }, { label: "কাস্টমার বাকি ও খাতা এজিং" }]} />
           {/* 👈 FIX: Uses branchName to display the active outlet badge */}
           <div className="flex items-center gap-2 mt-1">
             <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">

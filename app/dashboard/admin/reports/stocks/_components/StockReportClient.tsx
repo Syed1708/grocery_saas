@@ -4,7 +4,6 @@
 
 import { useState, useMemo } from "react";
 import {
-  ColumnDef,
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,

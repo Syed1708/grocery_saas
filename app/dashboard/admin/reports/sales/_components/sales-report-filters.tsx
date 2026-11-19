@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Search } from "lucide-react";
 import { Input } from "@/components/common/ui/Input";
 
 export function SalesReportFilters() {

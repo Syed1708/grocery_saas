@@ -23,7 +23,7 @@ export default function ExpenseRowActions({ row }: { row: IExpenseReportRow }) {
           <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
           <div className="absolute right-0 mt-1 w-44 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-lg z-30 py-1 text-xs">
             <Link
-              href={`/admin/expenses?voucher=${row.voucherNo}`}
+              href={`/dashboard/admin/expenses?voucher=${row.voucherNo}`}
               className="flex items-center gap-2 px-3 py-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800"
               onClick={() => setOpen(false)}
             >

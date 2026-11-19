@@ -1,20 +1,22 @@
 "use client";
+import { useState } from "react";
 import FormModal from "@/components/common/FormModal";
 import { Input } from "@/components/common/ui/Input";
 import { Select } from "@/components/common/ui/Select";
 import { Textarea } from "@/components/common/ui/Textarea";
 import { IExpense, IExpenseCategory } from "@/types";
 
-export default function ExpenseModal({ isOpen, onClose, onSubmit, loading, expense, categories, currencySymbol }: { isOpen: boolean; onClose: () => void; onSubmit: (e: any) => void; loading: boolean; expense?: IExpense | null; categories: IExpenseCategory[]; currencySymbol: string }) {
+export default function ExpenseModal({ isOpen, onClose, onSubmit, loading, expense, categories, currencySymbol }: { isOpen: boolean; onClose: () => void; onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void; loading: boolean; expense?: IExpense | null; categories: IExpenseCategory[]; currencySymbol: string }) {
   const isEditing = Boolean(expense);
   const catOptions = categories.map((c) => ({ label: `${c.name} (${c.code})`, value: c.id }));
+  const [defaultVoucherNo] = useState(() => `EXP-${Date.now().toString().slice(-6)}`);
 
   return (
     <FormModal isOpen={isOpen} onClose={onClose} onSubmit={onSubmit} title={isEditing ? "Edit Expense" : "Record Daily Expense"} description="Deducts directly from cash drawer and logs transaction." loading={loading} isEditing={isEditing} maxWidth="lg">
       {expense && <input type="hidden" name="id" value={expense.id} />}
       <div className="grid grid-cols-2 gap-3">
         <Select label="Expense Category *" name="categoryId" required defaultValue={expense ? categories.find(c => c.name === expense.categoryName)?.id : ""} options={catOptions} placeholder="Select category" />
-        <Input label="Voucher # *" name="voucherNo" required defaultValue={expense?.voucherNo || `EXP-${Date.now().toString().slice(-6)}`} />
+        <Input label="Voucher # *" name="voucherNo" required defaultValue={expense?.voucherNo || defaultVoucherNo} />
       </div>
       <div className="grid grid-cols-3 gap-3">
         <Input label="Date *" name="expenseDate" type="date" required defaultValue={expense?.expenseDate ? new Date(expense.expenseDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]} />

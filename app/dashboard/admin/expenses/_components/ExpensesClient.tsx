@@ -37,6 +37,8 @@ import {
   IOwnerTransaction,
 } from "@/types";
 
+type ActionResponse = { success: boolean; error?: string };
+
 export default function ExpensesClient({
   categories,
   expenses,
@@ -85,7 +87,7 @@ export default function ExpensesClient({
   const totalDrawings = equity.filter(e => e.type === "DRAWING").reduce((sum, e) => sum + e.amount, 0);
 
   // Generic Submit Wrapper
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>, action: (fd: FormData) => Promise<any>, successMsg: string, setter: (b: boolean) => void) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>, action: (fd: FormData) => Promise<ActionResponse>, successMsg: string, setter: (b: boolean) => void) {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);

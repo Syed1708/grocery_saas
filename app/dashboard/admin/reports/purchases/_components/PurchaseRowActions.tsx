@@ -40,7 +40,7 @@ export default function PurchaseRowActions({ row, onViewDetails }: Props) {
 
             {row.dueAmount > 0 && (
               <Link
-                href={`/admin/purchases/payment?supplierId=${row.supplierId}&purchaseId=${row.id}`}
+                href={`/dashboard/admin/purchases?supplierId=${row.supplierId}&purchaseId=${row.id}`}
                 className="flex items-center gap-2 px-3 py-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
                 onClick={() => setOpen(false)}
               >

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { ReceiptText, DollarSign, Wallet, CreditCard } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import ExpenseReportFilters from "./ExpenseReportFilters";
@@ -40,6 +40,7 @@ export default function ExpenseReportClient({
     data: rows,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (

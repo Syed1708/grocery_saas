@@ -12,15 +12,15 @@ interface PageProps {
 export default async function CustomerDueReportPage({ searchParams }: PageProps) {
   // 🛡️ Zero-Trust Guard: Enforce permissions and active status
   const user = await requireAuth({
-    requiredPermission: PERMISSIONS.POS_ACCESS,
+    requiredPermission: PERMISSIONS.REPORTS_CUSTOMER_DUE,
     requireActiveStatus: true,
   });
 
-  const { shopId, activeBranchId, role } = user;
+  const { shopId, activeBranchId } = user;
   const { search, type, aging } = await searchParams;
 
-  // Non-owners are strictly locked to their branch; Owners can view switched branch
-  const targetBranchId = role === "OWNER" ? activeBranchId : activeBranchId;
+  // Always scoped to the active branch (owners switch branch to view another)
+  const targetBranchId = activeBranchId;
 
   const [data, shop, activeBranch] = await Promise.all([
     getCustomerDueReportData(shopId, targetBranchId, search, type, aging),

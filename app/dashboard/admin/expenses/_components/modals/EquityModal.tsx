@@ -5,7 +5,7 @@ import { Select } from "@/components/common/ui/Select";
 import { Textarea } from "@/components/common/ui/Textarea";
 import { IOwnerTransaction } from "@/types";
 
-export default function EquityModal({ isOpen, onClose, onSubmit, loading, equity, currencySymbol }: { isOpen: boolean; onClose: () => void; onSubmit: (e: any) => void; loading: boolean; equity?: IOwnerTransaction | null; currencySymbol: string }) {
+export default function EquityModal({ isOpen, onClose, onSubmit, loading, equity, currencySymbol }: { isOpen: boolean; onClose: () => void; onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void; loading: boolean; equity?: IOwnerTransaction | null; currencySymbol: string }) {
   const isEditing = Boolean(equity);
   return (
     <FormModal isOpen={isOpen} onClose={onClose} onSubmit={onSubmit} title={isEditing ? "Edit Equity Transaction" : "Owner Capital & Drawings (মূলধন ও উত্তোলন)"} description="Record owner capital investments or personal withdrawals." loading={loading} isEditing={isEditing} submitLabel="Save Transaction">

@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { prisma } from "@/lib/prisma";
 import { getProfitLossData } from "@/queries/profit-loss-queries";
 import ProfitLossClient from "./_components/ProfitLossClient";
@@ -10,6 +11,7 @@ interface PageProps {
 
 export default async function ProfitLossPage({ searchParams }: PageProps) {
   const { shopId, activeBranchId: branchId } = await requireAuth({
+    requiredPermission: PERMISSIONS.REPORTS_PL_PROFIT,
     requireActiveStatus: true,
   });
   const filters = await searchParams;

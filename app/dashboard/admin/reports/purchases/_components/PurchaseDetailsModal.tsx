@@ -13,12 +13,11 @@ interface Props {
 }
 
 export default function PurchaseDetailsModal({ chalan, currencySymbol, onClose }: Props) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<IPurchaseItemDetail[]>([]);
 
   useEffect(() => {
     if (!chalan) return;
-    setLoading(true);
     fetchPurchaseChalanItemsAction(chalan.id)
       .then((res) => {
         if (res.success && res.data) setItems(res.data);

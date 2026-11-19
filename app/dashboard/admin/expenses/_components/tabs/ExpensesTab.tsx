@@ -1,6 +1,6 @@
 "use client";
 "use no memo";
-import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { Edit2, Trash2 } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { IExpense } from "@/types";
@@ -26,6 +26,6 @@ export default function ExpensesTab({ expenses, currencySymbol, onEdit, onDelete
       },
     },
   ];
-  const table = useReactTable({ data: expenses, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({ data: expenses, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() });
   return <DataTable table={table} columns={columns} />;
 }

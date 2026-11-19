@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { ShieldCheck, Plus, DollarSign, Wallet, AlertCircle } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { getClosingColumns } from "./Columns";
@@ -41,6 +41,7 @@ export default function ClosingsClient({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 "use no memo";
-import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { Edit2, Trash2 } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { IExpenseCategory } from "@/types";
@@ -25,6 +25,6 @@ export default function ExpenseCategoriesTab({ categories, onEdit, onDelete }: {
       },
     },
   ];
-  const table = useReactTable({ data: categories, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({ data: categories, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() });
   return <DataTable table={table} columns={columns} />;
 }

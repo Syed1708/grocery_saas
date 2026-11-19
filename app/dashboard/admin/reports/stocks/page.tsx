@@ -13,7 +13,7 @@ interface PageProps {
 export default async function StockReportPage({ searchParams }: PageProps) {
   // 🛡️ Zero-Trust Guard: Enforce permissions and active status
   const user = await requireAuth({
-    requiredPermission: PERMISSIONS.POS_ACCESS,
+    requiredPermission: PERMISSIONS.REPORTS_STOCK,
     requireActiveStatus: true,
   });
 

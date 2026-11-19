@@ -1,6 +1,5 @@
 // app/(dashboard)/reports/sales/page.tsx
 
-import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types";
 import { prisma } from "@/lib/prisma";
@@ -15,7 +14,7 @@ interface PageProps {
 export default async function SalesReportPage({ searchParams }: PageProps) {
   // 🛡️ Zero-Trust Guard: Enforce permissions and active status
   const user = await requireAuth({
-    requiredPermission: PERMISSIONS.POS_ACCESS,
+    requiredPermission: PERMISSIONS.REPORTS_SALES,
     requireActiveStatus: true,
   });
 

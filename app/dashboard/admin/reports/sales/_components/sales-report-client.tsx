@@ -126,7 +126,7 @@ export default function SalesReportClient({
     }
   };
 
-  const downloadCSV = (headers: string[], rows: any[][], fileName: string) => {
+  const downloadCSV = (headers: string[], rows: (string | number)[][], fileName: string) => {
     const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");

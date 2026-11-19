@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { Truck, DollarSign, Wallet, CreditCard, Percent } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import PurchaseReportFilters from "./PurchaseReportFilters";
@@ -51,6 +51,7 @@ export default function PurchaseReportClient({
     data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (
