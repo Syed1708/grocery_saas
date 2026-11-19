@@ -3,13 +3,10 @@
 import React, { useState } from "react";
 import {
   MessageCircle,
-  Printer,
   Save,
   X,
   Search,
   Sparkles,
-  AlertCircle,
-  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -18,10 +15,17 @@ import {
 } from "@/app/actions/purchase-order-actions";
 import { ReorderSuggestionItem } from "@/types/purchase-order";
 
+interface SupplierContact {
+  id: string;
+  name: string;
+  companyName?: string | null;
+  phone?: string | null;
+}
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  suppliers: any[];
+  suppliers: SupplierContact[];
   shopName: string;
   currencySymbol?: string;
 }
@@ -37,7 +41,7 @@ export default function SROrderModal({
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<ReorderSuggestionItem[]>([]);
   const [orderItems, setOrderItems] = useState<Record<string, number>>({});
-  const [supplierData, setSupplierData] = useState<any>(null);
+  const [supplierData, setSupplierData] = useState<Omit<SupplierContact, "id"> | null>(null);
   const [search, setSearch] = useState("");
 
   if (!isOpen) return null;

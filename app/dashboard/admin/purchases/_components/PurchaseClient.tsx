@@ -29,7 +29,7 @@ import {
   updateSupplierAction,
   deleteSupplierAction,
 } from "@/app/actions/supplier-actions";
-import { IPurchase } from "@/types/purchase";
+import { IPurchase, ISupplierVoucherDetails } from "@/types/purchase";
 import { IPurchaseOrder, ISupplier } from "@/types";
 import SupplierModal from "./modals/SupplierModal";
 import { IPurchaseReturn } from "@/types/purchase-return";
@@ -46,6 +46,7 @@ interface PurchasesClientProps {
   currencySymbol?: string;
   shopName?: string;
   userRole?: string;
+  initialSupplierId?: string;
 }
 
 
@@ -59,6 +60,7 @@ export default function PurchasesClient({
   currencySymbol = "৳",
   shopName = "Grocery Store",
   userRole = "OWNER",
+  initialSupplierId,
 }: PurchasesClientProps) {
   const [activeTab, setActiveTab] = useState<"invoices" | "suppliers" | "dues" | "returns" | "orders">("invoices");
   const [loading, setLoading] = useState(false);
@@ -67,7 +69,10 @@ export default function PurchasesClient({
   const [viewInvoice, setViewInvoice] = useState<IPurchase | null>(null);
   const [deletePurchaseTarget, setDeletePurchaseTarget] = useState<IPurchase | null>(null);
 
-  const [activeSupplierForPayment, setActiveSupplierForPayment] = useState<ISupplier | null>(null);
+  // Deep-link from reports ("due chalan"): open the payment modal for that supplier
+  const [activeSupplierForPayment, setActiveSupplierForPayment] = useState<ISupplier | null>(
+    () => suppliers.find((s) => s.id === initialSupplierId) ?? null
+  );
   const [activeSupplierForHistory, setActiveSupplierForHistory] = useState<ISupplier | null>(null);
   const [supplierModalOpen, setSupplierModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<ISupplier | null>(null);
@@ -77,7 +82,7 @@ export default function PurchasesClient({
 
   // Print Targets
   const [printChalan, setPrintChalan] = useState<IPurchase | null>(null);
-  const [printVoucher, setPrintVoucher] = useState<any | null>(null);
+  const [printVoucher, setPrintVoucher] = useState<ISupplierVoucherDetails | null>(null);
 
   const [printFormat, setPrintFormat] = useState<"80mm" | "58mm" | "a4">("80mm");
 
@@ -103,7 +108,7 @@ export default function PurchasesClient({
     });
   };
 
-  const handlePrintVoucher = (details: any, format: "80mm" | "58mm" | "a4" = "80mm") => {
+  const handlePrintVoucher = (details: ISupplierVoucherDetails, format: "80mm" | "58mm" | "a4" = "80mm") => {
     setPrintChalan(null);
     setPrintFormat(format);
     setPrintVoucher(details);
@@ -343,7 +348,20 @@ export default function PurchasesClient({
         supplier={activeSupplierForPayment}
         isOpen={Boolean(activeSupplierForPayment)}
         onClose={() => setActiveSupplierForPayment(null)}
-        onSuccess={(payment) => handlePrintVoucher(payment)}
+        onSuccess={(payment) =>
+          handlePrintVoucher({
+            voucherNo: payment.voucherNo,
+            supplierName: payment.supplierName,
+            companyName: payment.companyName,
+            phone: payment.phone,
+            previousDue: payment.previousDue,
+            amountPaid: payment.amountPaid,
+            remainingDue: payment.remainingDue,
+            paymentMethod: payment.paymentMethod,
+            reference: payment.reference,
+            date: payment.paymentDate,
+          })
+        }
         currencySymbol={currencySymbol}
       />
 

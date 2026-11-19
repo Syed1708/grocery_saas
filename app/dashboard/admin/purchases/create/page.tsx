@@ -4,10 +4,15 @@ import { prisma } from "@/lib/prisma";
 import { getSuppliers } from "@/queries/supplier-queries";
 import { getProducts } from "@/queries/product-queries";
 import PurchaseForm from "../_components/form/PurchaseForm";
+import type { IPurchaseFormInitialData } from "@/types/purchase";
 
 interface PageProps {
   // 🛡️ Next.js 16 App Router async Promise
   searchParams: Promise<{ fromPO?: string }>;
+}
+
+function generateChalanNo() {
+  return `CHAL-${Date.now().toString().slice(-6)}`;
 }
 
 export default async function CreatePurchasePage(props: PageProps) {
@@ -17,7 +22,7 @@ export default async function CreatePurchasePage(props: PageProps) {
 
   // 2. 🛡️ Zero-Trust Guard
   const user = await requireAuth({
-    requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+    requiredPermission: PERMISSIONS.PURCHASES_MANAGE,
     requireActiveStatus: true,
   });
 
@@ -57,7 +62,7 @@ export default async function CreatePurchasePage(props: PageProps) {
   ]);
 
   // 4. Format PO items if converted
-  let poInitialData: any = null;
+  let poInitialData: IPurchaseFormInitialData | null = null;
   if (po) {
     poInitialData = {
       fromPOId: po.id,
@@ -77,13 +82,13 @@ export default async function CreatePurchasePage(props: PageProps) {
     };
   }
 
-  const autoChalan = `CHAL-${Date.now().toString().slice(-6)}`;
+  const autoChalan = generateChalanNo();
 
   return (
     <div className="max-w-7xl mx-auto">
       <PurchaseForm
         mode="create"
-        initialData={poInitialData} // 👈 ADDED: Pre-fills form when converted from PO!
+        initialData={poInitialData ?? undefined} // 👈 ADDED: Pre-fills form when converted from PO!
         products={products}
         suppliers={suppliers}
         activeBranchName={activeBranch?.name || "Main Branch"}

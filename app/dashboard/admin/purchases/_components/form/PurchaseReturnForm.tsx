@@ -9,10 +9,11 @@ import { usePurchaseReturnForm } from "./usePurchaseReturnForm";
 import SupplierPicker from "./SupplierPicker";
 import PurchaseReturnItemsTable from "./PurchaseReturnItemsTable";
 import PurchaseReturnSummaryCard from "./PurchaseReturnSummaryCard";
+import type { IPurchaseProductInput, IPurchaseSupplierOption } from "@/types/purchase";
 
 interface Props {
-  products: any[];
-  suppliers: any[];
+  products: IPurchaseProductInput[];
+  suppliers: IPurchaseSupplierOption[];
   activeBranchName: string;
   currencySymbol?: string;
 }

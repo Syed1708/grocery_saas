@@ -4,14 +4,15 @@ import React from "react";
 import { Trash2 } from "lucide-react";
 import { ReturnRow } from "./usePurchaseReturnForm";
 import { ReturnReason } from "@/types/purchase-return";
+import type { IPurchaseProductInput } from "@/types/purchase";
 
 interface Props {
   items: ReturnRow[];
-  products: any[];
+  products: IPurchaseProductInput[];
   onUpdateRow: (rowId: string, patch: Partial<ReturnRow>) => void;
   onRemoveRow: (rowId: string) => void;
   currencySymbol?: string;
-  sanitizeNumber: (val: any) => number;
+  sanitizeNumber: (val: unknown) => number;
 }
 
 export default function PurchaseReturnItemsTable({

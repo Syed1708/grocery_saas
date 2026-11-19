@@ -1,7 +1,6 @@
 "use client";
 
 import Modal from "@/components/common/Modal";
-import { Printer } from "lucide-react";
 import { IPurchase } from "@/types/purchase";
 
 interface Props {

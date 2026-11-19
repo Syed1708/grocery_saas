@@ -7,12 +7,13 @@ import { recordSupplierPaymentAction } from "@/app/actions/supplier-actions";
 import { ISupplier } from "@/types";
 import { Input } from "@/components/common/ui/Input";
 import { Select } from "@/components/common/ui/Select";
+import type { ISupplierPaymentResult } from "@/types/purchase";
 
 interface Props {
   supplier: ISupplier | null;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (paymentData: any) => void;
+  onSuccess: (paymentData: ISupplierPaymentResult) => void;
   currencySymbol?: string;
 }
 

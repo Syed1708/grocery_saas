@@ -7,7 +7,7 @@ import { getSuppliers } from "@/queries/supplier-queries";
 export default async function CreatePurchaseReturnPage() {
   // 🛡️ Zero-Trust Guard
   const user = await requireAuth({
-    requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+    requiredPermission: PERMISSIONS.PURCHASES_MANAGE,
     requireActiveStatus: true,
   });
 
@@ -53,7 +53,7 @@ export default async function CreatePurchaseReturnPage() {
     <div className="max-w-7xl mx-auto">
       <PurchaseReturnForm
         products={formattedProducts}
-        suppliers={suppliers as any}
+        suppliers={suppliers}
         activeBranchName={branch?.name || "Main Branch"}
         currencySymbol={shop?.currencySymbol || "৳"}
       />

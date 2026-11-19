@@ -5,12 +5,13 @@ import Modal from "@/components/common/Modal";
 import { Printer, Loader2, Calendar } from "lucide-react";
 import { getSupplierPaymentHistoryAction } from "@/app/actions/supplier-actions";
 import { ISupplier } from "@/types";
+import type { ISupplierPaymentHistoryRow } from "@/types/purchase";
 
 interface Props {
   supplier: ISupplier | null;
   isOpen: boolean;
   onClose: () => void;
-  onPrintVoucher: (p: any) => void;
+  onPrintVoucher: (p: ISupplierPaymentHistoryRow) => void;
   currencySymbol?: string;
 }
 
@@ -21,12 +22,11 @@ export default function SupplierHistoryModal({
   onPrintVoucher,
   currencySymbol = "৳",
 }: Props) {
-  const [payments, setPayments] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [payments, setPayments] = useState<ISupplierPaymentHistoryRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (supplier?.id && isOpen) {
-      setLoading(true);
       getSupplierPaymentHistoryAction(supplier.id).then((res) => {
         setLoading(false);
         if (res.success && res.data) setPayments(res.data);

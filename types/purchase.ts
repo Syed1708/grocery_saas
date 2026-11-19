@@ -125,3 +125,113 @@ export interface IPurchaseFilterParams {
   paymentStatus?: string;
   search?: string;
 }
+
+export interface ISupplierVoucherDetails {
+  voucherNo: string;
+  supplierName?: string | null;
+  companyName?: string | null;
+  phone?: string | null;
+  previousDue?: number;
+  amountPaid?: number;
+  remainingDue?: number;
+  paymentMethod?: string;
+  reference?: string | null;
+  date?: Date | string;
+}
+
+export interface ISupplierPaymentResult {
+  success: true;
+  voucherNo: string;
+  supplierName: string;
+  companyName: string | null;
+  phone: string | null;
+  previousDue: number;
+  amountPaid: number;
+  remainingDue: number;
+  paymentMethod: string;
+  reference?: string | null;
+  paymentDate: Date | string;
+}
+
+export type RecordSupplierPaymentActionResult =
+  | ISupplierPaymentResult
+  | { success: false; error: string };
+
+export interface ISupplierPaymentHistoryRow {
+  id: string;
+  voucherNo: string;
+  amount: number;
+  paymentMethod: string;
+  reference: string | null;
+  note: string | null;
+  createdAt: Date | string;
+}
+
+// ==========================================
+// FORM-LAYER TYPES
+// ==========================================
+export interface IPurchaseProductInput {
+  id: string;
+  name: string;
+  nameEn?: string | null;
+  barcode?: string | null;
+  sku?: string | null;
+  brandName?: string | null;
+  brand?: { name?: string | null } | null;
+  unitCode?: string | null;
+  unit?: { shortCode?: string | null } | null;
+  stockQuantity?: number;
+  stock?: number;
+  costPrice?: number;
+  purchasePrice?: number;
+  sellingPrice?: number;
+  supplierId?: string | null;
+}
+
+export interface IPurchaseSupplierOption {
+  id: string;
+  name: string;
+  companyName?: string | null;
+  phone?: string | null;
+  currentDue?: number;
+}
+
+export interface IPurchaseInitialItem {
+  id?: string;
+  productId: string;
+  productName?: string | null;
+  name?: string | null;
+  product?: {
+    name?: string | null;
+    barcode?: string | null;
+    unit?: { shortCode?: string | null } | null;
+    stocks?: { quantity?: number | string }[];
+  } | null;
+  barcode?: string | null;
+  unitCode?: string | null;
+  unit?: string | null;
+  stock?: number | string;
+  billedQuantity?: number | string;
+  damagedQuantity?: number | string;
+  missingQuantity?: number | string;
+  quantity: number | string;
+  unitCost: number | string;
+  commission?: number | string;
+}
+
+export interface IPurchaseFormInitialData {
+  id?: string;
+  chalanNo?: string;
+  chalanImageUrl?: string | null;
+  fromPOId?: string | null;
+  supplierId?: string;
+  previousDue?: number | null;
+  purchaseDate?: string | Date | null;
+  paymentMethod?: string;
+  notes?: string | null;
+  discount?: number | string;
+  transportCost?: number | string;
+  vatPercent?: number | string;
+  paidAmount?: number | string;
+  items?: IPurchaseInitialItem[];
+}

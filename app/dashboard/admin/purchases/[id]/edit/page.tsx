@@ -15,7 +15,7 @@ export default async function EditPurchasePage({
 }) {
   // 1. Zero-Trust Guard: Enforce permissions and active status
   const user = await requireAuth({
-    requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+    requiredPermission: PERMISSIONS.PURCHASES_MANAGE,
     requireActiveStatus: true,
   });
 
@@ -97,8 +97,8 @@ export default async function EditPurchasePage({
       <PurchaseForm
         mode="edit"
         initialData={purchase}
-        products={products as any}
-        suppliers={suppliers as any}
+        products={products}
+        suppliers={suppliers}
         activeBranchName={rawPurchase.branch?.name || activeBranch?.name || "Main Branch"}
         currencySymbol={shop?.currencySymbol || "৳"}
       />

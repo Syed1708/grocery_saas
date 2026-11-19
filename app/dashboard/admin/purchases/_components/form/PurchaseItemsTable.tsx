@@ -3,15 +3,16 @@
 import React, { useState } from "react";
 import { Trash2, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { PurchaseRow } from "./usePurchaseForm";
+import type { IPurchaseProductInput } from "@/types/purchase";
 
 interface Props {
   items: PurchaseRow[];
-  products: any[];
-  onUpdateRow: (rowId: string, field: keyof PurchaseRow, value: any) => void;
+  products: IPurchaseProductInput[];
+  onUpdateRow: (rowId: string, field: keyof PurchaseRow, value: string | number) => void;
   onRemoveRow: (rowId: string) => void;
   highlightedRowId: string | null;
   currencySymbol?: string;
-  sanitizeNumber: (v: any) => number;
+  sanitizeNumber: (v: unknown) => number;
 }
 
 export default function PurchaseItemsTable({

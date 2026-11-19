@@ -10,12 +10,17 @@ import SupplierPicker from "./SupplierPicker";
 import PurchaseItemsTable from "./PurchaseItemsTable";
 import PurchaseSummaryCard from "./PurchaseSummaryCard";
 import ChalanPhotoUploader from "./ChalanPhotoUploader";
+import type {
+  IPurchaseFormInitialData,
+  IPurchaseProductInput,
+  IPurchaseSupplierOption,
+} from "@/types/purchase";
 
 interface Props {
   mode?: "create" | "edit";
-  initialData?: any;
-  products: any[];
-  suppliers: any[];
+  initialData?: IPurchaseFormInitialData;
+  products: IPurchaseProductInput[];
+  suppliers: IPurchaseSupplierOption[];
   activeBranchName: string;
   currencySymbol?: string;
   autoChalan?: string;

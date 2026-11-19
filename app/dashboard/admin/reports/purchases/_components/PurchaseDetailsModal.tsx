@@ -60,7 +60,7 @@ export default function PurchaseDetailsModal({ chalan, currencySymbol, onClose }
             <Loader2 className="animate-spin" size={16} /> চালানের মালামাল লোড হচ্ছে...
           </div>
         ) : (
-          <div className="max-h-[350px] overflow-y-auto border border-neutral-200 dark:border-neutral-800 rounded-xl">
+          <div className="max-h-87.5 overflow-y-auto border border-neutral-200 dark:border-neutral-800 rounded-xl">
             <table className="w-full text-left border-collapse text-xs">
               <thead className="bg-neutral-100 dark:bg-neutral-800 sticky top-0 font-semibold border-b border-neutral-200 dark:border-neutral-700 text-[11px]">
                 <tr>

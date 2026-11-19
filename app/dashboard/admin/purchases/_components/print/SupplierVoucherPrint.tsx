@@ -1,9 +1,14 @@
 "use client";
 
 import { PrintFormat } from "./PurchaseChalanPrint";
+import type { ISupplierVoucherDetails } from "@/types/purchase";
+
+function formatVoucherDate(value?: Date | string) {
+  return new Date(value ?? Date.now()).toLocaleDateString();
+}
 
 interface Props {
-  details: any | null;
+  details: ISupplierVoucherDetails | null;
   shopName: string;
   shopAddress?: string;
   shopPhone?: string;
@@ -87,7 +92,7 @@ export default function SupplierVoucherPrint({
                 </span>
                 <p className="font-mono text-sm font-bold pt-1">ভাউচার নং: #{details.voucherNo}</p>
                 <p className="text-xs text-neutral-600 font-mono">
-                  তারিখ: {new Date(details.date || Date.now()).toLocaleDateString()}
+                  তারিখ: {formatVoucherDate(details.date)}
                 </p>
               </div>
             </div>
@@ -157,11 +162,11 @@ export default function SupplierVoucherPrint({
             <div className="py-1 border-b border-black text-[9px] space-y-0.5">
               <div className="flex justify-between">
                 <span>ভাউচার নং: #{details.voucherNo}</span>
-                <span>{new Date(details.date || Date.now()).toLocaleDateString()}</span>
+                <span>{formatVoucherDate(details.date)}</span>
               </div>
               <div className="flex justify-between font-bold">
                 <span>সাপ্লায়ার:</span>
-                <span className="truncate max-w-[130px]">{details.companyName || details.supplierName}</span>
+                <span className="truncate max-w-32.5">{details.companyName || details.supplierName}</span>
               </div>
             </div>
 

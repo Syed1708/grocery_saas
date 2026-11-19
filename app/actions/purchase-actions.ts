@@ -16,7 +16,7 @@ import { deleteUploadedFile } from "@/lib/file-storage";
 export async function createPurchaseAction(payload: CreatePurchasePayload) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.PURCHASES_MANAGE,
       requireActiveStatus: true,
     });
 
@@ -250,7 +250,7 @@ if (fromPOId) {
 export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.PURCHASES_MANAGE,
       requireActiveStatus: true,
     });
 
@@ -422,7 +422,7 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
 export async function deletePurchaseAction(purchaseId: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.PURCHASES_MANAGE,
       requireActiveStatus: true,
     });
 

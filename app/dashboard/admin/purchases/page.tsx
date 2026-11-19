@@ -9,14 +9,19 @@ import PurchasesClient from "./_components/PurchaseClient";
 import { getPurchaseReturns } from "@/queries/purchase-return";
 import { IPurchaseReturn } from "@/types/purchase-return";
 
-export default async function PurchasesPage() {
+export default async function PurchasesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ supplierId?: string; purchaseId?: string }>;
+}) {
   // 🛡️ Zero-Trust Guard: Enforce permissions and active status
   const user = await requireAuth({
-    requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+    requiredPermission: PERMISSIONS.PURCHASES_VIEW,
     requireActiveStatus: true,
   });
 
   const { shopId, activeBranchId, role } = user;
+  const { supplierId } = await searchParams;
 
   // Parallel server queries (Strictly scoped to active branch)
   const [purchases, suppliers, returns, orders, shop] = await Promise.all([
@@ -41,6 +46,7 @@ export default async function PurchasesPage() {
         currencySymbol={shop?.currencySymbol || "৳"}
         shopName={shop?.name || "Grocery Store"}
         userRole={role}
+        initialSupplierId={supplierId}
       />
     </div>
   );

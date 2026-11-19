@@ -2,11 +2,12 @@
 
 import { useMemo } from "react";
 import { Search } from "lucide-react";
+import type { IPurchaseSupplierOption } from "@/types/purchase";
 
 interface Props {
-  suppliers: any[];
+  suppliers: IPurchaseSupplierOption[];
   selectedSupplierId: string;
-  onSelectSupplier: (s: any) => void;
+  onSelectSupplier: (s: IPurchaseSupplierOption) => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
   showDropdown: boolean;

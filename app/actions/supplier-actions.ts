@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types";
+import type { RecordSupplierPaymentActionResult } from "@/types/purchase";
 import { supplierSchema } from "@/lib/validations";
 import { getErrorMessage } from "@/lib/utils";
 
@@ -211,7 +212,7 @@ export async function recordSupplierPaymentAction(
   payloadOrId: RecordSupplierPaymentPayload | string,
   amountArg?: number,
   paymentMethodArg: string = "cash"
-) {
+): Promise<RecordSupplierPaymentActionResult> {
   try {
     const user = await requireAuth({
       requiredPermission: PERMISSIONS.SUPPLIERS_PAY,

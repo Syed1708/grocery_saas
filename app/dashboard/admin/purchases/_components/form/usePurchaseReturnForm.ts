@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ReturnReason, ReturnSettlementType } from "@/types/purchase-return";
 import { createPurchaseReturnAction } from "@/app/actions/purchase-return-actions";
+import type { IPurchaseProductInput, IPurchaseSupplierOption } from "@/types/purchase";
 
 export interface ReturnRow {
   rowId: string;
@@ -18,8 +19,8 @@ export interface ReturnRow {
 }
 
 interface Props {
-  products: any[];
-  suppliers: any[];
+  products: IPurchaseProductInput[];
+  suppliers: IPurchaseSupplierOption[];
   onFocusBarcode?: () => void;
 }
 
@@ -86,12 +87,12 @@ export function usePurchaseReturnForm({ products = [], suppliers = [], onFocusBa
 
   const finalSupplierDue = Math.max(0, supplierPreviousDue - dueDeduction);
 
-  const sanitizeNumber = (val: any) => {
-    const num = parseFloat(val);
+  const sanitizeNumber = (val: unknown) => {
+    const num = parseFloat(String(val));
     return isNaN(num) ? 0 : num;
   };
 
-  const addOrIncrementProduct = (product: any) => {
+  const addOrIncrementProduct = (product: IPurchaseProductInput) => {
     const cost = Number(product.costPrice ?? product.purchasePrice ?? 0);
     const stock = Number(product.stockQuantity ?? product.stock ?? 0);
 
@@ -176,7 +177,7 @@ export function usePurchaseReturnForm({ products = [], suppliers = [], onFocusBa
     }
   };
 
-  const handleSelectSupplier = (s: any) => {
+  const handleSelectSupplier = (s: IPurchaseSupplierOption) => {
     setSelectedSupplierId(s.id);
     setShowSupplierDropdown(false);
   };

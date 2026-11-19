@@ -8,6 +8,12 @@ import {
   createPurchaseAction,
   updatePurchaseAction,
 } from "@/app/actions/purchase-actions";
+import type {
+  CreatePurchasePayload,
+  IPurchaseFormInitialData,
+  IPurchaseProductInput,
+  IPurchaseSupplierOption,
+} from "@/types/purchase";
 
 export interface PurchaseRow {
   rowId: string;
@@ -33,9 +39,9 @@ export function usePurchaseForm({
   onFocusBarcode,
 }: {
   mode?: "create" | "edit";
-  initialData?: any;
-  products: any[];
-  suppliers: any[];
+  initialData?: IPurchaseFormInitialData;
+  products: IPurchaseProductInput[];
+  suppliers: IPurchaseSupplierOption[];
   autoChalan?: string;
   onFocusBarcode?: () => void;
 }) {
@@ -183,7 +189,7 @@ export function usePurchaseForm({
   // Initial Rows with Discrepancy Support
   const [items, setItems] = useState<PurchaseRow[]>(() => {
     if (initialData?.items && initialData.items.length > 0) {
-      return initialData.items.map((it: any) => {
+      return initialData.items.map((it) => {
         const billed = Number(it.billedQuantity ?? it.quantity);
         const damaged = Number(it.damagedQuantity || 0);
         const missing = Number(it.missingQuantity || 0);
@@ -192,10 +198,10 @@ export function usePurchaseForm({
         return {
           rowId: `row-${it.id || it.productId}`,
           productId: it.productId,
-          name: it.productName || it.name || it.product?.name,
+          name: it.productName || it.name || it.product?.name || "",
           barcode: it.barcode || it.product?.barcode || "",
           unit: it.unitCode || it.unit || it.product?.unit?.shortCode || "pcs",
-          stock: it.stock || it.product?.stocks?.[0]?.quantity || 0,
+          stock: Number(it.stock ?? it.product?.stocks?.[0]?.quantity ?? 0),
           quantity: netQty,
           billedQuantity: billed,
           damagedQuantity: damaged,
@@ -241,13 +247,13 @@ export function usePurchaseForm({
     Number(initialData?.paidAmount || 0)
   );
 
-  const sanitizeNumber = (val: any) => Math.max(0, Number(val) || 0);
+  const sanitizeNumber = (val: unknown) => Math.max(0, Number(val) || 0);
 
   useEffect(() => {
     onFocusBarcode?.();
   }, [onFocusBarcode]);
 
-  function handleSelectSupplier(supplier: any) {
+  function handleSelectSupplier(supplier: IPurchaseSupplierOption) {
     setSelectedSupplierId(supplier.id);
     setSupplierSearchQuery(
       `${supplier.name} (${supplier.phone || supplier.companyName || "Vendor"})`
@@ -276,7 +282,7 @@ export function usePurchaseForm({
     ]);
   }
 
-  function addOrIncrementProduct(product: any) {
+  function addOrIncrementProduct(product: IPurchaseProductInput) {
     const existingIndex = items.findIndex(
       (i) => i.productId && i.productId === product.id
     );
@@ -305,7 +311,7 @@ export function usePurchaseForm({
       const rowData = {
         productId: product.id,
         name: product.name,
-        barcode: product.barcode,
+        barcode: product.barcode || "",
         unit: product.unitCode || product.unit?.shortCode || "pcs",
         stock: product.stockQuantity || product.stock || 0,
         quantity: 1,
@@ -337,7 +343,7 @@ export function usePurchaseForm({
   }
 
   // Reactive row update with auto-calculated net good quantity
-  function updateRow(rowId: string, field: keyof PurchaseRow, value: any) {
+  function updateRow(rowId: string, field: keyof PurchaseRow, value: string | number) {
     setItems((prev) =>
       prev.map((r) => {
         if (r.rowId !== rowId) return r;
@@ -358,14 +364,14 @@ export function usePurchaseForm({
             ...r,
             productId: selected.id,
             name: selected.name,
-            barcode: selected.barcode,
+            barcode: selected.barcode || "",
             unit: selected.unitCode || selected.unit?.shortCode || "pcs",
             stock: selected.stockQuantity || selected.stock || 0,
             unitCost: Number(selected.costPrice ?? selected.purchasePrice ?? 0),
           };
         }
 
-        const updated = { ...r, [field]: value };
+        const updated = { ...r, [field]: value } as PurchaseRow;
 
         // Real-time calculation: Net Good Stock = Billed - Damaged - Missing
         if (
@@ -449,10 +455,13 @@ export function usePurchaseForm({
     if (validItems.length === 0)
       return toast.error("অন্তত একটি পণ্য সিলেক্ট করুন।");
 
+    if (mode === "edit" && !initialData?.id) {
+      return toast.error("সম্পাদনার জন্য চালান আইডি পাওয়া যায়নি।");
+    }
+
     setLoading(true);
 
-    const payload = {
-      ...(mode === "edit" ? { id: initialData.id } : {}),
+    const payload: CreatePurchasePayload = {
       supplierId: selectedSupplierId,
       chalanNo: chalanNo.trim(),
       fromPOId,
@@ -477,7 +486,7 @@ export function usePurchaseForm({
 
     const res =
       mode === "edit"
-        ? await updatePurchaseAction(payload as any)
+        ? await updatePurchaseAction({ ...payload, id: initialData?.id ?? "" })
         : await createPurchaseAction(payload);
     setLoading(false);
 
