@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import {
   getExpenseCategories,
   getExpenses,
@@ -11,6 +12,7 @@ import { prisma } from "@/lib/prisma";
 
 export default async function ExpensesPage() {
   const { shopId, activeBranchId: branchId } = await requireAuth({
+    requiredPermission: PERMISSIONS.FINANCE_EXPENSES,
     requireActiveStatus: true,
   });
 

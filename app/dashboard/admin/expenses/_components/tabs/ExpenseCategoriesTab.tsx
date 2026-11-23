@@ -1,9 +1,9 @@
 "use client";
 "use no memo";
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
-import { Edit2, Trash2 } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
-import { IExpenseCategory } from "@/types";
+import { TableActions } from "@/components/common/ui/table/TableHelpers";
+import { IExpenseCategory, PERMISSIONS } from "@/types";
 
 export default function ExpenseCategoriesTab({ categories, onEdit, onDelete }: { categories: IExpenseCategory[]; onEdit: (c: IExpenseCategory) => void; onDelete: (c: IExpenseCategory) => void }) {
   const columns: ColumnDef<IExpenseCategory>[] = [
@@ -14,15 +14,15 @@ export default function ExpenseCategoriesTab({ categories, onEdit, onDelete }: {
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-        return (
-          <div className="flex items-center gap-1.5">
-            <button onClick={() => onEdit(item)} className="p-1.5 text-neutral-500 hover:text-blue-600 rounded-lg transition cursor-pointer" title="Edit"><Edit2 size={15} /></button>
-            <button onClick={() => onDelete(item)} disabled={(item._count?.expenses || 0) > 0} className="p-1.5 text-neutral-500 hover:text-red-600 disabled:opacity-30 rounded-lg transition cursor-pointer" title="Delete"><Trash2 size={15} /></button>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableActions
+          onEdit={() => onEdit(row.original)}
+          editPermission={PERMISSIONS.FINANCE_EXPENSES}
+          onDelete={() => onDelete(row.original)}
+          canDelete={(row.original._count?.expenses || 0) === 0}
+          deletePermission={PERMISSIONS.FINANCE_EXPENSES}
+        />
+      ),
     },
   ];
   const table = useReactTable({ data: categories, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() });

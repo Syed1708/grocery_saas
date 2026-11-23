@@ -11,6 +11,13 @@ import {
   ownerTransactionSchema,
 } from "@/lib/validations";
 import { PERMISSIONS } from "@/types";
+import { getErrorMessage } from "@/lib/utils";
+
+const FINANCE_REVALIDATE_PATHS = ["/dashboard/admin/expenses"];
+
+function revalidateFinance() {
+  for (const path of FINANCE_REVALIDATE_PATHS) revalidatePath(path);
+}
 
 // ==========================================
 // 1. EXPENSE CATEGORIES (TYPES) CRUD
@@ -19,7 +26,7 @@ import { PERMISSIONS } from "@/types";
 export async function createExpenseCategoryAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_EXPENSES,
       requireActiveStatus: true,
     });
 
@@ -32,35 +39,35 @@ export async function createExpenseCategoryAction(formData: FormData) {
       status: formData.get("status")?.toString() || "active",
     });
 
-    if (!validated.success)
+    if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
+    }
     const data = validated.data;
 
     if (id) {
-      await prisma.expenseCategory.update({
+      const existing = await prisma.expenseCategory.findFirst({
         where: { id, shopId: user.shopId },
-        data,
+        select: { id: true },
       });
+      if (!existing) return { success: false, error: "Category not found." };
+      await prisma.expenseCategory.update({ where: { id }, data });
     } else {
       await prisma.expenseCategory.create({
         data: { ...data, shopId: user.shopId },
       });
     }
 
-    revalidatePath("/dashboard/admin/expenses");
+    revalidateFinance();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to save expense category.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to save expense category.") };
   }
 }
 
 export async function deleteExpenseCategoryAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_EXPENSES,
       requireActiveStatus: true,
     });
     const cat = await prisma.expenseCategory.findFirst({
@@ -76,24 +83,21 @@ export async function deleteExpenseCategoryAction(id: string) {
     }
 
     await prisma.expenseCategory.delete({ where: { id } });
-    revalidatePath("/dashboard/admin/expenses");
+    revalidateFinance();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to delete category.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to delete category.") };
   }
 }
 
 // ==========================================
-// 2. DAILY EXPENSES CRUD
+// 2. DAILY EXPENSES CRUD (cash-drawer reconciled)
 // ==========================================
 
 export async function createOrUpdateExpenseAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_EXPENSES,
       requireActiveStatus: true,
     });
     const id = formData.get("id")?.toString();
@@ -108,14 +112,22 @@ export async function createOrUpdateExpenseAction(formData: FormData) {
       note: formData.get("note")?.toString().trim() || null,
     });
 
-    if (!validated.success)
+    if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
+    }
     const data = validated.data;
 
-    await prisma.$transaction(async (tx) => {
-      if (id) {
+    if (id) {
+      const existing = await prisma.expense.findFirst({
+        where: { id, shopId: user.shopId, branchId: user.activeBranchId },
+      });
+      if (!existing) return { success: false, error: "Expense not found in this branch." };
+
+      const delta = Number(data.amount) - Number(existing.amount);
+
+      await prisma.$transaction(async (tx) => {
         await tx.expense.update({
-          where: { id, shopId: user.shopId },
+          where: { id },
           data: {
             categoryId: data.categoryId,
             voucherNo: data.voucherNo,
@@ -126,7 +138,32 @@ export async function createOrUpdateExpenseAction(formData: FormData) {
             note: data.note,
           },
         });
-      } else {
+
+        if (delta !== 0) {
+          const cashAcc = await tx.account.findFirst({
+            where: { shopId: user.shopId, branchId: user.activeBranchId, type: "CASH" },
+          });
+          if (cashAcc) {
+            const newBal = Number(cashAcc.currentBalance) - delta;
+            await tx.account.update({ where: { id: cashAcc.id }, data: { currentBalance: newBal } });
+            await tx.accountTransaction.create({
+              data: {
+                type: "EXPENSE",
+                amount: Math.abs(delta),
+                balanceAfter: newBal,
+                transactionDate: new Date(data.expenseDate),
+                voucherNo: data.voucherNo,
+                note: `Expense adjustment: ${data.note || data.voucherNo}`,
+                branchId: user.activeBranchId,
+                accountId: cashAcc.id,
+                userId: user.userId,
+              },
+            });
+          }
+        }
+      });
+    } else {
+      await prisma.$transaction(async (tx) => {
         await tx.expense.create({
           data: {
             categoryId: data.categoryId,
@@ -136,26 +173,18 @@ export async function createOrUpdateExpenseAction(formData: FormData) {
             paymentMethod: data.paymentMethod,
             reference: data.reference,
             note: data.note,
-            branchId: user.activeBranchId!,
+            branchId: user.activeBranchId,
             userId: user.userId,
             shopId: user.shopId,
           },
         });
 
-        // Deduct from cash drawer
         const cashAcc = await tx.account.findFirst({
-          where: {
-            shopId: user.shopId,
-            branchId: user.activeBranchId!,
-            type: "CASH",
-          },
+          where: { shopId: user.shopId, branchId: user.activeBranchId, type: "CASH" },
         });
         if (cashAcc) {
           const newBal = Number(cashAcc.currentBalance) - data.amount;
-          await tx.account.update({
-            where: { id: cashAcc.id },
-            data: { currentBalance: newBal },
-          });
+          await tx.account.update({ where: { id: cashAcc.id }, data: { currentBalance: newBal } });
           await tx.accountTransaction.create({
             data: {
               type: "EXPENSE",
@@ -164,55 +193,71 @@ export async function createOrUpdateExpenseAction(formData: FormData) {
               transactionDate: new Date(data.expenseDate),
               voucherNo: data.voucherNo,
               note: `Expense: ${data.note || data.voucherNo}`,
-              branchId: user.activeBranchId!,
+              branchId: user.activeBranchId,
               accountId: cashAcc.id,
               userId: user.userId,
             },
           });
         }
-      }
-    });
+      });
+    }
 
-    revalidatePath("/dashboard/admin/expenses");
+    revalidateFinance();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to save expense.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to save expense.") };
   }
 }
 
 export async function deleteExpenseAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_EXPENSES,
       requireActiveStatus: true,
     });
     const expense = await prisma.expense.findFirst({
-      where: { id, shopId: user.shopId },
+      where: { id, shopId: user.shopId, branchId: user.activeBranchId },
     });
     if (!expense) return { success: false, error: "Expense not found." };
 
-    await prisma.expense.delete({ where: { id } });
-    revalidatePath("/dashboard/admin/expenses");
+    await prisma.$transaction(async (tx) => {
+      const cashAcc = await tx.account.findFirst({
+        where: { shopId: user.shopId, branchId: user.activeBranchId, type: "CASH" },
+      });
+      if (cashAcc) {
+        const newBal = Number(cashAcc.currentBalance) + Number(expense.amount);
+        await tx.account.update({ where: { id: cashAcc.id }, data: { currentBalance: newBal } });
+        await tx.accountTransaction.create({
+          data: {
+            type: "EXPENSE",
+            amount: Number(expense.amount),
+            balanceAfter: newBal,
+            voucherNo: expense.voucherNo,
+            note: "Expense reversal (deleted)",
+            branchId: user.activeBranchId,
+            accountId: cashAcc.id,
+            userId: user.userId,
+          },
+        });
+      }
+      await tx.expense.delete({ where: { id } });
+    });
+
+    revalidateFinance();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to delete expense.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to delete expense.") };
   }
 }
 
 // ==========================================
-// 3. OTHER INCOMES CRUD
+// 3. OTHER INCOMES CRUD (cash-drawer reconciled)
 // ==========================================
 
 export async function createOrUpdateOtherIncomeAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_EXPENSES,
       requireActiveStatus: true,
     });
 
@@ -228,14 +273,22 @@ export async function createOrUpdateOtherIncomeAction(formData: FormData) {
       note: formData.get("note")?.toString().trim() || null,
     });
 
-    if (!validated.success)
+    if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
+    }
     const data = validated.data;
 
-    await prisma.$transaction(async (tx) => {
-      if (id) {
+    if (id) {
+      const existing = await prisma.otherIncome.findFirst({
+        where: { id, shopId: user.shopId, branchId: user.activeBranchId },
+      });
+      if (!existing) return { success: false, error: "Income record not found in this branch." };
+
+      const delta = Number(data.amount) - Number(existing.amount);
+
+      await prisma.$transaction(async (tx) => {
         await tx.otherIncome.update({
-          where: { id, shopId: user.shopId },
+          where: { id },
           data: {
             incomeSource: data.incomeSource,
             receiptNo: data.receiptNo,
@@ -246,7 +299,32 @@ export async function createOrUpdateOtherIncomeAction(formData: FormData) {
             note: data.note,
           },
         });
-      } else {
+
+        if (delta !== 0) {
+          const cashAcc = await tx.account.findFirst({
+            where: { shopId: user.shopId, branchId: user.activeBranchId, type: "CASH" },
+          });
+          if (cashAcc) {
+            const newBal = Number(cashAcc.currentBalance) + delta;
+            await tx.account.update({ where: { id: cashAcc.id }, data: { currentBalance: newBal } });
+            await tx.accountTransaction.create({
+              data: {
+                type: "INCOME",
+                amount: Math.abs(delta),
+                balanceAfter: newBal,
+                transactionDate: new Date(data.incomeDate),
+                voucherNo: data.receiptNo,
+                note: `Income adjustment: ${data.note || data.receiptNo}`,
+                branchId: user.activeBranchId,
+                accountId: cashAcc.id,
+                userId: user.userId,
+              },
+            });
+          }
+        }
+      });
+    } else {
+      await prisma.$transaction(async (tx) => {
         await tx.otherIncome.create({
           data: {
             incomeSource: data.incomeSource,
@@ -256,61 +334,91 @@ export async function createOrUpdateOtherIncomeAction(formData: FormData) {
             paymentMethod: data.paymentMethod,
             reference: data.reference,
             note: data.note,
-            branchId: user.activeBranchId!,
+            branchId: user.activeBranchId,
             userId: user.userId,
             shopId: user.shopId,
           },
         });
 
         const cashAcc = await tx.account.findFirst({
-          where: {
-            shopId: user.shopId,
-            branchId: user.activeBranchId!,
-            type: "CASH",
-          },
+          where: { shopId: user.shopId, branchId: user.activeBranchId, type: "CASH" },
         });
         if (cashAcc) {
           const newBal = Number(cashAcc.currentBalance) + data.amount;
-          await tx.account.update({
-            where: { id: cashAcc.id },
-            data: { currentBalance: newBal },
+          await tx.account.update({ where: { id: cashAcc.id }, data: { currentBalance: newBal } });
+          await tx.accountTransaction.create({
+            data: {
+              type: "INCOME",
+              amount: data.amount,
+              balanceAfter: newBal,
+              transactionDate: new Date(data.incomeDate),
+              voucherNo: data.receiptNo,
+              note: `Income: ${data.incomeSource}`,
+              branchId: user.activeBranchId,
+              accountId: cashAcc.id,
+              userId: user.userId,
+            },
           });
         }
-      }
-    });
+      });
+    }
 
-    revalidatePath("/dashboard/admin/expenses");
+    revalidateFinance();
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to save income." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to save income.") };
   }
 }
 
 export async function deleteOtherIncomeAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_EXPENSES,
       requireActiveStatus: true,
     });
-    await prisma.otherIncome.delete({ where: { id, shopId: user.shopId } });
-    revalidatePath("/dashboard/admin/expenses");
+    const income = await prisma.otherIncome.findFirst({
+      where: { id, shopId: user.shopId, branchId: user.activeBranchId },
+    });
+    if (!income) return { success: false, error: "Income record not found." };
+
+    await prisma.$transaction(async (tx) => {
+      const cashAcc = await tx.account.findFirst({
+        where: { shopId: user.shopId, branchId: user.activeBranchId, type: "CASH" },
+      });
+      if (cashAcc) {
+        const newBal = Number(cashAcc.currentBalance) - Number(income.amount);
+        await tx.account.update({ where: { id: cashAcc.id }, data: { currentBalance: newBal } });
+        await tx.accountTransaction.create({
+          data: {
+            type: "INCOME",
+            amount: Number(income.amount),
+            balanceAfter: newBal,
+            voucherNo: income.receiptNo,
+            note: "Income reversal (deleted)",
+            branchId: user.activeBranchId,
+            accountId: cashAcc.id,
+            userId: user.userId,
+          },
+        });
+      }
+      await tx.otherIncome.delete({ where: { id } });
+    });
+
+    revalidateFinance();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to delete income.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to delete income.") };
   }
 }
 
 // ==========================================
-// 4. COMPANY ASSETS CRUD
+// 4. COMPANY ASSETS CRUD (branch + global assets)
 // ==========================================
 
 export async function createOrUpdateCompanyAssetAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_EXPENSES,
       requireActiveStatus: true,
     });
     const id = formData.get("id")?.toString();
@@ -326,13 +434,24 @@ export async function createOrUpdateCompanyAssetAction(formData: FormData) {
       notes: formData.get("notes")?.toString().trim() || null,
     });
 
-    if (!validated.success)
+    if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
+    }
     const data = validated.data;
 
     if (id) {
+      const existing = await prisma.companyAsset.findFirst({
+        where: {
+          id,
+          shopId: user.shopId,
+          OR: [{ branchId: user.activeBranchId }, { branchId: null }],
+        },
+        select: { id: true },
+      });
+      if (!existing) return { success: false, error: "Asset not found in this branch." };
+
       await prisma.companyAsset.update({
-        where: { id, shopId: user.shopId },
+        where: { id },
         data: { ...data, purchaseDate: new Date(data.purchaseDate) },
       });
     } else {
@@ -346,27 +465,34 @@ export async function createOrUpdateCompanyAssetAction(formData: FormData) {
       });
     }
 
-    revalidatePath("/dashboard/admin/expenses");
+    revalidateFinance();
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to save asset." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to save asset.") };
   }
 }
 
 export async function deleteCompanyAssetAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_EXPENSES,
       requireActiveStatus: true,
     });
-    await prisma.companyAsset.delete({ where: { id, shopId: user.shopId } });
-    revalidatePath("/dashboard/admin/expenses");
+    const asset = await prisma.companyAsset.findFirst({
+      where: {
+        id,
+        shopId: user.shopId,
+        OR: [{ branchId: user.activeBranchId }, { branchId: null }],
+      },
+      select: { id: true },
+    });
+    if (!asset) return { success: false, error: "Asset not found." };
+
+    await prisma.companyAsset.delete({ where: { id } });
+    revalidateFinance();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to delete asset.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to delete asset.") };
   }
 }
 
@@ -377,7 +503,7 @@ export async function deleteCompanyAssetAction(id: string) {
 export async function createOrUpdateOwnerTransactionAction(formData: FormData) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_EXPENSES,
       requireActiveStatus: true,
     });
     const id = formData.get("id")?.toString();
@@ -392,13 +518,20 @@ export async function createOrUpdateOwnerTransactionAction(formData: FormData) {
       notes: formData.get("notes")?.toString().trim() || null,
     });
 
-    if (!validated.success)
+    if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
+    }
     const data = validated.data;
 
     if (id) {
-      await prisma.ownerTransaction.update({
+      const existing = await prisma.ownerTransaction.findFirst({
         where: { id, shopId: user.shopId },
+        select: { id: true },
+      });
+      if (!existing) return { success: false, error: "Transaction not found." };
+
+      await prisma.ownerTransaction.update({
+        where: { id },
         data: { ...data, transactionDate: new Date(data.transactionDate) },
       });
     } else {
@@ -412,31 +545,29 @@ export async function createOrUpdateOwnerTransactionAction(formData: FormData) {
       });
     }
 
-    revalidatePath("/dashboard/admin/expenses");
+    revalidateFinance();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to save equity transaction.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to save equity transaction.") };
   }
 }
 
 export async function deleteOwnerTransactionAction(id: string) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_EXPENSES,
       requireActiveStatus: true,
     });
-    await prisma.ownerTransaction.delete({
+    const existing = await prisma.ownerTransaction.findFirst({
       where: { id, shopId: user.shopId },
+      select: { id: true },
     });
-    revalidatePath("/dashboard/admin/expenses");
+    if (!existing) return { success: false, error: "Transaction not found." };
+
+    await prisma.ownerTransaction.delete({ where: { id } });
+    revalidateFinance();
     return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || "Failed to delete transaction.",
-    };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to delete transaction.") };
   }
 }

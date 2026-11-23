@@ -1,24 +1,23 @@
 "use client";
 import { useState } from "react";
 import FormModal from "@/components/common/FormModal";
-import { Input } from "@/components/common/ui/Input";
-import { Textarea } from "@/components/common/ui/Textarea";
+import { FormField } from "@/components/common/ui/form/FormField";
 import { IOtherIncome } from "@/types";
 
-export default function IncomeModal({ isOpen, onClose, onSubmit, loading, income, currencySymbol }: { isOpen: boolean; onClose: () => void; onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void; loading: boolean; income?: IOtherIncome | null; currencySymbol: string }) {
+export default function IncomeModal({ isOpen, onClose, onSubmit, loading, income, currencySymbol, errors = {} }: { isOpen: boolean; onClose: () => void; onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void; loading: boolean; income?: IOtherIncome | null; currencySymbol: string; errors?: Record<string, string> }) {
   const isEditing = Boolean(income);
   const [defaultReceiptNo] = useState(() => `INC-${Date.now().toString().slice(-6)}`);
 
   return (
     <FormModal isOpen={isOpen} onClose={onClose} onSubmit={onSubmit} title={isEditing ? "Edit Other Income" : "Record Other Income (অন্যান্য আয়)"} description="Log secondary revenues like scrap sale or delivery fees." loading={loading} isEditing={isEditing}>
       {income && <input type="hidden" name="id" value={income.id} />}
-      <Input label="Income Source *" name="incomeSource" required defaultValue={income?.incomeSource || ""} placeholder="e.g. Carton scrap sale" />
+      <FormField type="text" label="Income Source" name="incomeSource" required defaultValue={income?.incomeSource || ""} placeholder="e.g. Carton scrap sale" error={errors.incomeSource} />
       <div className="grid grid-cols-2 gap-3">
-        <Input label="Receipt # *" name="receiptNo" required defaultValue={income?.receiptNo || defaultReceiptNo} />
-        <Input label={`Amount (${currencySymbol}) *`} name="amount" type="number" step="0.01" required defaultValue={income?.amount ?? ""} placeholder="0.00" />
+        <FormField type="text" label="Receipt #" name="receiptNo" required defaultValue={income?.receiptNo || defaultReceiptNo} error={errors.receiptNo} />
+        <FormField type="number" label={`Amount (${currencySymbol})`} name="amount" step="0.01" required defaultValue={income?.amount ?? ""} placeholder="0.00" error={errors.amount} />
       </div>
-      <Input label="Date *" name="incomeDate" type="date" required defaultValue={income?.incomeDate ? new Date(income.incomeDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]} />
-      <Textarea label="Notes" name="note" rows={2} defaultValue={income?.note || ""} />
+      <FormField type="date" label="Date" name="incomeDate" required defaultValue={income?.incomeDate ? new Date(income.incomeDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]} error={errors.incomeDate} />
+      <FormField type="textarea" label="Notes" name="note" rows={2} defaultValue={income?.note || ""} error={errors.note} />
     </FormModal>
   );
 }

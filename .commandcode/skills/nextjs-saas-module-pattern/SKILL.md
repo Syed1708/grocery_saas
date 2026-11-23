@@ -325,11 +325,17 @@ and its action buttons don't work" in expenses, purchases and several report tab
 
 Owner-only deletes: check `user.role !== "OWNER"` and return a localized error.
 
-**Finance specifics:** accounts / cheques / fund transfers require `FINANCE_BANKING`; loans &
-installments require `FINANCE_LOANS`. Verify account, cheque, and loan rows belong to
-`shopId` + `activeBranchId` before mutating, and resolve transfer/clear-cheque accounts inside the
-active branch. CRUD entities use `useCrudModal`; one-off actions (transfer, clear cheque, pay
+**Finance specifics:** accounts / cheques / fund transfers require `FINANCE_BANKING`; expenses,
+incomes, company assets and owner equity require `FINANCE_EXPENSES`; loans & installments require
+`FINANCE_LOANS`. Verify rows belong to `shopId` + `activeBranchId` before mutating (company assets
+also allow `branchId: null` for head-office assets). Resolve transfer/clear-cheque accounts inside
+the active branch. CRUD entities use `useCrudModal`; one-off actions (transfer, clear cheque, pay
 installment) may keep a small manual modal + loading state.
+
+**Cash reconciliation:** any financial create/update/delete that touches an account must keep the
+drawer in sync — on edit apply `delta = newAmount - oldAmount`, on delete reverse the original
+effect, both inside the same `prisma.$transaction`, and post an `AccountTransaction` for audit.
+Never edit/delete an expense or income without adjusting the cash balance.
 
 **Loan corrections:** while `totalPaid === 0`, editing type/amount/due-date is allowed and the
 linked account effect is reversed/applied atomically. After repayments, terms lock; the owner-only

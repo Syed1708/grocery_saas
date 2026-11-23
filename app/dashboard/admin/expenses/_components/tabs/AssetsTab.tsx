@@ -1,9 +1,9 @@
 "use client";
 "use no memo";
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
-import { Edit2, Trash2 } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
-import { ICompanyAsset } from "@/types";
+import { TableActions } from "@/components/common/ui/table/TableHelpers";
+import { ICompanyAsset, PERMISSIONS } from "@/types";
 
 export default function AssetsTab({ assets, currencySymbol, onEdit, onDelete }: { assets: ICompanyAsset[]; currencySymbol: string; onEdit: (a: ICompanyAsset) => void; onDelete: (a: ICompanyAsset) => void }) {
   const columns: ColumnDef<ICompanyAsset>[] = [
@@ -15,15 +15,14 @@ export default function AssetsTab({ assets, currencySymbol, onEdit, onDelete }: 
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => {
-        const item = row.original;
-        return (
-          <div className="flex items-center gap-1.5">
-            <button onClick={() => onEdit(item)} className="p-1.5 text-neutral-500 hover:text-blue-600 rounded-lg transition cursor-pointer" title="Edit"><Edit2 size={15} /></button>
-            <button onClick={() => onDelete(item)} className="p-1.5 text-neutral-500 hover:text-red-600 rounded-lg transition cursor-pointer" title="Delete"><Trash2 size={15} /></button>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableActions
+          onEdit={() => onEdit(row.original)}
+          editPermission={PERMISSIONS.FINANCE_EXPENSES}
+          onDelete={() => onDelete(row.original)}
+          deletePermission={PERMISSIONS.FINANCE_EXPENSES}
+        />
+      ),
     },
   ];
   const table = useReactTable({ data: assets, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() });
