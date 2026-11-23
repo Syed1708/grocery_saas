@@ -102,6 +102,7 @@ export async function getLoans(
     loanDate: l.loanDate,
     dueDate: l.dueDate,
     status: l.status,
+    accountId: l.accountId,
     accountName: l.account?.name || null,
     notes: l.notes,
     branchId: l.branchId,

@@ -1,9 +1,7 @@
 "use client";
 
 import FormModal from "@/components/common/FormModal";
-import { Input } from "@/components/common/ui/Input";
-import { Select } from "@/components/common/ui/Select";
-import { Textarea } from "@/components/common/ui/Textarea";
+import { FormField } from "@/components/common/ui/form/FormField";
 import { IAccount } from "@/types";
 
 export default function AccountModal({
@@ -13,13 +11,15 @@ export default function AccountModal({
   loading,
   account,
   currencySymbol,
+  errors = {},
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void;
   loading: boolean;
   account?: IAccount | null;
   currencySymbol: string;
+  errors?: Record<string, string>;
 }) {
   const isEditing = Boolean(account);
 
@@ -35,16 +35,11 @@ export default function AccountModal({
     >
       {account && <input type="hidden" name="id" value={account.id} />}
 
-      <Input
-        label="Account Name"
-        name="name"
-        required
-        defaultValue={account?.name || ""}
-        placeholder="e.g. DBBL Bank, bKash Merchant"
-      />
+      <FormField type="text" label="Account Name" name="name" required defaultValue={account?.name || ""} placeholder="e.g. DBBL Bank, bKash Merchant" error={errors.name} />
 
       <div className="grid grid-cols-2 gap-3">
-        <Select
+        <FormField
+          type="select"
           label="Account Type"
           name="type"
           required
@@ -57,50 +52,28 @@ export default function AccountModal({
             { label: "Rocket", value: "ROCKET" },
             { label: "Other", value: "OTHER" },
           ]}
+          error={errors.type}
         />
-        {!isEditing && (
-          <Input
-            label={`Opening Balance (${currencySymbol})`}
-            name="openingBalance"
-            type="number"
-            step="0.01"
-            defaultValue={0}
-          />
-        )}
-        {isEditing && (
-          <Select
+        {!isEditing ? (
+          <FormField type="number" label={`Opening Balance (${currencySymbol})`} name="openingBalance" step="0.01" defaultValue={0} error={errors.openingBalance} />
+        ) : (
+          <FormField
+            type="select"
             label="Status"
             name="status"
             defaultValue={account?.status || "active"}
-            options={[
-              { label: "Active", value: "active" },
-              { label: "Inactive", value: "inactive" },
-            ]}
+            options={[{ label: "Active", value: "active" }, { label: "Inactive", value: "inactive" }]}
+            error={errors.status}
           />
         )}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Input
-          label="Account / Number"
-          name="accountNumber"
-          defaultValue={account?.accountNumber || ""}
-          placeholder="e.g. 124.101.5940"
-        />
-        <Input
-          label="Bank Name"
-          name="bankName"
-          defaultValue={account?.bankName || ""}
-          placeholder="e.g. DBBL, EBL"
-        />
+        <FormField type="text" label="Account / Number" name="accountNumber" defaultValue={account?.accountNumber || ""} placeholder="e.g. 124.101.5940" error={errors.accountNumber} />
+        <FormField type="text" label="Bank Name" name="bankName" defaultValue={account?.bankName || ""} placeholder="e.g. DBBL, EBL" error={errors.bankName} />
       </div>
 
-      <Textarea
-        label="Notes (Optional)"
-        name="notes"
-        rows={2}
-        defaultValue={account?.notes || ""}
-      />
+      <FormField type="textarea" label="Notes (Optional)" name="notes" rows={2} defaultValue={account?.notes || ""} error={errors.notes} />
     </FormModal>
   );
 }

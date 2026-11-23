@@ -45,6 +45,7 @@ export interface ILoan {
   loanDate: Date;
   dueDate?: Date | null;
   status: "ACTIVE" | "PAID";
+  accountId?: string | null;
   accountName?: string | null;
   notes?: string | null;
   branchId: string;                 // 👈 ERP Store Branch ID

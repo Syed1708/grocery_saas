@@ -3,7 +3,7 @@
 import Modal from "@/components/common/Modal";
 import { Input } from "@/components/common/ui/Input";
 import { Select } from "@/components/common/ui/Select";
-import { ILoan } from "@/types";
+import { IAccount, ILoan } from "@/types";
 
 export default function InstallmentModal({
   loan,
@@ -17,7 +17,7 @@ export default function InstallmentModal({
   onClose: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   loading: boolean;
-  accounts: any[];
+  accounts: IAccount[];
   currencySymbol: string;
 }) {
   if (!loan) return null;

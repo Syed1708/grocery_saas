@@ -5,12 +5,13 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { accountSchema, transferSchema, chequeSchema } from "@/lib/validations";
 import { PERMISSIONS } from "@/types";
+import { getErrorMessage } from "@/lib/utils";
 
 // --- 1. ACCOUNTS CRUD ---
 export async function createAccountAction(formData: FormData) {
   try {
             const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_BANKING,
       requireActiveStatus: true,
     });
 
@@ -43,7 +44,7 @@ export async function createAccountAction(formData: FormData) {
           currentBalance: data.openingBalance,
           status: data.status,
           notes: data.notes,
-          branchId: user.activeBranchId!,
+          branchId: user.activeBranchId,
           shopId: user.shopId,
         },
       });
@@ -56,7 +57,7 @@ export async function createAccountAction(formData: FormData) {
             balanceAfter: data.openingBalance,
             voucherNo: `OPB-${Date.now().toString().slice(-6)}`,
             note: "Opening Balance",
-            branchId: user.activeBranchId!,
+            branchId: user.activeBranchId,
             accountId: account.id,
             userId: user.userId,
           },
@@ -66,8 +67,8 @@ export async function createAccountAction(formData: FormData) {
 
     revalidatePath("/dashboard/admin/accounts");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to create account." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to create account.") };
   }
 }
 
@@ -75,7 +76,7 @@ export async function createAccountAction(formData: FormData) {
 export async function transferFundsAction(formData: FormData) {
   try {
             const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_BANKING,
       requireActiveStatus: true,
     });
 
@@ -97,8 +98,8 @@ export async function transferFundsAction(formData: FormData) {
       return { success: false, error: "Source and destination accounts cannot be the same." };
     }
 
-    const fromAcc = await prisma.account.findFirst({ where: { id: fromAccountId, shopId: user.shopId } });
-    const toAcc = await prisma.account.findFirst({ where: { id: toAccountId, shopId: user.shopId } });
+    const fromAcc = await prisma.account.findFirst({ where: { id: fromAccountId, shopId: user.shopId, branchId: user.activeBranchId } });
+    const toAcc = await prisma.account.findFirst({ where: { id: toAccountId, shopId: user.shopId, branchId: user.activeBranchId } });
 
     if (!fromAcc || !toAcc) return { success: false, error: "One or both accounts not found." };
 
@@ -123,7 +124,7 @@ export async function transferFundsAction(formData: FormData) {
           transactionDate: new Date(transferDate),
           voucherNo,
           note: `Transfer to ${toAcc.name}. ${note || ""}`,
-          branchId: user.activeBranchId!,
+          branchId: user.activeBranchId,
           accountId: fromAccountId,
           userId: user.userId,
         },
@@ -143,7 +144,7 @@ export async function transferFundsAction(formData: FormData) {
           transactionDate: new Date(transferDate),
           voucherNo,
           note: `Transfer from ${fromAcc.name}. ${note || ""}`,
-          branchId: user.activeBranchId!,
+          branchId: user.activeBranchId,
           accountId: toAccountId,
           userId: user.userId,
         },
@@ -152,8 +153,8 @@ export async function transferFundsAction(formData: FormData) {
 
     revalidatePath("/dashboard/admin/accounts");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Fund transfer failed." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Fund transfer failed.") };
   }
 }
 
@@ -161,7 +162,7 @@ export async function transferFundsAction(formData: FormData) {
 export async function createChequeAction(formData: FormData) {
   try {
             const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_BANKING,
       requireActiveStatus: true,
     });
 
@@ -193,7 +194,7 @@ export async function createChequeAction(formData: FormData) {
         amount: data.amount,
         status: "PENDING",
         note: data.note,
-        branchId: user.activeBranchId!,
+        branchId: user.activeBranchId,
         shopId: user.shopId,
         userId: user.userId,
       },
@@ -201,26 +202,26 @@ export async function createChequeAction(formData: FormData) {
 
     revalidatePath("/dashboard/admin/accounts");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to record cheque." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to record cheque.") };
   }
 }
 
 export async function clearChequeAction(chequeId: string, accountId: string) {
   try {
             const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_BANKING,
       requireActiveStatus: true,
     });
 
     const cheque = await prisma.bankCheque.findFirst({
-      where: { id: chequeId, shopId: user.shopId },
+      where: { id: chequeId, shopId: user.shopId, branchId: user.activeBranchId },
     });
     if (!cheque) return { success: false, error: "Cheque not found." };
     if (cheque.status === "CLEARED") return { success: false, error: "Cheque is already cleared." };
 
     const account = await prisma.account.findFirst({
-      where: { id: accountId, shopId: user.shopId },
+      where: { id: accountId, shopId: user.shopId, branchId: user.activeBranchId },
     });
     if (!account) return { success: false, error: "Deposit/Withdraw account not found." };
 
@@ -249,7 +250,7 @@ export async function clearChequeAction(chequeId: string, accountId: string) {
           balanceAfter: newBal,
           voucherNo,
           note: `Cheque Clearance (#${cheque.chequeNumber}, ${cheque.partyName})`,
-          branchId: user.activeBranchId!,
+          branchId: user.activeBranchId,
           accountId,
           userId: user.userId,
         },
@@ -267,15 +268,15 @@ export async function clearChequeAction(chequeId: string, accountId: string) {
 
     revalidatePath("/dashboard/admin/accounts");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to clear cheque." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to clear cheque.") };
   }
 }
 
 export async function updateAccountAction(formData: FormData) {
   try {
             const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_BANKING,
       requireActiveStatus: true,
     });
     const id = formData.get("id")?.toString();
@@ -290,26 +291,32 @@ export async function updateAccountAction(formData: FormData) {
 
     if (!name) return { success: false, error: "Account name is required." };
 
+    const existing = await prisma.account.findFirst({
+      where: { id, shopId: user.shopId, branchId: user.activeBranchId },
+      select: { id: true },
+    });
+    if (!existing) return { success: false, error: "Account not found in this branch." };
+
     await prisma.account.update({
-      where: { id, shopId: user.shopId },
+      where: { id },
       data: { name, accountNumber, bankName, branchName, status, notes },
     });
 
     revalidatePath("/dashboard/admin/accounts");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to update account." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to update account.") };
   }
 }
 
 export async function deleteAccountAction(id: string) {
   try {
             const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_BANKING,
       requireActiveStatus: true,
     });
     const account = await prisma.account.findFirst({
-      where: { id, shopId: user.shopId },
+      where: { id, shopId: user.shopId, branchId: user.activeBranchId },
     });
 
     if (!account) return { success: false, error: "Account not found." };
@@ -324,18 +331,18 @@ export async function deleteAccountAction(id: string) {
     await prisma.account.delete({ where: { id } });
     revalidatePath("/dashboard/admin/accounts");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to delete account." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to delete account.") };
   }
 }
 
 export async function deleteChequeAction(id: string) {
   try {
             const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_BANKING,
       requireActiveStatus: true,
     });
-    const cheque = await prisma.bankCheque.findFirst({ where: { id, shopId: user.shopId } });
+    const cheque = await prisma.bankCheque.findFirst({ where: { id, shopId: user.shopId, branchId: user.activeBranchId } });
 
     if (!cheque) return { success: false, error: "Cheque not found." };
     if (cheque.status === "CLEARED") {
@@ -345,21 +352,21 @@ export async function deleteChequeAction(id: string) {
     await prisma.bankCheque.delete({ where: { id } });
     revalidatePath("/dashboard/admin/accounts");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to delete cheque." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to delete cheque.") };
   }
 }
 
 export async function updateChequeAction(formData: FormData) {
   try {
             const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.FINANCE_BANKING,
       requireActiveStatus: true,
     });
     const id = formData.get("id")?.toString();
     if (!id) return { success: false, error: "Missing cheque ID." };
 
-    const cheque = await prisma.bankCheque.findFirst({ where: { id, shopId: user.shopId } });
+    const cheque = await prisma.bankCheque.findFirst({ where: { id, shopId: user.shopId, branchId: user.activeBranchId } });
     if (!cheque) return { success: false, error: "Cheque not found." };
     if (cheque.status === "CLEARED") {
       return { success: false, error: "Cannot edit a cleared cheque." };
@@ -399,7 +406,7 @@ export async function updateChequeAction(formData: FormData) {
 
     revalidatePath("/dashboard/admin/accounts");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to update cheque." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to update cheque.") };
   }
 }

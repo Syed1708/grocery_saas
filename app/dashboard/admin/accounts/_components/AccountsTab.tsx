@@ -1,10 +1,10 @@
 "use client";
 "use no memo";
 
-import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { Edit2, Trash2 } from "lucide-react";
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { DataTable } from "@/components/common/data-table/DataTable";
-import { IAccount } from "@/types";
+import { TableActions } from "@/components/common/ui/table/TableHelpers";
+import { IAccount, PERMISSIONS } from "@/types";
 
 export default function AccountsTab({
   accounts,
@@ -58,30 +58,17 @@ export default function AccountsTab({
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => {
-        const acc = row.original;
-        return (
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => onEdit(acc)}
-              className="p-1.5 rounded-lg text-neutral-500 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
-              title="Edit Account"
-            >
-              <Edit2 size={15} />
-            </button>
-            <button
-              onClick={() => onDelete(acc)}
-              className="p-1.5 rounded-lg text-neutral-500 hover:text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
-              title="Delete Account"
-            >
-              <Trash2 size={15} />
-            </button>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableActions
+          onEdit={() => onEdit(row.original)}
+          editPermission={PERMISSIONS.FINANCE_BANKING}
+          onDelete={() => onDelete(row.original)}
+          deletePermission={PERMISSIONS.FINANCE_BANKING}
+        />
+      ),
     },
   ];
 
-  const table = useReactTable({ data: accounts, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({ data: accounts, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() });
   return <DataTable table={table} columns={columns} />;
 }

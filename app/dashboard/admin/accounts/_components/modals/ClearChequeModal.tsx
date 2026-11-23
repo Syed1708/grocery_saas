@@ -2,7 +2,7 @@
 
 import Modal from "@/components/common/Modal";
 import { Select } from "@/components/common/ui/Select";
-import { IBankCheque } from "@/types";
+import { IAccount, IBankCheque } from "@/types";
 
 export default function ClearChequeModal({
   cheque,
@@ -16,7 +16,7 @@ export default function ClearChequeModal({
   onClose: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   loading: boolean;
-  accounts: any[];
+  accounts: IAccount[];
   currencySymbol: string;
 }) {
   if (!cheque) return null;

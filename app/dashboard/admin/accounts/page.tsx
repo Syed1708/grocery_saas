@@ -1,10 +1,12 @@
 import { requireAuth } from "@/lib/auth/guard";
+import { PERMISSIONS } from "@/types";
 import { prisma } from "@/lib/prisma";
 import { getAccounts, getBankCheques, getLoans } from "@/queries/account-queries"; // adjust path
 import AccountsClient from "./_components/AccountsClient";
 
 export default async function AccountsPage() {
   const { shopId, activeBranchId: branchId } = await requireAuth({
+    requiredPermission: PERMISSIONS.FINANCE_BANKING,
     requireActiveStatus: true,
   });
 

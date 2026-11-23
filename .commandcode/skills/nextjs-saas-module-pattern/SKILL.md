@@ -254,6 +254,19 @@ Markup only, all inputs via `FormField` (supports `text|number|email|password|da
   options={[{ label: "সক্রিয়", value: "active" }, { label: "নিষ্ক্রিয়", value: "inactive" }]} />
 ```
 
+### Typed form layer (no `any[]`)
+
+- Define input types instead of `any[]` — e.g. `IPurchaseProductInput`, `IPurchaseSupplierOption`,
+  `IXFormInitialData`. Products/suppliers from queries (`IProduct[]`, `ISupplier[]`) are
+  structurally assignable; drop `as any` casts on page props.
+- Numeric helpers take `unknown`: `sanitizeNumber(v: unknown)`; row update handlers take
+  `value: string | number` for `keyof Row`.
+- Build payloads as the shared action type (`CreateXPayload`), and on edit spread `id` when calling
+  `updateXAction`. Guard `mode === "edit" && !initialData?.id` first.
+- Never call impure functions (`Date.now()`, `new Date()`) during render. Generate codes in a
+  module-scope helper or a `useState` lazy initializer; format dates in a module-scope helper.
+- Modal submit prop type is `(e: React.SubmitEvent<HTMLFormElement>) => void` (matches `FormModal`).
+
 ## Shared UI generics (use these, don't hand-roll)
 
 | Component | Path | Use |
@@ -270,6 +283,24 @@ Markup only, all inputs via `FormField` (supports `text|number|email|password|da
 
 For a KPI grid: `<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">` with
 `StatCard`s.
+
+### Data tables & pagination (required)
+
+`DataTable` ALWAYS renders `DataTablePagination`, so every table must register the pagination
+model or the controls (first/prev/next/last, page size) silently do nothing:
+
+```tsx
+const table = useReactTable({
+  data,
+  columns, // ColumnDef<T>[]
+  getCoreRowModel: getCoreRowModel(),
+  getPaginationRowModel: getPaginationRowModel(), // 👈 required
+  // optional: getFilteredRowModel(), state/onStateChange...
+});
+```
+
+Check every new/edited table for `getPaginationRowModel` — this was the root cause of "pagination
+and its action buttons don't work" in expenses, purchases and several report tables.
 
 ## RBAC
 
@@ -293,6 +324,28 @@ For a KPI grid: `<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 
 | Administration | — | `STAFF_MANAGE`, `STAFF_PAYROLL`, `USERS_MANAGE`, `SETTINGS_STORE`, `BRANCH_MANAGE`, `BRANCH_SWITCH`, `FAMILY_LEDGER_ACCESS` |
 
 Owner-only deletes: check `user.role !== "OWNER"` and return a localized error.
+
+**Finance specifics:** accounts / cheques / fund transfers require `FINANCE_BANKING`; loans &
+installments require `FINANCE_LOANS`. Verify account, cheque, and loan rows belong to
+`shopId` + `activeBranchId` before mutating, and resolve transfer/clear-cheque accounts inside the
+active branch. CRUD entities use `useCrudModal`; one-off actions (transfer, clear cheque, pay
+installment) may keep a small manual modal + loading state.
+
+### Routing & deep links
+
+- App routes live under `/dashboard/...`. Never link to legacy `/admin/...` or `/reports/...`
+  paths — they 404. Audit `href` values when touching a module.
+- To open a modal from a link, read `searchParams` in the page and pass an initial id prop
+  (e.g. `?supplierId=...` → seed the payment modal state). Initialize state from the prop —
+  do not `setState` inside an effect.
+
+### Data isolation (branch / tenant)
+
+- Queries filter by `shopId` + `activeBranchId`.
+- Mutations verify ownership before write: `findFirst({ id, shopId, branchId })`, then update/delete
+  by `id`.
+- Validate submitted foreign ids (`staffId`, `departmentId`, `supplierId`, `productId`) belong to
+  the shop/branch before creating records — don't trust hidden form fields.
 
 ### Navigation & permission UI
 
@@ -341,6 +394,10 @@ warning is pre-existing and acceptable); build succeeds.
 - [ ] Actions share `formToXInput`, `xFields`, `revalidateXPaths`, and branch scope — no duplication.
 - [ ] All `catch` blocks use `getErrorMessage(error, fallback)`; never `catch (error: any)`.
 - [ ] Client uses `useCrudModal`; columns are `ColumnDef<T>[]`; row actions use `TableActions`.
+- [ ] Every table registers `getPaginationRowModel`.
+- [ ] All links use `/dashboard/...`; no stale `/admin/...` hrefs.
+- [ ] Mutations verify shop/branch ownership and foreign ids before writing.
+- [ ] Form layer typed (no `any[]`); payloads use shared action types; no impure calls in render.
 - [ ] Form uses `FormField` only and receives `errors`.
 - [ ] No `any` introduced anywhere.
 - [ ] UI text/layout unchanged (unless requested).

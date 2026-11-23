@@ -1,9 +1,8 @@
 "use client";
 
 import FormModal from "@/components/common/FormModal";
-import { Input } from "@/components/common/ui/Input";
-import { Select } from "@/components/common/ui/Select";
-import { ILoan } from "@/types";
+import { FormField } from "@/components/common/ui/form/FormField";
+import { IAccount, ILoan } from "@/types";
 
 export default function LoanModal({
   isOpen,
@@ -13,16 +12,19 @@ export default function LoanModal({
   loan,
   accounts,
   currencySymbol,
+  errors = {},
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void;
   loading: boolean;
   loan?: ILoan | null;
-  accounts: any[];
+  accounts: IAccount[];
   currencySymbol: string;
+  errors?: Record<string, string>;
 }) {
   const isEditing = Boolean(loan);
+  const termsLocked = isEditing && Number(loan?.totalPaid ?? 0) > 0;
   const accountOptions = accounts.map((a) => ({
     label: `${a.name} (Bal: ${currencySymbol}${a.currentBalance})`,
     value: a.id,
@@ -42,53 +44,61 @@ export default function LoanModal({
       {loan && <input type="hidden" name="id" value={loan.id} />}
 
       <div className="grid grid-cols-2 gap-3">
-        <Select
+        <FormField
+          type="select"
           label="Loan Type"
           name="type"
           required
-          disabled={isEditing} // Cannot change loan type after creation
+          disabled={termsLocked}
+          hint={termsLocked ? "Type cannot change after repayments have started." : undefined}
           defaultValue={loan?.type || "TAKEN"}
           options={[
             { label: "Loan Taken (ঋণ গ্রহণ - Money In)", value: "TAKEN" },
             { label: "Loan Given (ধার প্রদান - Money Out)", value: "GIVEN" },
           ]}
+          error={errors.type}
         />
-        <Input label="Person Name" name="personName" required defaultValue={loan?.personName || ""} placeholder="Lender or Borrower Name" />
+        <FormField type="text" label="Person Name" name="personName" required defaultValue={loan?.personName || ""} placeholder="Lender or Borrower Name" error={errors.personName} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Input
+        <FormField
+          type="number"
           label={`Amount (${currencySymbol})`}
           name="amount"
-          type="number"
           step="0.01"
           required
-          disabled={isEditing} // Principal amount locked after creation for accounting safety
+          disabled={termsLocked}
+          hint={termsLocked ? "Amount cannot change after repayments have started." : undefined}
           defaultValue={loan?.amount ?? ""}
           placeholder="0.00"
+          error={errors.amount}
         />
         {!isEditing ? (
-          <Select label="Affected Account" name="accountId" required options={accountOptions} placeholder="Select account" />
+          <FormField type="select" label="Affected Account" name="accountId" required options={accountOptions} placeholder="Select account" error={errors.accountId} />
         ) : (
-          <Input label="Phone Number" name="phone" defaultValue={loan?.phone || ""} placeholder="01700000000" />
+          <FormField type="text" label="Phone Number" name="phone" defaultValue={loan?.phone || ""} placeholder="01700000000" error={errors.phone} />
         )}
       </div>
 
       {!isEditing && (
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="Loan Date" name="loanDate" type="date" required defaultValue={new Date().toISOString().split("T")[0]} />
-          <Input label="Phone Number" name="phone" placeholder="01700000000" />
-        </div>
+        <>
+          <div className="grid grid-cols-2 gap-3">
+            <FormField type="date" label="Loan Date" name="loanDate" required defaultValue={new Date().toISOString().split("T")[0]} error={errors.loanDate} />
+            <FormField type="text" label="Phone Number" name="phone" placeholder="01700000000" error={errors.phone} />
+          </div>
+          <FormField type="date" label="Due Date (Optional)" name="dueDate" error={errors.dueDate} />
+        </>
       )}
 
       {isEditing && (
         <div className="grid grid-cols-2 gap-3">
-          <Input label="Due Date" name="dueDate" type="date" defaultValue={loan?.dueDate ? new Date(loan.dueDate).toISOString().split("T")[0] : ""} />
+          <FormField type="date" label="Due Date" name="dueDate" defaultValue={loan?.dueDate ? new Date(loan.dueDate).toISOString().split("T")[0] : ""} error={errors.dueDate} />
           <div />
         </div>
       )}
 
-      <Input label="Notes / Terms" name="notes" defaultValue={loan?.notes || ""} placeholder="e.g. 5% monthly interest" />
+      <FormField type="text" label="Notes / Terms" name="notes" defaultValue={loan?.notes || ""} placeholder="e.g. 5% monthly interest" error={errors.notes} />
     </FormModal>
   );
 }
