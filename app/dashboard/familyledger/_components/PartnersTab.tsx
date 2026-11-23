@@ -1,10 +1,11 @@
 "use client";
 "use no memo";
 
-import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { Edit2, Trash2, Shield } from "lucide-react";
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
+import { Shield } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
-import { IPartner } from "@/types/partner";
+import { TableActions } from "@/components/common/ui/table/TableHelpers";
+import { IPartner, PERMISSIONS } from "@/types";
 
 const RELATIONSHIP_LABELS: Record<string, string> = {
   FATHER: "বাবা (Father)",
@@ -89,30 +90,22 @@ export default function PartnersTab({
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => {
-        const p = row.original;
-        return (
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => onEdit(p)}
-              className="p-1.5 text-neutral-500 hover:text-blue-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition cursor-pointer"
-              title="Edit Partner"
-            >
-              <Edit2 size={14} />
-            </button>
-            <button
-              onClick={() => onDelete(p)}
-              className="p-1.5 text-neutral-400 hover:text-rose-600 transition cursor-pointer"
-              title="Delete Partner"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <TableActions
+          onEdit={() => onEdit(row.original)}
+          editPermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
+          onDelete={() => onDelete(row.original)}
+          deletePermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
+        />
+      ),
     },
   ];
 
-  const table = useReactTable({ data: partners, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({
+    data: partners,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
   return <DataTable table={table} columns={columns} />;
 }

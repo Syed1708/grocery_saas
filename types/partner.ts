@@ -21,6 +21,7 @@ export interface IPartner {
   notes: string | null;
   totalDrawings?: number;
   totalRations?: number;
+  totalInjections?: number;
   createdAt: Date;
 }
 
@@ -59,4 +60,37 @@ export interface IPartnerRation {
   partnerId: string;
   partnerName?: string;
   items: IPartnerRationItem[];
+}
+
+export interface IFamilyReportFilters {
+  startDate?: string;
+  endDate?: string;
+  partnerId?: string;
+}
+
+export interface IFamilyReportKpis {
+  openingCapital: number;
+  injections: number;
+  drawings: number;
+  rations: number;
+  netEquity: number;
+}
+
+export interface IFamilyReportPartnerRow {
+  id: string;
+  name: string;
+  relationship: PartnerRelationship;
+  equityPercent: number;
+  openingCapital: number;
+  injections: number;
+  drawings: number;
+  rations: number;
+  netEquity: number;
+}
+
+export interface IFamilyReportData {
+  kpis: IFamilyReportKpis;
+  partners: IFamilyReportPartnerRow[];
+  transactions: IPartnerTransaction[];
+  rations: IPartnerRation[];
 }

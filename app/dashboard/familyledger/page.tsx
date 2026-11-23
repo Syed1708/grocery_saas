@@ -1,21 +1,21 @@
 import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
+import { PERMISSIONS } from "@/types";
 
 import FamilyLedgerClient from "./_components/FamilyLedgerClient";
 import { getPartnerRations, getPartners, getPartnerTransactions } from "@/queries/partner-queries";
 
 export default async function FamilyLedgerPage() {
-  // 🛡️ Zero-Trust Guard: Family Ledger is strictly locked to OWNER
   const { shopId, activeBranchId: branchId } = await requireAuth({
-    allowedRoles: ["OWNER"],
+    requiredPermission: PERMISSIONS.FAMILY_LEDGER_ACCESS,
     requireActiveStatus: true,
   });
 
   // Parallel data fetching matching your AccountsPage pattern
-  const [partnersRes, transactionsRes, rationsRes, accountsRaw, productsRaw, shop] = await Promise.all([
-    getPartners(),
-    getPartnerTransactions(100),
-    getPartnerRations(100),
+  const [partners, transactions, rations, accountsRaw, productsRaw, shop] = await Promise.all([
+    getPartners(shopId, branchId),
+    getPartnerTransactions(shopId, branchId, 100),
+    getPartnerRations(shopId, branchId, 100),
     prisma.account.findMany({
       where: { 
         shopId, 
@@ -37,10 +37,6 @@ export default async function FamilyLedgerPage() {
   ]);
 
   // Safe unpack and Decimal-to-Number conversion for client components
-  const partners = partnersRes.data || [];
-  const transactions = transactionsRes.data || [];
-  const rations = rationsRes.data || [];
-
   const accounts = accountsRaw.map((a) => ({
     id: a.id,
     name: a.name,

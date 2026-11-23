@@ -20,12 +20,14 @@ export default function PartnerModal({
   onSubmit,
   loading = false,
   partner,
+  errors = {},
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void;
   loading?: boolean;
   partner?: IPartner | null;
+  errors?: Record<string, string>;
 }) {
   return (
     <FormModal
@@ -48,6 +50,7 @@ export default function PartnerModal({
           defaultValue={partner?.name}
           required
           placeholder="যেমন: হাজী আব্দুল করিম"
+          error={errors.name}
         />
 
         <Select
@@ -56,6 +59,7 @@ export default function PartnerModal({
           defaultValue={partner?.relationship || "UNCLE"}
           options={RELATIONSHIP_OPTIONS}
           required
+          error={errors.relationship}
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -66,6 +70,7 @@ export default function PartnerModal({
             step="0.01"
             defaultValue={partner?.equityPercent || 0}
             placeholder="যেমন: 25"
+            error={errors.equityPercent}
           />
           <Input
             label="প্রাথমিক বিনিয়োগ মূলধন (৳)"
@@ -73,6 +78,7 @@ export default function PartnerModal({
             type="number"
             defaultValue={partner?.openingCapital || 0}
             placeholder="যেমন: 500000"
+            error={errors.openingCapital}
           />
         </div>
 

@@ -8,6 +8,7 @@ import {
   PieChart, 
   ReceiptText, 
   ShieldCheck,
+  Wallet,
   ShoppingBag,
   DollarSign,
   AlertTriangle,
@@ -136,6 +137,18 @@ export default function ReportsOverviewClient({ stats, currencySymbol }: Props) 
             metricLabel="Today's Expenses"
             metricValue={`${currencySymbol}${stats.todayExpensesTotal.toFixed(2)}`}
             icon={ReceiptText}
+            colorScheme="violet"
+          />
+
+          <ReportCategoryCard
+            title="পারিবারিক লেজার রিপোর্ট"
+            subtitleEn="Family Ledger & Partner Equity"
+            description="Partner capital, family drawings, household bills, and home grocery rations at cost."
+            href="/dashboard/admin/reports/family"
+            badge="Family"
+            metricLabel="Partner Equity"
+            metricValue="Drawings & Rations"
+            icon={Wallet}
             colorScheme="violet"
           />
 

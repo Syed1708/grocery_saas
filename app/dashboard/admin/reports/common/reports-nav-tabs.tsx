@@ -11,6 +11,7 @@ import {
   PieChart,
   ReceiptText,
   ShieldCheck,
+  Wallet,
 } from "lucide-react";
 import { usePermission } from "@/hooks/usePermission";
 import { PERMISSIONS, PermissionKey } from "@/types/rbac";
@@ -32,6 +33,7 @@ export const reportTabs: ReportTab[] = [
   { label: "Purchases", href: "/dashboard/admin/reports/purchases", icon: Truck, permission: PERMISSIONS.REPORTS_PURCHASES },
   { label: "Profit & Loss", href: "/dashboard/admin/reports/profit-loss", icon: PieChart, permission: PERMISSIONS.REPORTS_PL_PROFIT },
   { label: "Expenses", href: "/dashboard/admin/reports/expenses", icon: ReceiptText, permission: PERMISSIONS.REPORTS_EXPENSES },
+  { label: "Family Ledger", href: "/dashboard/admin/reports/family", icon: Wallet, permission: PERMISSIONS.FAMILY_LEDGER_ACCESS },
   { label: "Z-Closing (কাউন্টার)", href: "/dashboard/admin/reports/closings", icon: ShieldCheck, permission: PERMISSIONS.REPORTS_CLOSING_Z },
 ];
 

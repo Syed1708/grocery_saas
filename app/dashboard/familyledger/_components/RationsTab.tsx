@@ -1,7 +1,7 @@
 "use client";
 "use no memo";
 
-import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { IPartnerRation } from "@/types/partner";
 import { format } from "date-fns";
@@ -55,6 +55,11 @@ export default function RationsTab({
     },
   ];
 
-  const table = useReactTable({ data: rations, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({
+    data: rations,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
   return <DataTable table={table} columns={columns} />;
 }

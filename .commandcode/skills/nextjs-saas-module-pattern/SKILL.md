@@ -373,6 +373,16 @@ card, and `print-color-adjust: exact`. Use `useSyncExternalStore` (not setState-
 mounted check before creating a portal. SVG barcodes need quiet zones on both sides,
 `shape-rendering="crispEdges"` and `preserveAspectRatio="none"`.
 
+**Family ledger:** everything requires `FAMILY_LEDGER_ACCESS` (page, sidebar and report tab).
+Queries take `(shopId, branchId, …)` from the guarded page and never authenticate again; partner
+balances are computed from branch-scoped transactions (`CAPITAL_INJECTION` adds, everything else
+subtracts) and branch-scoped rations. Writes verify `partnerId` and `productId` belong to the shop,
+verify `accountId` belongs to the active branch, block drawings above the account balance, and
+guard stock with `updateMany({ quantity: { gte } })`. Every drawing/injection writes both an
+`AccountTransaction` (`referenceType: "PARTNER"`) and the partner transaction. Partner create and
+update are separate actions (the client uses `useCrudModal`). The report lives at
+`/dashboard/admin/reports/family` and is listed in the reports nav and overview grid.
+
 **POS / sales / returns / closings:** checkout requires `POS_ACCESS`; voiding a sale is
 OWNER-only, needs `requireActiveStatus`, and must load the sale by `{ id, shopId, activeBranchId }`.
 Validate a submitted `customerId` with `{ id, shopId, OR: [{ branchId: active }, { branchId: null }] }`.

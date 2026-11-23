@@ -62,7 +62,7 @@ export default function Sidebar({
     { label: "Staffs", href: "/dashboard/admin/staff", icon: TrendingDown, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.STAFF_MANAGE },
     { label: "Day-End Closings", href: "/dashboard/admin/closings", icon: Receipt, roles: ["OWNER", "MANAGER", "CASHIER"], permission: PERMISSIONS.REPORTS_CLOSING_Z },
     { label: "Reports", href: "/dashboard/admin/reports", icon: Receipt, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.REPORTS_SALES },
-    { label: "Family Ledger", href: "/dashboard/familyledger", icon: Receipt, roles: ["OWNER"], permission: PERMISSIONS.REPORTS_SALES },
+    { label: "Family Ledger", href: "/dashboard/familyledger", icon: Receipt, roles: ["OWNER"], permission: PERMISSIONS.FAMILY_LEDGER_ACCESS },
     { label: "Store Settings", href: "/dashboard/admin/settings", icon: Settings, roles: ["OWNER", "MANAGER"], permission: PERMISSIONS.SETTINGS_STORE },
   ];
 

@@ -5,6 +5,8 @@ import { Plus, ArrowDownRight } from "lucide-react";
 import { toast } from "sonner";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { StatCard } from "@/components/common/StatCard";
+import { useCrudModal } from "@/hooks/useCrudModal";
 import PartnersTab from "./PartnersTab";
 import DrawingsTab from "./DrawingsTab";
 import RationsTab from "./RationsTab";
@@ -13,12 +15,12 @@ import DrawingModal from "./modals/DrawingModal";
 import RationModal from "./modals/RationModal";
 import { IPartner, IPartnerTransaction, IPartnerRation } from "@/types/partner";
 import {
- createPartnerAction,
+  createPartnerAction,
+  updatePartnerAction,
   recordPartnerTransactionAction,
   recordPartnerRationAction,
   deletePartnerAction,
 } from "@/app/actions/partner-actions";
-
 
 export default function FamilyLedgerClient({
   partners,
@@ -36,14 +38,16 @@ export default function FamilyLedgerClient({
   currencySymbol?: string;
 }) {
   const [activeTab, setActiveTab] = useState<"partners" | "drawings" | "rations">("partners");
-
-  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
   const [drawingModalOpen, setDrawingModalOpen] = useState(false);
   const [rationModalOpen, setRationModalOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  const [editingPartner, setEditingPartner] = useState<IPartner | null>(null);
-  const [deletePartnerTarget, setDeletePartnerTarget] = useState<IPartner | null>(null);
-  const [loading, setLoading] = useState(false);
+  const partnerCrud = useCrudModal<IPartner>({
+    createAction: createPartnerAction,
+    updateAction: updatePartnerAction,
+    deleteAction: deletePartnerAction,
+    entityName: "পার্টনার",
+  });
 
   // Summary Balances
   const totalCapital = partners.reduce((sum, p) => sum + p.openingCapital, 0);
@@ -51,28 +55,12 @@ export default function FamilyLedgerClient({
   const totalRations = partners.reduce((sum, p) => sum + (p.totalRations || 0), 0);
   const netBalance = partners.reduce((sum, p) => sum + p.currentBalance, 0);
 
-  async function handlePartnerSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    const res = await createPartnerAction(formData);
-    setLoading(false);
-
-    if (res.success) {
-      toast.success(editingPartner ? "Partner updated successfully!" : "Partner added successfully!");
-      setPartnerModalOpen(false);
-      setEditingPartner(null);
-    } else {
-      toast.error(res.error || "Operation failed.");
-    }
-  }
-
   async function handleDrawingSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
+    setActionLoading(true);
     const formData = new FormData(e.currentTarget);
     const res = await recordPartnerTransactionAction(formData);
-    setLoading(false);
+    setActionLoading(false);
 
     if (res.success) {
       toast.success("Drawing recorded & account adjusted!");
@@ -82,10 +70,13 @@ export default function FamilyLedgerClient({
     }
   }
 
-  async function handleRationSubmit(data: { partnerId: string; items: { productId: string; quantity: number }[] }) {
-    setLoading(true);
+  async function handleRationSubmit(data: {
+    partnerId: string;
+    items: { productId: string; quantity: number }[];
+  }) {
+    setActionLoading(true);
     const res = await recordPartnerRationAction(data);
-    setLoading(false);
+    setActionLoading(false);
 
     if (res.success) {
       toast.success("Home groceries issued & stock deducted!");
@@ -95,50 +86,16 @@ export default function FamilyLedgerClient({
     }
   }
 
-  async function handleDeletePartner() {
-    if (!deletePartnerTarget) return;
-    setLoading(true);
-    const res = await deletePartnerAction(deletePartnerTarget.id);
-    setLoading(false);
-
-    if (res.success) {
-      toast.success("Partner deleted.");
-      setDeletePartnerTarget(null);
-    } else {
-      toast.error(res.error || "Failed to delete partner.");
-    }
-  }
-
   return (
     <div className="space-y-6">
       <Breadcrumbs items={[{ label: "Family Business Ledger" }]} />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-5 shadow-xs">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 block mb-2">Total Partner Capital</span>
-          <span className="text-2xl font-black text-neutral-900 dark:text-neutral-100 font-mono">
-            {currencySymbol}{totalCapital.toLocaleString()}
-          </span>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-5 shadow-xs">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-rose-500 block mb-2">Total Drawings & Bills</span>
-          <span className="text-2xl font-black text-rose-600 font-mono">
-            {currencySymbol}{totalDrawings.toLocaleString()}
-          </span>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-5 shadow-xs">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-amber-500 block mb-2">Home Groceries (Cost)</span>
-          <span className="text-2xl font-black text-amber-600 font-mono">
-            {currencySymbol}{totalRations.toLocaleString()}
-          </span>
-        </div>
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-5 shadow-xs">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-500 block mb-2">Net Family Equity</span>
-          <span className="text-2xl font-black text-emerald-600 font-mono">
-            {currencySymbol}{netBalance.toLocaleString()}
-          </span>
-        </div>
+        <StatCard title="Total Partner Capital" value={`${currencySymbol}${totalCapital.toLocaleString()}`} tone="neutral" />
+        <StatCard title="Total Drawings & Bills" value={`${currencySymbol}${totalDrawings.toLocaleString()}`} tone="rose" />
+        <StatCard title="Home Groceries (Cost)" value={`${currencySymbol}${totalRations.toLocaleString()}`} tone="amber" />
+        <StatCard title="Net Family Equity" value={`${currencySymbol}${netBalance.toLocaleString()}`} tone="emerald" />
       </div>
 
       {/* TABS HEADER */}
@@ -173,7 +130,7 @@ export default function FamilyLedgerClient({
         <div className="flex items-center gap-2">
           {activeTab === "partners" && (
             <button
-              onClick={() => { setEditingPartner(null); setPartnerModalOpen(true); }}
+              onClick={partnerCrud.openCreate}
               className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition cursor-pointer"
             >
               <Plus size={15} /> Add Partner
@@ -203,8 +160,8 @@ export default function FamilyLedgerClient({
         <PartnersTab
           partners={partners}
           currencySymbol={currencySymbol}
-          onEdit={(p) => { setEditingPartner(p); setPartnerModalOpen(true); }}
-          onDelete={setDeletePartnerTarget}
+          onEdit={partnerCrud.openEdit}
+          onDelete={partnerCrud.setDeleteTarget}
         />
       )}
       {activeTab === "drawings" && <DrawingsTab transactions={transactions} currencySymbol={currencySymbol} />}
@@ -212,37 +169,41 @@ export default function FamilyLedgerClient({
 
       {/* MODALS */}
       <PartnerModal
-        isOpen={partnerModalOpen}
-        onClose={() => { setPartnerModalOpen(false); setEditingPartner(null); }}
-        onSubmit={handlePartnerSubmit}
-        loading={loading}
-        partner={editingPartner}
+        key={partnerCrud.editingItem?.id || "new-partner"}
+        isOpen={partnerCrud.isOpen}
+        onClose={partnerCrud.closeModal}
+        onSubmit={partnerCrud.handleSubmit}
+        loading={partnerCrud.loading}
+        partner={partnerCrud.editingItem}
+        errors={partnerCrud.errors}
       />
       <DrawingModal
+        key={`drawing-${drawingModalOpen}`}
         isOpen={drawingModalOpen}
         onClose={() => setDrawingModalOpen(false)}
         onSubmit={handleDrawingSubmit}
-        loading={loading}
+        loading={actionLoading}
         partners={partners}
         accounts={accounts}
       />
       <RationModal
+        key={`ration-${rationModalOpen}`}
         isOpen={rationModalOpen}
         onClose={() => setRationModalOpen(false)}
         onSubmit={handleRationSubmit}
-        loading={loading}
+        loading={actionLoading}
         partners={partners}
         products={products}
       />
 
       {/* CONFIRMATION DIALOG */}
       <ConfirmDialog
-        isOpen={Boolean(deletePartnerTarget)}
-        onClose={() => setDeletePartnerTarget(null)}
-        onConfirm={handleDeletePartner}
+        isOpen={Boolean(partnerCrud.deleteTarget)}
+        onClose={() => partnerCrud.setDeleteTarget(null)}
+        onConfirm={partnerCrud.handleDeleteConfirm}
         title="Delete Partner"
-        message={`Are you sure you want to delete partner "${deletePartnerTarget?.name}"?`}
-        loading={loading}
+        message={`Are you sure you want to delete partner "${partnerCrud.deleteTarget?.name}"?`}
+        loading={partnerCrud.loading}
       />
     </div>
   );

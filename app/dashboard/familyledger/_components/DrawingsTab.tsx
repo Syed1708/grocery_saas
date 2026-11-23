@@ -1,7 +1,7 @@
 "use client";
 "use no memo";
 
-import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { IPartnerTransaction } from "@/types/partner";
 import { format } from "date-fns";
@@ -74,6 +74,11 @@ export default function DrawingsTab({
     },
   ];
 
-  const table = useReactTable({ data: transactions, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({
+    data: transactions,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
   return <DataTable table={table} columns={columns} />;
 }
