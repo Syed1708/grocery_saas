@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types";
+import { getErrorMessage } from "@/lib/utils";
 import { IReturnableSale, IReturnableSaleItem, ICompletedReturn } from "@/types/sale";
 
 /**
@@ -114,9 +115,9 @@ export async function searchSaleForReturnAction(invoiceNo: string) {
       success: true,
       sale: returnableSale,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("searchSaleForReturnAction error:", error);
-    return { success: false, error: "চালান অনুসন্ধান করতে ব্যর্থ হয়েছে।" };
+    return { success: false, error: getErrorMessage(error, "চালান অনুসন্ধান করতে ব্যর্থ হয়েছে।") };
   }
 }
 
@@ -134,7 +135,7 @@ export async function createSaleReturnAction(formData: FormData) {
   try {
     // 1. Zero-Trust Authentication & Active Branch Guard
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.POS_ACCESS,
+      requiredPermission: PERMISSIONS.POS_REFUND_RETURN,
       requireActiveStatus: true,
     });
 
@@ -147,6 +148,10 @@ export async function createSaleReturnAction(formData: FormData) {
     const notes = formData.get("notes")?.toString().trim() || null;
 
     if (!saleId) return { success: false, error: "চালান আইডি দেওয়া হয়নি।" };
+
+    if (refundMethod !== "cash" && refundMethod !== "balance") {
+      return { success: false, error: "টাকা ফেরতের মাধ্যম সঠিক নয়।" };
+    }
 
     // 2. Fetch original sale with line items, customer, and prior returns
     const sale = await prisma.sale.findFirst({
@@ -391,7 +396,7 @@ export async function createSaleReturnAction(formData: FormData) {
 
         // 👈 Deduct physical cash from active branch cash drawer account
         const cashDrawer = await tx.account.findFirst({
-          where: { branchId: user.activeBranchId, type: "CASH", status: "active" },
+          where: { shopId: user.shopId, branchId: user.activeBranchId, type: "CASH", status: "active" },
         });
         if (cashDrawer) {
           await tx.account.update({
@@ -447,8 +452,8 @@ export async function createSaleReturnAction(formData: FormData) {
       returnNo,
       returnData,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Sale return error:", error);
-    return { success: false, error: error.message || "পণ্য ফেরত সম্পন্ন করা সম্ভব হয়নি।" };
+    return { success: false, error: getErrorMessage(error, "পণ্য ফেরত সম্পন্ন করা সম্ভব হয়নি।") };
   }
 }

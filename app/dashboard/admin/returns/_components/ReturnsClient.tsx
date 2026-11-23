@@ -171,9 +171,16 @@ export default function ReturnsClient({
                 customerName: ret.customerName,
                 totalRefund: ret.totalRefund,
                 refundMethod: ret.refundMethod,
-                branchName: "Main Branch",
-                cashierName: "Staff",
-                items: [],
+                branchName: ret.branchName || "Main Branch",
+                cashierName: ret.cashierName || "Staff",
+                items: (ret.items || []).map((it) => ({
+                  productName: it.productName,
+                  quantity: Number(it.quantity),
+                  unitCode: it.unitCode || "pcs",
+                  refundPrice: Number(it.refundPrice),
+                  lineTotal: Math.round(Number(it.quantity) * Number(it.refundPrice) * 100) / 100,
+                  condition: it.itemCondition,
+                })),
               });
               setTimeout(() => window.print(), 100);
             }}

@@ -152,10 +152,9 @@ export async function getSales(
       dueAmount: Number(s.dueAmount),
       changeAmount: Number(s.changeAmount),
       paymentMethod: s.paymentMethod,
-      paymentStatus: s.paymentStatus as any,
+      paymentStatus: s.paymentStatus,
       notes: s.notes,
       branchId: s.branchId,
-      // 👈 Resolves real branch name from MySQL relation
       branchName: s.branch?.name || "Main Branch",
       customerId: s.customerId,
       // 👈 Resolves real customer name from MySQL relation
@@ -221,7 +220,7 @@ export async function getSaleById(shopId: string, saleId: string): Promise<ISale
     dueAmount: Number(s.dueAmount),
     changeAmount: Number(s.changeAmount),
     paymentMethod: s.paymentMethod,
-    paymentStatus: s.paymentStatus as any,
+    paymentStatus: s.paymentStatus,
     notes: s.notes,
     branchId: s.branchId,
     branchName: s.branch?.name || "Main Branch",

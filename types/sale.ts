@@ -183,6 +183,7 @@ export interface ISaleReturn {
   customerId?: string | null;
   customerName: string;
   branchId: string;
+  branchName?: string | null;
   cashierName?: string;
   items?: ISaleReturnItem[];
   createdAt: Date | string;

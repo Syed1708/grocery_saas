@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types";
+import { getErrorMessage } from "@/lib/utils";
 import { CheckoutPayload, ISplitPaymentDetails } from "@/types/sale";
 
 /**
@@ -130,7 +131,13 @@ export async function checkoutAction(payload: CheckoutPayload) {
       if (!customerId) {
         return { success: false, error: "খুচরা ক্রেতার কাছে বাকি বিক্রয় সম্ভব নয়। স্থায়ী কাস্টমার নির্বাচন করুন।" };
       }
-      const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+      const customer = await prisma.customer.findFirst({
+        where: {
+          id: customerId,
+          shopId: user.shopId,
+          OR: [{ branchId: user.activeBranchId }, { branchId: null }],
+        },
+      });
       if (!customer) {
         return { success: false, error: "কাস্টমার অ্যাকাউন্ট পাওয়া যায়নি।" };
       }
@@ -261,9 +268,9 @@ export async function checkoutAction(payload: CheckoutPayload) {
       grandTotal,
       changeAmount,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("POS Checkout Error:", error);
-    return { success: false, error: error.message || "বিক্রয় সম্পন্ন করা সম্ভব হয়নি।" };
+    return { success: false, error: getErrorMessage(error, "বিক্রয় সম্পন্ন করা সম্ভব হয়নি।") };
   }
 }
 
@@ -275,15 +282,18 @@ export async function checkoutAction(payload: CheckoutPayload) {
  */
 export async function voidSaleAction(saleId: string) {
   try {
-    const user = await requireAuth();
+    const user = await requireAuth({ requireActiveStatus: true });
 
     // 🛡️ Strict Zero-Trust Guard: ONLY Store Owner can void sales
     if (user.role !== "OWNER") {
       return { success: false, error: "অনুমতি নেই: শুধুমাত্র দোকানের মালিক বিক্রয় চালান বাতিল বা মুছে ফেলতে পারেন।" };
     }
+    if (!user.activeBranchId) {
+      return { success: false, error: "সক্রিয় ব্রাঞ্চ নির্ধারণ করা নেই।" };
+    }
 
-    const sale = await prisma.sale.findUnique({
-      where: { id: saleId, shopId: user.shopId },
+    const sale = await prisma.sale.findFirst({
+      where: { id: saleId, shopId: user.shopId, branchId: user.activeBranchId },
       include: {
         items: true,
         returns: true,
@@ -395,8 +405,8 @@ export async function voidSaleAction(saleId: string) {
     revalidatePath("/dashboard/admin/customers");
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("voidSaleAction error:", error);
-    return { success: false, error: error.message || "চালান বাতিল করা ব্যর্থ হয়েছে।" };
+    return { success: false, error: getErrorMessage(error, "চালান বাতিল করা ব্যর্থ হয়েছে।") };
   }
 }

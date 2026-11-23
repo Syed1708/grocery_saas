@@ -343,6 +343,17 @@ on delete, reverse and remove. Do all of it inside one `prisma.$transaction`. Le
 reference fall back to their old CASH effect. Never edit/delete an expense or income without
 adjusting the correct account.
 
+**POS / sales / returns / closings:** checkout requires `POS_ACCESS`; voiding a sale is
+OWNER-only, needs `requireActiveStatus`, and must load the sale by `{ id, shopId, activeBranchId }`.
+Validate a submitted `customerId` with `{ id, shopId, OR: [{ branchId: active }, { branchId: null }] }`.
+Returns viewing uses `POS_ACCESS` (the sidebar entry itself is gated by `POS_REFUND_RETURN`);
+processing a return requires `POS_REFUND_RETURN`, whitelists `cash|balance`, re-checks remaining
+quantity per product, and only refunds cash up to the amount actually paid. Cash-drawer lookups
+always include `shopId` + `branchId`. Z-closings require `REPORTS_CLOSING_Z`, and the server
+recomputes every total from `getCurrentShiftSummary` — the client may only submit `countedCash` and
+`notes`; never trust client-sent shift totals. Print/history queries must include the return line
+items plus branch and cashier names so reprints are complete.
+
 **Loan corrections:** while `totalPaid === 0`, editing type/amount/due-date is allowed and the
 linked account effect is reversed/applied atomically. After repayments, terms lock; the owner-only
 `deleteLoanAction` voids the loan and rolls back the principal + every installment on their

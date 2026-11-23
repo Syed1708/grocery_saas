@@ -27,23 +27,7 @@ export default function ClosingFormModal({ isOpen, onClose, summary, currencySym
     e.preventDefault();
     setLoading(true);
 
-    const payload = {
-      closingDate: new Date().toISOString().split("T")[0],
-      openingCash: summary.openingCash,
-      cashSales: summary.cashSales,
-      cashDueCollected: summary.cashDueCollected,
-      cashOtherIncome: summary.cashOtherIncome,
-      cashExpenses: summary.cashExpenses,
-      cashSupplierPaid: summary.cashSupplierPaid,
-      cashRefunds: summary.cashRefunds,
-      expectedCash: summary.expectedCash,
-      countedCash,
-      difference,
-      totalInvoices: summary.totalInvoices,
-      notes,
-    };
-
-    const res = await createClosingAction(payload);
+    const res = await createClosingAction({ countedCash, notes });
     setLoading(false);
 
     if (res.success) {

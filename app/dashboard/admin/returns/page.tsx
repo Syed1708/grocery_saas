@@ -13,8 +13,8 @@ export default async function ReturnsPage() {
 
   const { shopId, activeBranchId } = user;
 
-  // 2. Fetch Returns scoped strictly to the active branch
-  const [rawReturns, rawShop] = await Promise.all([
+  // 2. Fetch Returns scoped strictly to the active branch (already number-normalized)
+  const [returns, rawShop] = await Promise.all([
     getSaleReturns(shopId, activeBranchId),
     prisma.shop.findUnique({
       where: { id: shopId },
@@ -27,17 +27,6 @@ export default async function ReturnsPage() {
       invoiceFooter: true, },
     }),
   ]);
-
-  // 3. Safe Decimal-to-Number conversion
-  const returns = (rawReturns || []).map((r: any) => ({
-    ...r,
-    totalRefund: Number(r.totalRefund || 0),
-    items: (r.items || []).map((it: any) => ({
-      ...it,
-      quantity: Number(it.quantity || 0),
-      refundPrice: Number(it.refundPrice || 0),
-    })),
-  }));
 
   const shop: IPosShopConfig = {
   name: rawShop?.name || "GROCERY STORE",
