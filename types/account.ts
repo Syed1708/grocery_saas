@@ -34,6 +34,16 @@ export interface IBankCheque {
   createdAt: Date;
 }
 
+export interface ILoanInstallment {
+  id: string;
+  voucherNo: string | null;
+  paymentDate: Date;
+  amount: number;
+  paymentMethod: string;
+  note: string | null;
+  accountName: string | null;
+}
+
 export interface ILoan {
   id: string;
   type: "TAKEN" | "GIVEN";

@@ -16,6 +16,7 @@ import ChequeModal from "./modals/ChequeModal";
 import ClearChequeModal from "./modals/ClearChequeModal";
 import LoanModal from "./modals/LoanModal";
 import InstallmentModal from "./modals/InstallmentModal";
+import LoanInstallmentsModal from "./modals/LoanInstallmentsModal";
 import {
   createAccountAction,
   updateAccountAction,
@@ -26,8 +27,8 @@ import {
   deleteChequeAction,
   updateChequeAction,
 } from "@/app/actions/account-actions";
-import { createLoanAction, addLoanInstallmentAction, deleteLoanAction, updateLoanAction } from "@/app/actions/loan-actions";
-import { IAccount, IBankCheque, ILoan } from "@/types";
+import { createLoanAction, addLoanInstallmentAction, deleteLoanAction, updateLoanAction, getLoanInstallmentsAction } from "@/app/actions/loan-actions";
+import { IAccount, IBankCheque, ILoan, ILoanInstallment } from "@/types";
 
 export default function AccountsClient({
   accounts,
@@ -71,6 +72,11 @@ export default function AccountsClient({
   const [clearLoading, setClearLoading] = useState(false);
   const [installmentsLoan, setInstallmentsLoan] = useState<ILoan | null>(null);
   const [installmentLoading, setInstallmentLoading] = useState(false);
+
+  // Installment history viewer
+  const [viewLoan, setViewLoan] = useState<ILoan | null>(null);
+  const [loanInstallments, setLoanInstallments] = useState<ILoanInstallment[]>([]);
+  const [loanViewLoading, setLoanViewLoading] = useState(false);
 
   const totalBalance = accounts.reduce((sum, a) => sum + a.currentBalance, 0);
   const cashBalance = accounts.filter((a) => a.type === "CASH").reduce((sum, a) => sum + a.currentBalance, 0);
@@ -118,6 +124,16 @@ export default function AccountsClient({
     } else {
       toast.error(res.error || "Failed to record installment.");
     }
+  }
+
+  async function openLoanInstallments(loan: ILoan) {
+    setViewLoan(loan);
+    setLoanInstallments([]);
+    setLoanViewLoading(true);
+    const res = await getLoanInstallmentsAction(loan.id);
+    setLoanViewLoading(false);
+    setLoanInstallments(res.data);
+    if (!res.success && res.error) toast.error(res.error);
   }
 
   return (
@@ -215,6 +231,7 @@ export default function AccountsClient({
           loans={loans}
           currencySymbol={currencySymbol}
           onPayInstallment={setInstallmentsLoan}
+          onViewLoan={openLoanInstallments}
           onEditLoan={loanCrud.openEdit}
           onDeleteLoan={loanCrud.setDeleteTarget}
         />
@@ -274,6 +291,13 @@ export default function AccountsClient({
         onSubmit={handleInstallmentSubmit}
         loading={installmentLoading}
         accounts={accounts}
+        currencySymbol={currencySymbol}
+      />
+      <LoanInstallmentsModal
+        loan={viewLoan}
+        installments={loanInstallments}
+        loading={loanViewLoading}
+        onClose={() => setViewLoan(null)}
         currencySymbol={currencySymbol}
       />
 

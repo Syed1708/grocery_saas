@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { loanSchema } from "@/lib/validations";
 import { PERMISSIONS } from "@/types";
+import type { ILoanInstallment } from "@/types";
 import { getErrorMessage } from "@/lib/utils";
 
 export async function createLoanAction(formData: FormData) {
@@ -190,6 +191,44 @@ export async function addLoanInstallmentAction(formData: FormData) {
     return { success: true };
   } catch (error) {
     return { success: false, error: getErrorMessage(error, "Failed to record installment.") };
+  }
+}
+
+export async function getLoanInstallmentsAction(
+  loanId: string
+): Promise<{ success: boolean; data: ILoanInstallment[]; error?: string }> {
+  try {
+    const user = await requireAuth({
+      requiredPermission: PERMISSIONS.FINANCE_LOANS,
+      requireActiveStatus: true,
+    });
+
+    const loan = await prisma.loan.findFirst({
+      where: { id: loanId, shopId: user.shopId, branchId: user.activeBranchId },
+      select: { id: true },
+    });
+    if (!loan) return { success: false, data: [], error: "Loan not found." };
+
+    const installments = await prisma.loanInstallment.findMany({
+      where: { loanId, branchId: user.activeBranchId },
+      include: { account: { select: { name: true } } },
+      orderBy: { paymentDate: "desc" },
+    });
+
+    return {
+      success: true,
+      data: installments.map((i) => ({
+        id: i.id,
+        voucherNo: i.voucherNo,
+        paymentDate: i.paymentDate,
+        amount: Number(i.amount),
+        paymentMethod: i.paymentMethod,
+        note: i.note,
+        accountName: i.account?.name || null,
+      })),
+    };
+  } catch (error) {
+    return { success: false, data: [], error: getErrorMessage(error, "Failed to load installments.") };
   }
 }
 

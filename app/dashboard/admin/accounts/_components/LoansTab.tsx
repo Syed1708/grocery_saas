@@ -10,12 +10,14 @@ export default function LoansTab({
   loans,
   currencySymbol,
   onPayInstallment,
+  onViewLoan,
   onEditLoan,
   onDeleteLoan,
 }: {
   loans: ILoan[];
   currencySymbol: string;
   onPayInstallment: (l: ILoan) => void;
+  onViewLoan: (l: ILoan) => void;
   onEditLoan: (l: ILoan) => void;
   onDeleteLoan: (l: ILoan) => void;
 }) {
@@ -100,6 +102,8 @@ export default function LoansTab({
               </button>
             )}
             <TableActions
+              onView={() => onViewLoan(loan)}
+              viewPermission={PERMISSIONS.FINANCE_LOANS}
               onEdit={() => onEditLoan(loan)}
               editPermission={PERMISSIONS.FINANCE_LOANS}
               onDelete={() => onDeleteLoan(loan)}
