@@ -380,8 +380,11 @@ subtracts) and branch-scoped rations. Writes verify `partnerId` and `productId` 
 verify `accountId` belongs to the active branch, block drawings above the account balance, and
 guard stock with `updateMany({ quantity: { gte } })`. Every drawing/injection writes both an
 `AccountTransaction` (`referenceType: "PARTNER"`) and the partner transaction. Partner create and
-update are separate actions (the client uses `useCrudModal`). The report lives at
-`/dashboard/admin/reports/family` and is listed in the reports nav and overview grid.
+update are separate actions (the client uses `useCrudModal`). Drawings/bills and grocery rations
+also support edit and delete: editing a drawing reverses the old account effect then applies the
+new one; deleting reverses it. Editing/deleting a ration restores the old stock lines before
+re-applying/deleting, so stock never drifts. The report lives at
+`/dashboard/admin/reports/family` (CSV + A4 PDF) and is listed in the reports nav and overview grid.
 
 **POS / sales / returns / closings:** checkout requires `POS_ACCESS`; voiding a sale is
 OWNER-only, needs `requireActiveStatus`, and must load the sale by `{ id, shopId, activeBranchId }`.

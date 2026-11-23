@@ -5,7 +5,7 @@ import { Plus, Trash2 } from "lucide-react";
 import FormModal from "@/components/common/FormModal";
 import { Input } from "@/components/common/ui/Input";
 import { Select } from "@/components/common/ui/Select";
-import { IPartner } from "@/types/partner";
+import { IPartner, IPartnerRation } from "@/types/partner";
 
 export default function RationModal({
   isOpen,
@@ -14,6 +14,7 @@ export default function RationModal({
   loading = false,
   partners,
   products,
+  ration,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -21,11 +22,14 @@ export default function RationModal({
   loading?: boolean;
   partners: IPartner[];
   products: { id: string; name: string; purchasePrice: number }[];
+  ration?: IPartnerRation | null;
 }) {
-  const [partnerId, setPartnerId] = useState(partners[0]?.id || "");
-  const [items, setItems] = useState<{ productId: string; quantity: number }[]>([
-    { productId: products[0]?.id || "", quantity: 1 },
-  ]);
+  const [partnerId, setPartnerId] = useState(ration?.partnerId || partners[0]?.id || "");
+  const [items, setItems] = useState<{ productId: string; quantity: number }[]>(
+    ration && ration.items.length > 0
+      ? ration.items.map((it) => ({ productId: it.productId, quantity: it.quantity }))
+      : [{ productId: products[0]?.id || "", quantity: 1 }]
+  );
 
   const partnerOptions = partners.map((p) => ({
     value: p.id,
@@ -57,9 +61,10 @@ export default function RationModal({
       isOpen={isOpen}
       onClose={onClose}
       onSubmit={handleFormSubmit}
-      title="বাসার রেশন বা নিত্যপণ্য এন্ট্রি (কেনা মূল্যে)"
+      title={ration ? "বাসার রেশন সম্পাদনা (Edit Ration)" : "বাসার রেশন বা নিত্যপণ্য এন্ট্রি (কেনা মূল্যে)"}
       description="নেওয়া পণ্যগুলো ক্রয়মূল্যে পার্টনার লেজারে যুক্ত হবে এবং স্টক সমন্বয় হবে।"
       loading={loading}
+      isEditing={Boolean(ration)}
       submitLabel="স্টক থেকে ইস্যু করুন"
       maxWidth="xl"
     >

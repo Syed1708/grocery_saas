@@ -3,7 +3,8 @@
 
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { DataTable } from "@/components/common/data-table/DataTable";
-import { IPartnerTransaction } from "@/types/partner";
+import { TableActions } from "@/components/common/ui/table/TableHelpers";
+import { IPartnerTransaction, PERMISSIONS } from "@/types";
 import { format } from "date-fns";
 
 const TYPE_BADGES: Record<string, { label: string; bg: string }> = {
@@ -16,9 +17,13 @@ const TYPE_BADGES: Record<string, { label: string; bg: string }> = {
 export default function DrawingsTab({
   transactions,
   currencySymbol = "৳",
+  onEdit,
+  onDelete,
 }: {
   transactions: IPartnerTransaction[];
   currencySymbol?: string;
+  onEdit: (t: IPartnerTransaction) => void;
+  onDelete: (t: IPartnerTransaction) => void;
 }) {
   const columns: ColumnDef<IPartnerTransaction>[] = [
     {
@@ -71,6 +76,18 @@ export default function DrawingsTab({
           </span>
         );
       },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <TableActions
+          onEdit={() => onEdit(row.original)}
+          editPermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
+          onDelete={() => onDelete(row.original)}
+          deletePermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
+        />
+      ),
     },
   ];
 

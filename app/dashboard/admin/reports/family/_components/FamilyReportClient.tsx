@@ -19,6 +19,7 @@ import {
   IPartnerRation,
   IPartnerTransaction,
 } from "@/types/partner";
+import FamilyReportPdf from "./FamilyReportPdf";
 
 const RELATIONSHIP_LABELS: Record<string, string> = {
   FATHER: "বাবা (Father)",
@@ -253,8 +254,6 @@ export default function FamilyReportClient({
 
   return (
     <div className="space-y-4">
-      <style dangerouslySetInnerHTML={{ __html: "@media print { @page { size: A4 landscape; margin: 8mm; } }" }} />
-
       {/* Screen toolbar */}
       <div className="print:hidden bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-3 rounded-xl space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -270,7 +269,7 @@ export default function FamilyReportClient({
               onClick={() => window.print()}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 dark:bg-neutral-700 text-white text-xs font-semibold rounded-lg cursor-pointer"
             >
-              <Printer size={13} /> Print
+              <Printer size={13} /> PDF (A4)
             </button>
             {hasFilters && (
               <button
@@ -311,7 +310,7 @@ export default function FamilyReportClient({
         </div>
       </div>
 
-      {/* Print-only title */}
+      {/* Print-only title is rendered by FamilyReportPdf */}
       <div className="hidden print:block mb-3">
         <h1 className="text-lg font-bold">{shop.name} — Family Ledger Report</h1>
         <p className="text-xs">
@@ -421,6 +420,14 @@ export default function FamilyReportClient({
         </div>
         <DataTable table={rationTable} columns={rationColumns} />
       </section>
+
+      <FamilyReportPdf
+        data={data}
+        currencySymbol={currencySymbol}
+        shop={shop}
+        branchName={branchName}
+        periodLabel={periodLabel}
+      />
     </div>
   );
 }

@@ -3,15 +3,20 @@
 
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { DataTable } from "@/components/common/data-table/DataTable";
-import { IPartnerRation } from "@/types/partner";
+import { TableActions } from "@/components/common/ui/table/TableHelpers";
+import { IPartnerRation, PERMISSIONS } from "@/types";
 import { format } from "date-fns";
 
 export default function RationsTab({
   rations,
   currencySymbol = "৳",
+  onEdit,
+  onDelete,
 }: {
   rations: IPartnerRation[];
   currencySymbol?: string;
+  onEdit: (r: IPartnerRation) => void;
+  onDelete: (r: IPartnerRation) => void;
 }) {
   const columns: ColumnDef<IPartnerRation>[] = [
     {
@@ -51,6 +56,18 @@ export default function RationsTab({
         <span className="font-mono font-black text-amber-600 text-sm">
           {currencySymbol}{Number(row.getValue("totalCost")).toLocaleString()}
         </span>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <TableActions
+          onEdit={() => onEdit(row.original)}
+          editPermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
+          onDelete={() => onDelete(row.original)}
+          deletePermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
+        />
       ),
     },
   ];

@@ -18,7 +18,11 @@ import {
   createPartnerAction,
   updatePartnerAction,
   recordPartnerTransactionAction,
+  updatePartnerTransactionAction,
+  deletePartnerTransactionAction,
   recordPartnerRationAction,
+  updatePartnerRationAction,
+  deletePartnerRationAction,
   deletePartnerAction,
 } from "@/app/actions/partner-actions";
 
@@ -42,6 +46,11 @@ export default function FamilyLedgerClient({
   const [rationModalOpen, setRationModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
+  const [editingDrawing, setEditingDrawing] = useState<IPartnerTransaction | null>(null);
+  const [deleteDrawingTarget, setDeleteDrawingTarget] = useState<IPartnerTransaction | null>(null);
+  const [editingRation, setEditingRation] = useState<IPartnerRation | null>(null);
+  const [deleteRationTarget, setDeleteRationTarget] = useState<IPartnerRation | null>(null);
+
   const partnerCrud = useCrudModal<IPartner>({
     createAction: createPartnerAction,
     updateAction: updatePartnerAction,
@@ -59,12 +68,15 @@ export default function FamilyLedgerClient({
     e.preventDefault();
     setActionLoading(true);
     const formData = new FormData(e.currentTarget);
-    const res = await recordPartnerTransactionAction(formData);
+    const res = editingDrawing
+      ? await updatePartnerTransactionAction(formData)
+      : await recordPartnerTransactionAction(formData);
     setActionLoading(false);
 
     if (res.success) {
-      toast.success("Drawing recorded & account adjusted!");
+      toast.success(editingDrawing ? "Drawing updated & account adjusted!" : "Drawing recorded & account adjusted!");
       setDrawingModalOpen(false);
+      setEditingDrawing(null);
     } else {
       toast.error(res.error || "Transaction failed.");
     }
@@ -75,14 +87,45 @@ export default function FamilyLedgerClient({
     items: { productId: string; quantity: number }[];
   }) {
     setActionLoading(true);
-    const res = await recordPartnerRationAction(data);
+    const res = editingRation
+      ? await updatePartnerRationAction(editingRation.id, data)
+      : await recordPartnerRationAction(data);
     setActionLoading(false);
 
     if (res.success) {
-      toast.success("Home groceries issued & stock deducted!");
+      toast.success(editingRation ? "Ration updated & stock adjusted!" : "Home groceries issued & stock deducted!");
       setRationModalOpen(false);
+      setEditingRation(null);
     } else {
       toast.error(res.error || "Failed to issue ration.");
+    }
+  }
+
+  async function handleDeleteDrawing() {
+    if (!deleteDrawingTarget) return;
+    setActionLoading(true);
+    const res = await deletePartnerTransactionAction(deleteDrawingTarget.id);
+    setActionLoading(false);
+
+    if (res.success) {
+      toast.success("Drawing deleted & account reversed.");
+      setDeleteDrawingTarget(null);
+    } else {
+      toast.error(res.error || "Failed to delete drawing.");
+    }
+  }
+
+  async function handleDeleteRation() {
+    if (!deleteRationTarget) return;
+    setActionLoading(true);
+    const res = await deletePartnerRationAction(deleteRationTarget.id);
+    setActionLoading(false);
+
+    if (res.success) {
+      toast.success("Ration deleted & stock restored.");
+      setDeleteRationTarget(null);
+    } else {
+      toast.error(res.error || "Failed to delete ration.");
     }
   }
 
@@ -138,7 +181,7 @@ export default function FamilyLedgerClient({
           )}
           {activeTab === "drawings" && (
             <button
-              onClick={() => setDrawingModalOpen(true)}
+              onClick={() => { setEditingDrawing(null); setDrawingModalOpen(true); }}
               className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl shadow-xs transition cursor-pointer"
             >
               <ArrowDownRight size={15} /> Record Drawing
@@ -146,7 +189,7 @@ export default function FamilyLedgerClient({
           )}
           {activeTab === "rations" && (
             <button
-              onClick={() => setRationModalOpen(true)}
+              onClick={() => { setEditingRation(null); setRationModalOpen(true); }}
               className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-xl shadow-xs transition cursor-pointer"
             >
               <Plus size={15} /> Issue Groceries
@@ -164,8 +207,22 @@ export default function FamilyLedgerClient({
           onDelete={partnerCrud.setDeleteTarget}
         />
       )}
-      {activeTab === "drawings" && <DrawingsTab transactions={transactions} currencySymbol={currencySymbol} />}
-      {activeTab === "rations" && <RationsTab rations={rations} currencySymbol={currencySymbol} />}
+      {activeTab === "drawings" && (
+        <DrawingsTab
+          transactions={transactions}
+          currencySymbol={currencySymbol}
+          onEdit={(t) => { setEditingDrawing(t); setDrawingModalOpen(true); }}
+          onDelete={setDeleteDrawingTarget}
+        />
+      )}
+      {activeTab === "rations" && (
+        <RationsTab
+          rations={rations}
+          currencySymbol={currencySymbol}
+          onEdit={(r) => { setEditingRation(r); setRationModalOpen(true); }}
+          onDelete={setDeleteRationTarget}
+        />
+      )}
 
       {/* MODALS */}
       <PartnerModal
@@ -178,22 +235,24 @@ export default function FamilyLedgerClient({
         errors={partnerCrud.errors}
       />
       <DrawingModal
-        key={`drawing-${drawingModalOpen}`}
+        key={editingDrawing?.id || `drawing-${drawingModalOpen}`}
         isOpen={drawingModalOpen}
-        onClose={() => setDrawingModalOpen(false)}
+        onClose={() => { setDrawingModalOpen(false); setEditingDrawing(null); }}
         onSubmit={handleDrawingSubmit}
         loading={actionLoading}
         partners={partners}
         accounts={accounts}
+        transaction={editingDrawing}
       />
       <RationModal
-        key={`ration-${rationModalOpen}`}
+        key={editingRation?.id || `ration-${rationModalOpen}`}
         isOpen={rationModalOpen}
-        onClose={() => setRationModalOpen(false)}
+        onClose={() => { setRationModalOpen(false); setEditingRation(null); }}
         onSubmit={handleRationSubmit}
         loading={actionLoading}
         partners={partners}
         products={products}
+        ration={editingRation}
       />
 
       {/* CONFIRMATION DIALOG */}
@@ -204,6 +263,24 @@ export default function FamilyLedgerClient({
         title="Delete Partner"
         message={`Are you sure you want to delete partner "${partnerCrud.deleteTarget?.name}"?`}
         loading={partnerCrud.loading}
+      />
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteDrawingTarget)}
+        onClose={() => setDeleteDrawingTarget(null)}
+        onConfirm={handleDeleteDrawing}
+        title="Delete Drawing / Bill"
+        message={`Delete voucher #${deleteDrawingTarget?.voucherNo}? The account effect will be reversed.`}
+        loading={actionLoading}
+      />
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteRationTarget)}
+        onClose={() => setDeleteRationTarget(null)}
+        onConfirm={handleDeleteRation}
+        title="Delete Home Grocery Ration"
+        message={`Delete ration #${deleteRationTarget?.rationNo}? Its stock will be restored.`}
+        loading={actionLoading}
       />
     </div>
   );
