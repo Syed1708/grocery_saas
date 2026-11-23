@@ -212,6 +212,7 @@ export const companyAssetSchema = z.object({
   currentValue: z.coerce.number().min(0).default(0),
   condition: z.enum(["GOOD", "MAINTENANCE", "DAMAGED", "DISPOSED"]).default("GOOD"),
   notes: z.string().max(255).optional().nullable(),
+  paymentMethod: z.string().default("cash"),
 });
 
 // 16. Owner Equity Schema (Capital vs Drawing)

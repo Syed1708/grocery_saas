@@ -19,7 +19,7 @@ export default function ExpenseModal({ isOpen, onClose, onSubmit, loading, expen
       <div className="grid grid-cols-3 gap-3">
         <FormField type="date" label="Date" name="expenseDate" required defaultValue={expense?.expenseDate ? new Date(expense.expenseDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]} error={errors.expenseDate} />
         <FormField type="number" label={`Amount (${currencySymbol})`} name="amount" step="0.01" required defaultValue={expense?.amount ?? ""} placeholder="0.00" error={errors.amount} />
-        <FormField type="select" label="Payment Source" name="paymentMethod" defaultValue={expense?.paymentMethod || "cash"} options={[{ label: "Cash Drawer", value: "cash" }, { label: "Bank Account", value: "bank" }, { label: "bKash", value: "bkash" }]} error={errors.paymentMethod} />
+        <FormField type="select" label="Payment Source" name="paymentMethod" defaultValue={expense?.paymentMethod || "cash"} options={[{ label: "Cash Drawer", value: "cash" }, { label: "Bank Account", value: "bank" }, { label: "bKash", value: "bkash" }, { label: "Nagad", value: "nagad" }, { label: "Rocket", value: "rocket" }, { label: "Other", value: "other" }]} error={errors.paymentMethod} />
       </div>
       <FormField type="text" label="Reference / Memo Note" name="reference" defaultValue={expense?.reference || ""} placeholder="e.g. Store rent for October" error={errors.reference} />
       <FormField type="textarea" label="Notes" name="note" rows={2} defaultValue={expense?.note || ""} error={errors.note} />

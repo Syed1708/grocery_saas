@@ -21,6 +21,7 @@ export default function AssetModal({ isOpen, onClose, onSubmit, loading, asset, 
         <FormField type="number" label={`Current Valuation (${currencySymbol})`} name="currentValue" step="0.01" required defaultValue={asset?.currentValue ?? ""} placeholder="0.00" error={errors.currentValue} />
       </div>
       <FormField type="select" label="Condition" name="condition" defaultValue={asset?.condition || "GOOD"} options={[{ label: "Good", value: "GOOD" }, { label: "Maintenance Needed", value: "MAINTENANCE" }, { label: "Damaged", value: "DAMAGED" }, { label: "Disposed", value: "DISPOSED" }]} error={errors.condition} />
+      <FormField type="select" label="Paid From" name="paymentMethod" defaultValue="cash" options={[{ label: "Cash Drawer", value: "cash" }, { label: "Bank Account", value: "bank" }, { label: "bKash", value: "bkash" }, { label: "Nagad", value: "nagad" }, { label: "Rocket", value: "rocket" }, { label: "Other", value: "other" }]} error={errors.paymentMethod} />
       <FormField type="textarea" label="Notes / Serial Number" name="notes" rows={2} defaultValue={asset?.notes || ""} error={errors.notes} />
     </FormModal>
   );

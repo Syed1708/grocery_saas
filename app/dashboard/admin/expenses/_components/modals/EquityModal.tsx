@@ -14,8 +14,9 @@ export default function EquityModal({ isOpen, onClose, onSubmit, loading, equity
       </div>
       <div className="grid grid-cols-2 gap-3">
         <FormField type="date" label="Date" name="transactionDate" required defaultValue={equity?.transactionDate ? new Date(equity.transactionDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]} error={errors.transactionDate} />
-        <FormField type="text" label="Purpose / Reason" name="purpose" defaultValue={equity?.purpose || ""} placeholder="e.g. Additional business capital" error={errors.purpose} />
+        <FormField type="select" label="Payment Source" name="paymentMethod" defaultValue={equity?.paymentMethod || "cash"} options={[{ label: "Cash Drawer", value: "cash" }, { label: "Bank Account", value: "bank" }, { label: "bKash", value: "bkash" }, { label: "Nagad", value: "nagad" }, { label: "Rocket", value: "rocket" }, { label: "Other", value: "other" }]} error={errors.paymentMethod} />
       </div>
+      <FormField type="text" label="Purpose / Reason" name="purpose" defaultValue={equity?.purpose || ""} placeholder="e.g. Additional business capital" error={errors.purpose} />
       <FormField type="textarea" label="Notes" name="notes" rows={2} defaultValue={equity?.notes || ""} error={errors.notes} />
     </FormModal>
   );

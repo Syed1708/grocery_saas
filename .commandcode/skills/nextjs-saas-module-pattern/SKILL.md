@@ -333,9 +333,15 @@ the active branch. CRUD entities use `useCrudModal`; one-off actions (transfer, 
 installment) may keep a small manual modal + loading state.
 
 **Cash reconciliation:** any financial create/update/delete that touches an account must keep the
-drawer in sync — on edit apply `delta = newAmount - oldAmount`, on delete reverse the original
-effect, both inside the same `prisma.$transaction`, and post an `AccountTransaction` for audit.
-Never edit/delete an expense or income without adjusting the cash balance.
+drawer in sync. Resolve the account from the form's `paymentMethod` (`cash` → CASH, `bank` → BANK,
+`bkash` → BKASH, `nagad` → NAGAD, `rocket` → ROCKET, else OTHER) within `shopId` + `activeBranchId`;
+if none exists return a clear error telling the user to create that account. On create post an
+`AccountTransaction` tagged with `referenceType` (EXPENSE / INCOME / ASSET / EQUITY) and
+`referenceId` = record id. On edit, reverse the existing entries for that reference (using each
+entry's own account and `type` to decide the direction), then re-apply with the new amount/method;
+on delete, reverse and remove. Do all of it inside one `prisma.$transaction`. Legacy rows without a
+reference fall back to their old CASH effect. Never edit/delete an expense or income without
+adjusting the correct account.
 
 **Loan corrections:** while `totalPaid === 0`, editing type/amount/due-date is allowed and the
 linked account effect is reversed/applied atomically. After repayments, terms lock; the owner-only
