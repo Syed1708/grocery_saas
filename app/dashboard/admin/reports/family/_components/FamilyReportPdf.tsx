@@ -12,7 +12,17 @@ interface Props {
   shop: { name: string; phone?: string | null; address?: string | null };
   branchName: string;
   periodLabel: string;
+  section: FamilyPdfSection;
 }
+
+export type FamilyPdfSection = "all" | "partners" | "transactions" | "rations";
+
+const SECTION_TITLES: Record<FamilyPdfSection, string> = {
+  all: "Family Ledger Report",
+  partners: "Partner Equity Summary",
+  transactions: "Drawings, Bills & Capital",
+  rations: "Home Groceries",
+};
 
 const RELATIONSHIP_LABELS: Record<string, string> = {
   FATHER: "Father",
@@ -36,6 +46,7 @@ export default function FamilyReportPdf({
   shop,
   branchName,
   periodLabel,
+  section,
 }: Props) {
   const mounted = useSyncExternalStore(
     emptySubscribe,
@@ -82,7 +93,7 @@ export default function FamilyReportPdf({
             {shop.address && <p className="text-[10px]">{shop.address}</p>}
           </div>
           <div className="text-right text-[10px]">
-            <h2 className="text-sm font-black uppercase">Family Ledger Report</h2>
+            <h2 className="text-sm font-black uppercase">{SECTION_TITLES[section]}</h2>
             <p>Period: {periodLabel}</p>
             <p>Printed: {new Date().toLocaleDateString()}</p>
           </div>
@@ -117,8 +128,10 @@ export default function FamilyReportPdf({
         </table>
 
         {/* Partner equity */}
-        <h3 className="font-bold text-[11px] uppercase mt-3 mb-1">Partner Equity Summary</h3>
-        <table className="family-print-table w-full border-collapse border border-neutral-400 text-[9px]">
+        {(section === "all" || section === "partners") && (
+          <>
+            <h3 className="font-bold text-[11px] uppercase mt-3 mb-1">Partner Equity Summary</h3>
+            <table className="family-print-table w-full border-collapse border border-neutral-400 text-[9px]">
           <thead>
             <tr className="bg-neutral-200 font-bold">
               <th className="border border-neutral-400 p-1 text-left">Partner</th>
@@ -146,12 +159,16 @@ export default function FamilyReportPdf({
             ))}
           </tbody>
         </table>
+          </>
+        )}
 
         {/* Transactions */}
-        <h3 className="font-bold text-[11px] uppercase mt-3 mb-1">
-          Drawings, Bills & Capital ({data.transactions.length})
-        </h3>
-        <table className="family-print-table w-full border-collapse border border-neutral-400 text-[9px]">
+        {(section === "all" || section === "transactions") && (
+          <>
+            <h3 className="font-bold text-[11px] uppercase mt-3 mb-1">
+              Drawings, Bills & Capital ({data.transactions.length})
+            </h3>
+            <table className="family-print-table w-full border-collapse border border-neutral-400 text-[9px]">
           <thead>
             <tr className="bg-neutral-200 font-bold">
               <th className="border border-neutral-400 p-1 text-left">Voucher</th>
@@ -179,12 +196,16 @@ export default function FamilyReportPdf({
             ))}
           </tbody>
         </table>
+          </>
+        )}
 
         {/* Rations */}
-        <h3 className="font-bold text-[11px] uppercase mt-3 mb-1">
-          Home Groceries ({data.rations.length})
-        </h3>
-        <table className="family-print-table w-full border-collapse border border-neutral-400 text-[9px]">
+        {(section === "all" || section === "rations") && (
+          <>
+            <h3 className="font-bold text-[11px] uppercase mt-3 mb-1">
+              Home Groceries ({data.rations.length})
+            </h3>
+            <table className="family-print-table w-full border-collapse border border-neutral-400 text-[9px]">
           <thead>
             <tr className="bg-neutral-200 font-bold">
               <th className="border border-neutral-400 p-1 text-left">Ration #</th>
@@ -210,6 +231,8 @@ export default function FamilyReportPdf({
             ))}
           </tbody>
         </table>
+          </>
+        )}
 
         <div className="mt-10 flex justify-between pt-3 border-t border-neutral-400 text-[9px]">
           <div className="text-center w-36 border-t border-black pt-1">Accountant</div>

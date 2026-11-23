@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ColumnDef,
@@ -19,7 +20,7 @@ import {
   IPartnerRation,
   IPartnerTransaction,
 } from "@/types/partner";
-import FamilyReportPdf from "./FamilyReportPdf";
+import FamilyReportPdf, { FamilyPdfSection } from "./FamilyReportPdf";
 
 const RELATIONSHIP_LABELS: Record<string, string> = {
   FATHER: "বাবা (Father)",
@@ -72,6 +73,12 @@ export default function FamilyReportClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [pdfSection, setPdfSection] = useState<FamilyPdfSection>("all");
+
+  const printPdf = (section: FamilyPdfSection) => {
+    flushSync(() => setPdfSection(section));
+    window.print();
+  };
 
   const setFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -266,7 +273,7 @@ export default function FamilyReportClient({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => window.print()}
+              onClick={() => printPdf("all")}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 dark:bg-neutral-700 text-white text-xs font-semibold rounded-lg cursor-pointer"
             >
               <Printer size={13} /> PDF (A4)
@@ -335,9 +342,17 @@ export default function FamilyReportClient({
           <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500">
             Partner Equity Summary
           </h3>
-          <button
-            type="button"
-            onClick={() =>
+          <div className="print:hidden flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => printPdf("partners")}
+              className="flex items-center gap-1 text-[11px] font-semibold text-neutral-700 dark:text-neutral-300 hover:underline cursor-pointer"
+            >
+              <Printer size={12} /> PDF
+            </button>
+            <button
+              type="button"
+              onClick={() =>
               downloadCsv(
                 `family-partners-${Date.now()}.csv`,
                 ["Partner", "Relationship", "Equity %", "Opening", "Injections", "Drawings", "Rations", "Net Equity"],
@@ -353,10 +368,11 @@ export default function FamilyReportClient({
                 ])
               )
             }
-            className="print:hidden flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer"
+            className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer"
           >
             <Download size={12} /> CSV
-          </button>
+            </button>
+          </div>
         </div>
         <DataTable table={partnerTable} columns={partnerColumns} />
       </section>
@@ -367,27 +383,36 @@ export default function FamilyReportClient({
           <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500">
             Drawings, Bills & Capital ({data.transactions.length})
           </h3>
-          <button
-            type="button"
-            onClick={() =>
-              downloadCsv(
-                `family-transactions-${Date.now()}.csv`,
-                ["Voucher", "Date", "Partner", "Type", "Purpose", "Account", "Amount"],
-                data.transactions.map((t) => [
-                  t.voucherNo,
-                  format(new Date(t.transactionDate), "yyyy-MM-dd"),
-                  t.partnerName || "",
-                  t.type,
-                  t.purpose || "",
-                  t.accountName || "",
-                  t.amount,
-                ])
-              )
-            }
-            className="print:hidden flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer"
-          >
-            <Download size={12} /> CSV
-          </button>
+          <div className="print:hidden flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => printPdf("transactions")}
+              className="flex items-center gap-1 text-[11px] font-semibold text-neutral-700 dark:text-neutral-300 hover:underline cursor-pointer"
+            >
+              <Printer size={12} /> PDF
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                downloadCsv(
+                  `family-transactions-${Date.now()}.csv`,
+                  ["Voucher", "Date", "Partner", "Type", "Purpose", "Account", "Amount"],
+                  data.transactions.map((t) => [
+                    t.voucherNo,
+                    format(new Date(t.transactionDate), "yyyy-MM-dd"),
+                    t.partnerName || "",
+                    t.type,
+                    t.purpose || "",
+                    t.accountName || "",
+                    t.amount,
+                  ])
+                )
+              }
+              className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer"
+            >
+              <Download size={12} /> CSV
+            </button>
+          </div>
         </div>
         <DataTable table={transactionTable} columns={transactionColumns} />
       </section>
@@ -398,25 +423,34 @@ export default function FamilyReportClient({
           <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500">
             Home Groceries ({data.rations.length})
           </h3>
-          <button
-            type="button"
-            onClick={() =>
-              downloadCsv(
-                `family-rations-${Date.now()}.csv`,
-                ["Ration #", "Date", "Partner", "Items", "Total Cost"],
-                data.rations.map((r) => [
-                  r.rationNo,
-                  format(new Date(r.rationDate), "yyyy-MM-dd"),
-                  r.partnerName || "",
-                  r.items.map((it) => `${it.productName} x${it.quantity}`).join(" | "),
-                  r.totalCost,
-                ])
-              )
-            }
-            className="print:hidden flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer"
-          >
-            <Download size={12} /> CSV
-          </button>
+          <div className="print:hidden flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => printPdf("rations")}
+              className="flex items-center gap-1 text-[11px] font-semibold text-neutral-700 dark:text-neutral-300 hover:underline cursor-pointer"
+            >
+              <Printer size={12} /> PDF
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                downloadCsv(
+                  `family-rations-${Date.now()}.csv`,
+                  ["Ration #", "Date", "Partner", "Items", "Total Cost"],
+                  data.rations.map((r) => [
+                    r.rationNo,
+                    format(new Date(r.rationDate), "yyyy-MM-dd"),
+                    r.partnerName || "",
+                    r.items.map((it) => `${it.productName} x${it.quantity}`).join(" | "),
+                    r.totalCost,
+                  ])
+                )
+              }
+              className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer"
+            >
+              <Download size={12} /> CSV
+            </button>
+          </div>
         </div>
         <DataTable table={rationTable} columns={rationColumns} />
       </section>
@@ -427,6 +461,7 @@ export default function FamilyReportClient({
         shop={shop}
         branchName={branchName}
         periodLabel={periodLabel}
+        section={pdfSection}
       />
     </div>
   );
