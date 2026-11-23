@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { IStockTransfer } from "@/types/stock-transfer";
+import { IStockTransfer, TransferStatus } from "@/types/stock-transfer";
 
 export async function getStockTransfers(
   shopId: string,
@@ -38,7 +38,7 @@ export async function getStockTransfers(
     transferNo: t.transferNo,
     dispatchDate: t.dispatchDate,
     receiveDate: t.receiveDate,
-    status: t.status as any,
+    status: t.status as TransferStatus,
     totalItems: t.totalItems,
     totalQuantity: Number(t.totalQuantity),
     totalCost: Number(t.totalCost),

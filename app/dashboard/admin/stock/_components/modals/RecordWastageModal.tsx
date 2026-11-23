@@ -6,12 +6,14 @@ import { X, AlertOctagon, Save, Trash2, Search, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { recordStockWastageAction } from "@/app/actions/stock-wastage-actions";
 import { WastageReason } from "@/types/stock-wastage";
+import { IStockProductOption } from "@/types/stock-transfer";
+import { ISupplier } from "@/types";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  products: any[];
-  suppliers?: any[];
+  products: IStockProductOption[];
+  suppliers?: ISupplier[];
   currencySymbol?: string;
 }
 
@@ -80,7 +82,7 @@ export default function RecordWastageModal({
   if (!isOpen) return null;
 
   // 4. Handlers
-  const addItem = (p: any) => {
+  const addItem = (p: IStockProductOption) => {
     const cost = Number(p.costPrice || 0);
     const stock = Number(p.stockQuantity || 0);
 
@@ -205,7 +207,7 @@ export default function RecordWastageModal({
               <label className="block text-xs font-semibold mb-1">নষ্টের প্রধান কারণ:</label>
               <select
                 value={reason}
-                onChange={(e) => setReason(e.target.value as any)}
+                onChange={(e) => setReason(e.target.value as WastageReason)}
                 className="w-full p-2.5 bg-neutral-50 dark:bg-neutral-800 border rounded-xl text-xs font-medium"
               >
                 <option value="ROTTEN_PERISHABLE">পচে নষ্ট (ফলমূল, শাকসবজি)</option>

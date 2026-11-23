@@ -126,6 +126,16 @@ export default function EditTransferModal({
             </div>
           </div>
 
+          <div>
+            <label className="block text-[11px] font-medium text-neutral-500 mb-1">নোট:</label>
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full p-2 text-xs border rounded-lg bg-white dark:bg-neutral-800"
+            />
+          </div>
+
           <div className="border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden divide-y divide-neutral-100 dark:divide-neutral-800">
             {items.map((item) => (
               <div key={item.productId} className="p-3 text-xs flex items-center justify-between gap-3">

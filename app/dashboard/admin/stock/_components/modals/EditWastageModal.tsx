@@ -102,7 +102,7 @@ export default function EditWastageModal({
             <label className="block text-xs font-semibold mb-1">নষ্টের কারণ:</label>
             <select
               value={reason}
-              onChange={(e) => setReason(e.target.value as any)}
+              onChange={(e) => setReason(e.target.value as WastageReason)}
               className="w-full p-2.5 bg-neutral-50 dark:bg-neutral-800 border rounded-xl text-xs font-medium"
             >
               <option value="ROTTEN_PERISHABLE">পচে নষ্ট (ফলমূল, শাকসবজি)</option>

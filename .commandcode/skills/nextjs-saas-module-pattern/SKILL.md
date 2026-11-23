@@ -386,6 +386,17 @@ new one; deleting reverses it. Editing/deleting a ration restores the old stock 
 re-applying/deleting, so stock never drifts. The report lives at
 `/dashboard/admin/reports/family` (CSV + A4 PDF) and is listed in the reports nav and overview grid.
 
+**Stock transfers & wastage:** the stock page uses `requiredAnyPermission: [INVENTORY_TRANSFER,
+INVENTORY_WASTAGE]` (guard supports `requiredAnyPermission`). Dispatch/update/cancel require
+`INVENTORY_TRANSFER` and are limited to the source branch; receive requires the destination branch.
+Wastage create/update require `INVENTORY_WASTAGE`, delete is OWNER-only, and every lookup is scoped
+by `{ id, shopId, activeBranchId }`. Value transfers and losses at `product.purchasePrice` from the
+DB — never trust client `unitCost`. Verify destination/product ids belong to the shop, reject
+duplicate product lines by merging quantities, guard stock with
+`updateMany({ quantity: { gte } })`, and restore with `upsert` + increment so rollbacks work even if
+a stock row was missing. Receiving must reconcile every line (`received + damaged === sent`) and
+auto-log transit damage as a branch wastage. Transfer statuses: DISPATCHED → COMPLETED/CANCELLED.
+
 **POS / sales / returns / closings:** checkout requires `POS_ACCESS`; voiding a sale is
 OWNER-only, needs `requireActiveStatus`, and must load the sale by `{ id, shopId, activeBranchId }`.
 Validate a submitted `customerId` with `{ id, shopId, OR: [{ branchId: active }, { branchId: null }] }`.

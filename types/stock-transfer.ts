@@ -1,5 +1,21 @@
 export type TransferStatus = "DISPATCHED" | "COMPLETED" | "CANCELLED";
 
+export interface IStockBranchOption {
+  id: string;
+  name: string;
+  isMain: boolean;
+}
+
+export interface IStockProductOption {
+  id: string;
+  name: string;
+  barcode: string;
+  brandName: string;
+  unitCode: string;
+  costPrice: number;
+  stockQuantity: number;
+}
+
 export interface IStockTransferItem {
   id?: string;
   productId: string;

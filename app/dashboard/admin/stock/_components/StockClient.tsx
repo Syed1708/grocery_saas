@@ -7,7 +7,8 @@ import { toast } from "sonner";
 
 // Types
 import { IStockWastage } from "@/types/stock-wastage";
-import { IStockTransfer } from "@/types/stock-transfer";
+import { IStockTransfer, IStockBranchOption, IStockProductOption } from "@/types/stock-transfer";
+import { ISupplier } from "@/types";
 
 // Tabs
 import WastageTab from "../_components/tabs/WastageTab";
@@ -34,10 +35,10 @@ import { cancelTransferAction } from "@/app/actions/stock-transfer-actions";
 interface Props {
   wastages: IStockWastage[];
   transfers?: IStockTransfer[];
-  branches?: any[];
+  branches?: IStockBranchOption[];
   currentBranchId: string;
-  suppliers?: any[];
-  products: any[];
+  suppliers?: ISupplier[];
+  products: IStockProductOption[];
   currencySymbol?: string;
   shopName: string;
   userRole?: string;
@@ -239,7 +240,6 @@ export default function StockClient({
           key={receivingTransfer.id}
           transfer={receivingTransfer}
           onClose={() => setReceivingTransfer(null)}
-          currencySymbol={currencySymbol}
         />
       )}
 

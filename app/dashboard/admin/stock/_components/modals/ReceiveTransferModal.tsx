@@ -10,13 +10,11 @@ import { receiveTransferAction } from "@/app/actions/stock-transfer-actions";
 interface Props {
   transfer: IStockTransfer;
   onClose: () => void;
-  currencySymbol?: string;
 }
 
 export default function ReceiveTransferModal({
   transfer,
   onClose,
-  currencySymbol = "৳",
 }: Props) {
   const [loading, setLoading] = useState(false);
 
@@ -106,7 +104,7 @@ export default function ReceiveTransferModal({
 
         <div className="p-5 overflow-y-auto flex-1 space-y-3">
           <p className="text-xs text-neutral-500">
-            বক্সগুলো গুণে দেখুন। কোনো বোতল ভাঙা বা প্যাকেট লিক থাকলে "রাস্তায় ক্ষতি" কলামে লিখুন:
+            বক্সগুলো গুণে দেখুন। কোনো বোতল ভাঙা বা প্যাকেট লিক থাকলে &quot;রাস্তায় ক্ষতি&quot; কলামে লিখুন:
           </p>
 
           <div className="border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden divide-y divide-neutral-100 dark:divide-neutral-800">

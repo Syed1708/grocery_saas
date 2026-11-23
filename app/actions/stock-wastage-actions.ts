@@ -4,69 +4,122 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types";
+import { getErrorMessage } from "@/lib/utils";
 import { CreateWastagePayload, WastageReason } from "@/types/stock-wastage";
+
+const STOCK_REVALIDATE_PATHS = [
+  "/dashboard/admin/stock",
+  "/dashboard/admin/products",
+  "/dashboard/admin/reports/stocks",
+  "/dashboard/admin/reports",
+  "/dashboard",
+];
+
+const WASTAGE_REASONS: WastageReason[] = [
+  "ROTTEN_PERISHABLE",
+  "BROKEN_DAMAGED",
+  "EXPIRED_NO_RETURN",
+  "PEST_DAMAGE",
+  "INTERNAL_STORE_USE",
+  "OTHER",
+];
+
+function isWastageReason(value: unknown): value is WastageReason {
+  return typeof value === "string" && (WASTAGE_REASONS as string[]).includes(value);
+}
+
+function revalidateStock() {
+  for (const path of STOCK_REVALIDATE_PATHS) revalidatePath(path);
+}
+
+async function requireWastageAccess() {
+  return requireAuth({
+    requiredPermission: PERMISSIONS.INVENTORY_WASTAGE,
+    requireActiveStatus: true,
+  });
+}
+
+interface WastageLine {
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitCost: number;
+  lineCost: number;
+  reason: WastageReason;
+}
+
+/** Validate products belong to the shop and value losses at DB purchase cost. */
+async function buildWastageLines(
+  shopId: string,
+  items: { productId: string; quantity: number; reason?: WastageReason }[],
+  defaultReason: WastageReason
+): Promise<WastageLine[]> {
+  if (!items || items.length === 0) {
+    throw new Error("কমপক্ষে একটি নষ্ট পণ্য নির্বাচন করুন।");
+  }
+
+  const productIds = [...new Set(items.map((item) => item.productId))];
+  const products = await prisma.product.findMany({
+    where: { id: { in: productIds }, shopId, status: "active" },
+    select: { id: true, name: true, purchasePrice: true },
+  });
+  const productMap = new Map(products.map((product) => [product.id, product]));
+  const lineMap = new Map<string, WastageLine>();
+
+  for (const item of items) {
+    const quantity = Number(item.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      throw new Error("পণ্যের পরিমাণ শূন্যের বেশি হতে হবে।");
+    }
+    const product = productMap.get(item.productId);
+    if (!product) throw new Error("পণ্য পাওয়া যায়নি বা এই দোকানের নয়।");
+
+    const unitCost = Number(product.purchasePrice);
+    const existing = lineMap.get(item.productId);
+    const totalQty = (existing?.quantity || 0) + quantity;
+
+    lineMap.set(item.productId, {
+      productId: item.productId,
+      productName: product.name,
+      quantity: totalQty,
+      unitCost,
+      lineCost: Math.round(totalQty * unitCost * 100) / 100,
+      reason: isWastageReason(item.reason) ? item.reason : defaultReason,
+    });
+  }
+
+  return [...lineMap.values()];
+}
 
 export async function recordStockWastageAction(payload: CreateWastagePayload) {
   try {
-    const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
-      requireActiveStatus: true,
-    });
-
-    if (!user.activeBranchId) {
-      return { success: false, error: "সক্রিয় ব্রাঞ্চ পাওয়া যায়নি।" };
-    }
-
+    const user = await requireWastageAccess();
     const { date, reason, notes, items } = payload;
-    if (!items || items.length === 0) {
-      return { success: false, error: "কমপক্ষে একটি নষ্ট পণ্য নির্বাচন করুন।" };
+
+    if (!isWastageReason(reason)) {
+      return { success: false, error: "নষ্টের কারণ সঠিক নয়।" };
     }
 
-    let totalQuantity = 0;
-    let totalCost = 0;
-
-    for (const it of items) {
-      const q = Number(it.quantity);
-      const c = Number(it.unitCost);
-      if (q <= 0) return { success: false, error: "পণ্যের পরিমাণ শূন্যের বেশি হতে হবে।" };
-      totalQuantity += q;
-      totalCost += q * c;
-    }
-
+    const lines = await buildWastageLines(user.shopId, items, reason);
+    const totalQuantity = lines.reduce((sum, line) => sum + line.quantity, 0);
+    const totalCost = Math.round(lines.reduce((sum, line) => sum + line.lineCost, 0) * 100) / 100;
     const wastageNo = `WST-${Date.now().toString().slice(-6)}`;
 
-    // 🚀 ATOMIC DATABASE TRANSACTION (Cash Drawer is NOT touched!)
     await prisma.$transaction(async (tx) => {
-      // 1. Verify stock availability & decrement for active branch
-      for (const it of items) {
-        const stockRecord = await tx.productStock.findUnique({
+      for (const line of lines) {
+        const updated = await tx.productStock.updateMany({
           where: {
-            productId_branchId: {
-              productId: it.productId,
-              branchId: user.activeBranchId!,
-            },
+            productId: line.productId,
+            branchId: user.activeBranchId,
+            quantity: { gte: line.quantity },
           },
+          data: { quantity: { decrement: line.quantity } },
         });
-
-        const currentStock = Number(stockRecord?.quantity || 0);
-        if (currentStock < it.quantity) {
-          throw new Error(
-            `পর্যাপ্ত স্টক নেই! বর্তমান স্টক: ${currentStock}, নষ্ট হিসেবে লিখতে চেয়েছেন: ${it.quantity}`
-          );
+        if (updated.count === 0) {
+          throw new Error(`পর্যাপ্ত স্টক নেই: ${line.productName}`);
         }
-
-        await tx.productStock.update({
-          where: {
-            productId_branchId: {
-              productId: it.productId,
-              branchId: user.activeBranchId!,
-            },
-          },
-          data: { quantity: { decrement: it.quantity } },
-        });
       }
 
-      // 2. Create Stock Wastage Record
       await tx.stockWastage.create({
         data: {
           wastageNo,
@@ -75,55 +128,59 @@ export async function recordStockWastageAction(payload: CreateWastagePayload) {
           totalCost,
           reason,
           notes: notes || null,
-          branchId: user.activeBranchId!,
+          branchId: user.activeBranchId,
           shopId: user.shopId,
           items: {
-            create: items.map((i) => ({
-              productId: i.productId,
-              quantity: i.quantity,
-              unitCost: i.unitCost,
-              lineCost: i.quantity * i.unitCost,
-              reason: i.reason || reason,
+            create: lines.map((line) => ({
+              productId: line.productId,
+              quantity: line.quantity,
+              unitCost: line.unitCost,
+              lineCost: line.lineCost,
+              reason: line.reason,
             })),
           },
         },
       });
     });
 
-    revalidatePath("/stock");
-    revalidatePath("/inventory");
-    revalidatePath("/reports");
+    revalidateStock();
     return { success: true, wastageNo };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Stock wastage error:", error);
-    return { success: false, error: error.message || "নষ্ট মাল রেকর্ড করা সম্ভব হয়নি।" };
+    return { success: false, error: getErrorMessage(error, "নষ্ট মাল রেকর্ড করা সম্ভব হয়নি।") };
   }
 }
 
 export async function deleteStockWastageAction(id: string) {
   try {
-    const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
-      requireActiveStatus: true,
-    });
+    const user = await requireWastageAccess();
 
     if (user.role !== "OWNER") {
       return { success: false, error: "শুধুমাত্র মালিক এই রেকর্ড বাতিল করতে পারেন।" };
     }
 
     const wastage = await prisma.stockWastage.findFirst({
-      where: { id, shopId: user.shopId },
+      where: { id, shopId: user.shopId, branchId: user.activeBranchId },
       include: { items: true },
     });
 
     if (!wastage) return { success: false, error: "রেকর্ড পাওয়া যায়নি।" };
 
-    // Atomic Rollback: Revert stock back to shelves
     await prisma.$transaction(async (tx) => {
-      for (const it of wastage.items) {
-        await tx.productStock.updateMany({
-          where: { productId: it.productId, branchId: wastage.branchId },
-          data: { quantity: { increment: it.quantity } },
+      for (const item of wastage.items) {
+        await tx.productStock.upsert({
+          where: {
+            productId_branchId: {
+              productId: item.productId,
+              branchId: wastage.branchId,
+            },
+          },
+          update: { quantity: { increment: item.quantity } },
+          create: {
+            productId: item.productId,
+            branchId: wastage.branchId,
+            quantity: item.quantity,
+          },
         });
       }
 
@@ -131,11 +188,10 @@ export async function deleteStockWastageAction(id: string) {
       await tx.stockWastage.delete({ where: { id } });
     });
 
-    revalidatePath("/stock");
-    revalidatePath("/inventory");
+    revalidateStock();
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "রেকর্ড মুছে ফেলা সম্ভব হয়নি।") };
   }
 }
 
@@ -154,85 +210,71 @@ export async function updateStockWastageAction(payload: {
   }[];
 }) {
   try {
-    const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
-      requireActiveStatus: true,
-    });
-
+    const user = await requireWastageAccess();
     const { id, reason, notes, items } = payload;
-    if (!items || items.length === 0) {
-      return { success: false, error: "কমপক্ষে একটি নষ্ট পণ্য থাকতে হবে।" };
+
+    if (!isWastageReason(reason)) {
+      return { success: false, error: "নষ্টের কারণ সঠিক নয়।" };
     }
 
     const existing = await prisma.stockWastage.findFirst({
-      where: { id, shopId: user.shopId },
+      where: { id, shopId: user.shopId, branchId: user.activeBranchId },
       include: { items: true },
     });
 
     if (!existing) return { success: false, error: "রেকর্ড পাওয়া যায়নি।" };
 
-    const branchId = existing.branchId;
+    const lines = await buildWastageLines(user.shopId, items, reason);
+    const totalQuantity = lines.reduce((sum, line) => sum + line.quantity, 0);
+    const totalCost = Math.round(lines.reduce((sum, line) => sum + line.lineCost, 0) * 100) / 100;
 
-    // Calculate new totals
-    let totalQuantity = 0;
-    let totalCost = 0;
-
-    for (const it of items) {
-      const q = Number(it.quantity);
-      const c = Number(it.unitCost);
-      if (q <= 0) return { success: false, error: "পণ্যের পরিমাণ শূন্যের বেশি হতে হবে।" };
-      totalQuantity += q;
-      totalCost += q * c;
-    }
-
-    // 🚀 ATOMIC DATABASE TRANSACTION
     await prisma.$transaction(async (tx) => {
-      // 1. Revert previous stock deduction (add back to shelf)
+      // 1. Restore old deducted stock
       for (const old of existing.items) {
-        await tx.productStock.updateMany({
-          where: { productId: old.productId, branchId },
-          data: { quantity: { increment: old.quantity } },
+        await tx.productStock.upsert({
+          where: {
+            productId_branchId: {
+              productId: old.productId,
+              branchId: existing.branchId,
+            },
+          },
+          update: { quantity: { increment: old.quantity } },
+          create: {
+            productId: old.productId,
+            branchId: existing.branchId,
+            quantity: old.quantity,
+          },
         });
       }
 
-      // 2. Delete old line items
       await tx.stockWastageItem.deleteMany({ where: { wastageId: id } });
 
-      // 3. Check availability & deduct new quantities
-      for (const it of items) {
-        const stockRecord = await tx.productStock.findUnique({
+      // 2. Deduct the corrected quantities with atomic stock guards
+      for (const line of lines) {
+        const updated = await tx.productStock.updateMany({
           where: {
-            productId_branchId: { productId: it.productId, branchId },
+            productId: line.productId,
+            branchId: existing.branchId,
+            quantity: { gte: line.quantity },
           },
+          data: { quantity: { decrement: line.quantity } },
         });
-
-        const currentStock = Number(stockRecord?.quantity || 0);
-        if (currentStock < it.quantity) {
-          throw new Error(
-            `পর্যাপ্ত স্টক নেই! বর্তমান স্টক: ${currentStock}, নতুন নষ্ট পরিমাণ: ${it.quantity}`
-          );
+        if (updated.count === 0) {
+          throw new Error(`পর্যাপ্ত স্টক নেই: ${line.productName}`);
         }
-
-        await tx.productStock.update({
-          where: {
-            productId_branchId: { productId: it.productId, branchId },
-          },
-          data: { quantity: { decrement: it.quantity } },
-        });
 
         await tx.stockWastageItem.create({
           data: {
             wastageId: id,
-            productId: it.productId,
-            quantity: it.quantity,
-            unitCost: it.unitCost,
-            lineCost: it.quantity * it.unitCost,
-            reason: it.reason || reason,
+            productId: line.productId,
+            quantity: line.quantity,
+            unitCost: line.unitCost,
+            lineCost: line.lineCost,
+            reason: line.reason,
           },
         });
       }
 
-      // 4. Update master wastage record
       await tx.stockWastage.update({
         where: { id },
         data: {
@@ -244,12 +286,10 @@ export async function updateStockWastageAction(payload: {
       });
     });
 
-    revalidatePath("/stock");
-    revalidatePath("/inventory");
-    revalidatePath("/reports");
+    revalidateStock();
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Update wastage error:", error);
-    return { success: false, error: error.message || "আপডেট সম্পন্ন করা সম্ভব হয়নি।" };
+    return { success: false, error: getErrorMessage(error, "আপডেট সম্পন্ন করা সম্ভব হয়নি।") };
   }
 }

@@ -8,7 +8,7 @@ import StockClient from "./_components/StockClient";
 
 export default async function StockOperationsPage() {
   const user = await requireAuth({
-    requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+    requiredAnyPermission: [PERMISSIONS.INVENTORY_TRANSFER, PERMISSIONS.INVENTORY_WASTAGE],
     requireActiveStatus: true,
   });
 
@@ -33,7 +33,7 @@ export default async function StockOperationsPage() {
         brand: { select: { name: true } },
         unit: { select: { shortCode: true } },
         stocks: {
-          where: { branchId: activeBranchId! },
+          where: { branchId: activeBranchId },
           select: { quantity: true },
         },
       },
@@ -61,8 +61,8 @@ export default async function StockOperationsPage() {
         wastages={wastages}
         transfers={transfers} // 👈 Pass transfers
         branches={branches}   // 👈 Pass branches
-        currentBranchId={activeBranchId!}
-        suppliers={suppliers as any}
+        currentBranchId={activeBranchId}
+        suppliers={suppliers}
         products={formattedProducts}
         currencySymbol={shop?.currencySymbol || "৳"}
         shopName={shop?.name || "Grocery Store"}

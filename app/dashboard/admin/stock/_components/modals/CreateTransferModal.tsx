@@ -2,16 +2,17 @@
 "use no memo";
 
 import React, { useState, useRef, useMemo } from "react";
-import { X, ArrowLeftRight, Save, Trash2, Search, Truck } from "lucide-react";
+import { X, ArrowLeftRight, Trash2, Search, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { createAndDispatchTransferAction } from "@/app/actions/stock-transfer-actions";
+import { IStockBranchOption, IStockProductOption } from "@/types/stock-transfer";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  branches: any[];
+  branches: IStockBranchOption[];
   currentBranchId: string;
-  products: any[];
+  products: IStockProductOption[];
   currencySymbol?: string;
 }
 
@@ -63,7 +64,7 @@ export default function CreateTransferModal({
 
   if (!isOpen) return null;
 
-  const addItem = (p: any) => {
+  const addItem = (p: IStockProductOption) => {
     const cost = Number(p.costPrice || 0);
     const stock = Number(p.stockQuantity || 0);
 
@@ -224,6 +225,18 @@ export default function CreateTransferModal({
                 className="w-full p-1.5 text-xs border rounded-lg bg-white dark:bg-neutral-800"
               />
             </div>
+          </div>
+
+          {/* Transfer Notes */}
+          <div>
+            <label className="block text-[11px] font-medium text-neutral-500 mb-1">চালানের নোট (ঐচ্ছিক):</label>
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="যেমন: মিরপুর শাখার জন্য জরুরি ডেলিভারি"
+              className="w-full p-2 text-xs border rounded-xl bg-white dark:bg-neutral-800"
+            />
           </div>
 
           {/* Product Search & Dropdown */}

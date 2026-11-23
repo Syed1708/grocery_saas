@@ -7,6 +7,7 @@ import { DEFAULT_ROLE_PERMISSIONS, PermissionKey, UserRole } from "@/types";
 interface AuthGuardOptions {
   allowedRoles?: UserRole[];
   requiredPermission?: PermissionKey;
+  requiredAnyPermission?: PermissionKey[];
   requireActiveStatus?: boolean;
 }
 
@@ -31,7 +32,8 @@ export async function requireAuth(options: AuthGuardOptions = {}) {
   const needsDbCheck =
     Boolean(options.allowedRoles) ||
     options.requireActiveStatus === true ||
-    Boolean(options.requiredPermission);
+    Boolean(options.requiredPermission) ||
+    Boolean(options.requiredAnyPermission?.length);
 
   let role: UserRole = tokenRole;
 
@@ -64,6 +66,21 @@ export async function requireAuth(options: AuthGuardOptions = {}) {
 
       if (!hasPermission) {
         throw new Error(`FORBIDDEN: Missing permission [${options.requiredPermission}].`);
+      }
+    }
+
+    if (options.requiredAnyPermission?.length && role !== "OWNER") {
+      const basePermissions = DEFAULT_ROLE_PERMISSIONS[role] || [];
+      const storedPermissions = Array.isArray(dbUser.customPermissions)
+        ? (dbUser.customPermissions as PermissionKey[])
+        : null;
+      const activePermissions =
+        storedPermissions !== null ? storedPermissions : basePermissions;
+
+      if (!options.requiredAnyPermission.some((permission) => activePermissions.includes(permission))) {
+        throw new Error(
+          `FORBIDDEN: Requires one of [${options.requiredAnyPermission.join(", ")}].`
+        );
       }
     }
   }
