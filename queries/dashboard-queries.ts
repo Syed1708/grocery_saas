@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/guard";
-import { IDashboardData, ISalesTrendPoint, ICategorySalesShare } from "@/types/dashboard";
+import { getErrorMessage } from "@/lib/utils";
+import { IDashboardData, ISalesTrendPoint, ICategorySalesShare, IStockAlertItem } from "@/types/dashboard";
 
 const PALETTE = ["#3b82f6", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6", "#06b6d4"];
 
@@ -176,7 +177,7 @@ export async function getDashboardData(): Promise<{ success: boolean; data?: IDa
     }));
 
     // 5. Stock & Expiry Alerts
-    const stockAlerts: any[] = [];
+    const stockAlerts: IStockAlertItem[] = [];
     let lowStockCount = 0;
     let expiringSoonCount = 0;
 
@@ -249,8 +250,8 @@ export async function getDashboardData(): Promise<{ success: boolean; data?: IDa
         stockAlerts,
       },
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("getDashboardData error:", error);
-    return { success: false, error: error.message || "Failed to load dashboard metrics." };
+    return { success: false, error: getErrorMessage(error, "Failed to load dashboard metrics.") };
   }
 }

@@ -2,6 +2,7 @@
 
 import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types";
+import { getErrorMessage } from "@/lib/utils";
 import { getCustomerKhataLedger } from "@/queries/customer-due-queries";
 
 export async function fetchCustomerKhataAction(customerId: string) {
@@ -12,14 +13,14 @@ export async function fetchCustomerKhataAction(customerId: string) {
       requireActiveStatus: true,
     });
 
-    const data = await getCustomerKhataLedger(customerId, user.shopId);
+    const data = await getCustomerKhataLedger(customerId, user.shopId, user.activeBranchId);
     if (!data) {
       return { success: false, error: "কাস্টমার বা খাতা রেকর্ড পাওয়া যায়নি।" };
     }
 
     return { success: true, data };
-  } catch (err: any) {
-    console.error("Failed to load customer khata:", err);
-    return { success: false, error: err.message || "খাতা লেজার লোড করতে ব্যর্থ হয়েছে।" };
+  } catch (error) {
+    console.error("Failed to load customer khata:", error);
+    return { success: false, error: getErrorMessage(error, "খাতা লেজার লোড করতে ব্যর্থ হয়েছে।") };
   }
 }

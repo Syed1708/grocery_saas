@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 import { IProfitLossData, IProfitLossFilterParams } from "@/types/profit-loss";
 
 export async function getProfitLossData(
@@ -6,7 +7,7 @@ export async function getProfitLossData(
   branchId: string,
   filters: IProfitLossFilterParams
 ): Promise<IProfitLossData> {
-  const dateFilter: any = {};
+  const dateFilter: Prisma.DateTimeFilter = {};
   if (filters.startDate || filters.endDate) {
     if (filters.startDate) dateFilter.gte = new Date(`${filters.startDate}T00:00:00`);
     if (filters.endDate) dateFilter.lte = new Date(`${filters.endDate}T23:59:59`);

@@ -34,7 +34,7 @@ export function SalesTrendsChart({ data }: { data: ISalesTrendPoint[] }) {
             <XAxis dataKey="date" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
             <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(v) => `৳${v / 1000}k`} />
             <Tooltip
-              formatter={(value: any) => [`৳${Number(value).toLocaleString()}`, ""]}
+              formatter={(value) => [`৳${Number(value).toLocaleString()}`, ""]}
               contentStyle={{ borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "12px" }}
             />
             <Area type="monotone" dataKey="sales" name="বিক্রয়" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#salesGrad)" />

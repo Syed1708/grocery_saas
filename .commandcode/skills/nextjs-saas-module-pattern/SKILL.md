@@ -397,6 +397,12 @@ duplicate product lines by merging quantities, guard stock with
 a stock row was missing. Receiving must reconcile every line (`received + damaged === sent`) and
 auto-log transit damage as a branch wastage. Transfer statuses: DISPATCHED → COMPLETED/CANCELLED.
 
+**Typed filters:** dynamic report filters must use Prisma input types (e.g.
+`Prisma.PurchaseWhereInput`, `Prisma.SaleWhereInput`, `Prisma.ProductStockWhereInput`,
+`Prisma.DateTimeFilter`) — never `const where: any`. Cast enum strings to the generated enum type
+(`PaymentStatus`, `PurchaseOrderStatus`, etc.) and type accumulated event rows with their shared
+interface instead of `any[]`.
+
 **POS / sales / returns / closings:** checkout requires `POS_ACCESS`; voiding a sale is
 OWNER-only, needs `requireActiveStatus`, and must load the sale by `{ id, shopId, activeBranchId }`.
 Validate a submitted `customerId` with `{ id, shopId, OR: [{ branchId: active }, { branchId: null }] }`.

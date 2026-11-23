@@ -287,10 +287,10 @@ export async function checkoutAction(payload: CheckoutPayload) {
       return createdSale;
     });
 
-    revalidatePath("/pos");
-    revalidatePath("/sales");
+    revalidatePath("/dashboard/pos");
+    revalidatePath("/dashboard/admin/sales");
     revalidatePath("/dashboard");
-    revalidatePath("/reports/closings");
+    revalidatePath("/dashboard/admin/reports/closings");
     revalidatePath("/dashboard/admin/customers");
 
     return {
@@ -460,10 +460,10 @@ export async function voidSaleAction(saleId: string) {
       await tx.sale.delete({ where: { id: sale.id } });
     });
 
-    revalidatePath("/sales");
-    revalidatePath("/pos");
+    revalidatePath("/dashboard/admin/sales");
+    revalidatePath("/dashboard/pos");
     revalidatePath("/dashboard");
-    revalidatePath("/reports/closings");
+    revalidatePath("/dashboard/admin/reports/closings");
     revalidatePath("/dashboard/admin/customers");
 
     return { success: true };

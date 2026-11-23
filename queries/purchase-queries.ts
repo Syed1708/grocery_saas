@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { PaymentStatus, PurchaseOrderStatus } from "@/generated/prisma/client";
 import { IPurchaseOrder } from "@/types";
 import { IPurchase } from "@/types/purchase";
 
@@ -63,7 +64,7 @@ export async function getPurchases(
     paidAmount: Number(p.paidAmount),
     dueAmount: Number(p.dueAmount),
     paymentMethod: p.paymentMethod,
-    paymentStatus: p.paymentStatus as any,
+    paymentStatus: p.paymentStatus as PaymentStatus,
     notes: p.notes,
     branchId: p.branchId,
     branchName: p.branch?.name || "Main Branch",
@@ -128,7 +129,7 @@ export async function getPurchaseOrders(
     id: o.id,
     orderNo: o.orderNo,
     orderDate: o.orderDate,
-    status: o.status as any,
+    status: o.status as PurchaseOrderStatus,
     totalItems: o.totalItems,
     estimatedTotal: Number(o.estimatedTotal),
     notes: o.notes,

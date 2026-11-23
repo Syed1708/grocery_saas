@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma, PaymentStatus } from "@/generated/prisma/client";
 import { ISalesFilterParams, ISalesReportKPIs, ISaleReportRow, IItemVelocityRow } from "@/types/index";
 
 export async function getSalesReportData(
@@ -11,16 +12,17 @@ export async function getSalesReportData(
   itemVelocity: IItemVelocityRow[];
 }> {
   // 👈 Simple, clean, and no extra imports needed
-  const where: any = {
+  const where: Prisma.SaleWhereInput = {
     shopId,
     branchId,
   };
 
   // Date range filter on saleDate
   if (filters.startDate || filters.endDate) {
-    where.saleDate = {};
-    if (filters.startDate) where.saleDate.gte = new Date(`${filters.startDate}T00:00:00`);
-    if (filters.endDate) where.saleDate.lte = new Date(`${filters.endDate}T23:59:59`);
+    const saleDate: Prisma.DateTimeFilter = {};
+    if (filters.startDate) saleDate.gte = new Date(`${filters.startDate}T00:00:00`);
+    if (filters.endDate) saleDate.lte = new Date(`${filters.endDate}T23:59:59`);
+    where.saleDate = saleDate;
   }
 
   // Payment method & status filters
@@ -28,7 +30,7 @@ export async function getSalesReportData(
     where.paymentMethod = filters.paymentMethod;
   }
   if (filters.paymentStatus && filters.paymentStatus !== "all") {
-    where.paymentStatus = filters.paymentStatus;
+    where.paymentStatus = filters.paymentStatus as PaymentStatus;
   }
 
   // Invoice or customer search

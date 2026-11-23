@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { getErrorMessage } from "@/lib/utils";
 import { saveUploadedFile, deleteUploadedFile } from "@/lib/file-storage";
 
 const profileSchema = z.object({
@@ -25,7 +26,7 @@ const passwordSchema = z
 
 export async function updateProfileAction(formData: FormData) {
   try {
-    const { userId } = await requireAuth();
+    const { userId } = await requireAuth({ requireActiveStatus: true });
 
     const validated = profileSchema.safeParse({
       name: formData.get("name")?.toString().trim(),
@@ -40,7 +41,8 @@ export async function updateProfileAction(formData: FormData) {
     const currentUser = await prisma.user.findUnique({ where: { id: userId } });
 
     // Handle Profile Image Upload
-    const imageFile = formData.get("profileImage") as File | null;
+    const rawImage = formData.get("profileImage");
+    const imageFile = rawImage instanceof File ? rawImage : null;
     let imageUrl = currentUser?.profileImage;
 
     if (imageFile && imageFile.size > 0) {
@@ -58,14 +60,14 @@ export async function updateProfileAction(formData: FormData) {
     revalidatePath("/dashboard/profile");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to update profile." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to update profile.") };
   }
 }
 
 export async function updatePasswordAction(formData: FormData) {
   try {
-    const { userId } = await requireAuth();
+    const { userId } = await requireAuth({ requireActiveStatus: true });
 
     const validated = passwordSchema.safeParse({
       currentPassword: formData.get("currentPassword")?.toString(),
@@ -94,7 +96,7 @@ export async function updatePasswordAction(formData: FormData) {
     });
 
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to change password." };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Failed to change password.") };
   }
 }

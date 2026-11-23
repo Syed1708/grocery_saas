@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma, PaymentStatus } from "@/generated/prisma/client";
 import { 
   IPurchaseReportKPIs, 
   IPurchaseReportRow, 
@@ -12,16 +13,17 @@ export async function getPurchaseReportData(
   filters: IPurchaseFilterParams
 ) {
   // ✅ Plain object: No extra 'Prisma' imports needed!
-  const where: any = {
+  const where: Prisma.PurchaseWhereInput = {
     shopId,
     branchId,
   };
 
   // Date Range filter
   if (filters.startDate || filters.endDate) {
-    where.purchaseDate = {};
-    if (filters.startDate) where.purchaseDate.gte = new Date(`${filters.startDate}T00:00:00`);
-    if (filters.endDate) where.purchaseDate.lte = new Date(`${filters.endDate}T23:59:59`);
+    const purchaseDate: Prisma.DateTimeFilter = {};
+    if (filters.startDate) purchaseDate.gte = new Date(`${filters.startDate}T00:00:00`);
+    if (filters.endDate) purchaseDate.lte = new Date(`${filters.endDate}T23:59:59`);
+    where.purchaseDate = purchaseDate;
   }
 
   // Supplier filter
@@ -31,7 +33,7 @@ export async function getPurchaseReportData(
 
   // Payment status filter
   if (filters.paymentStatus && filters.paymentStatus !== "all") {
-    where.paymentStatus = filters.paymentStatus;
+    where.paymentStatus = filters.paymentStatus as PaymentStatus;
   }
 
   // Search filter
@@ -94,7 +96,7 @@ export async function getPurchaseReportData(
     paidAmount: Number(p.paidAmount),
     dueAmount: Number(p.dueAmount),
     paymentMethod: p.paymentMethod,
-    paymentStatus: p.paymentStatus as any,
+    paymentStatus: p.paymentStatus as PaymentStatus,
     itemCount: p._count.items,
   }));
 

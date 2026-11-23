@@ -156,11 +156,11 @@ export async function createPurchaseReturnAction(payload: CreatePurchaseReturnPa
       }
     });
 
-    revalidatePath("/purchases");
-    revalidatePath("/inventory");
-    revalidatePath("/suppliers");
+    revalidatePath("/dashboard/admin/purchases");
+    revalidatePath("/dashboard/admin/products");
+    revalidatePath("/dashboard/admin/suppliers");
     revalidatePath("/dashboard");
-    revalidatePath("/reports/closings");
+    revalidatePath("/dashboard/admin/reports/closings");
 
     return { success: true, returnNo };
   } catch (error) {

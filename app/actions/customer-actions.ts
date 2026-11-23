@@ -13,7 +13,7 @@ import { accountTypeForPaymentMethod, normalizePaymentMethod } from "@/lib/payme
 // ==========================================
 const CUSTOMER_REVALIDATE_PATHS = [
   "/dashboard/admin/customers",
-  "/reports/customers-due",
+  "/dashboard/admin/reports/customers-due",
 ];
 
 function revalidateCustomerPaths(extra: string[] = []) {
@@ -226,7 +226,7 @@ export async function recordCustomerPaymentAction(
       }
     });
 
-    revalidateCustomerPaths(["/reports/closings"]);
+    revalidateCustomerPaths(["/dashboard/admin/reports/closings"]);
     return { success: true, receiptNo };
   } catch (error) {
     console.error("recordCustomerPaymentAction error:", error);

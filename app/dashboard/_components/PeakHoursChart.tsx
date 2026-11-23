@@ -19,7 +19,7 @@ export function PeakHoursChart({ data }: { data: IHourlyRushPoint[] }) {
             <XAxis dataKey="hour" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
             <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
             <Tooltip
-              formatter={(val: any, name: any) => [name === "orders" ? `${val} Orders` : `৳${Number(val).toLocaleString()}`, ""]}
+              formatter={(val, name) => [name === "orders" ? `${val} Orders` : `৳${Number(val).toLocaleString()}`, ""]}
               contentStyle={{ borderRadius: "8px", fontSize: "12px" }}
             />
             <Bar dataKey="orders" name="orders" fill="#6366f1" radius={[4, 4, 0, 0]} />

@@ -1,5 +1,6 @@
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 import { 
   IStockReportKPIs, 
   IStockReportRow, 
@@ -13,35 +14,34 @@ export async function getStockReportData(
   branchId: string,
   filters: IStockFilterParams
 ): Promise<{ kpis: IStockReportKPIs; rows: IStockReportRow[] }> {
-  const where: any = {
-    branchId,
-    product: {
-      shopId,
-      status: "active",
-    },
+  const productWhere: Prisma.ProductWhereInput = {
+    shopId,
+    status: "active",
   };
 
   // 1. Dynamic Filters
   if (filters.categoryId && filters.categoryId !== "all") {
-    where.product = { ...where.product, categoryId: filters.categoryId };
+    productWhere.categoryId = filters.categoryId;
   }
   if (filters.brandId && filters.brandId !== "all") {
-    where.product = { ...where.product, brandId: filters.brandId };
+    productWhere.brandId = filters.brandId;
   }
   if (filters.sectionId && filters.sectionId !== "all") {
-    where.product = { ...where.product, sectionId: filters.sectionId };
+    productWhere.sectionId = filters.sectionId;
   }
   if (filters.search && filters.search.trim()) {
     const q = filters.search.trim();
-    where.product = {
-      ...where.product,
-      OR: [
-        { name: { contains: q } },
-        { barcode: { contains: q } },
-        { sku: { contains: q } },
-      ],
-    };
+    productWhere.OR = [
+      { name: { contains: q } },
+      { barcode: { contains: q } },
+      { sku: { contains: q } },
+    ];
   }
+
+  const where: Prisma.ProductStockWhereInput = {
+    branchId,
+    product: productWhere,
+  };
 
   // 2. Fetch Stock Records with relations
   const rawStocks = await prisma.productStock.findMany({

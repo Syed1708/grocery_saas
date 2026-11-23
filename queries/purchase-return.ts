@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { IPurchaseReturn } from "@/types/purchase-return";
+import { IPurchaseReturn, ReturnReason, ReturnSettlementType } from "@/types/purchase-return";
 
 export async function getPurchaseReturns(
   shopId: string,
@@ -54,7 +54,7 @@ export async function getPurchaseReturns(
     totalAmount: Number(r.totalAmount),
     refundAmount: Number(r.refundAmount),
     dueDeduction: Number(r.dueDeduction),
-    settlementType: r.settlementType as any,
+    settlementType: r.settlementType as ReturnSettlementType,
     paymentMethod: r.paymentMethod,
     notes: r.notes,
     branchId: r.branchId,
@@ -73,7 +73,7 @@ export async function getPurchaseReturns(
       quantity: Number(item.quantity),
       unitCost: Number(item.unitCost),
       lineTotal: Number(item.lineTotal),
-      reason: (item.reason as any) || "DAMAGED",
+      reason: (item.reason as ReturnReason | null) || "DAMAGED",
     })),
     createdAt: r.createdAt,
   }));

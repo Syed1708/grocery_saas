@@ -228,11 +228,11 @@ if (fromPOId) {
       });
     });
 
-    revalidatePath("/purchases");
-    revalidatePath("/inventory");
-    revalidatePath("/suppliers");
+    revalidatePath("/dashboard/admin/purchases");
+    revalidatePath("/dashboard/admin/products");
+    revalidatePath("/dashboard/admin/suppliers");
     revalidatePath("/dashboard");
-    revalidatePath("/reports/closings");
+    revalidatePath("/dashboard/admin/reports/closings");
 
     return { success: true };
   } catch (error) {
@@ -403,9 +403,9 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
       });
     });
 
-    revalidatePath("/purchases");
-    revalidatePath("/inventory");
-    revalidatePath("/suppliers");
+    revalidatePath("/dashboard/admin/purchases");
+    revalidatePath("/dashboard/admin/products");
+    revalidatePath("/dashboard/admin/suppliers");
     return { success: true };
   } catch (error) {
     console.error("Update purchase error:", error);
@@ -507,10 +507,10 @@ export async function deletePurchaseAction(purchaseId: string) {
       });
     });
 
-    revalidatePath("/purchases");
-    revalidatePath("/suppliers");
-    revalidatePath("/inventory");
-    revalidatePath("/dashboard/closings");
+    revalidatePath("/dashboard/admin/purchases");
+    revalidatePath("/dashboard/admin/suppliers");
+    revalidatePath("/dashboard/admin/products");
+    revalidatePath("/dashboard/admin/closings");
     return { success: true };
   } catch (error) {
     console.error("Delete purchase error:", error);

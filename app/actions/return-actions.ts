@@ -439,13 +439,13 @@ export async function createSaleReturnAction(formData: FormData) {
     };
 
     // 6. Revalidate Cache
-    revalidatePath("/sales-returns");
-    revalidatePath("/sales");
-    revalidatePath("/pos");
+    revalidatePath("/dashboard/admin/returns");
+    revalidatePath("/dashboard/admin/sales");
+    revalidatePath("/dashboard/pos");
     revalidatePath("/dashboard");
-    revalidatePath("/reports/closings");
-    revalidatePath("/reports/customers-due");
-    revalidatePath("/expenses");
+    revalidatePath("/dashboard/admin/reports/closings");
+    revalidatePath("/dashboard/admin/reports/customers-due");
+    revalidatePath("/dashboard/admin/expenses");
 
     return {
       success: true,

@@ -3,6 +3,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations";
+import { getErrorMessage } from "@/lib/utils";
 
 export async function registerStoreAction(formData: FormData) {
   try {
@@ -100,8 +101,8 @@ export async function registerStoreAction(formData: FormData) {
     });
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Store registration failed:", error);
-    return { success: false, error: error.message || "Failed to register store." };
+    return { success: false, error: getErrorMessage(error, "Failed to register store.") };
   }
 }

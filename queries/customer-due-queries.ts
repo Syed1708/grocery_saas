@@ -1,6 +1,7 @@
 // 📁 queries/customer-due-queries.ts
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 import { 
   ICustomerDueKPIs, 
   ICustomerDueRow, 
@@ -24,14 +25,14 @@ export async function getCustomerDueReportData(
   kpis: ICustomerDueKPIs;
   customers: ICustomerDueRow[];
 }> {
-  const where: any = {
+  const where: Prisma.CustomerWhereInput = {
     shopId,
     status: "active",
     currentDue: { gt: 0 },
     ...(branchId ? { branchId } : {}), // 🛡️ Strict Branch Scoping
   };
 
-  if (customerType && customerType !== "all") {
+  if (customerType === "WALK_IN" || customerType === "PERMANENT") {
     where.type = customerType;
   }
 
@@ -134,13 +135,18 @@ export async function getCustomerDueReportData(
  */
 export async function getCustomerKhataLedger(
   customerId: string,
-  shopId: string
+  shopId: string,
+  branchId: string
 ): Promise<{
   summary: ICustomerKhataSummary;
   ledger: ICustomerKhataEntry[];
 } | null> {
   const customer = await prisma.customer.findFirst({
-    where: { id: customerId, shopId },
+    where: {
+      id: customerId,
+      shopId,
+      OR: [{ branchId }, { branchId: null }],
+    },
     select: {
       name: true,
       openingDue: true,
@@ -156,7 +162,7 @@ export async function getCustomerKhataLedger(
   // Parallel database queries
   const [sales, payments, returns] = await Promise.all([
     prisma.sale.findMany({
-      where: { customerId, shopId },
+      where: { customerId, shopId, branchId },
       select: {
         id: true,
         invoiceNo: true,
@@ -168,7 +174,7 @@ export async function getCustomerKhataLedger(
       orderBy: { createdAt: "asc" },
     }),
     prisma.customerPayment.findMany({
-      where: { customerId },
+      where: { customerId, branchId },
       select: {
         id: true,
         receiptNo: true,
@@ -180,7 +186,7 @@ export async function getCustomerKhataLedger(
       orderBy: { paymentDate: "asc" },
     }),
     prisma.saleReturn.findMany({
-      where: { customerId, shopId },
+      where: { customerId, shopId, branchId },
       select: {
         id: true,
         returnNo: true,
@@ -193,7 +199,7 @@ export async function getCustomerKhataLedger(
     }),
   ]);
 
-  const events: any[] = [];
+  const events: Omit<ICustomerKhataEntry, "balance">[] = [];
 
   // 1. Opening Balance
   if (openingDue > 0) {
@@ -290,7 +296,7 @@ export async function getCustomerKhataLedger(
 
   const ledger: ICustomerKhataEntry[] = events.map((item) => {
     runningBalance += item.debit - item.credit;
-    if (item.type === "SALE") totalBilled += item.invoiceTotal;
+    if (item.type === "SALE") totalBilled += item.invoiceTotal ?? 0;
     if (item.paidAtPos) totalPaid += item.paidAtPos;
     if (item.type === "PAYMENT") totalPaid += item.credit;
 

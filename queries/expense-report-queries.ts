@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 import { 
   IExpenseReportKPIs, 
   IExpenseCategoryStat, 
@@ -11,16 +12,17 @@ export async function getExpenseReportData(
   branchId: string,
   filters: IExpenseFilterParams
 ) {
-  const where: any = {
+  const where: Prisma.ExpenseWhereInput = {
     shopId,
     branchId,
   };
 
   // Date Range Filter
   if (filters.startDate || filters.endDate) {
-    where.expenseDate = {};
-    if (filters.startDate) where.expenseDate.gte = new Date(`${filters.startDate}T00:00:00`);
-    if (filters.endDate) where.expenseDate.lte = new Date(`${filters.endDate}T23:59:59`);
+    const expenseDate: Prisma.DateTimeFilter = {};
+    if (filters.startDate) expenseDate.gte = new Date(`${filters.startDate}T00:00:00`);
+    if (filters.endDate) expenseDate.lte = new Date(`${filters.endDate}T23:59:59`);
+    where.expenseDate = expenseDate;
   }
 
   // Category Filter

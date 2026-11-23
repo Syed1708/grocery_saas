@@ -17,7 +17,7 @@ export function CategoryDonutChart({ data }: { data: ICategorySalesShare[] }) {
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
-            <Tooltip formatter={(val: any) => [`৳${Number(val).toLocaleString()}`, ""]} />
+            <Tooltip formatter={(val) => [`৳${Number(val).toLocaleString()}`, ""]} />
           </PieChart>
         </ResponsiveContainer>
       </div>
