@@ -237,6 +237,7 @@ export default function BarcodeSheetModal({
       </div>
 
       {/* Dedicated print root, portaled to <body> so nothing else is printed */}
+      
       {mounted &&
         createPortal(
           <div id="barcode-print-sheet" aria-hidden="true">
