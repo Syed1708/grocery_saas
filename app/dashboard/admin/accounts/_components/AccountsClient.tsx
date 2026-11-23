@@ -298,8 +298,8 @@ export default function AccountsClient({
         isOpen={Boolean(loanCrud.deleteTarget)}
         onClose={() => loanCrud.setDeleteTarget(null)}
         onConfirm={loanCrud.handleDeleteConfirm}
-        title="Delete Loan"
-        message={`Delete loan record for ${loanCrud.deleteTarget?.personName}?`}
+        title="Void Loan (Rollback)"
+        message={`Void the loan for ${loanCrud.deleteTarget?.personName}? This reverses the principal and all installments on the linked account(s), then removes the loan.`}
         loading={loanCrud.loading}
       />
     </div>

@@ -102,7 +102,7 @@ export default function LoansTab({
             <TableActions
               onEdit={() => onEditLoan(loan)}
               editPermission={PERMISSIONS.FINANCE_LOANS}
-              onDelete={Number(loan.totalPaid) === 0 ? () => onDeleteLoan(loan) : undefined}
+              onDelete={() => onDeleteLoan(loan)}
               deletePermission={PERMISSIONS.FINANCE_LOANS}
             />
             {loan.status === "PAID" && <span className="text-emerald-600 font-bold text-xs">Fully Paid ✓</span>}

@@ -195,24 +195,84 @@ export async function addLoanInstallmentAction(formData: FormData) {
 
 export async function deleteLoanAction(id: string) {
   try {
-            const user = await requireAuth({
+    const user = await requireAuth({
       requiredPermission: PERMISSIONS.FINANCE_LOANS,
       requireActiveStatus: true,
     });
-    const loan = await prisma.loan.findFirst({
-      where: { id, shopId: user.shopId, branchId: user.activeBranchId },
-    });
 
-    if (!loan) return { success: false, error: "Loan record not found." };
-
-    if (Number(loan.totalPaid) > 0) {
-      return {
-        success: false,
-        error: "Cannot delete a loan that has recorded repayments.",
-      };
+    if (user.role !== "OWNER") {
+      return { success: false, error: "Only the store owner can void a loan." };
     }
 
-    await prisma.loan.delete({ where: { id } });
+    const loan = await prisma.loan.findFirst({
+      where: { id, shopId: user.shopId, branchId: user.activeBranchId },
+      include: { installments: true },
+    });
+    if (!loan) return { success: false, error: "Loan record not found." };
+    if (!loan.accountId) {
+      return { success: false, error: "This loan has no linked account, so its balance cannot be rolled back." };
+    }
+
+    // Reverse the principal effect + every installment effect on the accounts.
+    const deltas = new Map<string, number>();
+    const addDelta = (accountId: string, delta: number) => {
+      deltas.set(accountId, (deltas.get(accountId) || 0) + delta);
+    };
+
+    const principalEffect = loan.type === "TAKEN" ? Number(loan.amount) : -Number(loan.amount);
+    addDelta(loan.accountId, -principalEffect);
+
+    for (const inst of loan.installments) {
+      const repaymentEffect = loan.type === "TAKEN" ? -Number(inst.amount) : Number(inst.amount);
+      addDelta(inst.accountId, -repaymentEffect);
+    }
+
+    const accountIds = [...deltas.keys()];
+    const accounts = await prisma.account.findMany({
+      where: { id: { in: accountIds }, shopId: user.shopId, branchId: user.activeBranchId },
+    });
+    if (accounts.length !== accountIds.length) {
+      return { success: false, error: "One or more linked accounts no longer exist in this branch." };
+    }
+    const accountMap = new Map(accounts.map((a) => [a.id, a]));
+
+    for (const [accountId, delta] of deltas) {
+      const account = accountMap.get(accountId)!;
+      if (Number(account.currentBalance) + delta < 0) {
+        return {
+          success: false,
+          error: `Insufficient balance in "${account.name}" to roll back this loan. Adjust that account first.`,
+        };
+      }
+    }
+
+    await prisma.$transaction(async (tx) => {
+      for (const [accountId, delta] of deltas) {
+        if (delta === 0) continue;
+        const account = accountMap.get(accountId)!;
+        const newBalance = Number(account.currentBalance) + delta;
+        await tx.account.update({
+          where: { id: accountId },
+          data: { currentBalance: newBalance },
+        });
+        await tx.accountTransaction.create({
+          data: {
+            type: "LOAN",
+            amount: Math.abs(delta),
+            balanceAfter: newBalance,
+            voucherNo: `VOID-${Date.now().toString().slice(-6)}`,
+            note: `Loan void rollback (${loan.personName})`,
+            branchId: user.activeBranchId,
+            accountId,
+            userId: user.userId,
+          },
+        });
+      }
+
+      await tx.loanInstallment.deleteMany({ where: { loanId: id } });
+      await tx.loan.delete({ where: { id } });
+    });
+
     revalidatePath("/dashboard/admin/accounts");
     return { success: true };
   } catch (error) {

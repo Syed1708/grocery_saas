@@ -331,6 +331,11 @@ installments require `FINANCE_LOANS`. Verify account, cheque, and loan rows belo
 active branch. CRUD entities use `useCrudModal`; one-off actions (transfer, clear cheque, pay
 installment) may keep a small manual modal + loading state.
 
+**Loan corrections:** while `totalPaid === 0`, editing type/amount/due-date is allowed and the
+linked account effect is reversed/applied atomically. After repayments, terms lock; the owner-only
+`deleteLoanAction` voids the loan and rolls back the principal + every installment on their
+accounts (balance-validated) so it can be re-created correctly.
+
 ### Routing & deep links
 
 - App routes live under `/dashboard/...`. Never link to legacy `/admin/...` or `/reports/...`
