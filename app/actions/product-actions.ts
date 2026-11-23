@@ -7,6 +7,41 @@ import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types";
 import { saveUploadedFile, deleteUploadedFile } from "@/lib/file-storage";
 import { productSchema } from "@/lib/validations";
+import { getErrorMessage } from "@/lib/utils";
+
+const PRODUCT_REVALIDATE_PATHS = [
+  "/dashboard/admin/products",
+  "/dashboard/pos",
+  "/dashboard",
+  "/dashboard/admin/reports/stock",
+];
+
+function revalidateProductPaths() {
+  for (const path of PRODUCT_REVALIDATE_PATHS) revalidatePath(path);
+}
+
+/** Every submitted reference must belong to the same shop. */
+async function validateProductReferences(
+  shopId: string,
+  refs: { categoryId: string; unitId: string; brandId?: string | null; sectionId?: string | null }
+) {
+  const [category, unit, brand, section] = await Promise.all([
+    prisma.category.findFirst({ where: { id: refs.categoryId, shopId }, select: { id: true } }),
+    prisma.unit.findFirst({ where: { id: refs.unitId, shopId }, select: { id: true } }),
+    refs.brandId
+      ? prisma.brand.findFirst({ where: { id: refs.brandId, shopId }, select: { id: true } })
+      : Promise.resolve(null),
+    refs.sectionId
+      ? prisma.productSection.findFirst({ where: { id: refs.sectionId, shopId }, select: { id: true } })
+      : Promise.resolve(null),
+  ]);
+
+  if (!category) return "ক্যাটাগরি খুঁজে পাওয়া যায়নি।";
+  if (!unit) return "পরিমাপ একক খুঁজে পাওয়া যায়নি।";
+  if (refs.brandId && !brand) return "ব্র্যান্ড খুঁজে পাওয়া যায়নি।";
+  if (refs.sectionId && !section) return "তাক বা সেকশন খুঁজে পাওয়া যায়নি।";
+  return null;
+}
 
 // ==========================================
 // 1. CREATE PRODUCT
@@ -61,6 +96,9 @@ export async function createProductAction(formData: FormData) {
 
     const data = validated.data;
 
+    const referenceError = await validateProductReferences(user.shopId, data);
+    if (referenceError) return { success: false, error: referenceError };
+
     // 2. Uniqueness Checks within the Store
     const existingBarcode = await prisma.product.findUnique({
       where: { shopId_barcode: { shopId: user.shopId, barcode: data.barcode } },
@@ -83,7 +121,8 @@ export async function createProductAction(formData: FormData) {
     }
 
     // 3. Image Upload
-    const imageFile = formData.get("image") as File | null;
+    const rawImage = formData.get("image");
+    const imageFile = rawImage instanceof File ? rawImage : null;
     let imageUrl = "";
     if (imageFile && imageFile.size > 0) {
       imageUrl = await saveUploadedFile(imageFile, "products");
@@ -128,13 +167,11 @@ export async function createProductAction(formData: FormData) {
       }
     });
 
-    revalidatePath("/dashboard/admin/products");
-    revalidatePath("/pos");
-    revalidatePath("/dashboard");
+    revalidateProductPaths();
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Create product failed:", error);
-    return { success: false, error: error.message || "পণ্য তৈরি করতে ব্যর্থ হয়েছে।" };
+    return { success: false, error: getErrorMessage(error, "পণ্য তৈরি করতে ব্যর্থ হয়েছে।") };
   }
 }
 
@@ -186,6 +223,9 @@ export async function updateProductAction(formData: FormData) {
     });
     if (!currentProduct) return { success: false, error: "পণ্যটি খুঁজে পাওয়া যায়নি।" };
 
+    const referenceError = await validateProductReferences(user.shopId, data);
+    if (referenceError) return { success: false, error: referenceError };
+
     // 3. Conflict Checks for Barcode
     if (data.barcode !== currentProduct.barcode) {
       const conflict = await prisma.product.findUnique({
@@ -200,7 +240,8 @@ export async function updateProductAction(formData: FormData) {
     }
 
     // 4. Handle Image Replacement
-    const imageFile = formData.get("image") as File | null;
+    const rawImage = formData.get("image");
+    const imageFile = rawImage instanceof File ? rawImage : null;
     let imageUrl = currentProduct.image;
 
     if (imageFile && imageFile.size > 0) {
@@ -238,13 +279,11 @@ export async function updateProductAction(formData: FormData) {
       },
     });
 
-    revalidatePath("/dashboard/admin/products");
-    revalidatePath("/pos");
-    revalidatePath("/reports/stock");
+    revalidateProductPaths();
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Update product failed:", error);
-    return { success: false, error: error.message || "পণ্য আপডেট ব্যর্থ হয়েছে।" };
+    return { success: false, error: getErrorMessage(error, "পণ্য আপডেট ব্যর্থ হয়েছে।") };
   }
 }
 
@@ -300,13 +339,11 @@ export async function deleteProductAction(id: string) {
       await tx.product.delete({ where: { id } });
     });
 
-    revalidatePath("/dashboard/admin/products");
-    revalidatePath("/pos");
-    revalidatePath("/reports/stock");
+    revalidateProductPaths();
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Delete product failed:", error);
-    return { success: false, error: error.message || "পণ্য মুছে ফেলা সম্ভব হয়নি।" };
+    return { success: false, error: getErrorMessage(error, "পণ্য মুছে ফেলা সম্ভব হয়নি।") };
   }
 }
 
@@ -323,7 +360,7 @@ export interface StockAdjustmentPayload {
 export async function adjustStockAction(payload: StockAdjustmentPayload) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.INVENTORY_ADJUST,
       requireActiveStatus: true,
     });
 
@@ -408,14 +445,11 @@ export async function adjustStockAction(payload: StockAdjustmentPayload) {
       }
     });
 
-    revalidatePath("/dashboard/admin/products");
-    revalidatePath("/reports/stock");
-    revalidatePath("/pos");
-    revalidatePath("/dashboard");
+    revalidateProductPaths();
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Stock adjustment error:", error);
-    return { success: false, error: error.message || "স্টক সমন্বয় করতে ব্যর্থ হয়েছে।" };
+    return { success: false, error: getErrorMessage(error, "স্টক সমন্বয় করতে ব্যর্থ হয়েছে।") };
   }
 }

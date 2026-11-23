@@ -353,6 +353,17 @@ on delete, reverse and remove. Do all of it inside one `prisma.$transaction`. Le
 reference fall back to their old CASH effect. Never edit/delete an expense or income without
 adjusting the correct account.
 
+**Catalog / products:** create & update require `CATALOG_MANAGE`, delete is OWNER-only, and stock
+adjustments require `INVENTORY_ADJUST`. Always validate submitted foreign ids (`categoryId`,
+`unitId`, `brandId`, `sectionId`) with `{ id, shopId }` before writing — never trust a client id.
+Stock is read/written only for the active branch (`productStock`), while products themselves stay
+shop-level. Brand and section actions use `CATALOG_MANAGE` (brand delete is OWNER-only) and verify
+`{ id, shopId }` before update/delete. The products client runs three `useCrudModal` engines
+(product / brand / section); units keep their own inline create + guarded delete. Revalidate
+`/dashboard/admin/products`, `/dashboard/pos`, `/dashboard` and `/dashboard/admin/reports/stock`.
+Uploads go through `saveUploadedFile`, which enforces a 5 MB limit and an allow-list of image/PDF
+MIME types.
+
 **POS / sales / returns / closings:** checkout requires `POS_ACCESS`; voiding a sale is
 OWNER-only, needs `requireActiveStatus`, and must load the sale by `{ id, shopId, activeBranchId }`.
 Validate a submitted `customerId` with `{ id, shopId, OR: [{ branchId: active }, { branchId: null }] }`.

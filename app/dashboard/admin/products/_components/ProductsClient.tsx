@@ -55,6 +55,7 @@ import {
   deleteSectionAction,
 } from "@/app/actions/section-actions";
 import { deleteUnitAction } from "@/app/actions/unit-actions";
+import { useCrudModal } from "@/hooks/useCrudModal";
 
 import { IProduct, ICategoryOption, IUnitOption } from "@/types";
 
@@ -100,26 +101,32 @@ export default function ProductsClient({
   const [activeTab, setActiveTab] = useState<
     "products" | "brands" | "sections" | "units"
   >("products");
-  const [loading, setLoading] = useState(false);
+  const [unitLoading, setUnitLoading] = useState(false);
 
-  // Modal Targets
-  const [productModalOpen, setProductModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<IProduct | null>(null);
+  const productCrud = useCrudModal<IProduct>({
+    createAction: createProductAction,
+    updateAction: updateProductAction,
+    deleteAction: deleteProductAction,
+    entityName: "পণ্য",
+  });
+
+  const brandCrud = useCrudModal<ExtraOption>({
+    createAction: createBrandAction,
+    updateAction: updateBrandAction,
+    deleteAction: deleteBrandAction,
+    entityName: "ব্র্যান্ড",
+  });
+
+  const sectionCrud = useCrudModal<ExtraOption>({
+    createAction: createSectionAction,
+    updateAction: updateSectionAction,
+    deleteAction: deleteSectionAction,
+    entityName: "তাক",
+  });
+
   const [viewProduct, setViewProduct] = useState<IProduct | null>(null);
-  const [deleteProductTarget, setDeleteProductTarget] =
-    useState<IProduct | null>(null);
   const [barcodePrintProduct, setBarcodePrintProduct] =
     useState<IProduct | null>(null);
-
-  const [brandModalOpen, setBrandModalOpen] = useState(false);
-  const [editingBrand, setEditingBrand] = useState<ExtraOption | null>(null);
-  const [deleteBrandTarget, setDeleteBrandTarget] =
-    useState<ExtraOption | null>(null);
-
-  const [sectionModalOpen, setSectionModalOpen] = useState(false);
-  const [editingSection, setEditingSection] = useState<ExtraOption | null>(null);
-  const [deleteSectionTarget, setDeleteSectionTarget] =
-    useState<ExtraOption | null>(null);
 
   const [deleteUnitTarget, setDeleteUnitTarget] =
     useState<IUnitOption | null>(null);
@@ -170,69 +177,6 @@ export default function ProductsClient({
       return true;
     });
   }, [data, searchQuery, selectedCategory, selectedBrand, selectedSection, stockStatus]);
-
-  // Form Submissions
-  async function handleProductSubmit(e: React.SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    if (editingProduct) formData.append("id", editingProduct.id);
-
-    const res = editingProduct
-      ? await updateProductAction(formData)
-      : await createProductAction(formData);
-
-    setLoading(false);
-    if (res.success) {
-      toast.success(
-        editingProduct ? "পণ্য তথ্য সফলভাবে আপডেট হয়েছে!" : "নতুন পণ্য ক্যাটালগে যুক্ত হয়েছে!"
-      );
-      setProductModalOpen(false);
-      setEditingProduct(null);
-    } else {
-      toast.error(res.error || "অপারেশন ব্যর্থ হয়েছে।");
-    }
-  }
-
-  async function handleBrandSubmit(e: React.SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    if (editingBrand) formData.append("id", editingBrand.id);
-
-    const res = editingBrand
-      ? await updateBrandAction(formData)
-      : await createBrandAction(formData);
-
-    setLoading(false);
-    if (res.success) {
-      toast.success(editingBrand ? "ব্র্যান্ড আপডেট হয়েছে!" : "নতুন ব্র্যান্ড তৈরি হয়েছে!");
-      setBrandModalOpen(false);
-      setEditingBrand(null);
-    } else {
-      toast.error(res.error || "ব্র্যান্ড সংরক্ষণ করা সম্ভব হয়নি।");
-    }
-  }
-
-  async function handleSectionSubmit(e: React.SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    if (editingSection) formData.append("id", editingSection.id);
-
-    const res = editingSection
-      ? await updateSectionAction(formData)
-      : await createSectionAction(formData);
-
-    setLoading(false);
-    if (res.success) {
-      toast.success(editingSection ? "তাক বা সেকশন আপডেট হয়েছে!" : "নতুন তাক তৈরি হয়েছে!");
-      setSectionModalOpen(false);
-      setEditingSection(null);
-    } else {
-      toast.error(res.error || "তাক সংরক্ষণ করা সম্ভব হয়নি।");
-    }
-  }
 
   // TanStack Table Columns
   const columns: ColumnDef<IProduct>[] = [
@@ -381,10 +325,7 @@ export default function ProductsClient({
           </button>
           <button
             type="button"
-            onClick={() => {
-              setEditingProduct(row.original);
-              setProductModalOpen(true);
-            }}
+            onClick={() => productCrud.openEdit(row.original)}
             className="p-1.5 text-neutral-500 hover:text-blue-600 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
             title="পণ্য সম্পাদনা"
           >
@@ -393,7 +334,7 @@ export default function ProductsClient({
           {userRole === "OWNER" && (
             <button
               type="button"
-              onClick={() => setDeleteProductTarget(row.original)}
+              onClick={() => productCrud.setDeleteTarget(row.original)}
               className="p-1.5 text-neutral-500 hover:text-red-600 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
               title="মুছে ফেলুন"
             >
@@ -449,10 +390,7 @@ export default function ProductsClient({
             <DataTableViewOptions table={table} />
             <button
               type="button"
-              onClick={() => {
-                setEditingProduct(null);
-                setProductModalOpen(true);
-              }}
+              onClick={productCrud.openCreate}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer"
             >
               <Plus size={16} /> নতুন পণ্য যোগ
@@ -502,15 +440,9 @@ export default function ProductsClient({
       {activeTab === "brands" && (
         <BrandsTab
           brands={brands}
-          onAdd={() => {
-            setEditingBrand(null);
-            setBrandModalOpen(true);
-          }}
-          onEdit={(b) => {
-            setEditingBrand(b);
-            setBrandModalOpen(true);
-          }}
-          onDelete={(b) => setDeleteBrandTarget(b)}
+          onAdd={brandCrud.openCreate}
+          onEdit={brandCrud.openEdit}
+          onDelete={brandCrud.setDeleteTarget}
           userRole={userRole}
         />
       )}
@@ -519,15 +451,9 @@ export default function ProductsClient({
       {activeTab === "sections" && (
         <SectionsTab
           sections={sections}
-          onAdd={() => {
-            setEditingSection(null);
-            setSectionModalOpen(true);
-          }}
-          onEdit={(s) => {
-            setEditingSection(s);
-            setSectionModalOpen(true);
-          }}
-          onDelete={(s) => setDeleteSectionTarget(s)}
+          onAdd={sectionCrud.openCreate}
+          onEdit={sectionCrud.openEdit}
+          onDelete={sectionCrud.setDeleteTarget}
           userRole={userRole}
         />
       )}
@@ -543,44 +469,35 @@ export default function ProductsClient({
 
       {/* Modals with Clean Key-Reset Patterns */}
       <ProductFormModal
-        key={editingProduct?.id || "new-prod-modal"}
-        isOpen={productModalOpen}
-        onClose={() => {
-          setProductModalOpen(false);
-          setEditingProduct(null);
-        }}
-        onSubmit={handleProductSubmit}
-        editingProduct={editingProduct}
+        key={productCrud.editingItem?.id || "new-prod-modal"}
+        isOpen={productCrud.isOpen}
+        onClose={productCrud.closeModal}
+        onSubmit={productCrud.handleSubmit}
+        editingProduct={productCrud.editingItem}
         categories={categories}
         brands={brands}
         sections={sections}
         units={units}
-        loading={loading}
+        loading={productCrud.loading}
         currencySymbol={currencySymbol}
       />
 
       <BrandModal
-        key={editingBrand?.id || "new-brand-modal"}
-        isOpen={brandModalOpen}
-        onClose={() => {
-          setBrandModalOpen(false);
-          setEditingBrand(null);
-        }}
-        onSubmit={handleBrandSubmit}
-        editingBrand={editingBrand}
-        loading={loading}
+        key={brandCrud.editingItem?.id || "new-brand-modal"}
+        isOpen={brandCrud.isOpen}
+        onClose={brandCrud.closeModal}
+        onSubmit={brandCrud.handleSubmit}
+        editingBrand={brandCrud.editingItem}
+        loading={brandCrud.loading}
       />
 
       <SectionModal
-        key={editingSection?.id || "new-section-modal"}
-        isOpen={sectionModalOpen}
-        onClose={() => {
-          setSectionModalOpen(false);
-          setEditingSection(null);
-        }}
-        onSubmit={handleSectionSubmit}
-        editingSection={editingSection}
-        loading={loading}
+        key={sectionCrud.editingItem?.id || "new-section-modal"}
+        isOpen={sectionCrud.isOpen}
+        onClose={sectionCrud.closeModal}
+        onSubmit={sectionCrud.handleSubmit}
+        editingSection={sectionCrud.editingItem}
+        loading={sectionCrud.loading}
       />
 
       {viewProduct && (
@@ -603,66 +520,42 @@ export default function ProductsClient({
 
       {/* Confirm Deletion Dialogs */}
       <ConfirmDialog
-        isOpen={Boolean(deleteProductTarget)}
-        onClose={() => setDeleteProductTarget(null)}
-        onConfirm={async () => {
-          setLoading(true);
-          const res = await deleteProductAction(deleteProductTarget!.id);
-          setLoading(false);
-          if (res.success) {
-            toast.success("পণ্য মুছে ফেলা হয়েছে!");
-            setDeleteProductTarget(null);
-          } else toast.error(res.error);
-        }}
+        isOpen={Boolean(productCrud.deleteTarget)}
+        onClose={() => productCrud.setDeleteTarget(null)}
+        onConfirm={productCrud.handleDeleteConfirm}
         title="পণ্য মুছে ফেলুন"
-        message={`আপনি কি নিশ্চিতভাবে "${deleteProductTarget?.name}" মুছে ফেলতে চান?`}
+        message={`আপনি কি নিশ্চিতভাবে "${productCrud.deleteTarget?.name}" মুছে ফেলতে চান?`}
         confirmLabel="পণ্য মুছুন"
-        loading={loading}
+        loading={productCrud.loading}
       />
 
       <ConfirmDialog
-        isOpen={Boolean(deleteBrandTarget)}
-        onClose={() => setDeleteBrandTarget(null)}
-        onConfirm={async () => {
-          setLoading(true);
-          const res = await deleteBrandAction(deleteBrandTarget!.id);
-          setLoading(false);
-          if (res.success) {
-            toast.success("ব্র্যান্ড মুছে ফেলা হয়েছে!");
-            setDeleteBrandTarget(null);
-          } else toast.error(res.error);
-        }}
+        isOpen={Boolean(brandCrud.deleteTarget)}
+        onClose={() => brandCrud.setDeleteTarget(null)}
+        onConfirm={brandCrud.handleDeleteConfirm}
         title="ব্র্যান্ড মুছে ফেলুন"
-        message={`আপনি কি নিশ্চিতভাবে "${deleteBrandTarget?.name}" মুছে ফেলতে চান?`}
+        message={`আপনি কি নিশ্চিতভাবে "${brandCrud.deleteTarget?.name}" মুছে ফেলতে চান?`}
         confirmLabel="ব্র্যান্ড মুছুন"
-        loading={loading}
+        loading={brandCrud.loading}
       />
 
       <ConfirmDialog
-        isOpen={Boolean(deleteSectionTarget)}
-        onClose={() => setDeleteSectionTarget(null)}
-        onConfirm={async () => {
-          setLoading(true);
-          const res = await deleteSectionAction(deleteSectionTarget!.id);
-          setLoading(false);
-          if (res.success) {
-            toast.success("তাক মুছে ফেলা হয়েছে!");
-            setDeleteSectionTarget(null);
-          } else toast.error(res.error);
-        }}
+        isOpen={Boolean(sectionCrud.deleteTarget)}
+        onClose={() => sectionCrud.setDeleteTarget(null)}
+        onConfirm={sectionCrud.handleDeleteConfirm}
         title="তাক বা সেকশন মুছে ফেলুন"
-        message={`আপনি কি নিশ্চিতভাবে "${deleteSectionTarget?.name}" মুছে ফেলতে চান?`}
+        message={`আপনি কি নিশ্চিতভাবে "${sectionCrud.deleteTarget?.name}" মুছে ফেলতে চান?`}
         confirmLabel="তাক মুছুন"
-        loading={loading}
+        loading={sectionCrud.loading}
       />
 
       <ConfirmDialog
         isOpen={Boolean(deleteUnitTarget)}
         onClose={() => setDeleteUnitTarget(null)}
         onConfirm={async () => {
-          setLoading(true);
+          setUnitLoading(true);
           const res = await deleteUnitAction(deleteUnitTarget!.id);
-          setLoading(false);
+          setUnitLoading(false);
           if (res.success) {
             toast.success("একক মুছে ফেলা হয়েছে!");
             setDeleteUnitTarget(null);
@@ -671,7 +564,7 @@ export default function ProductsClient({
         title="পরিমাপ একক মুছে ফেলুন"
         message={`আপনি কি নিশ্চিতভাবে "${deleteUnitTarget?.name}" এককটি মুছে ফেলতে চান?`}
         confirmLabel="একক মুছুন"
-        loading={loading}
+        loading={unitLoading}
       />
     </div>
   );
