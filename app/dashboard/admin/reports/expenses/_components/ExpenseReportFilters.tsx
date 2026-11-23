@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Input } from "@/components/common/ui/Input";
 import { RotateCcw } from "lucide-react";
+import { PAYMENT_METHOD_OPTIONS } from "@/lib/payment-methods";
 
 interface FilterProps {
   categories: { id: string; name: string }[];
@@ -93,10 +94,9 @@ export default function ExpenseReportFilters({ categories }: FilterProps) {
           className="text-xs px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none cursor-pointer font-medium"
         >
           <option value="all">সকল মাধ্যম (All Methods)</option>
-          <option value="cash">নগদ ক্যাশ ড্রয়ার (Cash Drawer)</option>
-          <option value="bank">ব্যাংক একাউন্ট (Bank Account)</option>
-          <option value="bkash">বিকাশ (bKash)</option>
-          <option value="nagad">নগদ (Nagad)</option>
+          {PAYMENT_METHOD_OPTIONS.map((method) => (
+            <option key={method.value} value={method.value}>{method.label}</option>
+          ))}
         </select>
 
         <Input

@@ -22,6 +22,10 @@ interface PosCartProps {
   onBkashPaidChange: (v: number) => void;
   bankPaid: number;
   onBankPaidChange: (v: number) => void;
+  nagadPaid: number;
+  onNagadPaidChange: (v: number) => void;
+  rocketPaid: number;
+  onRocketPaidChange: (v: number) => void;
   changeAmount: number;
   dueAmount: number;
   onSetQuickCash: (amount: number) => void;
@@ -51,6 +55,10 @@ export default function PosCart({
   onBkashPaidChange,
   bankPaid,
   onBankPaidChange,
+  nagadPaid,
+  onNagadPaidChange,
+  rocketPaid,
+  onRocketPaidChange,
   changeAmount,
   dueAmount,
   onSetQuickCash,
@@ -178,6 +186,14 @@ export default function PosCart({
               <div>
                 <label className="text-[10px] text-indigo-600 font-bold block">ব্যাংক</label>
                 <input type="number" min="0" value={bankPaid || ""} onChange={(e) => onBankPaidChange(sanitize(e.target.value))} className="w-full px-2 py-1 text-xs border rounded-lg font-bold text-indigo-600" />
+              </div>
+              <div>
+                <label className="text-[10px] text-amber-600 font-bold block">নগদ (Nagad)</label>
+                <input type="number" min="0" value={nagadPaid || ""} onChange={(e) => onNagadPaidChange(sanitize(e.target.value))} className="w-full px-2 py-1 text-xs border rounded-lg font-bold text-amber-600" />
+              </div>
+              <div>
+                <label className="text-[10px] text-rose-600 font-bold block">রকেট (Rocket)</label>
+                <input type="number" min="0" value={rocketPaid || ""} onChange={(e) => onRocketPaidChange(sanitize(e.target.value))} className="w-full px-2 py-1 text-xs border rounded-lg font-bold text-rose-600" />
               </div>
             </div>
           </div>

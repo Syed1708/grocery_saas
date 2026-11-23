@@ -26,6 +26,7 @@ import {
   recordSupplierPaymentAction,
 } from "@/app/actions/supplier-actions";
 import { ISupplier, PERMISSIONS } from "@/types";
+import { PAYMENT_METHOD_OPTIONS } from "@/lib/payment-methods";
 import SupplierForm from "./SupplierForm";
 
 export default function SuppliersClient({
@@ -270,10 +271,11 @@ export default function SuppliersClient({
               name="paymentMethod"
               className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none cursor-pointer"
             >
-              <option value="cash">নগদ ক্যাশ ড্রয়ার (Cash Drawer)</option>
-              <option value="bank">ব্যাংক ট্রান্সফার (Bank Transfer)</option>
-              <option value="bkash">বিকাশ (bKash)</option>
-              <option value="nagad">নগদ (Nagad)</option>
+              {PAYMENT_METHOD_OPTIONS.map((method) => (
+                <option key={method.value} value={method.value}>
+                  {method.label}
+                </option>
+              ))}
             </select>
           </div>
 

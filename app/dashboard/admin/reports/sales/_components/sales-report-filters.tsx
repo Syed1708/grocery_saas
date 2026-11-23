@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Input } from "@/components/common/ui/Input";
+import { PAYMENT_METHOD_OPTIONS } from "@/lib/payment-methods";
 
 export function SalesReportFilters() {
   const router = useRouter();
@@ -61,10 +62,9 @@ export function SalesReportFilters() {
           className="text-xs px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none"
         >
           <option value="all">All Payment Methods</option>
-          <option value="cash">Cash</option>
-          <option value="bkash">bKash</option>
-          <option value="nagad">Nagad</option>
-          <option value="bank">Bank</option>
+          {PAYMENT_METHOD_OPTIONS.map((method) => (
+            <option key={method.value} value={method.value}>{method.label}</option>
+          ))}
           <option value="card">Card</option>
           <option value="due">Due (Khata)</option>
         </select>

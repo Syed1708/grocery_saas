@@ -48,23 +48,9 @@ export default async function PosPage() {
 
   if (!rawShop) redirect("/dashboard");
 
-  const catalog: IPosProduct[] = rawCatalog.map((p: any) => ({
-    id: p.id,
-    name: p.name,
-    nameEn: p.nameEn ?? null,
-    barcode: p.barcode,
-    sku: p.sku,
-    unitPrice: Number(p.sellingPrice ?? p.unitPrice),
-    unitId: p.unitId,
-    unitCode: p.unit?.shortCode || p.unitCode || "pcs",
-    categoryId: p.categoryId,
-    categoryName: p.category?.name || p.categoryName || "সাধারণ",
-    stockAvailable: Number(p.stocks?.[0]?.quantity ?? p.stockAvailable ?? 0),
-    alertQuantity: Number(p.alertQuantity || 5),
-    vatPercent: Number(p.vatPercent || 0),
-  }));
+  const catalog: IPosProduct[] = rawCatalog;
 
-  const customers: IPosCustomer[] = rawCustomers.map((c: any) => ({
+  const customers: IPosCustomer[] = rawCustomers.map((c) => ({
     id: c.id,
     name: c.name,
     phone: c.phone ?? null,

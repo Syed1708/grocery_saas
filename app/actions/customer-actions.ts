@@ -6,6 +6,7 @@ import { customerSchema } from "@/lib/validations";
 import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types";
 import { getErrorMessage } from "@/lib/utils";
+import { accountTypeForPaymentMethod, normalizePaymentMethod } from "@/lib/payment-methods";
 
 // ==========================================
 // SHARED HELPERS
@@ -187,6 +188,7 @@ export async function recordCustomerPaymentAction(
     if (!customer) return { success: false, error: "Customer not found in this branch." };
 
     const receiptNo = `REC-${Date.now().toString().slice(-6)}`;
+    const method = normalizePaymentMethod(paymentMethod);
 
     await prisma.$transaction(async (tx) => {
       // 1. Decrement Customer Due
@@ -200,24 +202,27 @@ export async function recordCustomerPaymentAction(
         data: {
           receiptNo,
           amount,
-          paymentMethod,
+          paymentMethod: method,
           note: note || "কাস্টমার বকেয়া কালেকশন (Due Collection)",
           branchId: user.activeBranchId,
           customerId: customer.id,
         },
       });
 
-      // 3. Increment Branch Cash Drawer if paid in cash
-      if (paymentMethod === "cash") {
-        const cashDrawer = await tx.account.findFirst({
-          where: { branchId: user.activeBranchId, type: "CASH", status: "active" },
+      // 3. Credit the matching account (cash / bank / bKash / Nagad / Rocket)
+      const paymentAccount = await tx.account.findFirst({
+        where: {
+          shopId: user.shopId,
+          branchId: user.activeBranchId,
+          type: accountTypeForPaymentMethod(method),
+          status: "active",
+        },
+      });
+      if (paymentAccount) {
+        await tx.account.update({
+          where: { id: paymentAccount.id },
+          data: { currentBalance: { increment: amount } },
         });
-        if (cashDrawer) {
-          await tx.account.update({
-            where: { id: cashDrawer.id },
-            data: { currentBalance: { increment: amount } },
-          });
-        }
       }
     });
 

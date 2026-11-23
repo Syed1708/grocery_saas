@@ -181,6 +181,18 @@ export default function SaleInvoiceReceipt({
                   <span>{currency}{formatMoney(sale.splitPayments.bank)}</span>
                 </div>
               )}
+              {Number(sale.splitPayments.nagad || 0) > 0 && (
+                <div className="flex justify-between">
+                  <span>• নগদ (Nagad):</span>
+                  <span>{currency}{formatMoney(sale.splitPayments.nagad)}</span>
+                </div>
+              )}
+              {Number(sale.splitPayments.rocket || 0) > 0 && (
+                <div className="flex justify-between">
+                  <span>• রকেট (Rocket):</span>
+                  <span>{currency}{formatMoney(sale.splitPayments.rocket)}</span>
+                </div>
+              )}
             </div>
           )}
 

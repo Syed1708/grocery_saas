@@ -7,6 +7,7 @@ import { PERMISSIONS } from "@/types";
 import type { RecordSupplierPaymentActionResult } from "@/types/purchase";
 import { supplierSchema } from "@/lib/validations";
 import { getErrorMessage } from "@/lib/utils";
+import { accountTypeForPaymentMethod, normalizePaymentMethod } from "@/lib/payment-methods";
 
 // ==========================================
 // SHARED HELPERS
@@ -233,6 +234,7 @@ export async function recordSupplierPaymentAction(
         : payloadOrId;
 
     const { supplierId, amount, paymentMethod = "cash", reference, note } = payload;
+    const method = normalizePaymentMethod(paymentMethod);
     const sAmount = Math.max(0, Number(amount) || 0);
 
     if (sAmount <= 0) {
@@ -254,7 +256,7 @@ export async function recordSupplierPaymentAction(
       const p = await tx.supplierPayment.create({
         data: {
           amount: sAmount,
-          paymentMethod,
+          paymentMethod: method,
           voucherNo,
           reference: reference || null,
           note: note || "মহাজনের বকেয়া পরিশোধ (Supplier Due Payout)",
@@ -271,17 +273,12 @@ export async function recordSupplierPaymentAction(
         },
       });
 
-      // 3. DEDUCT CASH FROM DRAWER / BANK ACCOUNT (Real Financial Sync)
-      const accountType = paymentMethod.toUpperCase();
-      const paymentAccountType: "CASH" | "BANK" | "BKASH" | "NAGAD" =
-        accountType === "BANK" || accountType === "BKASH" || accountType === "NAGAD"
-          ? accountType
-          : "CASH";
-
+      // 3. DEDUCT FROM THE MATCHING ACCOUNT (cash / bank / bKash / Nagad / Rocket)
       const paymentAccount = await tx.account.findFirst({
         where: {
+          shopId: user.shopId,
           branchId: user.activeBranchId,
-          type: paymentAccountType,
+          type: accountTypeForPaymentMethod(method),
           status: "active",
         },
       });
@@ -309,7 +306,7 @@ export async function recordSupplierPaymentAction(
       previousDue,
       amountPaid: sAmount,
       remainingDue,
-      paymentMethod,
+      paymentMethod: method,
       reference,
       paymentDate: payment.createdAt,
     };

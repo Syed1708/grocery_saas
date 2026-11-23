@@ -332,9 +332,19 @@ also allow `branchId: null` for head-office assets). Resolve transfer/clear-cheq
 the active branch. CRUD entities use `useCrudModal`; one-off actions (transfer, clear cheque, pay
 installment) may keep a small manual modal + loading state.
 
+**Payment methods (single source of truth):** never hardcode a payment-method list in a form or
+filter. Import from `@/lib/payment-methods`:
+`PAYMENT_METHODS` / `PAYMENT_METHOD_OPTIONS` (`cash`, `bank`, `bkash`, `nagad`, `rocket`),
+`normalizePaymentMethod()`, `accountTypeForPaymentMethod()`, `paymentMethodLabel()`. Every module —
+expenses, income, assets, equity, purchases, purchase returns, supplier payments, customer due
+collection, POS split payments and report filters — must offer these same five values and resolve
+the matching branch account with `accountTypeForPaymentMethod()`. POS split stores all five inside
+the `SPLIT:{...}` notes tag and its receipts print them. Unknown values normalize to `cash`;
+`non_cash` is an internal write-off marker and must never move an account.
+
 **Cash reconciliation:** any financial create/update/delete that touches an account must keep the
 drawer in sync. Resolve the account from the form's `paymentMethod` (`cash` → CASH, `bank` → BANK,
-`bkash` → BKASH, `nagad` → NAGAD, `rocket` → ROCKET, else OTHER) within `shopId` + `activeBranchId`;
+`bkash` → BKASH, `nagad` → NAGAD, `rocket` → ROCKET) within `shopId` + `activeBranchId`;
 if none exists return a clear error telling the user to create that account. On create post an
 `AccountTransaction` tagged with `referenceType` (EXPENSE / INCOME / ASSET / EQUITY) and
 `referenceId` = record id. On edit, reverse the existing entries for that reference (using each

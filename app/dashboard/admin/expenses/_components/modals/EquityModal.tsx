@@ -2,6 +2,7 @@
 import FormModal from "@/components/common/FormModal";
 import { FormField } from "@/components/common/ui/form/FormField";
 import { IOwnerTransaction } from "@/types";
+import { PAYMENT_METHOD_OPTIONS } from "@/lib/payment-methods";
 
 export default function EquityModal({ isOpen, onClose, onSubmit, loading, equity, currencySymbol, errors = {} }: { isOpen: boolean; onClose: () => void; onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void; loading: boolean; equity?: IOwnerTransaction | null; currencySymbol: string; errors?: Record<string, string> }) {
   const isEditing = Boolean(equity);
@@ -14,7 +15,7 @@ export default function EquityModal({ isOpen, onClose, onSubmit, loading, equity
       </div>
       <div className="grid grid-cols-2 gap-3">
         <FormField type="date" label="Date" name="transactionDate" required defaultValue={equity?.transactionDate ? new Date(equity.transactionDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]} error={errors.transactionDate} />
-        <FormField type="select" label="Payment Source" name="paymentMethod" defaultValue={equity?.paymentMethod || "cash"} options={[{ label: "Cash Drawer", value: "cash" }, { label: "Bank Account", value: "bank" }, { label: "bKash", value: "bkash" }, { label: "Nagad", value: "nagad" }, { label: "Rocket", value: "rocket" }, { label: "Other", value: "other" }]} error={errors.paymentMethod} />
+        <FormField type="select" label="Payment Source" name="paymentMethod" defaultValue={equity?.paymentMethod || "cash"} options={PAYMENT_METHOD_OPTIONS} error={errors.paymentMethod} />
       </div>
       <FormField type="text" label="Purpose / Reason" name="purpose" defaultValue={equity?.purpose || ""} placeholder="e.g. Additional business capital" error={errors.purpose} />
       <FormField type="textarea" label="Notes" name="notes" rows={2} defaultValue={equity?.notes || ""} error={errors.notes} />

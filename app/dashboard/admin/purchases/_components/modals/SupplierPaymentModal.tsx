@@ -8,6 +8,7 @@ import { ISupplier } from "@/types";
 import { Input } from "@/components/common/ui/Input";
 import { Select } from "@/components/common/ui/Select";
 import type { ISupplierPaymentResult } from "@/types/purchase";
+import { PAYMENT_METHOD_OPTIONS } from "@/lib/payment-methods";
 
 interface Props {
   supplier: ISupplier | null;
@@ -103,12 +104,7 @@ export default function SupplierPaymentModal({
             label="উৎস অ্যাকাউন্ট (Payment Method) *"
             name="paymentMethod"
             defaultValue="cash"
-            options={[
-              { value: "cash", label: "ক্যাশ ড্রয়ার (Cash Drawer)" },
-              { value: "bank", label: "ব্যাংক অ্যাকাউন্ট (Bank)" },
-              { value: "bkash", label: "বিকাশ মার্চেন্ট (bKash)" },
-              { value: "nagad", label: "নগদ মার্চেন্ট (Nagad)" },
-            ]}
+            options={PAYMENT_METHOD_OPTIONS}
           />
         </div>
 

@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types";
 import { CreatePurchaseReturnPayload } from "@/types/purchase-return";
+import { getErrorMessage } from "@/lib/utils";
+import { accountTypeForPaymentMethod, normalizePaymentMethod } from "@/lib/payment-methods";
 
 // ==========================================
 // 1. CREATE PURCHASE RETURN (DEBIT NOTE)
@@ -12,7 +14,7 @@ import { CreatePurchaseReturnPayload } from "@/types/purchase-return";
 export async function createPurchaseReturnAction(payload: CreatePurchaseReturnPayload) {
   try {
     const user = await requireAuth({
-      requiredPermission: PERMISSIONS.CATALOG_MANAGE,
+      requiredPermission: PERMISSIONS.PURCHASES_MANAGE,
       requireActiveStatus: true,
     });
 
@@ -103,7 +105,7 @@ export async function createPurchaseReturnAction(payload: CreatePurchaseReturnPa
           refundAmount: sRefundAmount,
           dueDeduction,
           settlementType,
-          paymentMethod: sRefundAmount > 0 ? paymentMethod : null,
+          paymentMethod: sRefundAmount > 0 ? normalizePaymentMethod(paymentMethod) : null,
           notes: notes || null,
           supplierId,
           purchaseId: purchaseId || null,
@@ -134,15 +136,13 @@ export async function createPurchaseReturnAction(payload: CreatePurchaseReturnPa
         });
       }
 
-      // 5. Receive Refund into Cash Drawer / Bank Account (if vendor returned cash)
+      // 5. Receive Refund into the matching branch account
       if (sRefundAmount > 0) {
-        const accountType = paymentMethod.toUpperCase();
         const paymentAccount = await tx.account.findFirst({
           where: {
-            branchId: user.activeBranchId!,
-            type: ["CASH", "BANK", "BKASH", "NAGAD"].includes(accountType)
-              ? (accountType as any)
-              : "CASH",
+            shopId: user.shopId,
+            branchId: user.activeBranchId,
+            type: accountTypeForPaymentMethod(normalizePaymentMethod(paymentMethod)),
             status: "active",
           },
         });
@@ -163,8 +163,8 @@ export async function createPurchaseReturnAction(payload: CreatePurchaseReturnPa
     revalidatePath("/reports/closings");
 
     return { success: true, returnNo };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Purchase return error:", error);
-    return { success: false, error: error.message || "পণ্য ফেরত সম্পন্ন করা সম্ভব হয়নি।" };
+    return { success: false, error: getErrorMessage(error, "পণ্য ফেরত সম্পন্ন করা সম্ভব হয়নি।") };
   }
 }

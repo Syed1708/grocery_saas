@@ -132,11 +132,15 @@ export async function getSales(
         if (jsonStr) splitPayments = JSON.parse(jsonStr);
       } catch {}
     } else if (s.paymentMethod === "cash") {
-      splitPayments = { cash: Number(s.paidAmount), bkash: 0, bank: 0 };
+      splitPayments = { cash: Number(s.paidAmount), bkash: 0, bank: 0, nagad: 0, rocket: 0 };
     } else if (s.paymentMethod === "bkash") {
-      splitPayments = { cash: 0, bkash: Number(s.paidAmount), bank: 0 };
+      splitPayments = { cash: 0, bkash: Number(s.paidAmount), bank: 0, nagad: 0, rocket: 0 };
     } else if (s.paymentMethod === "bank") {
-      splitPayments = { cash: 0, bkash: 0, bank: Number(s.paidAmount) };
+      splitPayments = { cash: 0, bkash: 0, bank: Number(s.paidAmount), nagad: 0, rocket: 0 };
+    } else if (s.paymentMethod === "nagad") {
+      splitPayments = { cash: 0, bkash: 0, bank: 0, nagad: Number(s.paidAmount), rocket: 0 };
+    } else if (s.paymentMethod === "rocket") {
+      splitPayments = { cash: 0, bkash: 0, bank: 0, nagad: 0, rocket: Number(s.paidAmount) };
     }
 
     return {

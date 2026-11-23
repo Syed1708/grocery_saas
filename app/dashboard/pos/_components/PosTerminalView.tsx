@@ -77,6 +77,10 @@ export default function PosTerminalView({
           onBkashPaidChange={pos.setBkashPaid}
           bankPaid={pos.bankPaid}
           onBankPaidChange={pos.setBankPaid}
+          nagadPaid={pos.nagadPaid}
+          onNagadPaidChange={pos.setNagadPaid}
+          rocketPaid={pos.rocketPaid}
+          onRocketPaidChange={pos.setRocketPaid}
           changeAmount={pos.changeAmount}
           dueAmount={pos.dueAmount}
           onSetQuickCash={pos.setQuickCash}

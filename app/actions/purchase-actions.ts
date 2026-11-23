@@ -9,6 +9,8 @@ import {
   UpdatePurchasePayload,
 } from "@/types/purchase";
 import { deleteUploadedFile } from "@/lib/file-storage";
+import { getErrorMessage } from "@/lib/utils";
+import { accountTypeForPaymentMethod, normalizePaymentMethod } from "@/lib/payment-methods";
 
 // ==========================================
 // 1. CREATE PURCHASE CHALAN
@@ -123,7 +125,7 @@ export async function createPurchaseAction(payload: CreatePurchasePayload) {
           purchaseDate: purchaseDate ? new Date(purchaseDate) : new Date(),
           paidAmount: sPaidAmount,
           dueAmount: chalanDue,
-          paymentMethod,
+          paymentMethod: normalizePaymentMethod(paymentMethod),
           paymentStatus,
           notes: notes || null,
           supplierId,
@@ -191,7 +193,7 @@ if (fromPOId) {
         await tx.supplierPayment.create({
           data: {
             amount: sPaidAmount,
-            paymentMethod,
+            paymentMethod: normalizePaymentMethod(paymentMethod),
             voucherNo: `PAY-PUR-${Date.now().toString().slice(-6)}`,
             reference: cleanChalanNo,
             note: `Payment for purchase chalan #${cleanChalanNo}`,
@@ -201,14 +203,12 @@ if (fromPOId) {
           },
         });
 
-        // Deduct Cash Drawer / Bank Account
-        const accountType = paymentMethod.toUpperCase();
+        // Deduct the matching branch account (cash / bank / bKash / Nagad / Rocket)
         const paymentAccount = await tx.account.findFirst({
           where: {
-            branchId: user.activeBranchId!,
-            type: ["CASH", "BANK", "BKASH", "NAGAD"].includes(accountType)
-              ? (accountType as any)
-              : "CASH",
+            shopId: user.shopId,
+            branchId: user.activeBranchId,
+            type: accountTypeForPaymentMethod(normalizePaymentMethod(paymentMethod)),
             status: "active",
           },
         });
@@ -235,11 +235,11 @@ if (fromPOId) {
     revalidatePath("/reports/closings");
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Purchase creation error:", error);
     return {
       success: false,
-      error: error.message || "চালান এন্ট্রি সম্পন্ন করা সম্ভব হয়নি।",
+      error: getErrorMessage(error, "চালান এন্ট্রি সম্পন্ন করা সম্ভব হয়নি।"),
     };
   }
 }
@@ -396,7 +396,7 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
           grandTotal,
           paidAmount: sPaidAmount,
           dueAmount: chalanDue,
-          paymentMethod,
+          paymentMethod: normalizePaymentMethod(paymentMethod),
           paymentStatus,
           notes: notes || null,
         },
@@ -407,11 +407,11 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
     revalidatePath("/inventory");
     revalidatePath("/suppliers");
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Update purchase error:", error);
     return {
       success: false,
-      error: error.message || "চালান আপডেট ব্যর্থ হয়েছে।",
+      error: getErrorMessage(error, "চালান আপডেট ব্যর্থ হয়েছে।"),
     };
   }
 }
@@ -470,14 +470,19 @@ export async function deletePurchaseAction(purchaseId: string) {
         });
       }
 
-      // 3. Refund physical cash back to drawer if money was paid
-      if (paidToRevert > 0 && purchase.paymentMethod === "cash") {
-        const cashDrawer = await tx.account.findFirst({
-          where: { branchId: purchaseBranchId, type: "CASH", status: "active" },
+      // 3. Refund the original payment account if money was paid
+      if (paidToRevert > 0) {
+        const refundAccount = await tx.account.findFirst({
+          where: {
+            shopId: purchase.shopId,
+            branchId: purchaseBranchId,
+            type: accountTypeForPaymentMethod(normalizePaymentMethod(purchase.paymentMethod)),
+            status: "active",
+          },
         });
-        if (cashDrawer) {
+        if (refundAccount) {
           await tx.account.update({
-            where: { id: cashDrawer.id },
+            where: { id: refundAccount.id },
             data: { currentBalance: { increment: paidToRevert } },
           });
         }
@@ -507,11 +512,11 @@ export async function deletePurchaseAction(purchaseId: string) {
     revalidatePath("/inventory");
     revalidatePath("/dashboard/closings");
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Delete purchase error:", error);
     return {
       success: false,
-      error: error.message || "চালান মুছে ফেলা সম্ভব হয়নি।",
+      error: getErrorMessage(error, "চালান মুছে ফেলা সম্ভব হয়নি।"),
     };
   }
 }

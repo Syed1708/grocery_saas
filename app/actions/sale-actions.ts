@@ -34,6 +34,8 @@ export async function checkoutAction(payload: CheckoutPayload) {
       cashPaid = 0,
       bkashPaid = 0,
       bankPaid = 0,
+      nagadPaid = 0,
+      rocketPaid = 0,
     } = payload;
 
     if (!items || items.length === 0) {
@@ -105,7 +107,9 @@ export async function checkoutAction(payload: CheckoutPayload) {
     const sCashPaid = Math.max(0, Number(cashPaid) || 0);
     const sBkashPaid = Math.max(0, Number(bkashPaid) || 0);
     const sBankPaid = Math.max(0, Number(bankPaid) || 0);
-    const totalPaid = sCashPaid + sBkashPaid + sBankPaid;
+    const sNagadPaid = Math.max(0, Number(nagadPaid) || 0);
+    const sRocketPaid = Math.max(0, Number(rocketPaid) || 0);
+    const totalPaid = sCashPaid + sBkashPaid + sBankPaid + sNagadPaid + sRocketPaid;
 
     const currentInvoiceDue = Math.max(0, Math.round((grandTotal - totalPaid) * 100) / 100);
     const changeAmount = Math.max(0, Math.round((totalPaid - grandTotal) * 100) / 100);
@@ -119,6 +123,8 @@ export async function checkoutAction(payload: CheckoutPayload) {
       sCashPaid > 0 && "cash",
       sBkashPaid > 0 && "bkash",
       sBankPaid > 0 && "bank",
+      sNagadPaid > 0 && "nagad",
+      sRocketPaid > 0 && "rocket",
     ].filter(Boolean);
 
     let paymentMethod = "cash";
@@ -150,7 +156,7 @@ export async function checkoutAction(payload: CheckoutPayload) {
     const invoiceNo = `INV-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
 
     // Prepare structured metadata for split payment reproduction on receipts
-    const splitTag = `SPLIT:{"cash":${sCashPaid},"bkash":${sBkashPaid},"bank":${sBankPaid}}`;
+    const splitTag = `SPLIT:{"cash":${sCashPaid},"bkash":${sBkashPaid},"bank":${sBankPaid},"nagad":${sNagadPaid},"rocket":${sRocketPaid}}`;
 
     // 🚀 ATOMIC DATABASE TRANSACTION
     const sale = await prisma.$transaction(async (tx) => {
@@ -216,7 +222,7 @@ export async function checkoutAction(payload: CheckoutPayload) {
       const actualCashIn = Math.max(0, sCashPaid - changeAmount);
       if (actualCashIn > 0) {
         const cashDrawer = await tx.account.findFirst({
-          where: { branchId: user.activeBranchId, type: "CASH", status: "active" },
+          where: { shopId: user.shopId, branchId: user.activeBranchId, type: "CASH", status: "active" },
         });
         if (cashDrawer) {
           await tx.account.update({
@@ -229,7 +235,7 @@ export async function checkoutAction(payload: CheckoutPayload) {
       // 5. Update bKash/MFS Account
       if (sBkashPaid > 0) {
         const bkashAcc = await tx.account.findFirst({
-          where: { branchId: user.activeBranchId, type: "BKASH", status: "active" },
+          where: { shopId: user.shopId, branchId: user.activeBranchId, type: "BKASH", status: "active" },
         });
         if (bkashAcc) {
           await tx.account.update({
@@ -242,12 +248,38 @@ export async function checkoutAction(payload: CheckoutPayload) {
       // 6. Update Bank/Card Account
       if (sBankPaid > 0) {
         const bankAcc = await tx.account.findFirst({
-          where: { branchId: user.activeBranchId, type: "BANK", status: "active" },
+          where: { shopId: user.shopId, branchId: user.activeBranchId, type: "BANK", status: "active" },
         });
         if (bankAcc) {
           await tx.account.update({
             where: { id: bankAcc.id },
             data: { currentBalance: { increment: sBankPaid } },
+          });
+        }
+      }
+
+      // 7. Update Nagad Account
+      if (sNagadPaid > 0) {
+        const nagadAcc = await tx.account.findFirst({
+          where: { shopId: user.shopId, branchId: user.activeBranchId, type: "NAGAD", status: "active" },
+        });
+        if (nagadAcc) {
+          await tx.account.update({
+            where: { id: nagadAcc.id },
+            data: { currentBalance: { increment: sNagadPaid } },
+          });
+        }
+      }
+
+      // 8. Update Rocket Account
+      if (sRocketPaid > 0) {
+        const rocketAcc = await tx.account.findFirst({
+          where: { shopId: user.shopId, branchId: user.activeBranchId, type: "ROCKET", status: "active" },
+        });
+        if (rocketAcc) {
+          await tx.account.update({
+            where: { id: rocketAcc.id },
+            data: { currentBalance: { increment: sRocketPaid } },
           });
         }
       }
@@ -312,7 +344,7 @@ export async function voidSaleAction(saleId: string) {
     }
 
     // Parse split payment from notes to rollback exact accounts
-    let split: ISplitPaymentDetails = { cash: 0, bkash: 0, bank: 0 };
+    let split: ISplitPaymentDetails = { cash: 0, bkash: 0, bank: 0, nagad: 0, rocket: 0 };
     if (sale.notes && sale.notes.includes("SPLIT:")) {
       try {
         const jsonStr = sale.notes.split("SPLIT:")[1]?.split("|")[0]?.trim();
@@ -324,6 +356,10 @@ export async function voidSaleAction(saleId: string) {
       split.bkash = Number(sale.paidAmount);
     } else if (sale.paymentMethod === "bank") {
       split.bank = Number(sale.paidAmount);
+    } else if (sale.paymentMethod === "nagad") {
+      split.nagad = Number(sale.paidAmount);
+    } else if (sale.paymentMethod === "rocket") {
+      split.rocket = Number(sale.paidAmount);
     }
 
     // 🚀 ATOMIC ROLLBACK TRANSACTION
@@ -357,7 +393,7 @@ export async function voidSaleAction(saleId: string) {
       const netCashPaid = Math.max(0, (split.cash || 0) - Number(sale.changeAmount || 0));
       if (netCashPaid > 0) {
         const cashDrawer = await tx.account.findFirst({
-          where: { branchId: sale.branchId, type: "CASH", status: "active" },
+          where: { shopId: sale.shopId, branchId: sale.branchId, type: "CASH", status: "active" },
         });
         if (cashDrawer) {
           await tx.account.update({
@@ -370,7 +406,7 @@ export async function voidSaleAction(saleId: string) {
       // 4. Rollback bKash Account
       if ((split.bkash || 0) > 0) {
         const bkashAcc = await tx.account.findFirst({
-          where: { branchId: sale.branchId, type: "BKASH", status: "active" },
+          where: { shopId: sale.shopId, branchId: sale.branchId, type: "BKASH", status: "active" },
         });
         if (bkashAcc) {
           await tx.account.update({
@@ -383,7 +419,7 @@ export async function voidSaleAction(saleId: string) {
       // 5. Rollback Bank Account
       if ((split.bank || 0) > 0) {
         const bankAcc = await tx.account.findFirst({
-          where: { branchId: sale.branchId, type: "BANK", status: "active" },
+          where: { shopId: sale.shopId, branchId: sale.branchId, type: "BANK", status: "active" },
         });
         if (bankAcc) {
           await tx.account.update({
@@ -393,7 +429,33 @@ export async function voidSaleAction(saleId: string) {
         }
       }
 
-      // 6. Delete Sale Items and Sale Record
+      // 6. Rollback Nagad Account
+      if ((split.nagad || 0) > 0) {
+        const nagadAcc = await tx.account.findFirst({
+          where: { shopId: sale.shopId, branchId: sale.branchId, type: "NAGAD", status: "active" },
+        });
+        if (nagadAcc) {
+          await tx.account.update({
+            where: { id: nagadAcc.id },
+            data: { currentBalance: { decrement: split.nagad } },
+          });
+        }
+      }
+
+      // 7. Rollback Rocket Account
+      if ((split.rocket || 0) > 0) {
+        const rocketAcc = await tx.account.findFirst({
+          where: { shopId: sale.shopId, branchId: sale.branchId, type: "ROCKET", status: "active" },
+        });
+        if (rocketAcc) {
+          await tx.account.update({
+            where: { id: rocketAcc.id },
+            data: { currentBalance: { decrement: split.rocket } },
+          });
+        }
+      }
+
+      // 8. Delete Sale Items and Sale Record
       await tx.saleItem.deleteMany({ where: { saleId: sale.id } });
       await tx.sale.delete({ where: { id: sale.id } });
     });

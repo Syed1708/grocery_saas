@@ -3,6 +3,7 @@
 import React from "react";
 import { ArrowDownLeft, Banknote, Save } from "lucide-react";
 import { ReturnSettlementType } from "@/types/purchase-return";
+import { PAYMENT_METHOD_OPTIONS } from "@/lib/payment-methods";
 
 interface Props {
   totalQuantity: number;
@@ -102,10 +103,9 @@ export default function PurchaseReturnSummaryCard({
                 onChange={(e) => onPaymentMethodChange(e.target.value)}
                 className="w-full p-2 text-xs border rounded-lg bg-white dark:bg-neutral-800"
               >
-                <option value="cash">নগদ (Cash Drawer)</option>
-                <option value="bkash">bKash</option>
-                <option value="nagad">Nagad</option>
-                <option value="bank">ব্যাংক ট্রান্সফার</option>
+                {PAYMENT_METHOD_OPTIONS.map((method) => (
+                  <option key={method.value} value={method.value}>{method.label}</option>
+                ))}
               </select>
             </div>
           </div>

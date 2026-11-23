@@ -37,6 +37,7 @@ import {
   recordCustomerPaymentAction,
 } from "@/app/actions/customer-actions";
 import { ICustomer, PERMISSIONS } from "@/types";
+import { PAYMENT_METHOD_OPTIONS } from "@/lib/payment-methods";
 import CustomerForm from "./CustomerForm";
 
 type BalanceFilter = "ALL" | "HAS_DUES" | "SETTLED" | "PERMANENT" | "WALK_IN";
@@ -370,10 +371,11 @@ export default function CustomersClient({
               defaultValue="cash"
               className="w-full px-3 py-2 border rounded-xl bg-white dark:bg-neutral-800 outline-none cursor-pointer font-medium"
             >
-              <option value="cash">প্রধান ক্যাশ ড্রয়ার (Cash Drawer)</option>
-              <option value="bkash">বিকাশ মার্চেন্ট ওয়ালেট (bKash)</option>
-              <option value="nagad">নগদ মার্চেন্ট ওয়ালেট (Nagad)</option>
-              <option value="bank">ব্যাংক একাউন্ট (Bank Deposit)</option>
+              {PAYMENT_METHOD_OPTIONS.map((method) => (
+                <option key={method.value} value={method.value}>
+                  {method.label}
+                </option>
+              ))}
             </select>
           </div>
 

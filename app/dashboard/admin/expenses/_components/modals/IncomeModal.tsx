@@ -3,6 +3,7 @@ import { useState } from "react";
 import FormModal from "@/components/common/FormModal";
 import { FormField } from "@/components/common/ui/form/FormField";
 import { IOtherIncome } from "@/types";
+import { PAYMENT_METHOD_OPTIONS } from "@/lib/payment-methods";
 
 export default function IncomeModal({ isOpen, onClose, onSubmit, loading, income, currencySymbol, errors = {} }: { isOpen: boolean; onClose: () => void; onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void; loading: boolean; income?: IOtherIncome | null; currencySymbol: string; errors?: Record<string, string> }) {
   const isEditing = Boolean(income);
@@ -17,7 +18,7 @@ export default function IncomeModal({ isOpen, onClose, onSubmit, loading, income
         <FormField type="number" label={`Amount (${currencySymbol})`} name="amount" step="0.01" required defaultValue={income?.amount ?? ""} placeholder="0.00" error={errors.amount} />
       </div>
       <FormField type="date" label="Date" name="incomeDate" required defaultValue={income?.incomeDate ? new Date(income.incomeDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]} error={errors.incomeDate} />
-      <FormField type="select" label="Received In" name="paymentMethod" defaultValue={income?.paymentMethod || "cash"} options={[{ label: "Cash Drawer", value: "cash" }, { label: "Bank Account", value: "bank" }, { label: "bKash", value: "bkash" }, { label: "Nagad", value: "nagad" }, { label: "Rocket", value: "rocket" }, { label: "Other", value: "other" }]} error={errors.paymentMethod} />
+      <FormField type="select" label="Received In" name="paymentMethod" defaultValue={income?.paymentMethod || "cash"} options={PAYMENT_METHOD_OPTIONS} error={errors.paymentMethod} />
       <FormField type="textarea" label="Notes" name="note" rows={2} defaultValue={income?.note || ""} error={errors.note} />
     </FormModal>
   );

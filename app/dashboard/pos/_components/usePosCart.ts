@@ -22,6 +22,8 @@ export function usePosCart(
   const [cashPaid, setCashPaid] = useState<number>(0);
   const [bkashPaid, setBkashPaid] = useState<number>(0);
   const [bankPaid, setBankPaid] = useState<number>(0);
+  const [nagadPaid, setNagadPaid] = useState<number>(0);
+  const [rocketPaid, setRocketPaid] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
   const [quickCustomerModalOpen, setQuickCustomerModalOpen] = useState(false);
@@ -42,7 +44,7 @@ export function usePosCart(
   const vatAmount = Math.round(((baseAmount * vatPercent) / 100) * 100) / 100;
   const grandTotal = Math.round((baseAmount + vatAmount) * 100) / 100;
 
-  const totalPaid = (cashPaid || 0) + (bkashPaid || 0) + (bankPaid || 0);
+  const totalPaid = (cashPaid || 0) + (bkashPaid || 0) + (bankPaid || 0) + (nagadPaid || 0) + (rocketPaid || 0);
   const dueAmount = Math.max(0, grandTotal - totalPaid);
   const changeAmount = Math.max(0, totalPaid - grandTotal);
 
@@ -119,6 +121,8 @@ export function usePosCart(
     setCashPaid(0);
     setBkashPaid(0);
     setBankPaid(0);
+    setNagadPaid(0);
+    setRocketPaid(0);
     setShowSplitPay(false);
     setTimeout(() => barcodeInputRef.current?.focus(), 100);
   }
@@ -173,6 +177,8 @@ export function usePosCart(
       cashPaid: Math.max(0, cashPaid),
       bkashPaid: Math.max(0, bkashPaid),
       bankPaid: Math.max(0, bankPaid),
+      nagadPaid: Math.max(0, nagadPaid),
+      rocketPaid: Math.max(0, rocketPaid),
     });
 
     setLoading(false);
@@ -237,6 +243,10 @@ export function usePosCart(
     setBkashPaid,
     bankPaid,
     setBankPaid,
+    nagadPaid,
+    setNagadPaid,
+    rocketPaid,
+    setRocketPaid,
     subtotal,
     vatPercent,
     vatAmount,
@@ -249,6 +259,8 @@ export function usePosCart(
       setCashPaid(grandTotal);
       setBkashPaid(0);
       setBankPaid(0);
+      setNagadPaid(0);
+      setRocketPaid(0);
     },
     handleBarcodeSubmit,
     submitSale,

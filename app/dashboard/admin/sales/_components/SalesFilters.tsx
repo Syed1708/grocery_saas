@@ -1,6 +1,7 @@
 "use client";
 
 import { Search, Filter, X } from "lucide-react";
+import { PAYMENT_METHOD_OPTIONS } from "@/lib/payment-methods";
 
 interface SalesFiltersProps {
   searchQuery: string;
@@ -66,9 +67,9 @@ export default function SalesFilters({
               className="px-2.5 py-1.5 text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none font-semibold cursor-pointer"
             >
               <option value="all">সব মাধ্যম (All)</option>
-              <option value="cash">নগদ (Cash)</option>
-              <option value="bkash">বিকাশ (bKash)</option>
-              <option value="bank">ব্যাংক (Bank)</option>
+              {PAYMENT_METHOD_OPTIONS.map((method) => (
+                <option key={method.value} value={method.value}>{method.label}</option>
+              ))}
               <option value="due">বাকি (Due)</option>
               <option value="mixed">মিক্সড (Mixed)</option>
             </select>

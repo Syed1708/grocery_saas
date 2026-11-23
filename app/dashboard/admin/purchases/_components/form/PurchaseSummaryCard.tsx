@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2, CheckCircle2 } from "lucide-react";
+import { PAYMENT_METHOD_OPTIONS } from "@/lib/payment-methods";
 
 interface Props {
   totalQuantity: number;
@@ -68,10 +69,9 @@ export default function PurchaseSummaryCard({
             onChange={(e) => onPaymentMethodChange(e.target.value)}
             className="w-full px-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
           >
-            <option value="cash">ক্যাশ ড্রয়ার (Cash Drawer)</option>
-            <option value="bank">ব্যাংক একাউন্ট (Bank Account)</option>
-            <option value="bkash">বিকাশ মার্চেন্ট (bKash)</option>
-            <option value="nagad">নগদ (Nagad)</option>
+            {PAYMENT_METHOD_OPTIONS.map((method) => (
+              <option key={method.value} value={method.value}>{method.label}</option>
+            ))}
           </select>
         </div>
 

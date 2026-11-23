@@ -13,6 +13,11 @@ import {
 } from "@/lib/validations";
 import { PERMISSIONS } from "@/types";
 import { getErrorMessage } from "@/lib/utils";
+import {
+  accountTypeForPaymentMethod,
+  normalizePaymentMethod,
+  PaymentMethod,
+} from "@/lib/payment-methods";
 
 const FINANCE_REVALIDATE_PATHS = ["/dashboard/admin/expenses"];
 
@@ -28,27 +33,13 @@ type Tx = Prisma.TransactionClient;
 type Direction = "IN" | "OUT";
 type LedgerType = "EXPENSE" | "INCOME" | "DEPOSIT" | "WITHDRAW";
 
-const PAYMENT_METHODS = ["cash", "bank", "bkash", "nagad", "rocket", "other"] as const;
-type PaymentMethod = (typeof PAYMENT_METHODS)[number];
-
-function normalizePaymentMethod(value?: string | null): PaymentMethod {
-  const method = (value || "cash").trim().toLowerCase();
-  return (PAYMENT_METHODS as readonly string[]).includes(method)
-    ? (method as PaymentMethod)
-    : "cash";
-}
-
-function accountTypeForMethod(method: PaymentMethod) {
-  return method.toUpperCase() as "CASH" | "BANK" | "BKASH" | "NAGAD" | "ROCKET" | "OTHER";
-}
-
 async function findMethodAccount(
   tx: Tx,
   shopId: string,
   branchId: string,
   method: PaymentMethod
 ) {
-  const type = accountTypeForMethod(method);
+  const type = accountTypeForPaymentMethod(method);
   const account = await tx.account.findFirst({
     where: { shopId, branchId, type, status: "active" },
     select: { id: true, currentBalance: true },
@@ -80,6 +71,7 @@ interface LedgerEntry {
 async function applyLedger(tx: Tx, ctx: LedgerContext, entry: LedgerEntry) {
   const amount = Number(entry.amount);
   if (amount <= 0) return;
+  if ((entry.method || "").trim().toLowerCase() === "non_cash") return;
 
   const account = await findMethodAccount(tx, ctx.shopId, ctx.branchId, normalizePaymentMethod(entry.method));
   const current = Number(account.currentBalance);

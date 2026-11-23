@@ -69,12 +69,16 @@ export interface CheckoutPayload {
   cashPaid: number;
   bkashPaid: number;
   bankPaid: number;
+  nagadPaid?: number;
+  rocketPaid?: number;
 }
 
 export interface ISplitPaymentDetails {
   cash?: number;
   bkash?: number;
   bank?: number;
+  nagad?: number;
+  rocket?: number;
 }
 
 export interface ICompletedSale {
