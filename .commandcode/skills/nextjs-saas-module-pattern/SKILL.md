@@ -364,6 +364,15 @@ shop-level. Brand and section actions use `CATALOG_MANAGE` (brand delete is OWNE
 Uploads go through `saveUploadedFile`, which enforces a 5 MB limit and an allow-list of image/PDF
 MIME types.
 
+**Printing:** never print a sheet that lives inside a modal/scroll container. Render a dedicated
+print root with `createPortal(..., document.body)`, hide it on screen (`display:none`) and in
+`@media print` hide every other direct body child (`body > *:not(#print-root)`), then show the
+root. Group content into explicit pages (e.g. 24 barcode stickers per A4 page) with
+`break-after: page`; set `@page { size: A4 portrait; margin: 4mm }`, `break-inside: avoid` on each
+card, and `print-color-adjust: exact`. Use `useSyncExternalStore` (not setState-in-effect) for the
+mounted check before creating a portal. SVG barcodes need quiet zones on both sides,
+`shape-rendering="crispEdges"` and `preserveAspectRatio="none"`.
+
 **POS / sales / returns / closings:** checkout requires `POS_ACCESS`; voiding a sale is
 OWNER-only, needs `requireActiveStatus`, and must load the sale by `{ id, shopId, activeBranchId }`.
 Validate a submitted `customerId` with `{ id, shopId, OR: [{ branchId: active }, { branchId: null }] }`.

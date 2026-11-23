@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import Modal from "@/components/common/Modal";
 import { Printer } from "lucide-react";
 import { IProduct } from "@/types";
@@ -13,9 +14,13 @@ interface Props {
   currencySymbol?: string;
 }
 
-function generateBarcodeSvg(text: string, height = 28): string {
+const STICKERS_PER_PAGE = 24;
+
+const emptySubscribe = () => () => {};
+
+function generateBarcodeSvg(text: string, height = 30): string {
   const cleanText = `*${(text || "123456").toUpperCase()}*`;
-  
+
   const code39Map: Record<string, string> = {
     '0': '000110100', '1': '100100001', '2': '001100001', '3': '101100000',
     '4': '000110001', '5': '100110000', '6': '001110000', '7': '000100101',
@@ -30,9 +35,10 @@ function generateBarcodeSvg(text: string, height = 28): string {
   };
 
   let paths = "";
-  let xCoord = 10;
+  // Code39 needs a quiet zone on both sides for scanners
+  let xCoord = 16;
   const narrowWidth = 1.5;
-  const wideWidth = 3.8;
+  const wideWidth = 3.6;
 
   for (let i = 0; i < cleanText.length; i++) {
     const char = cleanText[i];
@@ -51,8 +57,39 @@ function generateBarcodeSvg(text: string, height = 28): string {
     xCoord += narrowWidth;
   }
 
-  const totalWidth = xCoord + 10;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${height}" width="100%" height="${height}"><g>${paths}</g></svg>`;
+  const totalWidth = xCoord + 16;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${height}" width="100%" height="${height}" preserveAspectRatio="none" shape-rendering="crispEdges">${paths}</svg>`;
+}
+
+function StickerCard({
+  product,
+  barcodeSvg,
+  currencySymbol,
+}: {
+  product: IProduct;
+  barcodeSvg: string;
+  currencySymbol: string;
+}) {
+  return (
+    <div className="barcode-sticker-card p-2 border border-dashed border-neutral-300 rounded-lg flex flex-col justify-between items-center text-center bg-white text-black h-[33mm]">
+      <span className="text-[10px] font-extrabold truncate max-w-full uppercase text-neutral-900">
+        {product.name}
+      </span>
+
+      <div
+        className="w-full my-0.5 flex justify-center items-center overflow-hidden"
+        dangerouslySetInnerHTML={{ __html: barcodeSvg }}
+      />
+
+      <div className="w-full flex justify-between items-center text-[9px] font-mono px-0.5 border-t border-neutral-200 pt-0.5">
+        <span className="font-semibold">{product.barcode}</span>
+        <span className="font-black text-[10px]">
+          {currencySymbol}
+          {Number(product.sellingPrice).toFixed(2)}
+        </span>
+      </div>
+    </div>
+  );
 }
 
 export default function BarcodeSheetModal({
@@ -63,126 +100,154 @@ export default function BarcodeSheetModal({
   currencySymbol = "৳",
 }: Props) {
   const [stickerQuantity, setStickerQuantity] = useState<number>(24);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   if (!product) return null;
 
-  const barcodeSvgString = generateBarcodeSvg(product.barcode, 28);
+  const barcodeSvgString = generateBarcodeSvg(product.barcode);
+
+  const sticker = (key: number) => (
+    <StickerCard
+      key={key}
+      product={product}
+      barcodeSvg={barcodeSvgString}
+      currencySymbol={currencySymbol}
+    />
+  );
+
+  // Explicit A4 pages so multi-page sheets paginate reliably
+  const printPages = Array.from(
+    { length: Math.ceil(stickerQuantity / STICKERS_PER_PAGE) },
+    (_, pageIndex) => {
+      const start = pageIndex * STICKERS_PER_PAGE;
+      const end = Math.min(start + STICKERS_PER_PAGE, stickerQuantity);
+      return Array.from({ length: end - start }, (_, i) => sticker(start + i));
+    }
+  );
 
   return (
     <>
-      {/* 👈 Strict Print CSS with max-height removed for printing all rows */}
-{/* 👈 FIX: Changed position absolute to static for multi-page A4 pagination */}
       <style
         dangerouslySetInnerHTML={{
           __html: `
+            #barcode-print-sheet { display: none; }
             @media print {
               @page {
                 size: A4 portrait;
-                margin: 2mm 2mm !important;
+                margin: 4mm !important;
               }
-              body { background: white !important; color: black !important; margin: 0 !important; padding: 0 !important; }
-              body * { visibility: hidden !important; }
-              #printable-barcode-sheet, #printable-barcode-sheet * { visibility: visible !important; }
-              #printable-barcode-sheet {
+              html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+              }
+              body > *:not(#barcode-print-sheet) {
+                display: none !important;
+              }
+              #barcode-print-sheet {
+                display: block !important;
                 position: static !important;
                 width: 100% !important;
+                background: white !important;
+              }
+              .barcode-print-page {
                 display: grid !important;
                 grid-template-columns: repeat(3, 1fr) !important;
                 gap: 3mm !important;
-                background: white !important;
-                max-height: none !important;
-                overflow: visible !important;
+                page-break-after: always;
+                break-after: page;
+              }
+              .barcode-print-page:last-child {
+                page-break-after: auto;
+                break-after: auto;
               }
               .barcode-sticker-card {
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
               }
             }
           `,
         }}
       />
 
-      {/* Screen Modal (Hidden in Print) */}
-      <Modal
-        isOpen={Boolean(product)}
-        onClose={onClose}
-        title="বারকোড স্টিকার প্রিন্ট করুন (A4 Sticker Sheet)"
-        description={`পণ্য: ${product.name} • শাখা: ${branchName} • প্রতি পাতায় ২৪-৪৮ টি স্টিকার`}
-        maxWidth="xl"
-      >
-        <div className="space-y-4">
-          <div className="p-3 bg-neutral-50 dark:bg-neutral-800/60 rounded-xl border flex flex-wrap items-center justify-between gap-3 print:hidden">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-                স্টিকার সংখ্যা:
-              </span>
-              {[12, 24, 30, 48].map((qty) => (
-                <button
-                  key={qty}
-                  type="button"
-                  onClick={() => setStickerQuantity(qty)}
-                  className={`px-2.5 py-1 text-xs rounded-lg font-bold cursor-pointer transition ${
-                    stickerQuantity === qty ? "bg-blue-600 text-white" : "border bg-white dark:bg-neutral-900"
-                  }`}
-                >
-                  {qty}
-                </button>
-              ))}
+      {/* Screen Modal (never printed) */}
+      <div className="barcode-screen-only">
+        <Modal
+          isOpen={Boolean(product)}
+          onClose={onClose}
+          title="বারকোড স্টিকার প্রিন্ট করুন (A4 Sticker Sheet)"
+          description={`${shopName} • পণ্য: ${product.name} • শাখা: ${branchName} • প্রতি পাতায় ২৪ টি স্টিকার`}
+          maxWidth="xl"
+        >
+          <div className="space-y-4">
+            <div className="p-3 bg-neutral-50 dark:bg-neutral-800/60 rounded-xl border flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                  স্টিকার সংখ্যা:
+                </span>
+                {[12, 24, 30, 48].map((qty) => (
+                  <button
+                    key={qty}
+                    type="button"
+                    onClick={() => setStickerQuantity(qty)}
+                    className={`px-2.5 py-1 text-xs rounded-lg font-bold cursor-pointer transition ${
+                      stickerQuantity === qty ? "bg-blue-600 text-white" : "border bg-white dark:bg-neutral-900"
+                    }`}
+                  >
+                    {qty}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer"
+              >
+                <Printer size={15} /> প্রিন্ট করুন (Print Labels)
+              </button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer"
-            >
-              <Printer size={15} /> প্রিন্ট করুন (Print Labels)
-            </button>
-          </div>
+            <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+              টিপস: প্রিন্ট ডায়ালগে <strong>Headers and footers</strong> বন্ধ রাখুন — তাহলে URL ও
+              পৃষ্ঠা নম্বর প্রিন্ট হবে না।
+            </p>
 
-          {/* Sticker Grid Container */}
-          <div
-            id="printable-barcode-sheet"
-            className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[55vh] overflow-y-auto p-2 border rounded-xl bg-white text-black"
-          >
-            {Array.from({ length: stickerQuantity }).map((_, idx) => (
-              <div
-                key={idx}
-                className="barcode-sticker-card p-2 border border-dashed border-neutral-300 rounded-lg flex flex-col justify-between items-center text-center bg-white text-black h-[33mm]"
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[55vh] overflow-y-auto p-2 border rounded-xl bg-white text-black">
+              {Array.from({ length: stickerQuantity }).map((_, idx) => sticker(idx))}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 border rounded-xl text-xs font-semibold cursor-pointer bg-neutral-100 dark:bg-neutral-800"
               >
-                <span className="text-[7.5px] font-bold truncate max-w-full uppercase text-neutral-600">
-                  {shopName} • {branchName}
-                </span>
+                বন্ধ করুন
+              </button>
+            </div>
+          </div>
+        </Modal>
+      </div>
 
-                <span className="text-[10px] font-extrabold truncate max-w-full uppercase text-neutral-900">
-                  {product.name}
-                </span>
-
-                <div
-                  className="w-full my-0.5 flex justify-center items-center overflow-hidden"
-                  dangerouslySetInnerHTML={{ __html: barcodeSvgString }}
-                />
-
-                <div className="w-full flex justify-between items-center text-[9px] font-mono px-0.5 border-t border-neutral-200 pt-0.5">
-                  <span className="font-semibold">{product.barcode}</span>
-                  <span className="font-black text-[10px]">
-                    {currencySymbol}{Number(product.sellingPrice).toFixed(2)}
-                  </span>
-                </div>
+      {/* Dedicated print root, portaled to <body> so nothing else is printed */}
+      {mounted &&
+        createPortal(
+          <div id="barcode-print-sheet" aria-hidden="true">
+            {printPages.map((cards, pageIndex) => (
+              <div key={pageIndex} className="barcode-print-page">
+                {cards}
               </div>
             ))}
-          </div>
-
-          <div className="flex justify-end pt-2 print:hidden">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border rounded-xl text-xs font-semibold cursor-pointer bg-neutral-100 dark:bg-neutral-800"
-            >
-              বন্ধ করুন
-            </button>
-          </div>
-        </div>
-      </Modal>
+          </div>,
+          document.body
+        )}
     </>
   );
 }
