@@ -3,6 +3,7 @@
 import { Printer, Download } from "lucide-react";
 import { IExpenseReportRow } from "@/types/expenses";
 import { toast } from "sonner";
+import { downloadCsv } from "@/lib/csv";
 
 export default function ExpenseExportActions({ rows }: { rows: IExpenseReportRow[] }) {
   const handlePrintPdf = () => {
@@ -29,25 +30,21 @@ export default function ExpenseExportActions({ rows }: { rows: IExpenseReportRow
 
     const csvRows = rows.map((r, index) => [
       index + 1,
-      `"${r.voucherNo}"`,
+      r.voucherNo,
       new Date(r.expenseDate).toLocaleDateString(),
-      `"${r.categoryName}"`,
+      r.categoryName,
       r.amount.toFixed(2),
       r.paymentMethod.toUpperCase(),
-      `"${r.reference || "N/A"}"`,
-      `"${(r.note || "").replace(/"/g, '""')}"`,
-      `"${r.spentBy || "N/A"}"`,
+      r.reference || "N/A",
+      r.note || "",
+      r.spentBy || "N/A",
     ]);
 
-    const csvContent = "\uFEFF" + [headers.join(","), ...csvRows.map((e) => e.join(","))].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `expense-report-${new Date().toISOString().split("T")[0]}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadCsv(
+      `expense-report-${new Date().toISOString().split("T")[0]}.csv`,
+      headers,
+      csvRows
+    );
 
     toast.success("Expense report exported to Excel successfully!");
   };

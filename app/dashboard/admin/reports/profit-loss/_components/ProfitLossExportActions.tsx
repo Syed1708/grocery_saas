@@ -3,6 +3,7 @@
 import { Printer, Download } from "lucide-react";
 import { IProfitLossData } from "@/types/profit-loss";
 import { toast } from "sonner";
+import { downloadCsv } from "@/lib/csv";
 
 export default function ProfitLossExportActions({ data }: { data: IProfitLossData }) {
   const handlePrintPdf = () => {
@@ -10,8 +11,7 @@ export default function ProfitLossExportActions({ data }: { data: IProfitLossDat
   };
 
   const handleDownloadCsv = () => {
-    const csvRows = [
-      ["আর্থিক বিবরণী হিসাব (Particulars)", "পরিমাণ (Amount / BDT)"],
+    const csvRows: (string | number)[][] = [
       ["১. মোট বিক্রয় (Gross Sales)", data.grossSales.toFixed(2)],
       ["বাদ: বিক্রয় ছাড় (Discounts)", `-${data.salesDiscount.toFixed(2)}`],
       ["বাদ: পণ্য ফেরত (Returns)", `-${data.salesReturns.toFixed(2)}`],
@@ -35,15 +35,11 @@ export default function ProfitLossExportActions({ data }: { data: IProfitLossDat
       ["প্রকৃত লাভ মার্জিন % (Net Margin)", `${data.netMarginPercent}%`],
     ];
 
-    const csvContent = "\uFEFF" + csvRows.map((e) => `"${e[0]}","${e[1]}"`).join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `profit-loss-statement-${new Date().toISOString().split("T")[0]}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadCsv(
+      `profit-loss-statement-${new Date().toISOString().split("T")[0]}.csv`,
+      ["আর্থিক বিবরণী হিসাব (Particulars)", "পরিমাণ (Amount / BDT)"],
+      csvRows
+    );
 
     toast.success("P&L statement exported to Excel successfully!");
   };

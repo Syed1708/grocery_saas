@@ -269,12 +269,21 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
     } = payload;
 
     const existingPurchase = await prisma.purchase.findFirst({
-      where: { id, shopId: user.shopId },
+      where: { id, shopId: user.shopId, branchId: user.activeBranchId },
       include: { items: true },
     });
 
     if (!existingPurchase) {
       return { success: false, error: "চালান খুঁজে পাওয়া যায়নি।" };
+    }
+
+    const productIds = [...new Set(items.map((item) => item.productId))];
+    const validProducts = await prisma.product.findMany({
+      where: { id: { in: productIds }, shopId: user.shopId, status: "active" },
+      select: { id: true },
+    });
+    if (validProducts.length !== productIds.length) {
+      return { success: false, error: "পণ্য পাওয়া যায়নি বা এই দোকানের নয়।" };
     }
 
     const supplier = await prisma.supplier.findFirst({
@@ -312,7 +321,12 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
     const newNetImpact = grandTotal - sPaidAmount;
     const netDueDelta = newNetImpact - oldNetImpact;
 
-    const purchaseBranchId = existingPurchase.branchId || user.activeBranchId!;
+    const oldPaidAmount = Number(existingPurchase.paidAmount);
+    const oldMethod = normalizePaymentMethod(existingPurchase.paymentMethod);
+    const newMethod = normalizePaymentMethod(paymentMethod);
+    const paymentChanged = oldPaidAmount !== sPaidAmount || oldMethod !== newMethod;
+
+    const purchaseBranchId = existingPurchase.branchId;
 
     await prisma.$transaction(async (tx) => {
       // 1. Rollback old stock using original purchase branch
@@ -380,7 +394,115 @@ export async function updatePurchaseAction(payload: UpdatePurchasePayload) {
         });
       }
 
-      // 5. Update purchase bill record
+      // 5. Reconcile the payment account + voucher when paid amount/method changes
+      if (paymentChanged) {
+        if (oldPaidAmount > 0) {
+          const oldAccount = await tx.account.findFirst({
+            where: {
+              shopId: user.shopId,
+              branchId: purchaseBranchId,
+              type: accountTypeForPaymentMethod(oldMethod),
+              status: "active",
+            },
+            select: { id: true, currentBalance: true },
+          });
+          if (oldAccount) {
+            const refundedBalance = Number(oldAccount.currentBalance) + oldPaidAmount;
+            await tx.account.update({
+              where: { id: oldAccount.id },
+              data: { currentBalance: refundedBalance },
+            });
+            await tx.accountTransaction.create({
+              data: {
+                type: "DEPOSIT",
+                amount: oldPaidAmount,
+                balanceAfter: refundedBalance,
+                referenceType: "PURCHASE",
+                referenceId: id,
+                voucherNo: existingPurchase.chalanNo,
+                note: `Purchase payment reversal (edit): ${existingPurchase.chalanNo}`,
+                branchId: purchaseBranchId,
+                accountId: oldAccount.id,
+                userId: user.userId,
+              },
+            });
+          }
+        }
+
+        if (sPaidAmount > 0) {
+          const newAccount = await tx.account.findFirst({
+            where: {
+              shopId: user.shopId,
+              branchId: purchaseBranchId,
+              type: accountTypeForPaymentMethod(newMethod),
+              status: "active",
+            },
+            select: { id: true, currentBalance: true },
+          });
+
+          if (!newAccount) {
+            throw new Error("নির্বাচিত পেমেন্ট অ্যাকাউন্ট পাওয়া যায়নি।");
+          }
+
+          const newBalance = Number(newAccount.currentBalance) - sPaidAmount;
+          await tx.account.update({
+            where: { id: newAccount.id },
+            data: { currentBalance: newBalance },
+          });
+          await tx.accountTransaction.create({
+            data: {
+              type: "PURCHASE",
+              amount: sPaidAmount,
+              balanceAfter: newBalance,
+              referenceType: "PURCHASE",
+              referenceId: id,
+              voucherNo: existingPurchase.chalanNo,
+              note: `Purchase payment (edited): ${existingPurchase.chalanNo}`,
+              branchId: purchaseBranchId,
+              accountId: newAccount.id,
+              userId: user.userId,
+            },
+          });
+        }
+      }
+
+      // 6. Keep the supplier payment voucher in sync
+      if (paymentChanged) {
+        const existingVoucher = await tx.supplierPayment.findFirst({
+          where: { purchaseId: id },
+          orderBy: { createdAt: "asc" },
+        });
+
+        if (sPaidAmount > 0) {
+          if (existingVoucher) {
+            await tx.supplierPayment.update({
+              where: { id: existingVoucher.id },
+              data: {
+                amount: sPaidAmount,
+                paymentMethod: newMethod,
+                branchId: purchaseBranchId,
+              },
+            });
+          } else {
+            await tx.supplierPayment.create({
+              data: {
+                amount: sPaidAmount,
+                paymentMethod: newMethod,
+                voucherNo: `PAY-PUR-${Date.now().toString().slice(-6)}`,
+                reference: chalanNo.trim(),
+                note: `Edited payment for purchase chalan #${chalanNo.trim()}`,
+                supplierId,
+                purchaseId: id,
+                branchId: purchaseBranchId,
+              },
+            });
+          }
+        } else {
+          await tx.supplierPayment.deleteMany({ where: { purchaseId: id } });
+        }
+      }
+
+      // 7. Update purchase bill record
       await tx.purchase.update({
         where: { id },
         data: {

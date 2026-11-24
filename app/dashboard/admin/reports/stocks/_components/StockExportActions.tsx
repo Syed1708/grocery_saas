@@ -3,6 +3,7 @@
 import { Printer, Download } from "lucide-react";
 import { IStockReportRow } from "@/types/stock";
 import { toast } from "sonner";
+import { downloadCsv } from "@/lib/csv";
 
 export default function StockExportActions({ rows }: { rows: IStockReportRow[] }) {
   // 1. A4 Print-to-PDF
@@ -37,12 +38,12 @@ export default function StockExportActions({ rows }: { rows: IStockReportRow[] }
 
     const csvRows = rows.map((r, index) => [
       index + 1,
-      `"${r.productName.replace(/"/g, '""')}"`,
-      `"${r.barcode}"`,
-      `"${r.sku}"`,
-      `"${r.categoryName}"`,
-      `"${r.brandName || "N/A"}"`,
-      `"${r.sectionCode || "N/A"}"`,
+      r.productName,
+      r.barcode,
+      r.sku,
+      r.categoryName,
+      r.brandName || "N/A",
+      r.sectionCode || "N/A",
       r.quantity,
       r.unitCode,
       r.purchasePrice.toFixed(2),
@@ -53,16 +54,11 @@ export default function StockExportActions({ rows }: { rows: IStockReportRow[] }
       r.stockStatus,
     ]);
 
-    // Prepend UTF-8 BOM (\uFEFF) so Excel opens Bengali characters properly
-    const csvContent = "\uFEFF" + [headers.join(","), ...csvRows.map((e) => e.join(","))].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `stock-valuation-report-${new Date().toISOString().split("T")[0]}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadCsv(
+      `stock-valuation-report-${new Date().toISOString().split("T")[0]}.csv`,
+      headers,
+      csvRows
+    );
 
     toast.success("Excel CSV file downloaded successfully!");
   };

@@ -10,6 +10,7 @@ import { getCustomerDueColumns } from "./columns";
 import CustomerKhataModal from "./customer-khata-modal";
 import { ICustomerDueKPIs, ICustomerDueRow } from "@/types/index";
 import { ReportKpiCard } from "../../common/report-kpi-card";
+import { downloadCsv } from "@/lib/csv";
 
 interface Props {
   kpis: ICustomerDueKPIs;
@@ -76,24 +77,21 @@ export default function CustomersDueClient({
       const location = c.village || c.address || "N/A";
 
       return [
-        `"${c.name}"`,
-        `"${c.phone || "N/A"}"`,
-        `"${c.type}"`,
-        `"${location}"`,
+        c.name,
+        c.phone || "N/A",
+        c.type,
+        location,
         c.currentDue.toFixed(2),
         c.creditLimit.toFixed(2),
-        `"${statusLabel}"`,
+        statusLabel,
       ];
     });
 
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Customer_Due_Report_${branchName.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadCsv(
+      `Customer_Due_Report_${branchName.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.csv`,
+      headers,
+      rows
+    );
   };
 
   const columns = getCustomerDueColumns(currencySymbol, (c) => setActiveCustomer(c));

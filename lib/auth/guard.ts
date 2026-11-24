@@ -18,70 +18,63 @@ export async function requireAuth(options: AuthGuardOptions = {}) {
     throw new Error("UNAUTHORIZED: Please log in to perform this action.");
   }
 
-  const { id: userId, shopId, role: tokenRole, branchId: activeBranchId } = session.user;
+  const { id: userId, shopId, branchId: activeBranchId } = session.user;
 
   // 1. Ensure a branch context exists
   if (!activeBranchId) {
     throw new Error("FORBIDDEN: No active branch associated with this session.");
   }
 
-  // 2. Re-validate identity against the DB whenever the guard actually needs
-  // trust (role checks, permissions, or active status). The role in the JWT can
-  // be stale after a promotion/demotion or deactivation, so we never rely on it
-  // for authorization decisions.
-  const needsDbCheck =
-    Boolean(options.allowedRoles) ||
-    options.requireActiveStatus === true ||
-    Boolean(options.requiredPermission) ||
-    Boolean(options.requiredAnyPermission?.length);
+  // 2. Re-validate identity against the DB on every guarded call. The role in
+  // the JWT can be stale after a promotion/demotion or deactivation, and the
+  // tokenVersion invalidates sessions after a password/role/status change.
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true, isActive: true, customPermissions: true, tokenVersion: true },
+  });
 
-  let role: UserRole = tokenRole;
+  if (!dbUser || !dbUser.isActive) {
+    throw new Error("FORBIDDEN: User account is inactive or revoked.");
+  }
 
-  if (needsDbCheck) {
-    const dbUser = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true, isActive: true, customPermissions: true },
-    });
+  if (dbUser.tokenVersion !== (session.user.tokenVersion ?? 0)) {
+    throw new Error("FORBIDDEN: Session has been revoked. Please sign in again.");
+  }
 
-    if (!dbUser || !dbUser.isActive) {
-      throw new Error("FORBIDDEN: User account is inactive or revoked.");
+  const role: UserRole = dbUser.role as UserRole;
+
+  if (options.allowedRoles && !options.allowedRoles.includes(role)) {
+    throw new Error(`FORBIDDEN: Requires one of [${options.allowedRoles.join(", ")}].`);
+  }
+
+  if (options.requiredPermission && role !== "OWNER") {
+    const basePermissions = DEFAULT_ROLE_PERMISSIONS[role] || [];
+    const storedPermissions = Array.isArray(dbUser.customPermissions)
+      ? (dbUser.customPermissions as PermissionKey[])
+      : null;
+
+    // If explicit permissions are saved, use them. Otherwise use role defaults.
+    const activePermissions =
+      storedPermissions !== null ? storedPermissions : basePermissions;
+    const hasPermission = activePermissions.includes(options.requiredPermission);
+
+    if (!hasPermission) {
+      throw new Error(`FORBIDDEN: Missing permission [${options.requiredPermission}].`);
     }
+  }
 
-    role = dbUser.role as UserRole;
+  if (options.requiredAnyPermission?.length && role !== "OWNER") {
+    const basePermissions = DEFAULT_ROLE_PERMISSIONS[role] || [];
+    const storedPermissions = Array.isArray(dbUser.customPermissions)
+      ? (dbUser.customPermissions as PermissionKey[])
+      : null;
+    const activePermissions =
+      storedPermissions !== null ? storedPermissions : basePermissions;
 
-    if (options.allowedRoles && !options.allowedRoles.includes(role)) {
-      throw new Error(`FORBIDDEN: Requires one of [${options.allowedRoles.join(", ")}].`);
-    }
-
-    if (options.requiredPermission && role !== "OWNER") {
-      const basePermissions = DEFAULT_ROLE_PERMISSIONS[role] || [];
-      const storedPermissions = Array.isArray(dbUser.customPermissions)
-        ? (dbUser.customPermissions as PermissionKey[])
-        : null;
-
-      // If explicit permissions are saved, use them. Otherwise use role defaults.
-      const activePermissions =
-        storedPermissions !== null ? storedPermissions : basePermissions;
-      const hasPermission = activePermissions.includes(options.requiredPermission);
-
-      if (!hasPermission) {
-        throw new Error(`FORBIDDEN: Missing permission [${options.requiredPermission}].`);
-      }
-    }
-
-    if (options.requiredAnyPermission?.length && role !== "OWNER") {
-      const basePermissions = DEFAULT_ROLE_PERMISSIONS[role] || [];
-      const storedPermissions = Array.isArray(dbUser.customPermissions)
-        ? (dbUser.customPermissions as PermissionKey[])
-        : null;
-      const activePermissions =
-        storedPermissions !== null ? storedPermissions : basePermissions;
-
-      if (!options.requiredAnyPermission.some((permission) => activePermissions.includes(permission))) {
-        throw new Error(
-          `FORBIDDEN: Requires one of [${options.requiredAnyPermission.join(", ")}].`
-        );
-      }
+    if (!options.requiredAnyPermission.some((permission) => activePermissions.includes(permission))) {
+      throw new Error(
+        `FORBIDDEN: Requires one of [${options.requiredAnyPermission.join(", ")}].`
+      );
     }
   }
 

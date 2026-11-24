@@ -20,8 +20,18 @@ export type UserModel = runtime.Types.Result.DefaultSelection<Prisma.$UserPayloa
 
 export type AggregateUser = {
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
+}
+
+export type UserAvgAggregateOutputType = {
+  tokenVersion: number | null
+}
+
+export type UserSumAggregateOutputType = {
+  tokenVersion: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -33,6 +43,7 @@ export type UserMinAggregateOutputType = {
   role: $Enums.UserRole | null
   profileImage: string | null
   isActive: boolean | null
+  tokenVersion: number | null
   branchId: string | null
   shopId: string | null
   createdAt: Date | null
@@ -49,6 +60,7 @@ export type UserMaxAggregateOutputType = {
   role: $Enums.UserRole | null
   profileImage: string | null
   isActive: boolean | null
+  tokenVersion: number | null
   branchId: string | null
   shopId: string | null
   createdAt: Date | null
@@ -65,6 +77,7 @@ export type UserCountAggregateOutputType = {
   role: number
   profileImage: number
   isActive: number
+  tokenVersion: number
   branchId: number
   shopId: number
   createdAt: number
@@ -75,6 +88,14 @@ export type UserCountAggregateOutputType = {
 }
 
 
+export type UserAvgAggregateInputType = {
+  tokenVersion?: true
+}
+
+export type UserSumAggregateInputType = {
+  tokenVersion?: true
+}
+
 export type UserMinAggregateInputType = {
   id?: true
   name?: true
@@ -84,6 +105,7 @@ export type UserMinAggregateInputType = {
   role?: true
   profileImage?: true
   isActive?: true
+  tokenVersion?: true
   branchId?: true
   shopId?: true
   createdAt?: true
@@ -100,6 +122,7 @@ export type UserMaxAggregateInputType = {
   role?: true
   profileImage?: true
   isActive?: true
+  tokenVersion?: true
   branchId?: true
   shopId?: true
   createdAt?: true
@@ -116,6 +139,7 @@ export type UserCountAggregateInputType = {
   role?: true
   profileImage?: true
   isActive?: true
+  tokenVersion?: true
   branchId?: true
   shopId?: true
   createdAt?: true
@@ -163,6 +187,18 @@ export type UserAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UserAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: UserSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserMinAggregateInputType
@@ -193,6 +229,8 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: UserCountAggregateInputType | true
+  _avg?: UserAvgAggregateInputType
+  _sum?: UserSumAggregateInputType
   _min?: UserMinAggregateInputType
   _max?: UserMaxAggregateInputType
 }
@@ -206,6 +244,7 @@ export type UserGroupByOutputType = {
   role: $Enums.UserRole
   profileImage: string | null
   isActive: boolean
+  tokenVersion: number
   branchId: string | null
   shopId: string
   createdAt: Date
@@ -213,6 +252,8 @@ export type UserGroupByOutputType = {
   supervisorPin: string | null
   customPermissions: runtime.JsonValue | null
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
@@ -244,6 +285,7 @@ export type UserWhereInput = {
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   profileImage?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  tokenVersion?: Prisma.IntFilter<"User"> | number
   branchId?: Prisma.StringNullableFilter<"User"> | string | null
   shopId?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -272,6 +314,7 @@ export type UserOrderByWithRelationInput = {
   role?: Prisma.SortOrder
   profileImage?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   branchId?: Prisma.SortOrderInput | Prisma.SortOrder
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -304,6 +347,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   profileImage?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  tokenVersion?: Prisma.IntFilter<"User"> | number
   branchId?: Prisma.StringNullableFilter<"User"> | string | null
   shopId?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -332,6 +376,7 @@ export type UserOrderByWithAggregationInput = {
   role?: Prisma.SortOrder
   profileImage?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   branchId?: Prisma.SortOrderInput | Prisma.SortOrder
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -339,8 +384,10 @@ export type UserOrderByWithAggregationInput = {
   supervisorPin?: Prisma.SortOrderInput | Prisma.SortOrder
   customPermissions?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
+  _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
+  _sum?: Prisma.UserSumOrderByAggregateInput
 }
 
 export type UserScalarWhereWithAggregatesInput = {
@@ -355,6 +402,7 @@ export type UserScalarWhereWithAggregatesInput = {
   role?: Prisma.EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
   profileImage?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  tokenVersion?: Prisma.IntWithAggregatesFilter<"User"> | number
   branchId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   shopId?: Prisma.StringWithAggregatesFilter<"User"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -372,6 +420,7 @@ export type UserCreateInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   supervisorPin?: string | null
@@ -398,6 +447,7 @@ export type UserUncheckedCreateInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   branchId?: string | null
   shopId: string
   createdAt?: Date | string
@@ -424,6 +474,7 @@ export type UserUpdateInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -450,6 +501,7 @@ export type UserUncheckedUpdateInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -476,6 +528,7 @@ export type UserCreateManyInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   branchId?: string | null
   shopId: string
   createdAt?: Date | string
@@ -493,6 +546,7 @@ export type UserUpdateManyMutationInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -508,6 +562,7 @@ export type UserUncheckedUpdateManyInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -541,12 +596,17 @@ export type UserCountOrderByAggregateInput = {
   role?: Prisma.SortOrder
   profileImage?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   branchId?: Prisma.SortOrder
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   supervisorPin?: Prisma.SortOrder
   customPermissions?: Prisma.SortOrder
+}
+
+export type UserAvgOrderByAggregateInput = {
+  tokenVersion?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -558,6 +618,7 @@ export type UserMaxOrderByAggregateInput = {
   role?: Prisma.SortOrder
   profileImage?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   branchId?: Prisma.SortOrder
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -574,11 +635,16 @@ export type UserMinOrderByAggregateInput = {
   role?: Prisma.SortOrder
   profileImage?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   branchId?: Prisma.SortOrder
   shopId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   supervisorPin?: Prisma.SortOrder
+}
+
+export type UserSumOrderByAggregateInput = {
+  tokenVersion?: Prisma.SortOrder
 }
 
 export type UserNullableScalarRelationFilter = {
@@ -827,6 +893,7 @@ export type UserCreateWithoutShopInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   supervisorPin?: string | null
@@ -852,6 +919,7 @@ export type UserUncheckedCreateWithoutShopInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   branchId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -906,6 +974,7 @@ export type UserScalarWhereInput = {
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   profileImage?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  tokenVersion?: Prisma.IntFilter<"User"> | number
   branchId?: Prisma.StringNullableFilter<"User"> | string | null
   shopId?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -923,6 +992,7 @@ export type UserCreateWithoutBranchInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   supervisorPin?: string | null
@@ -948,6 +1018,7 @@ export type UserUncheckedCreateWithoutBranchInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -999,6 +1070,7 @@ export type UserCreateWithoutSalesInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   supervisorPin?: string | null
@@ -1024,6 +1096,7 @@ export type UserUncheckedCreateWithoutSalesInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   branchId?: string | null
   shopId: string
   createdAt?: Date | string
@@ -1065,6 +1138,7 @@ export type UserUpdateWithoutSalesInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1090,6 +1164,7 @@ export type UserUncheckedUpdateWithoutSalesInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1115,6 +1190,7 @@ export type UserCreateWithoutSaleReturnsInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   supervisorPin?: string | null
@@ -1140,6 +1216,7 @@ export type UserUncheckedCreateWithoutSaleReturnsInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   branchId?: string | null
   shopId: string
   createdAt?: Date | string
@@ -1181,6 +1258,7 @@ export type UserUpdateWithoutSaleReturnsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1206,6 +1284,7 @@ export type UserUncheckedUpdateWithoutSaleReturnsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1231,6 +1310,7 @@ export type UserCreateWithoutAccountTransactionsInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   supervisorPin?: string | null
@@ -1256,6 +1336,7 @@ export type UserUncheckedCreateWithoutAccountTransactionsInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   branchId?: string | null
   shopId: string
   createdAt?: Date | string
@@ -1297,6 +1378,7 @@ export type UserUpdateWithoutAccountTransactionsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1322,6 +1404,7 @@ export type UserUncheckedUpdateWithoutAccountTransactionsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1347,6 +1430,7 @@ export type UserCreateWithoutBankChequesInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   supervisorPin?: string | null
@@ -1372,6 +1456,7 @@ export type UserUncheckedCreateWithoutBankChequesInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   branchId?: string | null
   shopId: string
   createdAt?: Date | string
@@ -1413,6 +1498,7 @@ export type UserUpdateWithoutBankChequesInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1438,6 +1524,7 @@ export type UserUncheckedUpdateWithoutBankChequesInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1463,6 +1550,7 @@ export type UserCreateWithoutLoanInstallmentsInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   supervisorPin?: string | null
@@ -1488,6 +1576,7 @@ export type UserUncheckedCreateWithoutLoanInstallmentsInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   branchId?: string | null
   shopId: string
   createdAt?: Date | string
@@ -1529,6 +1618,7 @@ export type UserUpdateWithoutLoanInstallmentsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1554,6 +1644,7 @@ export type UserUncheckedUpdateWithoutLoanInstallmentsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1579,6 +1670,7 @@ export type UserCreateWithoutExpensesInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   supervisorPin?: string | null
@@ -1604,6 +1696,7 @@ export type UserUncheckedCreateWithoutExpensesInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   branchId?: string | null
   shopId: string
   createdAt?: Date | string
@@ -1645,6 +1738,7 @@ export type UserUpdateWithoutExpensesInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1670,6 +1764,7 @@ export type UserUncheckedUpdateWithoutExpensesInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1695,6 +1790,7 @@ export type UserCreateWithoutOtherIncomesInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   supervisorPin?: string | null
@@ -1720,6 +1816,7 @@ export type UserUncheckedCreateWithoutOtherIncomesInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   branchId?: string | null
   shopId: string
   createdAt?: Date | string
@@ -1761,6 +1858,7 @@ export type UserUpdateWithoutOtherIncomesInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1786,6 +1884,7 @@ export type UserUncheckedUpdateWithoutOtherIncomesInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1811,6 +1910,7 @@ export type UserCreateWithoutStaffProfileInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   supervisorPin?: string | null
@@ -1836,6 +1936,7 @@ export type UserUncheckedCreateWithoutStaffProfileInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   branchId?: string | null
   shopId: string
   createdAt?: Date | string
@@ -1877,6 +1978,7 @@ export type UserUpdateWithoutStaffProfileInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1902,6 +2004,7 @@ export type UserUncheckedUpdateWithoutStaffProfileInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1927,6 +2030,7 @@ export type UserCreateWithoutCashRegistersInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   supervisorPin?: string | null
@@ -1952,6 +2056,7 @@ export type UserUncheckedCreateWithoutCashRegistersInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   branchId?: string | null
   shopId: string
   createdAt?: Date | string
@@ -1993,6 +2098,7 @@ export type UserUpdateWithoutCashRegistersInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2018,6 +2124,7 @@ export type UserUncheckedUpdateWithoutCashRegistersInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2043,6 +2150,7 @@ export type UserCreateManyShopInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   branchId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2059,6 +2167,7 @@ export type UserUpdateWithoutShopInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2084,6 +2193,7 @@ export type UserUncheckedUpdateWithoutShopInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2109,6 +2219,7 @@ export type UserUncheckedUpdateManyWithoutShopInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2125,6 +2236,7 @@ export type UserCreateManyBranchInput = {
   role?: $Enums.UserRole
   profileImage?: string | null
   isActive?: boolean
+  tokenVersion?: number
   shopId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2141,6 +2253,7 @@ export type UserUpdateWithoutBranchInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supervisorPin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2166,6 +2279,7 @@ export type UserUncheckedUpdateWithoutBranchInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2191,6 +2305,7 @@ export type UserUncheckedUpdateManyWithoutBranchInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   shopId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2301,6 +2416,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   role?: boolean
   profileImage?: boolean
   isActive?: boolean
+  tokenVersion?: boolean
   branchId?: boolean
   shopId?: boolean
   createdAt?: boolean
@@ -2332,6 +2448,7 @@ export type UserSelectScalar = {
   role?: boolean
   profileImage?: boolean
   isActive?: boolean
+  tokenVersion?: boolean
   branchId?: boolean
   shopId?: boolean
   createdAt?: boolean
@@ -2340,7 +2457,7 @@ export type UserSelectScalar = {
   customPermissions?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phone" | "password" | "role" | "profileImage" | "isActive" | "branchId" | "shopId" | "createdAt" | "updatedAt" | "supervisorPin" | "customPermissions", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phone" | "password" | "role" | "profileImage" | "isActive" | "tokenVersion" | "branchId" | "shopId" | "createdAt" | "updatedAt" | "supervisorPin" | "customPermissions", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   branch?: boolean | Prisma.User$branchArgs<ExtArgs>
   shop?: boolean | Prisma.ShopDefaultArgs<ExtArgs>
@@ -2380,6 +2497,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     role: $Enums.UserRole
     profileImage: string | null
     isActive: boolean
+    tokenVersion: number
     branchId: string | null
     shopId: string
     createdAt: Date
@@ -2774,6 +2892,7 @@ export interface UserFieldRefs {
   readonly role: Prisma.FieldRef<"User", 'UserRole'>
   readonly profileImage: Prisma.FieldRef<"User", 'String'>
   readonly isActive: Prisma.FieldRef<"User", 'Boolean'>
+  readonly tokenVersion: Prisma.FieldRef<"User", 'Int'>
   readonly branchId: Prisma.FieldRef<"User", 'String'>
   readonly shopId: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>

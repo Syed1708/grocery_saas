@@ -110,6 +110,7 @@ export const authOptions: NextAuthOptions = {
           branchId,
           branchName,
           customPermissions: Array.isArray(user.customPermissions) ? (user.customPermissions as string[]) : [],
+          tokenVersion: user.tokenVersion,
         };
       },
     }),
@@ -127,7 +128,45 @@ export const authOptions: NextAuthOptions = {
         token.shopName = user.shopName;
         token.branchId = user.branchId;
         token.branchName = user.branchName;
-        token.customPermissions = user.customPermissions; // 👈 Added
+        token.customPermissions = user.customPermissions; // ðŸ‘ˆ Added
+        token.tokenVersion = user.tokenVersion;
+        token.revoked = false;
+      }
+
+      // 1b. Session revocation: re-check the user against the DB on every use.
+      // Password/role/status changes bump tokenVersion, invalidating old JWTs.
+      if (token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id },
+          select: {
+            role: true,
+            isActive: true,
+            tokenVersion: true,
+            customPermissions: true,
+            shopId: true,
+          },
+        });
+
+        if (
+          !dbUser ||
+          !dbUser.isActive ||
+          dbUser.shopId !== token.shopId ||
+          dbUser.tokenVersion !== (token.tokenVersion ?? 0)
+        ) {
+          token.revoked = true;
+          token.id = "";
+          token.shopId = "";
+          token.branchId = null;
+          token.branchName = null;
+          token.customPermissions = [];
+          token.role = "CASHIER";
+          return token;
+        }
+
+        token.role = dbUser.role as UserRole;
+        token.customPermissions = Array.isArray(dbUser.customPermissions)
+          ? (dbUser.customPermissions as string[])
+          : [];
       }
 
       // 2. Dynamic Branch Switching (Only OWNER can switch branches)
@@ -166,6 +205,7 @@ export const authOptions: NextAuthOptions = {
         session.user.branchId = token.branchId as string | null;
         session.user.branchName = token.branchName as string | null;
         session.user.customPermissions = (token.customPermissions as string[]) || []; 
+        session.user.tokenVersion = (token.tokenVersion as number) || 0;
       }
       return session;
     },

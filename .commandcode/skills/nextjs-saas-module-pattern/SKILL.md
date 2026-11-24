@@ -403,6 +403,19 @@ auto-log transit damage as a branch wastage. Transfer statuses: DISPATCHED → C
 (`PaymentStatus`, `PurchaseOrderStatus`, etc.) and type accumulated event rows with their shared
 interface instead of `any[]`.
 
+**Session revocation:** `User.tokenVersion` is stored in the JWT. Password changes, role changes,
+deactivation, branch reassignment and custom-permission changes increment it. The `jwt` callback
+re-checks the DB and flags the token revoked; `requireAuth` always re-reads the user and rejects a
+stale `tokenVersion`; middleware only authorizes tokens with `shopId` and no `revoked` flag.
+Changing your own password intentionally logs the current session out.
+
+**CSP & headers:** `next.config.ts` sets a Content-Security-Policy plus nosniff / frame / referrer /
+permissions / HSTS headers. Keep `script-src 'unsafe-inline'` for Next and add `'unsafe-eval'` +
+`ws:` only in development.
+
+**CSV exports:** use `lib/csv.ts` (`csvCell`, `toCsv`, `downloadCsv`). It escapes quotes/commas and
+neutralizes formula injection (`= + - @`). Never hand-build CSV strings in report components.
+
 **POS / sales / returns / closings:** checkout requires `POS_ACCESS`; voiding a sale is
 OWNER-only, needs `requireActiveStatus`, and must load the sale by `{ id, shopId, activeBranchId }`.
 Validate a submitted `customerId` with `{ id, shopId, OR: [{ branchId: active }, { branchId: null }] }`.

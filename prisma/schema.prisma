@@ -252,6 +252,7 @@ model User {
   role         UserRole @default(CASHIER)
   profileImage String?
   isActive     Boolean  @default(true) // ✅ Keep your boolean! It's simpler and cleaner than an enum.
+  tokenVersion Int      @default(0) // Bumped on password/role/status changes to revoke old JWTs
   branchId     String?
   branch       Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
   shopId       String

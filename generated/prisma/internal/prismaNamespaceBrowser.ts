@@ -188,6 +188,7 @@ export const UserScalarFieldEnum = {
   role: 'role',
   profileImage: 'profileImage',
   isActive: 'isActive',
+  tokenVersion: 'tokenVersion',
   branchId: 'branchId',
   shopId: 'shopId',
   createdAt: 'createdAt',

@@ -39,7 +39,7 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => Boolean(token),
+      authorized: ({ token }) => Boolean(token && !token.revoked && token.shopId),
     },
   }
 );

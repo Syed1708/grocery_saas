@@ -21,6 +21,7 @@ import {
   IPartnerTransaction,
 } from "@/types/partner";
 import FamilyReportPdf, { FamilyPdfSection } from "./FamilyReportPdf";
+import { downloadCsv } from "@/lib/csv";
 
 const RELATIONSHIP_LABELS: Record<string, string> = {
   FATHER: "বাবা (Father)",
@@ -37,23 +38,6 @@ const TRANSACTION_LABELS: Record<string, string> = {
   CAPITAL_INJECTION: "মূলধন জমা",
   PROFIT_DISTRIBUTION: "মুনাফা বিতরণ",
 };
-
-function csvCell(value: string | number): string {
-  if (typeof value === "number") return String(value);
-  const guarded = /^[=+\-@]/.test(value) ? `'${value}` : value;
-  return /[",\n]/.test(guarded) ? `"${guarded.replace(/"/g, '""')}"` : guarded;
-}
-
-function downloadCsv(filename: string, headers: string[], rows: (string | number)[][]) {
-  const csv = [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
-  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
-}
 
 interface Props {
   data: IFamilyReportData;

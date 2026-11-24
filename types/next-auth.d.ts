@@ -12,6 +12,7 @@ declare module "next-auth" {
       branchId: string | null;
       branchName: string | null;
       customPermissions: string[]; // 👈 Added
+      tokenVersion: number;
     } & DefaultSession["user"];
   }
 
@@ -22,6 +23,7 @@ declare module "next-auth" {
     branchId: string | null;
     branchName: string | null;
     customPermissions: string[]; // 👈 Added
+    tokenVersion: number;
   }
 }
 
@@ -34,5 +36,7 @@ declare module "next-auth/jwt" {
     branchId: string | null;
     branchName: string | null;
     customPermissions: string[]; // 👈 Added
+    tokenVersion: number;
+    revoked?: boolean;
   }
 }

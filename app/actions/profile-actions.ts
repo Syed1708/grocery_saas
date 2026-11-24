@@ -92,7 +92,10 @@ export async function updatePasswordAction(formData: FormData) {
     const hashed = await bcrypt.hash(newPassword, 10);
     await prisma.user.update({
       where: { id: userId },
-      data: { password: hashed },
+      data: {
+        password: hashed,
+        tokenVersion: { increment: 1 },
+      },
     });
 
     return { success: true };

@@ -3,6 +3,7 @@
 import { Printer, Download } from "lucide-react";
 import { IPurchaseReportRow } from "@/types/purchases";
 import { toast } from "sonner";
+import { downloadCsv } from "@/lib/csv";
 
 export default function PurchaseExportActions({ rows }: { rows: IPurchaseReportRow[] }) {
   const handlePrintPdf = () => {
@@ -32,10 +33,10 @@ export default function PurchaseExportActions({ rows }: { rows: IPurchaseReportR
 
     const csvRows = rows.map((r, index) => [
       index + 1,
-      `"${r.chalanNo}"`,
+      r.chalanNo,
       new Date(r.purchaseDate).toLocaleDateString(),
-      `"${r.supplierName.replace(/"/g, '""')}"`,
-      `"${r.companyName || "N/A"}"`,
+      r.supplierName,
+      r.companyName || "N/A",
       r.totalQuantity,
       r.itemCount,
       r.grandTotal.toFixed(2),
@@ -45,15 +46,11 @@ export default function PurchaseExportActions({ rows }: { rows: IPurchaseReportR
       r.paymentStatus,
     ]);
 
-    const csvContent = "\uFEFF" + [headers.join(","), ...csvRows.map((e) => e.join(","))].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `purchase-chalans-report-${new Date().toISOString().split("T")[0]}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadCsv(
+      `purchase-chalans-report-${new Date().toISOString().split("T")[0]}.csv`,
+      headers,
+      csvRows
+    );
 
     toast.success("Excel CSV file downloaded successfully!");
   };

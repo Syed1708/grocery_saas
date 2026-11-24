@@ -98,7 +98,10 @@ export async function saveUserAction(input: unknown) {
 
     if (parsed.id) {
       const currentUser = await prisma.user.findUnique({ where: { id: parsed.id } });
-      if (currentUser?.role === "OWNER" && (parsed.role !== "OWNER" || !parsed.isActive)) {
+      if (!currentUser) {
+        throw new Error("User not found.");
+      }
+      if (currentUser.role === "OWNER" && (parsed.role !== "OWNER" || !parsed.isActive)) {
         const activeOwners = await prisma.user.count({
           where: { shopId, role: "OWNER", isActive: true },
         });
@@ -106,6 +109,13 @@ export async function saveUserAction(input: unknown) {
           throw new Error("Cannot deactivate or demote the sole active Owner.");
         }
       }
+
+      const shouldRevoke =
+        Boolean(passwordHash) ||
+        currentUser.role !== parsed.role ||
+        currentUser.isActive !== parsed.isActive ||
+        currentUser.branchId !== finalBranchId ||
+        JSON.stringify(currentUser.customPermissions ?? []) !== JSON.stringify(customPermissions);
 
       await prisma.user.update({
         where: { id: parsed.id, shopId },
@@ -119,6 +129,7 @@ export async function saveUserAction(input: unknown) {
           customPermissions,
           ...(passwordHash ? { password: passwordHash } : {}),
           ...(pinHash !== undefined ? { supervisorPin: pinHash } : {}),
+          ...(shouldRevoke ? { tokenVersion: { increment: 1 } } : {}),
         },
       });
     } else {
@@ -172,7 +183,10 @@ export async function toggleUserStatusAction(userId: string, currentStatus: bool
 
   await prisma.user.update({
     where: { id: userId, shopId },
-    data: { isActive: !currentStatus },
+    data: {
+      isActive: !currentStatus,
+      ...(currentStatus ? { tokenVersion: { increment: 1 } } : {}),
+    },
   });
 
   revalidatePath(USERS_REVALIDATE_PATH);
