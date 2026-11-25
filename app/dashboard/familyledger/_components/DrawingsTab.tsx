@@ -1,11 +1,15 @@
 "use client";
 "use no memo";
 
+import { useState } from "react";
+import { flushSync } from "react-dom";
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
+import { Printer } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { TableActions } from "@/components/common/ui/table/TableHelpers";
 import { IPartnerTransaction, PERMISSIONS } from "@/types";
 import { format } from "date-fns";
+import DrawingVoucherPdf from "./DrawingVoucherPdf";
 
 const TYPE_BADGES: Record<string, { label: string; bg: string }> = {
   CASH_DRAWING: { label: "ক্যাশ উত্তোলন", bg: "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400" },
@@ -17,14 +21,25 @@ const TYPE_BADGES: Record<string, { label: string; bg: string }> = {
 export default function DrawingsTab({
   transactions,
   currencySymbol = "৳",
+  shop,
+  branchName,
   onEdit,
   onDelete,
 }: {
   transactions: IPartnerTransaction[];
   currencySymbol?: string;
+  shop: { name: string; phone?: string | null; address?: string | null };
+  branchName: string;
   onEdit: (t: IPartnerTransaction) => void;
   onDelete: (t: IPartnerTransaction) => void;
 }) {
+  const [printTransaction, setPrintTransaction] = useState<IPartnerTransaction | null>(null);
+
+  const printDrawingPdf = (transaction: IPartnerTransaction) => {
+    flushSync(() => setPrintTransaction(transaction));
+    window.print();
+  };
+
   const columns: ColumnDef<IPartnerTransaction>[] = [
     {
       accessorKey: "voucherNo",
@@ -81,12 +96,22 @@ export default function DrawingsTab({
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <TableActions
-          onEdit={() => onEdit(row.original)}
-          editPermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
-          onDelete={() => onDelete(row.original)}
-          deletePermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
-        />
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => printDrawingPdf(row.original)}
+            className="inline-flex items-center gap-1 px-1.5 py-1 rounded-lg text-[10px] font-bold text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition cursor-pointer"
+            title="Print drawing or bill voucher PDF"
+          >
+            <Printer size={13} /> PDF
+          </button>
+          <TableActions
+            onEdit={() => onEdit(row.original)}
+            editPermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
+            onDelete={() => onDelete(row.original)}
+            deletePermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
+          />
+        </div>
       ),
     },
   ];
@@ -97,5 +122,17 @@ export default function DrawingsTab({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
-  return <DataTable table={table} columns={columns} />;
+  return (
+    <>
+      <DataTable table={table} columns={columns} />
+      {printTransaction && (
+        <DrawingVoucherPdf
+          transaction={printTransaction}
+          currencySymbol={currencySymbol}
+          shop={shop}
+          branchName={branchName}
+        />
+      )}
+    </>
+  );
 }

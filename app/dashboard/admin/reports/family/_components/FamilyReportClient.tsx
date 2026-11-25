@@ -21,7 +21,10 @@ import {
   IPartnerTransaction,
 } from "@/types/partner";
 import FamilyReportPdf, { FamilyPdfSection } from "./FamilyReportPdf";
-import PartnerStatementPdf, { PartnerGroupBy } from "./PartnerStatementPdf";
+import PartnerStatementPdf, {
+  PartnerGroupBy,
+  PartnerStatementType,
+} from "./PartnerStatementPdf";
 import { downloadCsv } from "@/lib/csv";
 import { formatDateInput } from "@/lib/profit-loss-range";
 
@@ -62,6 +65,11 @@ export default function FamilyReportClient({
   const [pdfSection, setPdfSection] = useState<FamilyPdfSection>("all");
   const [printPartner, setPrintPartner] = useState<IFamilyReportPartnerRow | null>(null);
   const [groupBy, setGroupBy] = useState<PartnerGroupBy>("monthly");
+  const statementTypeParam = searchParams.get("statementType");
+  const statementType: PartnerStatementType =
+    statementTypeParam === "drawings" || statementTypeParam === "rations"
+      ? statementTypeParam
+      : "all";
 
   const printPdf = (section: FamilyPdfSection) => {
     flushSync(() => {
@@ -114,7 +122,10 @@ export default function FamilyReportClient({
   };
 
   const hasFilters = Boolean(
-    searchParams.get("startDate") || searchParams.get("endDate") || searchParams.get("partnerId")
+    searchParams.get("startDate") ||
+      searchParams.get("endDate") ||
+      searchParams.get("partnerId") ||
+      statementTypeParam
   );
 
   const periodLabel = useMemo(() => {
@@ -193,6 +204,20 @@ export default function FamilyReportClient({
       ),
     },
   ];
+
+  const hiddenPartnerColumns =
+    statementType === "rations"
+      ? ["injections", "drawings", "netEquity"]
+      : statementType === "drawings"
+        ? ["injections", "rations", "netEquity"]
+        : [];
+  const visiblePartnerColumns = partnerColumns.filter((column) => {
+    const key =
+      "accessorKey" in column && typeof column.accessorKey === "string"
+        ? column.accessorKey
+        : column.id;
+    return !key || !hiddenPartnerColumns.includes(key);
+  });
 
   const transactionColumns: ColumnDef<IPartnerTransaction>[] = [
     {
@@ -281,7 +306,7 @@ export default function FamilyReportClient({
 
   const partnerTable = useReactTable({
     data: data.partners,
-    columns: partnerColumns,
+    columns: visiblePartnerColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
@@ -307,6 +332,13 @@ export default function FamilyReportClient({
             <h2 className="text-sm font-bold">Family Ledger Report</h2>
             <p className="text-[11px] text-neutral-500">
               {shop.name} • {branchName} • {periodLabel}
+            </p>
+            <p className="text-[10px] font-semibold text-blue-600 dark:text-blue-400">
+              {statementType === "drawings"
+                ? "Showing Drawings & Bills only"
+                : statementType === "rations"
+                  ? "Showing Home Groceries only"
+                  : "Showing all family activity"}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -338,7 +370,7 @@ export default function FamilyReportClient({
           <button type="button" onClick={() => setPeriodPreset("all")} className="text-[11px] px-2.5 py-1 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 rounded-md font-medium cursor-pointer">সব সময়</button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
           <Input
             type="date"
             value={searchParams.get("startDate") || ""}
@@ -361,6 +393,16 @@ export default function FamilyReportClient({
             {partnerOptions.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
+          </select>
+          <select
+            value={statementType}
+            onChange={(e) => setFilter("statementType", e.target.value)}
+            aria-label="Partner statement type"
+            className="text-xs px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none cursor-pointer"
+          >
+            <option value="all">Full Statement (All)</option>
+            <option value="drawings">Drawings & Bills Only</option>
+            <option value="rations">Home Groceries Only</option>
           </select>
           <select
             value={groupBy}
@@ -388,10 +430,18 @@ export default function FamilyReportClient({
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <StatCard title="Opening Capital" value={`${currencySymbol}${data.kpis.openingCapital.toFixed(2)}`} tone="neutral" />
-        <StatCard title="Capital Injected" value={`${currencySymbol}${data.kpis.injections.toFixed(2)}`} tone="emerald" />
-        <StatCard title="Drawings & Bills" value={`${currencySymbol}${data.kpis.drawings.toFixed(2)}`} tone="rose" />
-        <StatCard title="Home Groceries" value={`${currencySymbol}${data.kpis.rations.toFixed(2)}`} tone="amber" />
-        <StatCard title="Net Family Equity" value={`${currencySymbol}${data.kpis.netEquity.toFixed(2)}`} tone="blue" />
+        {statementType !== "rations" && (
+          <StatCard title="Drawings & Bills" value={`${currencySymbol}${data.kpis.drawings.toFixed(2)}`} tone="rose" />
+        )}
+        {statementType !== "drawings" && (
+          <StatCard title="Home Groceries" value={`${currencySymbol}${data.kpis.rations.toFixed(2)}`} tone="amber" />
+        )}
+        {statementType === "all" && (
+          <>
+            <StatCard title="Capital Injected" value={`${currencySymbol}${data.kpis.injections.toFixed(2)}`} tone="emerald" />
+            <StatCard title="Net Family Equity" value={`${currencySymbol}${data.kpis.netEquity.toFixed(2)}`} tone="blue" />
+          </>
+        )}
       </div>
 
       {/* Partner equity */}
@@ -432,10 +482,11 @@ export default function FamilyReportClient({
             </button>
           </div>
         </div>
-        <DataTable table={partnerTable} columns={partnerColumns} />
+        <DataTable table={partnerTable} columns={visiblePartnerColumns} />
       </section>
 
       {/* Transactions */}
+      {statementType !== "rations" && (
       <section className="space-y-2">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500">
@@ -474,8 +525,10 @@ export default function FamilyReportClient({
         </div>
         <DataTable table={transactionTable} columns={transactionColumns} />
       </section>
+      )}
 
       {/* Rations */}
+      {statementType !== "drawings" && (
       <section className="space-y-2">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500">
@@ -512,6 +565,7 @@ export default function FamilyReportClient({
         </div>
         <DataTable table={rationTable} columns={rationColumns} />
       </section>
+      )}
 
       {!printPartner && (
         <FamilyReportPdf
@@ -533,6 +587,7 @@ export default function FamilyReportClient({
           branchName={branchName}
           periodLabel={periodLabel}
           groupBy={groupBy}
+          statementType={statementType}
         />
       )}
     </div>

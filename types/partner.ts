@@ -66,6 +66,7 @@ export interface IFamilyReportFilters {
   startDate?: string;
   endDate?: string;
   partnerId?: string;
+  statementType?: "all" | "drawings" | "rations";
 }
 
 export interface IFamilyReportKpis {

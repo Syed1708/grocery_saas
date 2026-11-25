@@ -391,8 +391,14 @@ The report has quick periods (today / this month / last month / this year / all)
 daily/monthly/yearly partner-statement grouping. Every partner row in the equity table has its own
 PDF statement (`PartnerStatementPdf`) with summary, drawings/bills details and grocery line items.
 The Home Groceries table also has a per-row PDF action (`RationInvoicePdf`) that prints that single
-ration invoice with every item, quantity, unit cost and total. Render only one print portal at a
-time (family report, partner statement **or** ration invoice) because each
+ration invoice with every item, quantity, unit cost and total. Drawings & Bills has the same
+per-row action (`DrawingVoucherPdf`) for the individual voucher. Partner statements support an
+`all | drawings | rations` type selector, so a statement can be limited to just drawings/bills or
+just home groceries for one partner. This selector is a server-side URL filter
+(`statementType` in `IFamilyReportFilters`), not client-only state, so partner KPIs, table columns
+and visible sections change along with the PDF; drawings-only also excludes
+`CAPITAL_INJECTION` rows. Render only one print portal at a time (family report,
+partner statement, ration invoice **or** drawing voucher) because each
 `body > *:not(#print-root)` print rule would otherwise hide the other.
 
 **Stock transfers & wastage:** the stock page uses `requiredAnyPermission: [INVENTORY_TRANSFER,

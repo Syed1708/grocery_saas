@@ -215,6 +215,8 @@ export default function FamilyLedgerClient({
         <DrawingsTab
           transactions={transactions}
           currencySymbol={currencySymbol}
+          shop={shop}
+          branchName={branchName}
           onEdit={(t) => { setEditingDrawing(t); setDrawingModalOpen(true); }}
           onDelete={setDeleteDrawingTarget}
         />

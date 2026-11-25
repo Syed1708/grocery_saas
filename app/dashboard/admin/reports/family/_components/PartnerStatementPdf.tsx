@@ -13,6 +13,7 @@ import {
 const emptySubscribe = () => () => {};
 
 export type PartnerGroupBy = "daily" | "monthly" | "yearly";
+export type PartnerStatementType = "all" | "drawings" | "rations";
 
 const GROUP_LABELS: Record<PartnerGroupBy, string> = {
   daily: "Daily",
@@ -44,6 +45,7 @@ interface Props {
   branchName: string;
   periodLabel: string;
   groupBy: PartnerGroupBy;
+  statementType: PartnerStatementType;
 }
 
 interface PeriodRow {
@@ -77,6 +79,7 @@ export default function PartnerStatementPdf({
   branchName,
   periodLabel: reportPeriodLabel,
   groupBy,
+  statementType,
 }: Props) {
   const mounted = useSyncExternalStore(
     emptySubscribe,
@@ -85,14 +88,19 @@ export default function PartnerStatementPdf({
   );
 
   const transactions: IPartnerTransaction[] = data.transactions
-    .filter((transaction) => transaction.partnerId === partner.id)
+    .filter(
+      (transaction) =>
+        transaction.partnerId === partner.id &&
+        statementType !== "rations" &&
+        (statementType !== "drawings" || transaction.type !== "CAPITAL_INJECTION")
+    )
     .sort(
       (a, b) =>
         new Date(a.transactionDate).getTime() - new Date(b.transactionDate).getTime()
     );
 
   const rations: IPartnerRation[] = data.rations
-    .filter((ration) => ration.partnerId === partner.id)
+    .filter((ration) => statementType !== "drawings" && ration.partnerId === partner.id)
     .sort(
       (a, b) => new Date(a.rationDate).getTime() - new Date(b.rationDate).getTime()
     );
@@ -136,6 +144,18 @@ export default function PartnerStatementPdf({
   );
   const totalUsage = totalDrawings + totalRations;
   const netMovement = totalInjections - totalUsage;
+  const showCapital = statementType === "all";
+  const showDrawings = statementType !== "rations";
+  const showGroceries = statementType !== "drawings";
+  const summaryColumns =
+    2 + (showCapital ? 1 : 0) + (showDrawings ? 1 : 0) + (showGroceries ? 1 : 0) +
+    (showDrawings && showGroceries ? 1 : 0);
+  const statementTitle =
+    statementType === "drawings"
+      ? "Partner Drawings & Bills Statement"
+      : statementType === "rations"
+        ? "Partner Home Groceries Statement"
+        : "Partner Statement";
 
   if (!mounted) return null;
 
@@ -177,7 +197,7 @@ export default function PartnerStatementPdf({
           {shop.address && <p className="text-[10px]">{shop.address}</p>}
         </div>
         <div className="text-right text-[10px]">
-          <h2 className="text-sm font-black uppercase">Partner Statement</h2>
+          <h2 className="text-sm font-black uppercase">{statementTitle}</h2>
           <p className="font-bold">{partner.name}</p>
           <p>{RELATIONSHIP_LABELS[partner.relationship] || partner.relationship} • {partner.equityPercent}% equity</p>
           <p>Period: {reportPeriodLabel}</p>
@@ -188,26 +208,60 @@ export default function PartnerStatementPdf({
       <table className="w-full border-collapse border border-neutral-400 text-[10px] my-2">
         <tbody>
           <tr>
-            <td className="border border-neutral-400 p-1 text-center">
-              <span className="block text-[8px] uppercase font-bold">Capital Injected</span>
-              <strong>{currencySymbol}{totalInjections.toFixed(2)}</strong>
-            </td>
-            <td className="border border-neutral-400 p-1 text-center">
-              <span className="block text-[8px] uppercase font-bold">Drawings & Bills</span>
-              <strong>{currencySymbol}{totalDrawings.toFixed(2)}</strong>
-            </td>
-            <td className="border border-neutral-400 p-1 text-center">
-              <span className="block text-[8px] uppercase font-bold">Home Groceries</span>
-              <strong>{currencySymbol}{totalRations.toFixed(2)}</strong>
-            </td>
-            <td className="border border-neutral-400 p-1 text-center">
-              <span className="block text-[8px] uppercase font-bold">Total Usage</span>
-              <strong>{currencySymbol}{totalUsage.toFixed(2)}</strong>
-            </td>
-            <td className="border border-neutral-400 p-1 text-center">
-              <span className="block text-[8px] uppercase font-bold">Net Movement</span>
-              <strong>{netMovement >= 0 ? "+" : ""}{currencySymbol}{netMovement.toFixed(2)}</strong>
-            </td>
+            {statementType === "rations" ? (
+              <>
+                <td className="border border-neutral-400 p-1 text-center">
+                  <span className="block text-[8px] uppercase font-bold">Home Groceries</span>
+                  <strong>{currencySymbol}{totalRations.toFixed(2)}</strong>
+                </td>
+                <td className="border border-neutral-400 p-1 text-center">
+                  <span className="block text-[8px] uppercase font-bold">Ration Invoices</span>
+                  <strong>{rations.length}</strong>
+                </td>
+                <td className="border border-neutral-400 p-1 text-center">
+                  <span className="block text-[8px] uppercase font-bold">Net Movement</span>
+                  <strong>-{currencySymbol}{totalRations.toFixed(2)}</strong>
+                </td>
+              </>
+            ) : statementType === "drawings" ? (
+              <>
+                <td className="border border-neutral-400 p-1 text-center">
+                  <span className="block text-[8px] uppercase font-bold">Drawings & Bills</span>
+                  <strong>{currencySymbol}{totalDrawings.toFixed(2)}</strong>
+                </td>
+                <td className="border border-neutral-400 p-1 text-center">
+                  <span className="block text-[8px] uppercase font-bold">Vouchers</span>
+                  <strong>{transactions.length}</strong>
+                </td>
+                <td className="border border-neutral-400 p-1 text-center">
+                  <span className="block text-[8px] uppercase font-bold">Net Movement</span>
+                  <strong>-{currencySymbol}{totalDrawings.toFixed(2)}</strong>
+                </td>
+              </>
+            ) : (
+              <>
+                <td className="border border-neutral-400 p-1 text-center">
+                  <span className="block text-[8px] uppercase font-bold">Capital Injected</span>
+                  <strong>{currencySymbol}{totalInjections.toFixed(2)}</strong>
+                </td>
+                <td className="border border-neutral-400 p-1 text-center">
+                  <span className="block text-[8px] uppercase font-bold">Drawings & Bills</span>
+                  <strong>{currencySymbol}{totalDrawings.toFixed(2)}</strong>
+                </td>
+                <td className="border border-neutral-400 p-1 text-center">
+                  <span className="block text-[8px] uppercase font-bold">Home Groceries</span>
+                  <strong>{currencySymbol}{totalRations.toFixed(2)}</strong>
+                </td>
+                <td className="border border-neutral-400 p-1 text-center">
+                  <span className="block text-[8px] uppercase font-bold">Total Usage</span>
+                  <strong>{currencySymbol}{totalUsage.toFixed(2)}</strong>
+                </td>
+                <td className="border border-neutral-400 p-1 text-center">
+                  <span className="block text-[8px] uppercase font-bold">Net Movement</span>
+                  <strong>{netMovement >= 0 ? "+" : ""}{currencySymbol}{netMovement.toFixed(2)}</strong>
+                </td>
+              </>
+            )}
           </tr>
         </tbody>
       </table>
@@ -219,31 +273,33 @@ export default function PartnerStatementPdf({
         <thead>
           <tr className="bg-neutral-200 font-bold">
             <th className="border border-neutral-400 p-1 text-left">Period</th>
-            <th className="border border-neutral-400 p-1 text-right">Capital In</th>
-            <th className="border border-neutral-400 p-1 text-right">Drawings & Bills</th>
-            <th className="border border-neutral-400 p-1 text-right">Home Groceries</th>
-            <th className="border border-neutral-400 p-1 text-right">Total Usage</th>
+            {showCapital && <th className="border border-neutral-400 p-1 text-right">Capital In</th>}
+            {showDrawings && <th className="border border-neutral-400 p-1 text-right">Drawings & Bills</th>}
+            {showGroceries && <th className="border border-neutral-400 p-1 text-right">Home Groceries</th>}
+            {showDrawings && showGroceries && <th className="border border-neutral-400 p-1 text-right">Total Usage</th>}
             <th className="border border-neutral-400 p-1 text-right">Net Movement</th>
           </tr>
         </thead>
         <tbody>
           {periodRows.length === 0 ? (
             <tr>
-              <td colSpan={6} className="border border-neutral-400 p-2 text-center">
+              <td colSpan={summaryColumns} className="border border-neutral-400 p-2 text-center">
                 No activity in this period.
               </td>
             </tr>
           ) : (
             periodRows.map((row) => {
               const usage = row.drawings + row.rations;
-              const net = row.injections - usage;
+              const net = showCapital
+                ? row.injections - usage
+                : -((showDrawings ? row.drawings : 0) + (showGroceries ? row.rations : 0));
               return (
                 <tr key={row.key}>
                   <td className="border border-neutral-400 p-1">{row.label}</td>
-                  <td className="border border-neutral-400 p-1 text-right">{currencySymbol}{row.injections.toFixed(2)}</td>
-                  <td className="border border-neutral-400 p-1 text-right">{currencySymbol}{row.drawings.toFixed(2)}</td>
-                  <td className="border border-neutral-400 p-1 text-right">{currencySymbol}{row.rations.toFixed(2)}</td>
-                  <td className="border border-neutral-400 p-1 text-right font-bold">{currencySymbol}{usage.toFixed(2)}</td>
+                  {showCapital && <td className="border border-neutral-400 p-1 text-right">{currencySymbol}{row.injections.toFixed(2)}</td>}
+                  {showDrawings && <td className="border border-neutral-400 p-1 text-right">{currencySymbol}{row.drawings.toFixed(2)}</td>}
+                  {showGroceries && <td className="border border-neutral-400 p-1 text-right">{currencySymbol}{row.rations.toFixed(2)}</td>}
+                  {showDrawings && showGroceries && <td className="border border-neutral-400 p-1 text-right font-bold">{currencySymbol}{usage.toFixed(2)}</td>}
                   <td className="border border-neutral-400 p-1 text-right font-bold">{net >= 0 ? "+" : ""}{currencySymbol}{net.toFixed(2)}</td>
                 </tr>
               );
@@ -252,8 +308,10 @@ export default function PartnerStatementPdf({
         </tbody>
       </table>
 
+      {showDrawings && (
+        <>
       <h3 className="font-bold text-[11px] uppercase mt-3 mb-1">
-        Drawings, Bills & Capital ({transactions.length})
+        {statementType === "drawings" ? "Drawings & Bills" : "Drawings, Bills & Capital"} ({transactions.length})
       </h3>
       <table className="partner-print-table w-full border-collapse border border-neutral-400 text-[9px]">
         <thead>
@@ -294,7 +352,11 @@ export default function PartnerStatementPdf({
           )}
         </tbody>
       </table>
+        </>
+      )}
 
+      {showGroceries && (
+        <>
       <h3 className="font-bold text-[11px] uppercase mt-3 mb-1">
         Home Groceries ({rations.length})
       </h3>
@@ -335,6 +397,8 @@ export default function PartnerStatementPdf({
           )}
         </tbody>
       </table>
+        </>
+      )}
 
       <div className="mt-10 flex justify-between pt-3 border-t border-neutral-400 text-[9px]">
         <div className="text-center w-36 border-t border-black pt-1">Accountant</div>
