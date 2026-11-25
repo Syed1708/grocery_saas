@@ -2,6 +2,7 @@ import { requireAuth } from "@/lib/auth/guard";
 import { PERMISSIONS } from "@/types";
 import { prisma } from "@/lib/prisma";
 import { getProfitLossData } from "@/queries/profit-loss-queries";
+import { getDefaultProfitLossRange } from "@/lib/profit-loss-range";
 import ProfitLossClient from "./_components/ProfitLossClient";
 import { IProfitLossFilterParams } from "@/types/profit-loss";
 
@@ -15,6 +16,7 @@ export default async function ProfitLossPage({ searchParams }: PageProps) {
     requireActiveStatus: true,
   });
   const filters = await searchParams;
+  const defaultRange = getDefaultProfitLossRange();
 
   const [plData, shop, branch] = await Promise.all([
     getProfitLossData(shopId, branchId, filters),
@@ -32,6 +34,7 @@ export default async function ProfitLossPage({ searchParams }: PageProps) {
     <div className="max-w-7xl mx-auto">
       <ProfitLossClient
         data={plData}
+        defaultRange={defaultRange}
         currencySymbol={shop?.currencySymbol || "৳"}
         shop={{
           name: shop?.name || "Grocery ERP",

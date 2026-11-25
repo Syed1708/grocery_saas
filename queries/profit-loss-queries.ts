@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
+import { getDefaultProfitLossRange } from "@/lib/profit-loss-range";
 import { IProfitLossData, IProfitLossFilterParams } from "@/types/profit-loss";
 
 export async function getProfitLossData(
@@ -7,24 +8,18 @@ export async function getProfitLossData(
   branchId: string,
   filters: IProfitLossFilterParams
 ): Promise<IProfitLossData> {
+  const defaultRange = getDefaultProfitLossRange();
+  const startDate = filters.startDate || defaultRange.startDate;
+  const endDate = filters.endDate || defaultRange.endDate;
+
   const dateFilter: Prisma.DateTimeFilter = {};
-  if (filters.startDate || filters.endDate) {
-    if (filters.startDate) {
-      const start = new Date(`${filters.startDate}T00:00:00`);
-      if (!Number.isNaN(start.getTime())) dateFilter.gte = start;
-    }
-    if (filters.endDate) {
-      const end = new Date(`${filters.endDate}T00:00:00`);
-      if (!Number.isNaN(end.getTime())) {
-        // Exclusive next-day boundary includes the whole end date.
-        end.setDate(end.getDate() + 1);
-        dateFilter.lt = end;
-      }
-    }
-  } else {
-    // Default: This Month
-    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    dateFilter.gte = startOfMonth;
+  const start = new Date(`${startDate}T00:00:00`);
+  if (!Number.isNaN(start.getTime())) dateFilter.gte = start;
+  const end = new Date(`${endDate}T00:00:00`);
+  if (!Number.isNaN(end.getTime())) {
+    // Exclusive next-day boundary includes the whole end date.
+    end.setDate(end.getDate() + 1);
+    dateFilter.lt = end;
   }
 
   // 1. Sales & Gross Revenue

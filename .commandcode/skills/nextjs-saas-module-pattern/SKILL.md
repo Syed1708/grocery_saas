@@ -383,8 +383,17 @@ guard stock with `updateMany({ quantity: { gte } })`. Every drawing/injection wr
 update are separate actions (the client uses `useCrudModal`). Drawings/bills and grocery rations
 also support edit and delete: editing a drawing reverses the old account effect then applies the
 new one; deleting reverses it. Editing/deleting a ration restores the old stock lines before
-re-applying/deleting, so stock never drifts. The report lives at
+re-applying/deleting, so stock never drifts. Drawings, household bills and home groceries are
+partner-equity movements — they must **not** be included in the P&L or counted as operating
+expenses; only genuine store expenses belong there. The report lives at
 `/dashboard/admin/reports/family` (CSV + A4 PDF) and is listed in the reports nav and overview grid.
+The report has quick periods (today / this month / last month / this year / all), date inputs, and
+daily/monthly/yearly partner-statement grouping. Every partner row in the equity table has its own
+PDF statement (`PartnerStatementPdf`) with summary, drawings/bills details and grocery line items.
+The Home Groceries table also has a per-row PDF action (`RationInvoicePdf`) that prints that single
+ration invoice with every item, quantity, unit cost and total. Render only one print portal at a
+time (family report, partner statement **or** ration invoice) because each
+`body > *:not(#print-root)` print rule would otherwise hide the other.
 
 **Stock transfers & wastage:** the stock page uses `requiredAnyPermission: [INVENTORY_TRANSFER,
 INVENTORY_WASTAGE]` (guard supports `requiredAnyPermission`). Dispatch/update/cancel require
@@ -406,7 +415,10 @@ DAMAGED returns stay in COGS and their cost becomes a damage loss. Sale returns 
 `EXP-DAMAGE` expense with reference `Return #...`; skip that expense in the P&L so the loss is not
 double-counted. Stock wastage has no matching expense, so add `stockWastage.totalCost` into
 `damagedGoodsLoss`. Keep `totalOpex = operatingExpenses + payroll + damagedGoodsLoss` and
-`netProfit = grossProfit - totalOpex + otherIncome`.
+`netProfit = grossProfit - totalOpex + otherIncome`. The default period is a rolling 365 days
+(`lib/profit-loss-range.ts`), not the current calendar month: a partial month would charge full
+monthly rent/payroll against incomplete sales and look like a loss. Pass the server-computed default
+range into the filter UI so the date inputs always show the active period and stay hydration-safe.
 
 **Typed filters:** dynamic report filters must use Prisma input types (e.g.
 `Prisma.PurchaseWhereInput`, `Prisma.SaleWhereInput`, `Prisma.ProductStockWhereInput`,

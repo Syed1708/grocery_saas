@@ -12,7 +12,7 @@ export default async function FamilyLedgerPage() {
   });
 
   // Parallel data fetching matching your AccountsPage pattern
-  const [partners, transactions, rations, accountsRaw, productsRaw, shop] = await Promise.all([
+  const [partners, transactions, rations, accountsRaw, productsRaw, shop, branch] = await Promise.all([
     getPartners(shopId, branchId),
     getPartnerTransactions(shopId, branchId, 100),
     getPartnerRations(shopId, branchId, 100),
@@ -32,7 +32,11 @@ export default async function FamilyLedgerPage() {
     }),
     prisma.shop.findUnique({
       where: { id: shopId },
-      select: { currencySymbol: true },
+      select: { name: true, phone: true, address: true, currencySymbol: true },
+    }),
+    prisma.branch.findUnique({
+      where: { id: branchId },
+      select: { name: true },
     }),
   ]);
 
@@ -60,6 +64,12 @@ export default async function FamilyLedgerPage() {
         accounts={accounts}
         products={products}
         currencySymbol={shop?.currencySymbol || "৳"}
+        shop={{
+          name: shop?.name || "Grocery ERP",
+          phone: shop?.phone,
+          address: shop?.address,
+        }}
+        branchName={branch?.name || "Main Branch"}
       />
     </div>
   );

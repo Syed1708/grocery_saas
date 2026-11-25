@@ -1,23 +1,38 @@
 "use client";
 "use no memo";
 
+import { useState } from "react";
+import { flushSync } from "react-dom";
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
+import { Printer } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { TableActions } from "@/components/common/ui/table/TableHelpers";
 import { IPartnerRation, PERMISSIONS } from "@/types";
 import { format } from "date-fns";
+import RationInvoicePdf from "./RationInvoicePdf";
 
 export default function RationsTab({
   rations,
   currencySymbol = "৳",
+  shop,
+  branchName,
   onEdit,
   onDelete,
 }: {
   rations: IPartnerRation[];
   currencySymbol?: string;
+  shop: { name: string; phone?: string | null; address?: string | null };
+  branchName: string;
   onEdit: (r: IPartnerRation) => void;
   onDelete: (r: IPartnerRation) => void;
 }) {
+  const [printRation, setPrintRation] = useState<IPartnerRation | null>(null);
+
+  const printRationPdf = (ration: IPartnerRation) => {
+    flushSync(() => setPrintRation(ration));
+    window.print();
+  };
+
   const columns: ColumnDef<IPartnerRation>[] = [
     {
       accessorKey: "rationNo",
@@ -62,12 +77,22 @@ export default function RationsTab({
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <TableActions
-          onEdit={() => onEdit(row.original)}
-          editPermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
-          onDelete={() => onDelete(row.original)}
-          deletePermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
-        />
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => printRationPdf(row.original)}
+            className="inline-flex items-center gap-1 px-1.5 py-1 rounded-lg text-[10px] font-bold text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition cursor-pointer"
+            title="Print ration invoice PDF"
+          >
+            <Printer size={13} /> PDF
+          </button>
+          <TableActions
+            onEdit={() => onEdit(row.original)}
+            editPermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
+            onDelete={() => onDelete(row.original)}
+            deletePermission={PERMISSIONS.FAMILY_LEDGER_ACCESS}
+          />
+        </div>
       ),
     },
   ];
@@ -78,5 +103,17 @@ export default function RationsTab({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
-  return <DataTable table={table} columns={columns} />;
+  return (
+    <>
+      <DataTable table={table} columns={columns} />
+      {printRation && (
+        <RationInvoicePdf
+          ration={printRation}
+          currencySymbol={currencySymbol}
+          shop={shop}
+          branchName={branchName}
+        />
+      )}
+    </>
+  );
 }

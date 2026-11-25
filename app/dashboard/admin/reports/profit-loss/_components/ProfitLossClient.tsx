@@ -5,10 +5,12 @@ import ProfitLossFilters from "./ProfitLossFilters";
 import ProfitLossExportActions from "./ProfitLossExportActions";
 import ProfitLossPdf from "./ProfitLossPdf";
 import { IProfitLossData } from "@/types/profit-loss";
+import type { ProfitLossDateRange } from "@/lib/profit-loss-range";
 import { ReportKpiCard } from "../../common/report-kpi-card";
 
 interface Props {
   data: IProfitLossData;
+  defaultRange: ProfitLossDateRange;
   currencySymbol: string;
   shop: { name: string; phone?: string | null; address?: string | null };
   branchName: string;
@@ -16,6 +18,7 @@ interface Props {
 
 export default function ProfitLossClient({
   data,
+  defaultRange,
   currencySymbol = "৳",
   shop,
   branchName,
@@ -76,7 +79,7 @@ export default function ProfitLossClient({
         </div>
 
         {/* Date Filter Toolbar */}
-        <ProfitLossFilters />
+        <ProfitLossFilters defaultRange={defaultRange} />
 
         {/* Structured Income Statement Card */}
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-5 shadow-xs">

@@ -3,8 +3,10 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Input } from "@/components/common/ui/Input";
 import { RotateCcw } from "lucide-react";
+import { formatDateInput } from "@/lib/profit-loss-range";
+import type { ProfitLossDateRange } from "@/lib/profit-loss-range";
 
-export default function ProfitLossFilters() {
+export default function ProfitLossFilters({ defaultRange }: { defaultRange: ProfitLossDateRange }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -16,7 +18,9 @@ export default function ProfitLossFilters() {
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const handlePreset = (type: "today" | "yesterday" | "last7" | "thisMonth" | "lastMonth") => {
+  const handlePreset = (
+    type: "today" | "yesterday" | "last7" | "thisMonth" | "lastMonth" | "last12"
+  ) => {
     const now = new Date();
     let start = new Date();
     let end = new Date();
@@ -33,11 +37,14 @@ export default function ProfitLossFilters() {
     } else if (type === "lastMonth") {
       start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       end = new Date(now.getFullYear(), now.getMonth(), 0);
+    } else if (type === "last12") {
+      start = new Date(`${defaultRange.startDate}T00:00:00`);
+      end = new Date(`${defaultRange.endDate}T00:00:00`);
     }
 
     const params = new URLSearchParams();
-    params.set("startDate", start.toISOString().split("T")[0]);
-    params.set("endDate", end.toISOString().split("T")[0]);
+    params.set("startDate", formatDateInput(start));
+    params.set("endDate", formatDateInput(end));
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -53,7 +60,12 @@ export default function ProfitLossFilters() {
           <button type="button" onClick={() => handlePreset("last7")} className="text-xs px-2.5 py-1 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 rounded-md font-medium transition cursor-pointer">গত ৭ দিন</button>
           <button type="button" onClick={() => handlePreset("thisMonth")} className="text-xs px-2.5 py-1 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 rounded-md font-medium transition cursor-pointer">চলতি মাস</button>
           <button type="button" onClick={() => handlePreset("lastMonth")} className="text-xs px-2.5 py-1 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 rounded-md font-medium transition cursor-pointer">গত মাস</button>
+          <button type="button" onClick={() => handlePreset("last12")} className="text-xs px-2.5 py-1 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 rounded-md font-semibold transition cursor-pointer">গত ১২ মাস</button>
         </div>
+
+        {!hasActiveFilters && (
+          <span className="text-[10px] text-neutral-400 font-medium">ডিফল্ট: গত ১২ মাস</span>
+        )}
 
         {hasActiveFilters && (
           <button
@@ -71,13 +83,13 @@ export default function ProfitLossFilters() {
         <Input
           label="হতে (From Date)"
           type="date"
-          value={searchParams.get("startDate") || ""}
+          value={searchParams.get("startDate") || defaultRange.startDate}
           onChange={(e) => handleFilter("startDate", e.target.value)}
         />
         <Input
           label="পর্যন্ত (To Date)"
           type="date"
-          value={searchParams.get("endDate") || ""}
+          value={searchParams.get("endDate") || defaultRange.endDate}
           onChange={(e) => handleFilter("endDate", e.target.value)}
         />
       </div>

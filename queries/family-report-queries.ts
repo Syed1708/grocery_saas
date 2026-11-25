@@ -56,7 +56,6 @@ export async function getFamilyReportData(
         ...partnerFilter,
         ...(dateRange ? { transactionDate: dateRange } : {}),
       },
-      take: 500,
       orderBy: { transactionDate: "desc" },
       include: {
         partner: { select: { name: true } },
@@ -70,7 +69,6 @@ export async function getFamilyReportData(
         ...partnerFilter,
         ...(dateRange ? { rationDate: dateRange } : {}),
       },
-      take: 500,
       orderBy: { rationDate: "desc" },
       include: {
         partner: { select: { name: true } },

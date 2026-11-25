@@ -21,7 +21,9 @@ import {
   IPartnerTransaction,
 } from "@/types/partner";
 import FamilyReportPdf, { FamilyPdfSection } from "./FamilyReportPdf";
+import PartnerStatementPdf, { PartnerGroupBy } from "./PartnerStatementPdf";
 import { downloadCsv } from "@/lib/csv";
+import { formatDateInput } from "@/lib/profit-loss-range";
 
 const RELATIONSHIP_LABELS: Record<string, string> = {
   FATHER: "বাবা (Father)",
@@ -58,9 +60,19 @@ export default function FamilyReportClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [pdfSection, setPdfSection] = useState<FamilyPdfSection>("all");
+  const [printPartner, setPrintPartner] = useState<IFamilyReportPartnerRow | null>(null);
+  const [groupBy, setGroupBy] = useState<PartnerGroupBy>("monthly");
 
   const printPdf = (section: FamilyPdfSection) => {
-    flushSync(() => setPdfSection(section));
+    flushSync(() => {
+      setPrintPartner(null);
+      setPdfSection(section);
+    });
+    window.print();
+  };
+
+  const printPartnerStatement = (partner: IFamilyReportPartnerRow) => {
+    flushSync(() => setPrintPartner(partner));
     window.print();
   };
 
@@ -68,6 +80,36 @@ export default function FamilyReportClient({
     const params = new URLSearchParams(searchParams.toString());
     if (value && value !== "all") params.set(key, value);
     else params.delete(key);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const setPeriodPreset = (preset: "today" | "thisMonth" | "lastMonth" | "thisYear" | "all") => {
+    const params = new URLSearchParams(searchParams.toString());
+    const now = new Date();
+    let start: Date | null = null;
+    let end: Date | null = null;
+
+    if (preset === "today") {
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      end = new Date(start);
+    } else if (preset === "thisMonth") {
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    } else if (preset === "lastMonth") {
+      start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      end = new Date(now.getFullYear(), now.getMonth(), 0);
+    } else if (preset === "thisYear") {
+      start = new Date(now.getFullYear(), 0, 1);
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    }
+
+    if (start && end) {
+      params.set("startDate", formatDateInput(start));
+      params.set("endDate", formatDateInput(end));
+    } else {
+      params.delete("startDate");
+      params.delete("endDate");
+    }
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -135,6 +177,19 @@ export default function FamilyReportClient({
       header: "Net Equity",
       cell: ({ row }) => (
         <span className="font-mono text-xs font-black text-blue-600">{currencySymbol}{row.original.netEquity.toFixed(2)}</span>
+      ),
+    },
+    {
+      id: "statement",
+      header: "Statement",
+      cell: ({ row }) => (
+        <button
+          type="button"
+          onClick={() => printPartnerStatement(row.original)}
+          className="inline-flex items-center gap-1 text-[11px] font-semibold text-neutral-700 dark:text-neutral-300 hover:underline cursor-pointer print:hidden"
+        >
+          <Printer size={12} /> PDF
+        </button>
       ),
     },
   ];
@@ -274,7 +329,16 @@ export default function FamilyReportClient({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[11px] font-semibold text-neutral-500">সময়কাল:</span>
+          <button type="button" onClick={() => setPeriodPreset("today")} className="text-[11px] px-2.5 py-1 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 rounded-md font-medium cursor-pointer">আজ</button>
+          <button type="button" onClick={() => setPeriodPreset("thisMonth")} className="text-[11px] px-2.5 py-1 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 rounded-md font-medium cursor-pointer">এই মাস</button>
+          <button type="button" onClick={() => setPeriodPreset("lastMonth")} className="text-[11px] px-2.5 py-1 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 rounded-md font-medium cursor-pointer">গত মাস</button>
+          <button type="button" onClick={() => setPeriodPreset("thisYear")} className="text-[11px] px-2.5 py-1 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 rounded-md font-medium cursor-pointer">এই বছর</button>
+          <button type="button" onClick={() => setPeriodPreset("all")} className="text-[11px] px-2.5 py-1 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 rounded-md font-medium cursor-pointer">সব সময়</button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
           <Input
             type="date"
             value={searchParams.get("startDate") || ""}
@@ -297,6 +361,16 @@ export default function FamilyReportClient({
             {partnerOptions.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
+          </select>
+          <select
+            value={groupBy}
+            onChange={(e) => setGroupBy(e.target.value as PartnerGroupBy)}
+            aria-label="Partner statement grouping"
+            className="text-xs px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none cursor-pointer"
+          >
+            <option value="daily">দৈনিক সারসংক্ষেপ (Daily)</option>
+            <option value="monthly">মাসিক সারসংক্ষেপ (Monthly)</option>
+            <option value="yearly">বার্ষিক সারসংক্ষেপ (Yearly)</option>
           </select>
         </div>
       </div>
@@ -439,14 +513,28 @@ export default function FamilyReportClient({
         <DataTable table={rationTable} columns={rationColumns} />
       </section>
 
-      <FamilyReportPdf
-        data={data}
-        currencySymbol={currencySymbol}
-        shop={shop}
-        branchName={branchName}
-        periodLabel={periodLabel}
-        section={pdfSection}
-      />
+      {!printPartner && (
+        <FamilyReportPdf
+          data={data}
+          currencySymbol={currencySymbol}
+          shop={shop}
+          branchName={branchName}
+          periodLabel={periodLabel}
+          section={pdfSection}
+        />
+      )}
+
+      {printPartner && (
+        <PartnerStatementPdf
+          data={data}
+          partner={printPartner}
+          currencySymbol={currencySymbol}
+          shop={shop}
+          branchName={branchName}
+          periodLabel={periodLabel}
+          groupBy={groupBy}
+        />
+      )}
     </div>
   );
 }

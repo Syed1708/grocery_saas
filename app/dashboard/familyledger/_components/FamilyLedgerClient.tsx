@@ -33,6 +33,8 @@ export default function FamilyLedgerClient({
   accounts,
   products,
   currencySymbol = "৳",
+  shop,
+  branchName,
 }: {
   partners: IPartner[];
   transactions: IPartnerTransaction[];
@@ -40,6 +42,8 @@ export default function FamilyLedgerClient({
   accounts: { id: string; name: string; type: string; currentBalance: number }[];
   products: { id: string; name: string; sku: string; purchasePrice: number }[];
   currencySymbol?: string;
+  shop: { name: string; phone?: string | null; address?: string | null };
+  branchName: string;
 }) {
   const [activeTab, setActiveTab] = useState<"partners" | "drawings" | "rations">("partners");
   const [drawingModalOpen, setDrawingModalOpen] = useState(false);
@@ -219,6 +223,8 @@ export default function FamilyLedgerClient({
         <RationsTab
           rations={rations}
           currencySymbol={currencySymbol}
+          shop={shop}
+          branchName={branchName}
           onEdit={(r) => { setEditingRation(r); setRationModalOpen(true); }}
           onDelete={setDeleteRationTarget}
         />
