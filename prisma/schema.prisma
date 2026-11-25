@@ -1544,3 +1544,13 @@ model PartnerRationItem {
   @@index([productId])
   @@map("partner_ration_items")
 }
+
+model RateLimitBucket {
+  key       String   @id
+  count     Int      @default(0)
+  resetAt   DateTime
+  updatedAt DateTime @updatedAt
+
+  @@index([resetAt])
+  @@map("rate_limit_buckets")
+}

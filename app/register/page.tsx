@@ -11,7 +11,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -159,14 +159,16 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">Password (6+ chars) *</label>
+                <label className="block text-xs font-medium text-neutral-700 mb-1">Password (8+ chars, letter + number) *</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-2.5 text-neutral-400" size={16} />
                   <input
                     type="password"
                     name="password"
                     required
-                    minLength={6}
+                    minLength={8}
+                    pattern="(?=.*[A-Za-z])(?=.*\d).{8,}"
+                    title="At least 8 characters, including a letter and a number"
                     placeholder="••••••••"
                     className="w-full pl-9 pr-3 py-2 text-sm border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
                   />

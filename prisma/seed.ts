@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { randomBytes } from "node:crypto";
 import { prisma } from "../lib/prisma";
 
 const DEFAULT_UNITS = [
@@ -18,6 +19,18 @@ type SeedUserRole = "OWNER" | "MANAGER" | "CASHIER";
 type SeedCustomerType = "WALK_IN" | "PERMANENT";
 type SeedPaymentStatus = "PAID" | "PARTIAL" | "DUE";
 
+// Demo credentials: never ship a known password. Provide SEED_PASSWORD (>=12 chars)
+// or one strong random password is generated and printed once at the end.
+const ENV_SEED_PASSWORD = process.env.SEED_PASSWORD?.trim();
+const GENERATED_SEED_PASSWORD = ENV_SEED_PASSWORD
+  ? null
+  : `${randomBytes(18).toString("base64url")}Aa1`;
+const SEED_PASSWORD = ENV_SEED_PASSWORD || GENERATED_SEED_PASSWORD!;
+
+if (SEED_PASSWORD.length < 12) {
+  throw new Error("SEED_PASSWORD must be at least 12 characters long.");
+}
+
 interface SeedProduct {
   id: string;
   unitId: string;
@@ -36,6 +49,7 @@ async function cleanDatabase() {
   await prisma.partnerRation.deleteMany().catch(() => {});
   await prisma.partnerTransaction.deleteMany().catch(() => {});
   await prisma.partner.deleteMany().catch(() => {});
+  await prisma.rateLimitBucket.deleteMany().catch(() => {});
 
   await prisma.saleReturnItem.deleteMany().catch(() => {});
   await prisma.saleReturn.deleteMany().catch(() => {});
@@ -129,7 +143,7 @@ async function main() {
   // 2. USERS (RBAC)
   // ==========================================
   console.log("👥 [2/12] Seeding RBAC Users across Branches...");
-  const hashedPassword = await bcrypt.hash("123456", 10);
+  const hashedPassword = await bcrypt.hash(SEED_PASSWORD, 10);
 
   const users: Array<{
     email: string;
@@ -935,12 +949,17 @@ async function main() {
   console.log("🚚 Suppliers:        5 FMCG Vendors with Active Payables");
   console.log("🔒 Day-End Closings: 7 Consecutive Cash Register Z-Reports");
   console.log("------------------------------------------------------------");
-  console.log("🔑 Demo Login Credentials (All Passwords: 123456):");
-  console.log("   👑 OWNER:          owner@grocery.com");
-  console.log("   👔 MAIN MANAGER:   manager@grocery.com");
-  console.log("   🧑‍💻 MAIN CASHIER:   cashier@grocery.com");
-  console.log("   👔 MIRPUR MANAGER: manager.mirpur@grocery.com");
-  console.log("   🧑‍💻 MIRPUR CASHIER: cashier.mirpur@grocery.com");
+  console.log("🔑 Demo Login Accounts:");
+  console.log("   OWNER:          owner@grocery.com");
+  console.log("   MAIN MANAGER:   manager@grocery.com");
+  console.log("   MAIN CASHIER:   cashier@grocery.com");
+  console.log("   MIRPUR MANAGER: manager.mirpur@grocery.com");
+  console.log("   MIRPUR CASHIER: cashier.mirpur@grocery.com");
+  if (GENERATED_SEED_PASSWORD) {
+    console.log(`   Generated password (change after first login): ${SEED_PASSWORD}`);
+  } else {
+    console.log("   Password: from the SEED_PASSWORD environment variable.");
+  }
   console.log("============================================================");
 }
 

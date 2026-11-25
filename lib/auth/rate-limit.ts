@@ -1,13 +1,8 @@
 // lib/auth/rate-limit.ts
-// Lightweight fixed-window rate limiter for the credentials login endpoint.
-// In-memory (per server instance); swap for Redis/DB if deploying multi-instance.
+// Database-backed fixed-window rate limiter for the credentials login endpoint.
+// Shared across server instances and survives restarts.
 
-interface Bucket {
-  count: number;
-  resetAt: number;
-}
-
-const buckets = new Map<string, Bucket>();
+import { prisma } from "@/lib/prisma";
 
 export interface RateLimitResult {
   limited: boolean;
@@ -15,44 +10,60 @@ export interface RateLimitResult {
 }
 
 /** Check whether a key has exhausted its attempt budget for the window. */
-export function isRateLimited(key: string, maxAttempts: number): RateLimitResult {
-  const now = Date.now();
-  const bucket = buckets.get(key);
+export async function isRateLimited(
+  key: string,
+  maxAttempts: number
+): Promise<RateLimitResult> {
+  const now = new Date();
+  const bucket = await prisma.rateLimitBucket.findUnique({ where: { key } });
 
-  if (!bucket || now > bucket.resetAt) {
-    if (bucket) buckets.delete(key);
+  if (!bucket || bucket.resetAt <= now) {
     return { limited: false, retryAfterMs: 0 };
   }
 
   if (bucket.count >= maxAttempts) {
-    return { limited: true, retryAfterMs: bucket.resetAt - now };
+    return { limited: true, retryAfterMs: bucket.resetAt.getTime() - now.getTime() };
   }
 
   return { limited: false, retryAfterMs: 0 };
 }
 
 /** Record a failed attempt against a key. */
-export function registerFailure(key: string, windowMs: number) {
-  const now = Date.now();
-  const bucket = buckets.get(key);
+export async function registerFailure(key: string, windowMs: number) {
+  const now = new Date();
+  const resetAt = new Date(now.getTime() + windowMs);
 
-  if (!bucket || now > bucket.resetAt) {
-    buckets.set(key, { count: 1, resetAt: now + windowMs });
-  } else {
-    bucket.count += 1;
+  // Reset an expired bucket atomically.
+  const reset = await prisma.rateLimitBucket.updateMany({
+    where: { key, resetAt: { lte: now } },
+    data: { count: 1, resetAt },
+  });
+
+  if (reset.count === 0) {
+    try {
+      await prisma.rateLimitBucket.upsert({
+        where: { key },
+        create: { key, count: 1, resetAt },
+        update: { count: { increment: 1 } },
+      });
+    } catch {
+      // Concurrent first-insert race: the row now exists, increment it.
+      await prisma.rateLimitBucket.update({
+        where: { key },
+        data: { count: { increment: 1 } },
+      });
+    }
   }
 
-  // Opportunistic cleanup so the map cannot grow unbounded.
-  if (buckets.size > 5000) {
-    for (const [k, v] of buckets) {
-      if (now > v.resetAt) buckets.delete(k);
-    }
+  // Opportunistic cleanup (indexed on resetAt) so the table cannot grow unbounded.
+  if (Math.random() < 0.02) {
+    await prisma.rateLimitBucket.deleteMany({ where: { resetAt: { lt: now } } });
   }
 }
 
 /** Clear the attempt budget (called on a successful login). */
-export function resetRateLimit(key: string) {
-  buckets.delete(key);
+export async function resetRateLimit(key: string) {
+  await prisma.rateLimitBucket.deleteMany({ where: { key } });
 }
 
 export function rateLimitMessage(retryAfterMs: number): string {

@@ -9,6 +9,7 @@ import { userSchema } from "@/lib/validations/user";
 import { ZodError } from "zod";
 import { DEFAULT_ROLE_PERMISSIONS, PERMISSIONS, UserRole } from "@/types/rbac";
 import { getErrorMessage } from "@/lib/utils";
+import { validateStrongPassword } from "@/lib/validations/password";
 
 const USERS_REVALIDATE_PATH = "/dashboard/admin/users";
 const VALID_PERMISSIONS = new Set<string>(Object.values(PERMISSIONS));
@@ -76,8 +77,9 @@ export async function saveUserAction(input: unknown) {
 
     let passwordHash: string | undefined;
     if (parsed.password && parsed.password.trim().length > 0) {
-      if (parsed.password.length < 6) {
-        throw new Error("Password must be at least 6 characters.");
+      const passwordError = validateStrongPassword(parsed.password);
+      if (passwordError) {
+        throw new Error(passwordError);
       }
       passwordHash = await bcrypt.hash(parsed.password, 10);
     } else if (!parsed.id) {

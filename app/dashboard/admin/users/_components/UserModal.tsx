@@ -26,7 +26,7 @@ export default function UserModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void;
   loading: boolean;
   user?: IUserItem | null;
   branches: BranchOption[];
@@ -104,7 +104,7 @@ export default function UserModal({
 
         <div className="grid grid-cols-2 gap-3">
           <Input label="Phone Number" name="phone" defaultValue={user?.phone || ""} placeholder="+1 555 0192" />
-          <Input label={isEditing ? "Password (Leave blank to keep)" : "Password *"} name="password" type="password" required={!isEditing} placeholder="••••••••" />
+          <Input label={isEditing ? "Password (Leave blank to keep)" : "Password *"} name="password" type="password" required={!isEditing} minLength={8} pattern="(?=.*[A-Za-z])(?=.*\d).{8,}" title="At least 8 characters, including a letter and a number" helperText="8+ characters, including a letter and a number" placeholder="••••••••" />
         </div>
 
         <div className="grid grid-cols-2 gap-3">

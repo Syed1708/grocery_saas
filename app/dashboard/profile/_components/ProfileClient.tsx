@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { User, Lock, Mail, Phone, Shield, Camera, Loader2 } from "lucide-react";
+import { User, Lock, Mail, Phone, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { updateProfileAction, updatePasswordAction } from "@/app/actions/profile-actions";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
 import ImageUpload from "@/components/common/ImageUpload";
+import Image from "next/image";
 
 interface ProfileData {
   id: string;
@@ -22,7 +23,7 @@ export default function ProfileClient({ user }: { user: ProfileData }) {
   const [activeTab, setActiveTab] = useState<"info" | "security">("info");
   const [loading, setLoading] = useState(false);
 
-  async function handleProfileSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleProfileSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
 
@@ -37,7 +38,7 @@ export default function ProfileClient({ user }: { user: ProfileData }) {
     }
   }
 
-  async function handlePasswordSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handlePasswordSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
 
@@ -63,7 +64,13 @@ export default function ProfileClient({ user }: { user: ProfileData }) {
       <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-center gap-5">
         <div className="w-20 h-20 rounded-2xl overflow-hidden bg-blue-50 dark:bg-neutral-800 border-2 border-blue-500 flex items-center justify-center shrink-0 text-2xl font-bold text-blue-600">
           {user.profileImage ? (
-            <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+            <Image
+              src={user.profileImage}
+              alt={user.name}
+              className="w-full h-full object-cover"
+              width={80}
+              height={80}
+            />
           ) : (
             user.name.charAt(0).toUpperCase()
           )}
@@ -202,7 +209,7 @@ export default function ProfileClient({ user }: { user: ProfileData }) {
 
             <div>
               <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                New Password (6+ characters) *
+                New Password (8+ characters, letter + number) *
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-2.5 text-neutral-400" size={15} />
@@ -210,7 +217,9 @@ export default function ProfileClient({ user }: { user: ProfileData }) {
                   type="password"
                   name="newPassword"
                   required
-                  minLength={6}
+                  minLength={8}
+                  pattern="(?=.*[A-Za-z])(?=.*\d).{8,}"
+                  title="At least 8 characters, including a letter and a number"
                   placeholder="••••••••"
                   className="w-full pl-9 pr-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -227,7 +236,9 @@ export default function ProfileClient({ user }: { user: ProfileData }) {
                   type="password"
                   name="confirmPassword"
                   required
-                  minLength={6}
+                  minLength={8}
+                  pattern="(?=.*[A-Za-z])(?=.*\d).{8,}"
+                  title="At least 8 characters, including a letter and a number"
                   placeholder="••••••••"
                   className="w-full pl-9 pr-3 py-2 text-xs border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-blue-500"
                 />

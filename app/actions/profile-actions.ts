@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getErrorMessage } from "@/lib/utils";
+import { strongPasswordSchema } from "@/lib/validations/password";
 import { saveUploadedFile, deleteUploadedFile } from "@/lib/file-storage";
 
 const profileSchema = z.object({
@@ -16,7 +17,7 @@ const profileSchema = z.object({
 const passwordSchema = z
   .object({
     currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z.string().min(6, "New password must be at least 6 characters"),
+    newPassword: strongPasswordSchema,
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {

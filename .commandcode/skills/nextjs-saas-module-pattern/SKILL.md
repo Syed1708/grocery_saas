@@ -416,6 +416,15 @@ permissions / HSTS headers. Keep `script-src 'unsafe-inline'` for Next and add `
 **CSV exports:** use `lib/csv.ts` (`csvCell`, `toCsv`, `downloadCsv`). It escapes quotes/commas and
 neutralizes formula injection (`= + - @`). Never hand-build CSV strings in report components.
 
+**Passwords, rate limits, migrations:** use `lib/validations/password.ts`
+(`strongPasswordSchema`: 8–72 chars, letter + number) for registration, profile changes, and admin
+user creation. Login throttling is DB-backed via `RateLimitBucket` (`lib/auth/rate-limit.ts`) so it
+is shared across instances and survives restarts. Seed passwords come from `SEED_PASSWORD` or a
+generated strong password printed once — never hardcode. Schema changes ship as Prisma migrations;
+this project uses a baseline migration under `prisma/migrations/`. On an existing database whose
+tables were created with `db push`, run
+`prisma migrate resolve --applied 20261124000000_baseline` once so `migrate deploy` is aligned.
+
 **POS / sales / returns / closings:** checkout requires `POS_ACCESS`; voiding a sale is
 OWNER-only, needs `requireActiveStatus`, and must load the sale by `{ id, shopId, activeBranchId }`.
 Validate a submitted `customerId` with `{ id, shopId, OR: [{ branchId: active }, { branchId: null }] }`.

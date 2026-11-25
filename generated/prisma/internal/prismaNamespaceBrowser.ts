@@ -99,7 +99,8 @@ export const ModelName = {
   Partner: 'Partner',
   PartnerTransaction: 'PartnerTransaction',
   PartnerRation: 'PartnerRation',
-  PartnerRationItem: 'PartnerRationItem'
+  PartnerRationItem: 'PartnerRationItem',
+  RateLimitBucket: 'RateLimitBucket'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1038,6 +1039,16 @@ export const PartnerRationItemScalarFieldEnum = {
 export type PartnerRationItemScalarFieldEnum = (typeof PartnerRationItemScalarFieldEnum)[keyof typeof PartnerRationItemScalarFieldEnum]
 
 
+export const RateLimitBucketScalarFieldEnum = {
+  key: 'key',
+  count: 'count',
+  resetAt: 'resetAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RateLimitBucketScalarFieldEnum = (typeof RateLimitBucketScalarFieldEnum)[keyof typeof RateLimitBucketScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1731,4 +1742,11 @@ export const PartnerRationItemOrderByRelevanceFieldEnum = {
 } as const
 
 export type PartnerRationItemOrderByRelevanceFieldEnum = (typeof PartnerRationItemOrderByRelevanceFieldEnum)[keyof typeof PartnerRationItemOrderByRelevanceFieldEnum]
+
+
+export const RateLimitBucketOrderByRelevanceFieldEnum = {
+  key: 'key'
+} as const
+
+export type RateLimitBucketOrderByRelevanceFieldEnum = (typeof RateLimitBucketOrderByRelevanceFieldEnum)[keyof typeof RateLimitBucketOrderByRelevanceFieldEnum]
 

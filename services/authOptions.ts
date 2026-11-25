@@ -40,18 +40,20 @@ export const authOptions: NextAuthOptions = {
         const emailKey = `login:email:${email}`;
         const ipKey = `login:ip:${ip}`;
 
-        const emailLimit = isRateLimited(emailKey, MAX_EMAIL_ATTEMPTS);
+        const emailLimit = await isRateLimited(emailKey, MAX_EMAIL_ATTEMPTS);
         if (emailLimit.limited) {
           throw new Error(rateLimitMessage(emailLimit.retryAfterMs));
         }
-        const ipLimit = isRateLimited(ipKey, MAX_IP_ATTEMPTS);
+        const ipLimit = await isRateLimited(ipKey, MAX_IP_ATTEMPTS);
         if (ipLimit.limited) {
           throw new Error(rateLimitMessage(ipLimit.retryAfterMs));
         }
 
-        const registerFailureFor = () => {
-          registerFailure(emailKey, LOGIN_WINDOW_MS);
-          registerFailure(ipKey, LOGIN_WINDOW_MS);
+        const registerFailureFor = async () => {
+          await Promise.all([
+            registerFailure(emailKey, LOGIN_WINDOW_MS),
+            registerFailure(ipKey, LOGIN_WINDOW_MS),
+          ]);
         };
 
         const user = await prisma.user.findUnique({
@@ -63,23 +65,23 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user) {
-          registerFailureFor();
+          await registerFailureFor();
           throw new Error("Invalid email or password.");
         }
 
         if (!user.isActive) {
-          registerFailureFor();
+          await registerFailureFor();
           throw new Error("Your account has been deactivated. Contact your store owner.");
         }
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) {
-          registerFailureFor();
+          await registerFailureFor();
           throw new Error("Invalid email or password.");
         }
 
         // Successful login clears the email throttle.
-        resetRateLimit(emailKey);
+        await resetRateLimit(emailKey);
 
         // Branch Resolution Logic:
         // Cashier/Manager -> uses their assigned branch

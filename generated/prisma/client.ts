@@ -286,3 +286,8 @@ export type PartnerRation = Prisma.PartnerRationModel
  * 
  */
 export type PartnerRationItem = Prisma.PartnerRationItemModel
+/**
+ * Model RateLimitBucket
+ * 
+ */
+export type RateLimitBucket = Prisma.RateLimitBucketModel
