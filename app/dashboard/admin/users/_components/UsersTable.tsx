@@ -2,7 +2,7 @@
 "use client";
 "use no memo";
 
-import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { Edit2, Trash2, KeyRound } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { Switch } from "@/components/common/ui/Switch";
@@ -136,6 +136,6 @@ export default function UsersTable({
     },
   ];
 
-  const table = useReactTable({ data: users, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({ data: users, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() });
   return <DataTable table={table} columns={columns} />;
 }

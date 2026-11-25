@@ -1,6 +1,6 @@
 "use client";
 "use no memo";
-import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { TableActions } from "@/components/common/ui/table/TableHelpers";
 import { IPayroll, PERMISSIONS } from "@/types";
@@ -31,6 +31,6 @@ export default function PayrollsTab({ payrolls, currencySymbol, onDelete }: { pa
       ),
     },
   ];
-  const table = useReactTable({ data: payrolls, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({ data: payrolls, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() });
   return <DataTable table={table} columns={columns} />;
 }

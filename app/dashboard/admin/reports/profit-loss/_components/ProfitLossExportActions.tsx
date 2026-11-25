@@ -26,7 +26,7 @@ export default function ProfitLossExportActions({ data }: { data: IProfitLossDat
       ["", ""],
       ["৩. দোকান পরিচালন খরচ (Operating Expenses)", data.operatingExpenses.toFixed(2)],
       ["স্টাফ বেতন ও ভাতা (Payroll)", data.payrollExpenses.toFixed(2)],
-      ["নষ্ট পণ্য বাবদ ক্ষতি (Damaged Goods)", data.damagedGoodsLoss.toFixed(2)],
+      ["নষ্ট ও অপচয় বাবদ ক্ষতি (Damaged & Wastage)", data.damagedGoodsLoss.toFixed(2)],
       ["মোট পরিচালন ব্যয় (Total OPEX)", data.totalOpex.toFixed(2)],
       ["", ""],
       ["৪. অন্যান্য আয় (Other Income)", data.otherIncome.toFixed(2)],

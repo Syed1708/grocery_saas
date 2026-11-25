@@ -1,6 +1,6 @@
 "use client";
 "use no memo";
-import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { TableActions } from "@/components/common/ui/table/TableHelpers";
 import { IStaff, PERMISSIONS } from "@/types";
@@ -33,6 +33,6 @@ export default function StaffTab({ staff, onEdit, onDelete }: { staff: IStaff[];
       ),
     },
   ];
-  const table = useReactTable({ data: staff, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({ data: staff, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() });
   return <DataTable table={table} columns={columns} />;
 }

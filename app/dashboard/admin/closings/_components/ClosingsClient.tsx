@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
@@ -41,7 +41,7 @@ export default function ClosingsClient({
   };
 
   const columns = getClosingColumns(currencySymbol, handlePrint);
-  const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() });
 
   return (
     <div className="space-y-4">

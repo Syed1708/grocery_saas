@@ -397,6 +397,17 @@ duplicate product lines by merging quantities, guard stock with
 a stock row was missing. Receiving must reconcile every line (`received + damaged === sent`) and
 auto-log transit damage as a branch wastage. Transfer statuses: DISPATCHED → COMPLETED/CANCELLED.
 
+**Profit & loss report:** use each module's business date, not `createdAt` — sales `saleDate`,
+sale returns `returnDate`, expenses `expenseDate`, payroll `salaryDate`, other income `incomeDate`,
+stock wastage `date`. Use an exclusive next-day `lt` boundary for the end date so the whole day is
+included. Value returned stock at the original sale line `purchaseCost` (fall back to
+`product.purchasePrice`), never at the customer `refundPrice`: RESTOCK returns reduce COGS, while
+DAMAGED returns stay in COGS and their cost becomes a damage loss. Sale returns also auto-post an
+`EXP-DAMAGE` expense with reference `Return #...`; skip that expense in the P&L so the loss is not
+double-counted. Stock wastage has no matching expense, so add `stockWastage.totalCost` into
+`damagedGoodsLoss`. Keep `totalOpex = operatingExpenses + payroll + damagedGoodsLoss` and
+`netProfit = grossProfit - totalOpex + otherIncome`.
+
 **Typed filters:** dynamic report filters must use Prisma input types (e.g.
 `Prisma.PurchaseWhereInput`, `Prisma.SaleWhereInput`, `Prisma.ProductStockWhereInput`,
 `Prisma.DateTimeFilter`) — never `const where: any`. Cast enum strings to the generated enum type
@@ -407,7 +418,8 @@ interface instead of `any[]`.
 deactivation, branch reassignment and custom-permission changes increment it. The `jwt` callback
 re-checks the DB and flags the token revoked; `requireAuth` always re-reads the user and rejects a
 stale `tokenVersion`; middleware only authorizes tokens with `shopId` and no `revoked` flag.
-Changing your own password intentionally logs the current session out.
+Changing your own password intentionally logs the current session out. Middleware also matches
+`/login` and `/register`; signed-in users are redirected to `/dashboard`.
 
 **CSP & headers:** `next.config.ts` sets a Content-Security-Policy plus nosniff / frame / referrer /
 permissions / HSTS headers. Keep `script-src 'unsafe-inline'` for Next and add `'unsafe-eval'` +
@@ -482,6 +494,36 @@ accounts (balance-validated) so it can be re-created correctly.
 - When extracting a repeated block into a generic, reproduce the original markup exactly and
   verify the module still renders the same.
 - Keep Bangla copy verbatim (copy from the file, don't retype from memory).
+
+## Full-year demo seed (`prisma/seed.ts`)
+
+The seed is intentionally a **large, one-year demo dataset**, not a minimal fixture. It is
+destructive: `cleanDatabase()` deletes every base table inside one transaction (FK checks toggled
+on that same connection), then recreates everything. Back up before running it, and supply
+`SEED_PASSWORD` (≥12 chars) in `.env.local`; if absent the seed generates a strong password and
+prints it once.
+
+What it generates (keep these in mind when changing seed logic):
+
+- **365 days** of POS sales across both branches — 14–20 invoices/day (~5,100 invoices,
+  ~17,900 sale items), with cash/bank/bkash/nagad/rocket/due methods and 90 sale returns.
+- **72 products** (32 core + 40 generated extras), 12 suppliers, 41 purchase chalans with payment
+  vouchers, 18 purchase returns, 18 purchase orders, 15 quotations.
+- **40 customers** (10 core + 30 generated), 240 due collections. Customer `currentDue` is
+  re-derived from the generated sales-due minus payments so khata balances stay consistent.
+- **12 months** of OPEX (rent, electricity, internet, maintenance, marketing) plus daily staff
+  food/transport, 24 other-income receipts, 24 owner capital/drawing rows, 10 fixed assets.
+- **12 staff**, 144 monthly payrolls, 48 salary advances; 6 additional loans with 18 installments,
+  12 cheques, 120 account-ledger rows.
+- **730 Z-closings** (365 days × 2 branches), 20 stock transfers, 40 wastage records, 74 partner
+  transactions and 36 monthly partner rations.
+
+Demo prices apply a **1.2× retail markup** over the base catalog values so the seeded year is
+realistic: roughly 25–26% gross margin, ~2% net margin, positive net profit after payroll/rent.
+If you change volume, payroll, rent or prices, re-check the P&L report (`getProfitLossData` for
+the last 365 days) and keep the demo year profitable rather than accidentally returning a large
+loss. Prefer `createMany` for plain rows and explicit ids for parent/child seed records; type
+accumulated `createMany` arrays with `Prisma.*CreateManyInput` (no `any[]`).
 
 ## Verification (Windows)
 

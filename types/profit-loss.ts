@@ -23,7 +23,7 @@ export interface IProfitLossData {
   // 4. Operating Expenses (OPEX)
   operatingExpenses: number;
   payrollExpenses: number;
-  damagedGoodsLoss: number;
+  damagedGoodsLoss: number; // Damaged sale returns + stock wastage, valued at cost
   totalOpex: number;
   expenseCategories: IExpenseCategoryBreakdown[];
 

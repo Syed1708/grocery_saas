@@ -1,6 +1,6 @@
 "use client";
 "use no memo";
-import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { TableActions } from "@/components/common/ui/table/TableHelpers";
 import { IDepartment, PERMISSIONS } from "@/types";
@@ -24,6 +24,6 @@ export default function DepartmentsTab({ departments, onEdit, onDelete }: { depa
       ),
     },
   ];
-  const table = useReactTable({ data: departments, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({ data: departments, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() });
   return <DataTable table={table} columns={columns} />;
 }

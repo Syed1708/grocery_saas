@@ -119,7 +119,7 @@ export default function ProfitLossPdf({ data, currencySymbol, shop, branchName }
                 <td className="p-2 text-right font-mono">{currencySymbol}{data.payrollExpenses.toFixed(2)}</td>
               </tr>
               <tr className="border-b border-neutral-200">
-                <td className="p-2 pl-4">নষ্ট পণ্যের ক্ষতি (Damaged Goods Write-off)</td>
+                <td className="p-2 pl-4">নষ্ট ও অপচয় বাবদ ক্ষতি (Damaged & Wastage Write-off)</td>
                 <td className="p-2 text-right font-mono">{currencySymbol}{data.damagedGoodsLoss.toFixed(2)}</td>
               </tr>
               <tr className="font-bold border-b border-neutral-300 bg-neutral-50">

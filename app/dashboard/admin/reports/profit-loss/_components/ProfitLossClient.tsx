@@ -144,7 +144,7 @@ export default function ProfitLossClient({
                   </strong>
                 </div>
                 <div className="p-2 rounded-lg bg-neutral-50 dark:bg-neutral-800/50 text-[11px]">
-                  <span className="text-neutral-400 block text-[10px]">নষ্ট পণ্যের ক্ষতি (Damaged)</span>
+                  <span className="text-neutral-400 block text-[10px]">নষ্ট ও অপচয় (Damaged/Wastage)</span>
                   <strong className="font-mono font-bold text-red-600">
                     {currencySymbol}{data.damagedGoodsLoss.toFixed(2)}
                   </strong>

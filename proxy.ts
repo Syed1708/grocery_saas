@@ -22,8 +22,19 @@ function matchesPrefix(path: string, prefixes: string[]) {
 
 export default withAuth(
   function middleware(req) {
-    const role = req.nextauth.token?.role;
+    const token = req.nextauth.token;
+    const role = token?.role;
     const path = req.nextUrl.pathname;
+
+    // Signed-in users should never see the auth screens again.
+    if (
+      (path === "/login" || path === "/register") &&
+      token &&
+      !token.revoked &&
+      token.shopId
+    ) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
 
     // Cashier restrictions: POS, shift closings and own profile only.
     if (role === "CASHIER" && !matchesPrefix(path, CASHIER_ALLOWED_PREFIXES)) {
@@ -39,13 +50,18 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => Boolean(token && !token.revoked && token.shopId),
+      authorized: ({ token, req }) => {
+        const path = req.nextUrl.pathname;
+        // Public auth screens: always allow; the middleware above redirects
+        // authenticated users away from them.
+        if (path === "/login" || path === "/register") return true;
+        return Boolean(token && !token.revoked && token.shopId);
+      },
     },
   }
 );
 
 export const config = {
-  // Guard the entire authenticated app surface (previously these paths did
-  // not match the real /dashboard/* routes, leaving role rules unenforced).
-  matcher: ["/dashboard/:path*"],
+  // Guard the authenticated app surface and the public auth screens.
+  matcher: ["/dashboard/:path*", "/login", "/register"],
 };

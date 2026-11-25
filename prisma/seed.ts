@@ -1,6 +1,12 @@
 import bcrypt from "bcryptjs";
 import { randomBytes } from "node:crypto";
+import dotenv from "dotenv";
+import type { Prisma } from "../generated/prisma/client";
 import { prisma } from "../lib/prisma";
+
+// Works both via `prisma db seed` and `tsx prisma/seed.ts` directly.
+dotenv.config({ path: ".env.local" });
+dotenv.config({ path: ".env" });
 
 const DEFAULT_UNITS = [
   { name: "Piece", shortCode: "pcs", allowDecimal: false },
@@ -40,53 +46,30 @@ interface SeedProduct {
 
 async function cleanDatabase() {
   console.log("🧹 [0/12] Cleaning previous database records...");
-  
-  // Disable foreign key checks for safe truncation in MySQL
-  await prisma.$executeRawUnsafe(`SET FOREIGN_KEY_CHECKS = 0;`);
 
-  // Delete all transactional, family, and operational tables
-  await prisma.partnerRationItem.deleteMany().catch(() => {});
-  await prisma.partnerRation.deleteMany().catch(() => {});
-  await prisma.partnerTransaction.deleteMany().catch(() => {});
-  await prisma.partner.deleteMany().catch(() => {});
-  await prisma.rateLimitBucket.deleteMany().catch(() => {});
+  // FOREIGN_KEY_CHECKS is session-scoped, so all work must stay on one
+  // connection. A transaction guarantees that; enumerating the tables also
+  // keeps this correct as new models are added.
+  await prisma.$transaction(async (tx) => {
+    await tx.$executeRawUnsafe(`SET FOREIGN_KEY_CHECKS = 0;`);
+    try {
+      const tables = await tx.$queryRawUnsafe<{ tableName: string }[]>(
+        `SELECT TABLE_NAME AS tableName
+         FROM information_schema.tables
+         WHERE table_schema = DATABASE()
+           AND table_type = 'BASE TABLE'
+           AND TABLE_NAME <> '_prisma_migrations'`
+      );
 
-  await prisma.saleReturnItem.deleteMany().catch(() => {});
-  await prisma.saleReturn.deleteMany().catch(() => {});
-  await prisma.saleItem.deleteMany().catch(() => {});
-  await prisma.sale.deleteMany().catch(() => {});
-  await prisma.purchaseItem.deleteMany().catch(() => {});
-  await prisma.purchase.deleteMany().catch(() => {});
-  await prisma.productStock.deleteMany().catch(() => {});
-  await prisma.product.deleteMany().catch(() => {});
-  await prisma.productSection.deleteMany().catch(() => {});
-  await prisma.brand.deleteMany().catch(() => {});
-  await prisma.category.deleteMany().catch(() => {});
-  await prisma.unit.deleteMany().catch(() => {});
-  await prisma.customerPayment.deleteMany().catch(() => {});
-  await prisma.customer.deleteMany().catch(() => {});
-  await prisma.supplierPayment.deleteMany().catch(() => {});
-  await prisma.supplier.deleteMany().catch(() => {});
-  await prisma.cashRegister.deleteMany().catch(() => {});
-  await prisma.expense.deleteMany().catch(() => {});
-  await prisma.expenseCategory.deleteMany().catch(() => {});
-  await prisma.otherIncome.deleteMany().catch(() => {});
-  await prisma.companyAsset.deleteMany().catch(() => {});
-  await prisma.loanInstallment.deleteMany().catch(() => {});
-  await prisma.loan.deleteMany().catch(() => {});
-  await prisma.bankCheque.deleteMany().catch(() => {});
-  await prisma.accountTransaction.deleteMany().catch(() => {});
-  await prisma.account.deleteMany().catch(() => {});
-  await prisma.salaryAdvance.deleteMany().catch(() => {});
-  await prisma.payroll.deleteMany().catch(() => {});
-  await prisma.staffProfile.deleteMany().catch(() => {});
-  await prisma.department.deleteMany().catch(() => {});
-  await prisma.user.deleteMany().catch(() => {});
-  await prisma.branch.deleteMany().catch(() => {});
-  await prisma.shop.deleteMany().catch(() => {});
+      for (const { tableName } of tables) {
+        if (!/^[A-Za-z0-9_]+$/.test(tableName)) continue;
+        await tx.$executeRawUnsafe(`DELETE FROM \`${tableName}\``);
+      }
+    } finally {
+      await tx.$executeRawUnsafe(`SET FOREIGN_KEY_CHECKS = 1;`);
+    }
+  });
 
-  // Re-enable foreign key constraints
-  await prisma.$executeRawUnsafe(`SET FOREIGN_KEY_CHECKS = 1;`);
   console.log("✨ Database completely cleared!");
 }
 
@@ -246,9 +229,9 @@ async function main() {
   }
 
   // ==========================================
-  // 4. RICH PRODUCT CATALOG (32 ITEMS)
+  // 4. RICH PRODUCT CATALOG (72 ITEMS)
   // ==========================================
-  console.log("🛒 [4/12] Seeding 32 Products with Expiry & Multi-Branch Stock...");
+  console.log("🛒 [4/12] Seeding 72 Products with Expiry & Multi-Branch Stock...");
   const rawProducts = [
     { name: "আড়ং তরল দুধ ১ লিটার", nameEn: "Aarong Liquid Milk 1L", barcode: "890100100101", sku: "MILK-001", purchasePrice: 80, sellingPrice: 90, wholesalePrice: 85, vat: 0, expDays: 4, alert: 15, stockMain: 40, stockMirpur: 20, u: "ltr", cat: "dairy-milk", b: "Pran Foods", sec: "RK-A" },
     { name: "কোকাকোলা ৫০০ মিলি", nameEn: "Coca-Cola 500ml Pet", barcode: "890100100102", sku: "BEV-001", purchasePrice: 32, sellingPrice: 40, wholesalePrice: 36, vat: 5, expDays: 180, alert: 20, stockMain: 120, stockMirpur: 60, u: "pcs", cat: "beverages", b: "Akij Food", sec: "RK-A" },
@@ -304,8 +287,8 @@ async function main() {
         sku: p.sku,
         description: `খুচরা ও পাইকারি বিক্রয়ের পণ্য। ${p.nameEn}`,
         purchasePrice: p.purchasePrice,
-        sellingPrice: p.sellingPrice,
-        wholesalePrice: p.wholesalePrice,
+        sellingPrice: Math.round(p.sellingPrice * 1.2),
+        wholesalePrice: Math.round(p.wholesalePrice * 1.2),
         vatPercent: p.vat,
         expiryDate,
         alertQuantity: p.alert,
@@ -337,15 +320,131 @@ async function main() {
   }
 
   // ==========================================
+  // 4b. EXTENDED CATALOG (adds test depth)
+  // ==========================================
+  interface ExtraProduct {
+    name: string;
+    nameEn: string;
+    u: string;
+    cat: string;
+    b: string;
+    sec: string;
+    cost: number;
+    sell: number;
+    vat: number;
+    expDays: number;
+    alert: number;
+    main: number;
+    mirpur: number;
+  }
+
+  const extraProducts: ExtraProduct[] = [
+    { name: "ফ্রেশ মিল্ক পাউডার ১ কেজি", nameEn: "Fresh Milk Powder 1kg", u: "pkt", cat: "dairy-milk", b: "Pran Foods", sec: "SH-01", cost: 650, sell: 720, vat: 0, expDays: 365, alert: 10, main: 40, mirpur: 20 },
+    { name: "আড়ং মাখন ২০০ গ্রাম", nameEn: "Aarong Butter 200g", u: "pcs", cat: "dairy-milk", b: "Pran Foods", sec: "RK-A", cost: 260, sell: 295, vat: 0, expDays: 120, alert: 8, main: 25, mirpur: 12 },
+    { name: "পোলো ক্যান্ডি ২০ পিস", nameEn: "Polo Candy 20pcs", u: "pkt", cat: "snacks-biscuits", b: "Pran Foods", sec: "SH-02", cost: 100, sell: 120, vat: 0, expDays: 240, alert: 15, main: 60, mirpur: 30 },
+    { name: "প্রাণ চানাচুর ৫০০ গ্রাম", nameEn: "Pran Chanachur 500g", u: "pkt", cat: "snacks-biscuits", b: "Pran Foods", sec: "SH-02", cost: 90, sell: 110, vat: 0, expDays: 150, alert: 12, main: 55, mirpur: 25 },
+    { name: "লেইজ চিপস ২৫ গ্রাম", nameEn: "Lays Chips 25g", u: "pcs", cat: "snacks-biscuits", b: "Akij Food", sec: "SH-02", cost: 20, sell: 25, vat: 0, expDays: 120, alert: 30, main: 120, mirpur: 60 },
+    { name: "পেপসি ৫০০ মিলি", nameEn: "Pepsi 500ml", u: "pcs", cat: "beverages", b: "Akij Food", sec: "RK-A", cost: 32, sell: 40, vat: 5, expDays: 180, alert: 24, main: 100, mirpur: 50 },
+    { name: "সেভেন আপ ১ লিটার", nameEn: "7UP 1L", u: "pcs", cat: "beverages", b: "Akij Food", sec: "RK-A", cost: 60, sell: 72, vat: 5, expDays: 180, alert: 20, main: 70, mirpur: 35 },
+    { name: "ফ্রুটিকা জুস ১ লিটার", nameEn: "Frutika Juice 1L", u: "pcs", cat: "beverages", b: "Pran Foods", sec: "RK-A", cost: 120, sell: 140, vat: 0, expDays: 120, alert: 15, main: 45, mirpur: 20 },
+    { name: "নেসলে ওয়াটার ১ লিটার", nameEn: "Nestle Water 1L", u: "pcs", cat: "beverages", b: "Nestlé", sec: "RK-A", cost: 20, sell: 25, vat: 0, expDays: 365, alert: 30, main: 140, mirpur: 70 },
+    { name: "বাসমতি চাল ৫ কেজি", nameEn: "Basmati Rice 5kg", u: "bag", cat: "rice-grains", b: "Meghna (Fresh)", sec: "ST-01", cost: 950, sell: 1080, vat: 0, expDays: 365, alert: 6, main: 25, mirpur: 12 },
+    { name: "চিনিগুঁড়া চাল ২ কেজি", nameEn: "Chinigura Rice 2kg", u: "pkt", cat: "rice-grains", b: "Meghna (Fresh)", sec: "ST-01", cost: 320, sell: 365, vat: 0, expDays: 365, alert: 10, main: 35, mirpur: 18 },
+    { name: "মুগ ডাল ১ কেজি", nameEn: "Mung Dal 1kg", u: "kg", cat: "rice-grains", b: "Pran Foods", sec: "ST-01", cost: 150, sell: 175, vat: 0, expDays: 240, alert: 15, main: 50, mirpur: 25 },
+    { name: "ছোলা ১ কেজি", nameEn: "Chickpea 1kg", u: "kg", cat: "rice-grains", b: "Meghna (Fresh)", sec: "ST-01", cost: 110, sell: 130, vat: 0, expDays: 240, alert: 15, main: 45, mirpur: 20 },
+    { name: "ফ্রেশ আটা ৫ কেজি", nameEn: "Fresh Atta 5kg", u: "bag", cat: "rice-grains", b: "Meghna (Fresh)", sec: "ST-01", cost: 250, sell: 285, vat: 0, expDays: 180, alert: 10, main: 40, mirpur: 20 },
+    { name: "ফ্রেশ সয়াবিন তেল ১ লিটার", nameEn: "Fresh Soybean Oil 1L", u: "ltr", cat: "cooking-essentials", b: "Meghna (Fresh)", sec: "SH-01", cost: 165, sell: 185, vat: 0, expDays: 270, alert: 20, main: 60, mirpur: 30 },
+    { name: "স্কয়ার সরিষার তেল ১ লিটার", nameEn: "Square Mustard Oil 1L", u: "ltr", cat: "cooking-essentials", b: "Square", sec: "SH-01", cost: 300, sell: 340, vat: 0, expDays: 270, alert: 10, main: 30, mirpur: 15 },
+    { name: "স্কয়ার জিরা গুঁড়া ১০০ গ্রাম", nameEn: "Square Cumin Powder 100g", u: "pkt", cat: "cooking-essentials", b: "Square", sec: "SH-01", cost: 80, sell: 95, vat: 0, expDays: 300, alert: 12, main: 45, mirpur: 20 },
+    { name: "স্কয়ার ধনিয়া গুঁড়া ২০০ গ্রাম", nameEn: "Square Coriander Powder 200g", u: "pkt", cat: "cooking-essentials", b: "Square", sec: "SH-01", cost: 70, sell: 85, vat: 0, expDays: 300, alert: 12, main: 40, mirpur: 18 },
+    { name: "স্কয়ার গরম মসলা ৫০ গ্রাম", nameEn: "Square Garam Masala 50g", u: "pkt", cat: "cooking-essentials", b: "Square", sec: "SH-01", cost: 55, sell: 68, vat: 0, expDays: 300, alert: 15, main: 50, mirpur: 25 },
+    { name: "মেঘনা লবণ ২ কেজি", nameEn: "Meghna Salt 2kg", u: "pkt", cat: "cooking-essentials", b: "Meghna (Fresh)", sec: "SH-01", cost: 55, sell: 65, vat: 0, expDays: 500, alert: 24, main: 90, mirpur: 45 },
+    { name: "ফ্রেশ চিনি ২ কেজি", nameEn: "Fresh Sugar 2kg", u: "pkt", cat: "cooking-essentials", b: "Meghna (Fresh)", sec: "SH-01", cost: 240, sell: 260, vat: 0, expDays: 400, alert: 15, main: 55, mirpur: 25 },
+    { name: "ইস্পাহানি চা পাতা ৪০০ গ্রাম", nameEn: "Ispahani Tea 400g", u: "pkt", cat: "beverages", b: "Meghna (Fresh)", sec: "RK-A", cost: 220, sell: 250, vat: 5, expDays: 300, alert: 12, main: 40, mirpur: 18 },
+    { name: "নেসলে কফি ১০০ গ্রাম", nameEn: "Nescafe Coffee 100g", u: "pcs", cat: "beverages", b: "Nestlé", sec: "RK-A", cost: 480, sell: 540, vat: 5, expDays: 365, alert: 8, main: 24, mirpur: 12 },
+    { name: "হুইল ডিটারজেন্ট ২ কেজি", nameEn: "Wheel Detergent 2kg", u: "pkt", cat: "cleaning-hygiene", b: "Unilever", sec: "CLN-01", cost: 240, sell: 270, vat: 5, expDays: 500, alert: 12, main: 40, mirpur: 20 },
+    { name: "স্কয়ার ফ্লোর ক্লিনার ১ লিটার", nameEn: "Square Floor Cleaner 1L", u: "pcs", cat: "cleaning-hygiene", b: "Square", sec: "CLN-01", cost: 140, sell: 160, vat: 5, expDays: 400, alert: 10, main: 30, mirpur: 15 },
+    { name: "ক্লিন অ্যান্ড ক্লিয়ার গ্লাস ক্লিনার", nameEn: "Clean & Clear Glass Cleaner", u: "pcs", cat: "cleaning-hygiene", b: "Unilever", sec: "CLN-01", cost: 120, sell: 140, vat: 5, expDays: 400, alert: 10, main: 28, mirpur: 14 },
+    { name: "ক্লোজআপ টুথপেস্ট ১৫০ গ্রাম", nameEn: "Closeup Toothpaste 150g", u: "pcs", cat: "personal-care", b: "Unilever", sec: "CS-01", cost: 130, sell: 150, vat: 7.5, expDays: 365, alert: 12, main: 35, mirpur: 18 },
+    { name: "গার্নিয়ার ফেসওয়াশ ১০০ গ্রাম", nameEn: "Garnier Face Wash 100g", u: "pcs", cat: "personal-care", b: "Unilever", sec: "CS-01", cost: 180, sell: 210, vat: 7.5, expDays: 400, alert: 8, main: 25, mirpur: 12 },
+    { name: "ডেটল হ্যান্ডওয়াশ ২৫০ মিলি", nameEn: "Dettol Handwash 250ml", u: "pcs", cat: "personal-care", b: "Unilever", sec: "CS-01", cost: 120, sell: 140, vat: 5, expDays: 400, alert: 12, main: 32, mirpur: 16 },
+    { name: "টুইঙ্কল বেবি সোপ ৭৫ গ্রাম", nameEn: "Twinkle Baby Soap 75g", u: "pcs", cat: "baby-care", b: "Square", sec: "CS-01", cost: 60, sell: 72, vat: 5, expDays: 400, alert: 15, main: 45, mirpur: 20 },
+    { name: "স্কয়ার বেবি লোশন ২০০ মিলি", nameEn: "Square Baby Lotion 200ml", u: "pcs", cat: "baby-care", b: "Square", sec: "CS-01", cost: 220, sell: 250, vat: 5, expDays: 400, alert: 8, main: 22, mirpur: 10 },
+    { name: "টুইঙ্কল বেবি ওয়াইপস ৮০ পিস", nameEn: "Twinkle Baby Wipes 80pcs", u: "pkt", cat: "baby-care", b: "Square", sec: "ST-01", cost: 180, sell: 210, vat: 5, expDays: 300, alert: 10, main: 28, mirpur: 12 },
+    { name: "স্টিং এনার্জি ড্রিংক ২৫০ মিলি", nameEn: "Sting Energy Drink 250ml", u: "pcs", cat: "beverages", b: "Pran Foods", sec: "RK-A", cost: 70, sell: 85, vat: 5, expDays: 180, alert: 24, main: 80, mirpur: 40 },
+    { name: "প্রাণ ম্যাংগো জুস ১ লিটার", nameEn: "Pran Mango Juice 1L", u: "pcs", cat: "beverages", b: "Pran Foods", sec: "RK-A", cost: 110, sell: 130, vat: 0, expDays: 120, alert: 15, main: 40, mirpur: 20 },
+    { name: "প্রাণ লিচু জুস ২৫০ মিলি", nameEn: "Pran Litchi Juice 250ml", u: "pcs", cat: "beverages", b: "Pran Foods", sec: "RK-A", cost: 30, sell: 38, vat: 0, expDays: 120, alert: 24, main: 70, mirpur: 35 },
+    { name: "অলিম্পিক ফ্যামিলি বিস্কুট", nameEn: "Olympic Family Biscuit", u: "pkt", cat: "snacks-biscuits", b: "Akij Food", sec: "SH-02", cost: 60, sell: 72, vat: 0, expDays: 180, alert: 18, main: 50, mirpur: 25 },
+    { name: "নেসলে চকলেট বার ৫০ গ্রাম", nameEn: "Nestle Chocolate Bar 50g", u: "pcs", cat: "snacks-biscuits", b: "Nestlé", sec: "SH-02", cost: 45, sell: 55, vat: 0, expDays: 240, alert: 20, main: 60, mirpur: 30 },
+    { name: "প্রাণ কেক স্লাইস ২৫০ গ্রাম", nameEn: "Pran Cake Slice 250g", u: "pcs", cat: "snacks-biscuits", b: "Pran Foods", sec: "SH-02", cost: 80, sell: 95, vat: 0, expDays: 30, alert: 10, main: 30, mirpur: 15 },
+    { name: "প্যারাসুট হেয়ার অয়েল ১০০ মিলি", nameEn: "Parachute Hair Oil 100ml", u: "pcs", cat: "personal-care", b: "Unilever", sec: "CS-01", cost: 130, sell: 150, vat: 7.5, expDays: 500, alert: 10, main: 30, mirpur: 15 },
+    { name: "জিলেট শেভিং ক্রিম ১০০ গ্রাম", nameEn: "Gillette Shaving Cream 100g", u: "pcs", cat: "personal-care", b: "Unilever", sec: "CS-01", cost: 150, sell: 175, vat: 7.5, expDays: 400, alert: 8, main: 22, mirpur: 10 },
+  ];
+
+  for (const [index, p] of extraProducts.entries()) {
+    const unitId = unitMap.get(p.u);
+    const categoryId = categoryMap.get(p.cat);
+    const brandId = brandMap.get(p.b);
+    const sectionId = sectionMap.get(p.sec);
+    if (!unitId || !categoryId) continue;
+
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + p.expDays);
+
+    const product = await prisma.product.create({
+      data: {
+        name: p.name,
+        nameEn: p.nameEn,
+        barcode: `8901001${String(200 + index).padStart(6, "0")}`,
+        sku: `EXT-${String(index + 1).padStart(3, "0")}`,
+        description: `বিস্তারিত টেস্ট ক্যাটালগ পণ্য। ${p.nameEn}`,
+        purchasePrice: p.cost,
+        sellingPrice: Math.round(p.sell * 1.2),
+        wholesalePrice: Math.round(p.sell * 1.2 * 0.94),
+        vatPercent: p.vat,
+        expiryDate,
+        alertQuantity: p.alert,
+        status: "active",
+        unitId,
+        categoryId,
+        brandId,
+        sectionId,
+        shopId: shop.id,
+      },
+    });
+
+    productList.push({
+      id: product.id,
+      unitId: product.unitId,
+      purchasePrice: Number(product.purchasePrice),
+      sellingPrice: Number(product.sellingPrice),
+    });
+
+    await prisma.productStock.createMany({
+      data: [
+        { productId: product.id, branchId: mainBranch.id, quantity: p.main },
+        { productId: product.id, branchId: mirpurBranch.id, quantity: p.mirpur },
+      ],
+    });
+  }
+
+  // ==========================================
   // 5. SUPPLIERS & PURCHASES
   // ==========================================
   console.log("🚚 [5/12] Seeding FMCG Suppliers & Purchases...");
   const suppliersData = [
-    { id: "supp-pran", name: "প্রাণ ফুডস ডিস্ট্রিবিউশন", company: "PRAN Foods Ltd", phone: "01711002233", due: 24500 },
-    { id: "supp-unilever", name: "ইউনিলিভার বাংলাদেশ সাপ্লাই", company: "Unilever Bangladesh Ltd", phone: "01811445566", due: 45000 },
-    { id: "supp-square", name: "স্কয়ার কনজিউমার সাপ্লায়ার", company: "Square Consumer Ltd", phone: "01911778899", due: 18000 },
-    { id: "supp-fresh", name: "মেঘনা ফ্রেশ ডিপো", company: "Meghna Group", phone: "01722334455", due: 32000 },
-    { id: "supp-akij", name: "আকিজ বেভারেজ সাপ্লাই", company: "Akij Food Ltd", phone: "01533445566", due: 12500 },
+    { id: "supp-pran", name: "প্রাণ ফুডস ডিস্ট্রিবিউশন", company: "PRAN Foods Ltd", phone: "01711002233" },
+    { id: "supp-unilever", name: "ইউনিলিভার বাংলাদেশ সাপ্লাই", company: "Unilever Bangladesh Ltd", phone: "01811445566" },
+    { id: "supp-square", name: "স্কয়ার কনজিউমার সাপ্লায়ার", company: "Square Consumer Ltd", phone: "01911778899" },
+    { id: "supp-fresh", name: "মেঘনা ফ্রেশ ডিপো", company: "Meghna Group", phone: "01722334455" },
+    { id: "supp-akij", name: "আকিজ বেভারেজ সাপ্লাই", company: "Akij Food Ltd", phone: "01533445566" },
+    { id: "supp-nestle", name: "নেসলে বাংলাদেশ ডিস্ট্রিবিউশন", company: "Nestlé Bangladesh", phone: "01733445577" },
+    { id: "supp-molla", name: "মোল্লা সল্ট ইন্ডাস্ট্রিজ", company: "Molla Salt Ltd", phone: "01844556688" },
+    { id: "supp-aci", name: "এসিআই ফুডস ডিপো", company: "ACI Foods Ltd", phone: "01955667799" },
+    { id: "supp-ahmed", name: "আহমেদ ফুড প্রোডাক্টস", company: "Ahmed Foods", phone: "01666778800" },
+    { id: "supp-kazi", name: "কাজী ফার্মস ডিস্ট্রিবিউশন", company: "Kazi Farms", phone: "01777889911" },
+    { id: "supp-radhuni", name: "রাধুনী স্পাইস ডিপো", company: "Square Food & Beverage", phone: "01888990022" },
+    { id: "supp-meghna-fresh", name: "ফ্রেশ চাল ও আটা ডিপো", company: "Meghna Fresh", phone: "01999001133" },
   ];
 
   const supplierMap = new Map();
@@ -359,7 +458,7 @@ async function main() {
         contactPerson: "SR Manager",
         address: "ঢাকা, বাংলাদেশ",
         openingDue: 0,
-        currentDue: s.due,
+        currentDue: 0,
         status: "active",
         shopId: shop.id,
         branchId: mainBranch.id,
@@ -384,11 +483,23 @@ async function main() {
     { no: "CH-AKJ-905", daysAgo: 4, sub: 28000, paid: 28000, due: 0, supp: "supp-akij", status: "PAID" },
   ];
 
+  interface SeedPurchaseRecord {
+    id: string;
+    supplierId: string;
+    purchaseDate: Date;
+    paid: number;
+    due: number;
+    paymentMethod: string;
+  }
+  const purchaseRecords: SeedPurchaseRecord[] = [];
+
   for (const ch of chalans) {
-    await prisma.purchase.create({
+    const purchaseDate = new Date(Date.now() - ch.daysAgo * 24 * 60 * 60 * 1000);
+    const purchase = await prisma.purchase.create({
       data: {
+        id: `pur-${ch.no}`,
         chalanNo: ch.no,
-        purchaseDate: new Date(Date.now() - ch.daysAgo * 24 * 60 * 60 * 1000),
+        purchaseDate,
         subtotal: ch.sub,
         totalQuantity: 80,
         discount: 0,
@@ -421,6 +532,126 @@ async function main() {
           ],
         },
       },
+    });
+    purchaseRecords.push({
+      id: purchase.id,
+      supplierId: purchase.supplierId,
+      purchaseDate,
+      paid: ch.paid,
+      due: ch.due + 400,
+      paymentMethod: "bank",
+    });
+  }
+
+  // Full-year purchase history (3 chalans per month)
+  const purchaseStart = new Date();
+  purchaseStart.setHours(10, 0, 0, 0);
+  purchaseStart.setDate(purchaseStart.getDate() - 364);
+
+  for (let month = 0; month < 12; month++) {
+    for (let j = 0; j < 3; j++) {
+      const purchaseDate = new Date(purchaseStart);
+      purchaseDate.setMonth(purchaseDate.getMonth() + month);
+      purchaseDate.setDate(4 + j * 9);
+      if (purchaseDate > new Date()) continue;
+
+      const supplier = suppliersData[(month * 3 + j) % suppliersData.length];
+      const branch = j === 2 && month % 2 === 0 ? mirpurBranch : mainBranch;
+      const method = ["cash", "bank", "bkash", "nagad"][(month + j) % 4];
+
+      const items: {
+        productId: string;
+        unitId: string;
+        quantity: number;
+        unitCost: number;
+        lineTotal: number;
+      }[] = [];
+      let subtotal = 0;
+      let totalQuantity = 0;
+      const lineCount = 3 + (j % 3);
+
+      for (let k = 0; k < lineCount; k++) {
+        const product = productList[(month * 5 + j * 7 + k) % productList.length];
+        const quantity = 6 + ((month * 3 + j * 5 + k) % 18);
+        const lineTotal = quantity * product.purchasePrice;
+        subtotal += lineTotal;
+        totalQuantity += quantity;
+        items.push({
+          productId: product.id,
+          unitId: product.unitId,
+          quantity,
+          unitCost: product.purchasePrice,
+          lineTotal,
+        });
+      }
+
+      const transportCost = 300 + (month % 4) * 100;
+      const grandTotal = subtotal + transportCost;
+      const paid = j === 0 ? grandTotal : Math.round(grandTotal * (0.35 + (month % 4) * 0.1));
+      const due = Math.max(0, grandTotal - paid);
+      const paymentStatus = due === 0 ? "PAID" : paid > 0 ? "PARTIAL" : "DUE";
+      const id = `pur-year-${month}-${j}`;
+
+      const purchase = await prisma.purchase.create({
+        data: {
+          id,
+          chalanNo: `CH-Y-${month + 1}-${j + 1}`,
+          purchaseDate,
+          subtotal,
+          totalQuantity,
+          discount: j === 1 ? 200 : 0,
+          transportCost,
+          vatAmount: 0,
+          grandTotal,
+          paidAmount: paid,
+          dueAmount: due,
+          paymentMethod: method,
+          paymentStatus,
+          branchId: branch.id,
+          supplierId: supplierMap.get(supplier.id)!.id,
+          shopId: shop.id,
+          items: { create: items },
+        },
+      });
+
+      purchaseRecords.push({
+        id: purchase.id,
+        supplierId: purchase.supplierId,
+        purchaseDate,
+        paid,
+        due,
+        paymentMethod: method,
+      });
+    }
+  }
+
+  // Payment vouchers for every purchase with a paid portion
+  await prisma.supplierPayment.createMany({
+    data: purchaseRecords
+      .filter((record) => record.paid > 0)
+      .map((record) => ({
+        amount: record.paid,
+        paymentMethod: record.paymentMethod,
+        voucherNo: `PAY-${record.id}`,
+        reference: record.id,
+        note: "Seed purchase payment",
+        paymentDate: record.purchaseDate,
+        supplierId: record.supplierId,
+        purchaseId: record.id,
+        branchId: mainBranch.id,
+      })),
+  });
+
+  // Derive supplier dues from the full purchase history
+  const supplierDues = await prisma.purchase.groupBy({
+    by: ["supplierId"],
+    where: { shopId: shop.id },
+    _sum: { dueAmount: true },
+  });
+  for (const row of supplierDues) {
+    await prisma.supplier.update({
+      where: { id: row.supplierId },
+      data: { currentDue: Number(row._sum.dueAmount || 0) },
     });
   }
 
@@ -474,21 +705,73 @@ async function main() {
     customerMap.set(c.id, cust);
   }
 
-  // ==========================================
-  // 7. 30-DAY CONTINUOUS POS SALES ENGINE
-  // ==========================================
-  console.log("📈 [7/12] Generating 30 Days of Continuous POS Sales for Recharts Graphs...");
-  let invoiceCounter = 26000;
-  const paymentMethods = ["cash", "cash", "cash", "bkash", "bkash", "nagad", "due"];
-  const mainPermanentCustIds = ["cust-tushi", "cust-haji", "cust-dr-kabir", "cust-master", "cust-anwar", "cust-babul"];
-  const mirpurPermanentCustIds = ["cust-nasima", "cust-kamal"];
+  // Extra permanent customers for realistic khata volume
+  const extraCustomerNames = [
+    "মোঃ জাহাঙ্গীর আলম", "সাবিনা ইয়াসমিন", "আব্দুল্লাহ আল মামুন", "রুবিনা আক্তার", "মোঃ শাহীন মিয়া",
+    "নাজমা বেগম", "সাইফুল ইসলাম", "মারিয়া খাতুন", "মোঃ ইব্রাহিম", "সুরাইয়া পারভীন",
+    "মোঃ রাসেল আহমেদ", "ফাতেমা বেগম", "আবুল কালাম", "শারমিন সুলতানা", "মোঃ হাসান আলী",
+    "রেহানা পারভীন", "মোঃ সোহেল রানা", "আনোয়ারা বেগম", "মোঃ ফরিদ মিয়া", "সালমা খাতুন",
+    "মোঃ নাসির উদ্দিন", "জেসমিন আক্তার", "মোঃ আলমগীর", "রোকসানা বেগম", "মোঃ সেলিম রেজা",
+    "মাহমুদা খাতুন", "মোঃ জসিম উদ্দিন", "নুরজাহান বেগম", "মোঃ আরিফ হোসেন", "শাহানা আক্তার",
+  ];
 
-  for (let daysAgo = 30; daysAgo >= 0; daysAgo--) {
-    const invoicesToday = 3 + Math.floor((daysAgo * 7) % 4); 
+  const extraCustomerRows = extraCustomerNames.map((name, index) => {
+    const branchId = index % 2 === 0 ? mainBranch.id : mirpurBranch.id;
+    return {
+      id: `cust-extra-${index + 1}`,
+      name,
+      phone: `016${String(10000000 + index * 137).slice(0, 8)}`,
+      type: "PERMANENT" as const,
+      village: index % 2 === 0 ? "কাওরান বাজার" : "মিরপুর ১০",
+      district: "ঢাকা",
+      address: `বাসা ${10 + index}, রোড ${2 + (index % 12)}`,
+      creditLimit: 20000 + (index % 5) * 10000,
+      openingDue: 0,
+      currentDue: 0,
+      status: "active",
+      shopId: shop.id,
+      branchId,
+    };
+  });
+
+  await prisma.customer.createMany({ data: extraCustomerRows });
+  for (const row of extraCustomerRows) {
+    customerMap.set(row.id, { id: row.id });
+  }
+
+  // ==========================================
+  // 7. FULL-YEAR CONTINUOUS POS SALES ENGINE
+  // ==========================================
+  console.log("📈 [7/12] Generating 365 Days of POS Sales...");
+  let invoiceCounter = 26000;
+  const paymentMethods = ["cash", "cash", "cash", "bkash", "bkash", "nagad", "rocket", "due"];
+  const mainPermanentCustIds = [
+    "cust-tushi", "cust-haji", "cust-dr-kabir", "cust-master", "cust-anwar", "cust-babul",
+    ...extraCustomerRows.filter((row) => row.branchId === mainBranch.id).map((row) => row.id),
+  ];
+  const mirpurPermanentCustIds = [
+    "cust-nasima", "cust-kamal",
+    ...extraCustomerRows.filter((row) => row.branchId === mirpurBranch.id).map((row) => row.id),
+  ];
+
+  interface SeedSaleRecord {
+    id: string;
+    branchId: string;
+    customerId: string;
+    saleDate: Date;
+    productId: string;
+    unitId: string;
+    unitPrice: number;
+  }
+  const saleSeedRecords: SeedSaleRecord[] = [];
+
+  for (let daysAgo = 364; daysAgo >= 0; daysAgo--) {
+    const invoicesToday = 14 + Math.floor((daysAgo * 7) % 7);
 
     for (let i = 0; i < invoicesToday; i++) {
       invoiceCounter++;
       const invNo = `INV-${invoiceCounter}`;
+      const saleId = `sale-${invoiceCounter}`;
 
       const hour = 9 + ((i * 3 + daysAgo) % 13);
       const minute = (i * 17) % 60;
@@ -499,8 +782,8 @@ async function main() {
       const method = paymentMethods[(daysAgo + i) % paymentMethods.length];
       const isDue = method === "due";
 
-      // Distribute sales between Main and Mirpur
-      const isMirpur = daysAgo % 4 === 0 && i === 0;
+      // Distribute roughly 25% of invoices to Mirpur
+      const isMirpur = i % 4 === 3;
       const activeBranchId = isMirpur ? mirpurBranch.id : mainBranch.id;
       const activeCashierId = isMirpur ? mirpurCashierUser.id : cashierUser.id;
 
@@ -519,7 +802,7 @@ async function main() {
           : customerMap.get("cust-walkin-main")!.id;
       }
 
-      const numItems = 2 + (i % 3);
+      const numItems = 2 + ((daysAgo + i) % 4);
       const selectedProducts: SeedProduct[] = [];
       for (let k = 0; k < numItems; k++) {
         const prodIndex = (daysAgo * 3 + i * 2 + k) % productList.length;
@@ -543,12 +826,15 @@ async function main() {
 
       const discount = i % 5 === 0 ? 50 : 0;
       const grandTotal = Math.max(0, subtotal - discount);
-      const paidAmount = isDue ? (i % 2 === 0 ? Math.floor(grandTotal * 0.3) : 0) : grandTotal;
+      const paidAmount = isDue
+        ? Math.floor(grandTotal * (0.25 + (i % 3) * 0.15))
+        : grandTotal;
       const dueAmount = grandTotal - paidAmount;
       const paymentStatus = dueAmount === 0 ? "paid" : paidAmount > 0 ? "partial" : "due";
 
       await prisma.sale.create({
         data: {
+          id: saleId,
           invoiceNo: invNo,
           saleDate: saleTimestamp,
           createdAt: saleTimestamp,
@@ -570,9 +856,114 @@ async function main() {
           },
         },
       });
+
+      const first = lineItems[0];
+      if (first) {
+        saleSeedRecords.push({
+          id: saleId,
+          branchId: activeBranchId,
+          customerId,
+          saleDate: saleTimestamp,
+          productId: first.productId,
+          unitId: first.unitId,
+          unitPrice: first.unitPrice,
+        });
+      }
     }
   }
   console.log(`✅ Seeded ${invoiceCounter - 26000} historical POS invoices!`);
+
+  // Full-year sale returns
+  const saleReturns = [];
+  for (let i = 0; i < 90; i++) {
+    const record = saleSeedRecords[(i * 37) % saleSeedRecords.length];
+    if (!record) continue;
+    const returnDate = new Date(record.saleDate);
+    returnDate.setDate(returnDate.getDate() + 1 + (i % 7));
+    if (returnDate > new Date()) continue;
+
+    const condition = i % 5 === 0 ? "DAMAGED" : "RESTOCK";
+    saleReturns.push({
+      id: `sret-${i + 1}`,
+      returnNo: `RET-Y-${String(i + 1).padStart(3, "0")}`,
+      returnDate,
+      totalRefund: record.unitPrice,
+      refundMethod: i % 3 === 0 ? "balance" : "cash",
+      notes: "Seed yearly customer return",
+      branchId: record.branchId,
+      saleId: record.id,
+      customerId: record.customerId,
+      userId: record.branchId === mirpurBranch.id ? mirpurCashierUser.id : cashierUser.id,
+      shopId: shop.id,
+      items: {
+        create: [
+          {
+            productId: record.productId,
+            unitId: record.unitId,
+            quantity: 1,
+            refundPrice: record.unitPrice,
+            itemCondition: condition as "RESTOCK" | "DAMAGED",
+          },
+        ],
+      },
+    });
+  }
+  for (const ret of saleReturns) {
+    await prisma.saleReturn.create({ data: ret });
+  }
+
+  // Full-year customer due collections
+  const allPermanentCustomerIds = [...mainPermanentCustIds, ...mirpurPermanentCustIds];
+  const customerBranchMap = new Map<string, string>();
+  for (const id of mainPermanentCustIds) customerBranchMap.set(id, mainBranch.id);
+  for (const id of mirpurPermanentCustIds) customerBranchMap.set(id, mirpurBranch.id);
+  for (const row of extraCustomerRows) customerBranchMap.set(row.id, row.branchId);
+
+  const customerPayments = [];
+  for (let i = 0; i < 240; i++) {
+    const customerId = allPermanentCustomerIds[i % allPermanentCustomerIds.length];
+    const branchId = customerBranchMap.get(customerId);
+    if (!branchId) continue;
+    const paymentDate = new Date();
+    paymentDate.setDate(paymentDate.getDate() - ((i * 3) % 360));
+    paymentDate.setHours(11, (i * 7) % 60, 0, 0);
+    customerPayments.push({
+      paymentDate,
+      amount: 500 + ((i * 173) % 4500),
+      paymentMethod: ["cash", "bkash", "bank", "nagad"][i % 4],
+      receiptNo: `REC-Y-${String(i + 1).padStart(4, "0")}`,
+      reference: "Seed yearly due collection",
+      note: "খাতার বকেয়া আদায়",
+      branchId,
+      customerId,
+    });
+  }
+  await prisma.customerPayment.createMany({ data: customerPayments });
+
+  // Keep customer dues consistent with the generated year of sales/payments
+  const [salesDue, paymentsMade] = await Promise.all([
+    prisma.sale.groupBy({
+      by: ["customerId"],
+      where: { shopId: shop.id, customerId: { not: null } },
+      _sum: { dueAmount: true },
+    }),
+    prisma.customerPayment.groupBy({
+      by: ["customerId"],
+      _sum: { amount: true },
+    }),
+  ]);
+  const paymentMap = new Map(paymentsMade.map((row) => [row.customerId, Number(row._sum.amount || 0)]));
+  for (const row of salesDue) {
+    if (!row.customerId) continue;
+    const outstanding = Math.max(
+      0,
+      Number(row._sum.dueAmount || 0) - (paymentMap.get(row.customerId) || 0)
+    );
+    await prisma.customer.update({
+      where: { id: row.customerId },
+      data: { currentDue: outstanding },
+    });
+  }
 
   // ==========================================
   // 8. FINANCIAL ACCOUNTS, CHEQUES & LOANS
@@ -679,6 +1070,10 @@ async function main() {
     { name: "স্টাফ খাবার ও চা-নাস্তা (Staff Food)", code: "EXP-FOOD" },
     { name: "পরিবহন ও লেবার (Transport & Labor)", code: "EXP-TRANS" },
     { name: "মেরামত ও রক্ষণাবেক্ষণ (Maintenance)", code: "EXP-MAINT" },
+    { name: "মার্কেটিং ও প্রচার (Marketing)", code: "EXP-MKT" },
+    { name: "ইন্টারনেট ও যোগাযোগ (Internet)", code: "EXP-UTIL" },
+    { name: "প্যাকেজিং সামগ্রী (Packaging)", code: "EXP-PACK" },
+    { name: "সরকারি ফি ও লাইসেন্স (Govt Fees)", code: "EXP-GOV" },
   ];
 
   const expenseCatMap = new Map();
@@ -700,7 +1095,7 @@ async function main() {
     branchId: string;
     shopId: string;
   }> = [];
-  for (let d = 28; d >= 0; d -= 2) {
+  for (let d = 364; d >= 0; d -= 2) {
     const expDate = new Date();
     expDate.setDate(expDate.getDate() - d);
 
@@ -731,30 +1126,92 @@ async function main() {
     }
   }
 
-  expensesToSeed.push(
-    {
-      voucherNo: "VCH-RENT-OCT",
-      expenseDate: new Date(Date.now() - 26 * 24 * 60 * 60 * 1000),
-      amount: 25000,
-      paymentMethod: "bank",
-      reference: "Main Branch Monthly Shop Rent",
-      note: "কাওরান বাজার দোকান ভাড়া",
-      categoryId: expenseCatMap.get("EXP-RENT")!,
-      branchId: mainBranch.id,
-      shopId: shop.id,
-    },
-    {
-      voucherNo: "VCH-ELEC-OCT",
-      expenseDate: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000),
-      amount: 6800,
-      paymentMethod: "bank",
-      reference: "DESCO Electricity Prepaid Recharge",
-      note: "বিদ্যুৎ বিল অক্টোবর ২০২৬",
-      categoryId: expenseCatMap.get("EXP-ELEC")!,
-      branchId: mainBranch.id,
-      shopId: shop.id,
-    }
-  );
+  // Monthly operating costs for the full year
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+  for (let m = 11; m >= 0; m--) {
+    const monthDate = new Date();
+    monthDate.setMonth(monthDate.getMonth() - m);
+    const monthLabel = monthNames[monthDate.getMonth()];
+    const yearLabel = monthDate.getFullYear();
+
+    const rentDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), 3);
+    const elecDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), 8);
+    const utilDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), 10);
+    const maintDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), 15);
+    const mktDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), 20);
+
+    expensesToSeed.push(
+      {
+        voucherNo: `VCH-RENT-${yearLabel}-${monthDate.getMonth() + 1}-M`,
+        expenseDate: rentDate,
+        amount: 25000,
+        paymentMethod: "bank",
+        reference: `Main branch rent ${monthLabel} ${yearLabel}`,
+        note: "কাওরান বাজার দোকান ভাড়া",
+        categoryId: expenseCatMap.get("EXP-RENT")!,
+        branchId: mainBranch.id,
+        shopId: shop.id,
+      },
+      {
+        voucherNo: `VCH-RENT-${yearLabel}-${monthDate.getMonth() + 1}-MP`,
+        expenseDate: rentDate,
+        amount: 18000,
+        paymentMethod: "bank",
+        reference: `Mirpur branch rent ${monthLabel} ${yearLabel}`,
+        note: "মিরপুর শাখার দোকান ভাড়া",
+        categoryId: expenseCatMap.get("EXP-RENT")!,
+        branchId: mirpurBranch.id,
+        shopId: shop.id,
+      },
+      {
+        voucherNo: `VCH-ELEC-${yearLabel}-${monthDate.getMonth() + 1}`,
+        expenseDate: elecDate,
+        amount: 6200 + (m % 4) * 450,
+        paymentMethod: "bank",
+        reference: `DESCO electricity ${monthLabel}`,
+        note: `${monthLabel} ${yearLabel} বিদ্যুৎ বিল`,
+        categoryId: expenseCatMap.get("EXP-ELEC")!,
+        branchId: mainBranch.id,
+        shopId: shop.id,
+      },
+      {
+        voucherNo: `VCH-UTIL-${yearLabel}-${monthDate.getMonth() + 1}`,
+        expenseDate: utilDate,
+        amount: 1200 + (m % 3) * 200,
+        paymentMethod: "bkash",
+        reference: `Internet & phone ${monthLabel}`,
+        note: "ইন্টারনেট ও মোবাইল বিল",
+        categoryId: expenseCatMap.get("EXP-UTIL")!,
+        branchId: mainBranch.id,
+        shopId: shop.id,
+      },
+      {
+        voucherNo: `VCH-MAINT-${yearLabel}-${monthDate.getMonth() + 1}`,
+        expenseDate: maintDate,
+        amount: 900 + (m % 5) * 300,
+        paymentMethod: "cash",
+        reference: `Store maintenance ${monthLabel}`,
+        note: "দোকান মেরামত ও রক্ষণাবেক্ষণ",
+        categoryId: expenseCatMap.get("EXP-MAINT")!,
+        branchId: mainBranch.id,
+        shopId: shop.id,
+      },
+      {
+        voucherNo: `VCH-MKT-${yearLabel}-${monthDate.getMonth() + 1}`,
+        expenseDate: mktDate,
+        amount: 1800 + (m % 4) * 500,
+        paymentMethod: "cash",
+        reference: `Local marketing ${monthLabel}`,
+        note: "লোকাল প্রচার ও লিফলেট",
+        categoryId: expenseCatMap.get("EXP-MKT")!,
+        branchId: mainBranch.id,
+        shopId: shop.id,
+      }
+    );
+  }
 
   await prisma.expense.createMany({ data: expensesToSeed });
 
@@ -787,6 +1244,92 @@ async function main() {
     ],
   });
 
+  // Other income across the year (scrap sales, delivery fees, commissions)
+  const otherIncomes = [];
+  for (let m = 11; m >= 0; m--) {
+    const incomeDate = new Date();
+    incomeDate.setMonth(incomeDate.getMonth() - m);
+    incomeDate.setDate(6);
+    otherIncomes.push({
+      incomeSource: "স্ক্র্যাপ ও কার্টন বিক্রয় (Scrap Sale)",
+      receiptNo: `INC-SCRAP-${m + 1}`,
+      incomeDate,
+      amount: 1200 + (m % 4) * 350,
+      paymentMethod: "cash",
+      reference: "Monthly scrap sale",
+      note: "কার্টন, বোতল ও পুরনো প্যাকেট বিক্রয়",
+      branchId: mainBranch.id,
+      userId: cashierUser.id,
+      shopId: shop.id,
+    });
+
+    const deliveryDate = new Date();
+    deliveryDate.setMonth(deliveryDate.getMonth() - m);
+    deliveryDate.setDate(18);
+    otherIncomes.push({
+      incomeSource: "ডেলিভারি সার্ভিস চার্জ (Delivery Fee)",
+      receiptNo: `INC-DEL-${m + 1}`,
+      incomeDate: deliveryDate,
+      amount: 800 + (m % 3) * 250,
+      paymentMethod: "bkash",
+      reference: "Home delivery charges",
+      note: "হোম ডেলিভারি সার্ভিস আয়",
+      branchId: mainBranch.id,
+      userId: cashierUser.id,
+      shopId: shop.id,
+    });
+  }
+  await prisma.otherIncome.createMany({ data: otherIncomes });
+
+  // Owner capital injections and drawings for the year
+  const ownerTransactions = [];
+  for (let m = 11; m >= 0; m--) {
+    const capitalDate = new Date();
+    capitalDate.setMonth(capitalDate.getMonth() - m);
+    capitalDate.setDate(2);
+    ownerTransactions.push({
+      type: "CAPITAL" as const,
+      transactionDate: capitalDate,
+      amount: 25000 + (m % 4) * 5000,
+      paymentMethod: "bank",
+      reference: `Owner capital ${m + 1}`,
+      purpose: "Business working capital",
+      notes: "মালিকের মাসিক মূলধন জমা",
+      branchId: mainBranch.id,
+      shopId: shop.id,
+    });
+
+    const drawingDate = new Date();
+    drawingDate.setMonth(drawingDate.getMonth() - m);
+    drawingDate.setDate(25);
+    ownerTransactions.push({
+      type: "DRAWING" as const,
+      transactionDate: drawingDate,
+      amount: 9000 + (m % 5) * 1500,
+      paymentMethod: "cash",
+      reference: `Owner drawing ${m + 1}`,
+      purpose: "Household and personal expense",
+      notes: "মালিকের ব্যক্তিগত উত্তোলন",
+      branchId: mainBranch.id,
+      shopId: shop.id,
+    });
+  }
+  await prisma.ownerTransaction.createMany({ data: ownerTransactions });
+
+  // Additional fixed assets
+  await prisma.companyAsset.createMany({
+    data: [
+      { name: "ডেলিভারি মোটরসাইকেল (Honda)", assetCode: "AST-BIKE-01", purchaseDate: new Date("2024-11-10"), purchaseCost: 165000, currentValue: 140000, condition: "GOOD", notes: "হোম ডেলিভারির জন্য", branchId: mainBranch.id, shopId: shop.id },
+      { name: "ওয়ালটন ফ্রিজ ৩০০ লিটার", assetCode: "AST-FRZ-02", purchaseDate: new Date("2025-02-14"), purchaseCost: 42000, currentValue: 35000, condition: "GOOD", notes: "মিরপুর শাখার ফ্রিজ", branchId: mirpurBranch.id, shopId: shop.id },
+      { name: "কম্পিউটার ও মনিটর সেট", assetCode: "AST-PC-01", purchaseDate: new Date("2025-05-01"), purchaseCost: 38000, currentValue: 30000, condition: "GOOD", notes: "POS ও হিসাবের জন্য", branchId: mainBranch.id, shopId: shop.id },
+      { name: "বিলিং প্রিন্টার (EPSON)", assetCode: "AST-PRN-01", purchaseDate: new Date("2025-05-01"), purchaseCost: 22000, currentValue: 17500, condition: "GOOD", notes: "ইনভয়েস প্রিন্টার", branchId: mainBranch.id, shopId: shop.id },
+      { name: "শেলফ ও ডিসপ্লে র্যাক", assetCode: "AST-RACK-01", purchaseDate: new Date("2024-09-20"), purchaseCost: 65000, currentValue: 50000, condition: "GOOD", notes: "দোকানের ডিসপ্লে র্যাক", branchId: mainBranch.id, shopId: shop.id },
+      { name: "সিসিটিভি ক্যামেরা সেট (৮ চ্যানেল)", assetCode: "AST-CCTV-01", purchaseDate: new Date("2025-01-10"), purchaseCost: 28000, currentValue: 22000, condition: "GOOD", notes: "নিরাপত্তা ক্যামেরা", branchId: mainBranch.id, shopId: shop.id },
+      { name: "ইলেকট্রিক ওজন স্কেল ১০০ কেজি", assetCode: "AST-SCL-02", purchaseDate: new Date("2024-12-05"), purchaseCost: 9500, currentValue: 7000, condition: "GOOD", notes: "মিরপুর শাখার স্কেল", branchId: mirpurBranch.id, shopId: shop.id },
+      { name: "জেনারেটর (Walton 2.5 KVA)", assetCode: "AST-GEN-01", purchaseDate: new Date("2025-03-15"), purchaseCost: 85000, currentValue: 72000, condition: "MAINTENANCE", notes: "লোডশেডিং ব্যাকআপ", branchId: mainBranch.id, shopId: shop.id },
+    ],
+  });
+
   // ==========================================
   // 10. STAFF & DEPARTMENTS
   // ==========================================
@@ -806,19 +1349,34 @@ async function main() {
   }
 
   const staffProfiles = [
-    { name: "মোঃ রফিকুল ইসলাম", phone: "01711334455", desig: "Senior Cashier", basic: 18000, dept: "SALES", branch: mainBranch.id },
-    { name: "কাজী ফারুক", phone: "01811445566", desig: "Store Manager", basic: 24000, dept: "ACC", branch: mainBranch.id },
-    { name: "আল-আমিন মোল্লা", phone: "01911556677", desig: "Inventory Keeper", basic: 14000, dept: "WH", branch: mainBranch.id },
-    { name: "সুমন হোসেন", phone: "01611667788", desig: "Mirpur Cashier", basic: 16000, dept: "SALES", branch: mirpurBranch.id },
+    { name: "মোঃ রফিকুল ইসলাম", phone: "01711334455", desig: "Senior Cashier", basic: 18000, dept: "SALES", branch: mainBranch.id, joined: "2024-02-01" },
+    { name: "কাজী ফারুক", phone: "01811445566", desig: "Store Manager", basic: 24000, dept: "ACC", branch: mainBranch.id, joined: "2023-06-15" },
+    { name: "আল-আমিন মোল্লা", phone: "01911556677", desig: "Inventory Keeper", basic: 14000, dept: "WH", branch: mainBranch.id, joined: "2024-04-10" },
+    { name: "সুমন হোসেন", phone: "01611667788", desig: "Mirpur Cashier", basic: 16000, dept: "SALES", branch: mirpurBranch.id, joined: "2024-07-01" },
+    { name: "মোঃ সাইফুল ইসলাম", phone: "01722778899", desig: "Sales Associate", basic: 13000, dept: "SALES", branch: mainBranch.id, joined: "2025-01-05" },
+    { name: "নাফিসা আক্তার", phone: "01833889900", desig: "Junior Accountant", basic: 17000, dept: "ACC", branch: mainBranch.id, joined: "2025-02-12" },
+    { name: "মোঃ জাহিদ হাসান", phone: "01944990011", desig: "Stock Assistant", basic: 12500, dept: "WH", branch: mainBranch.id, joined: "2025-03-20" },
+    { name: "আব্দুর রহিম", phone: "01655001122", desig: "Delivery Driver", basic: 15000, dept: "WH", branch: mainBranch.id, joined: "2024-09-01" },
+    { name: "মোঃ শাহিন আলম", phone: "01766112233", desig: "Mirpur Manager", basic: 22000, dept: "SALES", branch: mirpurBranch.id, joined: "2024-05-18" },
+    { name: "রুমা খাতুন", phone: "01877223344", desig: "Cashier", basic: 14500, dept: "SALES", branch: mirpurBranch.id, joined: "2025-04-02" },
+    { name: "মোঃ কামরুল ইসলাম", phone: "01988334455", desig: "Security Guard", basic: 12000, dept: "WH", branch: mainBranch.id, joined: "2024-08-11" },
+    { name: "শাহিদা বেগম", phone: "01699445566", desig: "Cleaner", basic: 10000, dept: "WH", branch: mirpurBranch.id, joined: "2025-05-09" },
   ];
 
+  const staffRecords: {
+    id: string;
+    basic: number;
+    branchId: string;
+    name: string;
+  }[] = [];
+
   for (const st of staffProfiles) {
-    await prisma.staffProfile.create({
+    const staff = await prisma.staffProfile.create({
       data: {
         name: st.name,
         phone: st.phone,
         designation: st.desig,
-        joiningDate: new Date("2024-02-01"),
+        joiningDate: new Date(st.joined),
         basicSalary: st.basic,
         dailyAllowance: 100,
         overtimeRate: 60,
@@ -829,50 +1387,122 @@ async function main() {
         shopId: shop.id,
       },
     });
+    staffRecords.push({
+      id: staff.id,
+      basic: Number(staff.basicSalary),
+      branchId: staff.branchId,
+      name: staff.name,
+    });
   }
 
+  // 12 months of payroll for every staff member
+  const payrolls: Prisma.PayrollCreateManyInput[] = [];
+  const payrollBase = new Date();
+  for (let offset = 11; offset >= 0; offset--) {
+    const salaryDate = new Date(
+      payrollBase.getFullYear(),
+      payrollBase.getMonth() - offset,
+      28
+    );
+    const monthIndex = salaryDate.getMonth();
+
+    staffRecords.forEach((staff, staffIndex) => {
+      const allowance = 1800 + (offset % 4) * 300;
+      const overtimeAmount = 400 + ((offset + staffIndex) % 5) * 250;
+      const advanceDeduction = offset % 3 === 0 ? 800 : 0;
+      const netSalary = staff.basic + allowance + overtimeAmount - advanceDeduction;
+
+      payrolls.push({
+        payslipNo: `PS-${salaryDate.getFullYear()}-${monthIndex + 1}-${String(staffIndex + 1).padStart(2, "0")}`,
+        month: monthNames[monthIndex],
+        year: salaryDate.getFullYear(),
+        salaryDate,
+        basicSalary: staff.basic,
+        allowance,
+        overtimeAmount,
+        advanceDeduction,
+        penaltyDeduction: 0,
+        netSalary,
+        paymentMethod: ["cash", "bank", "bkash"][(offset + staffIndex) % 3],
+        paymentStatus: "paid",
+        notes: "Seed monthly payroll",
+        branchId: staff.branchId,
+        staffId: staff.id,
+        shopId: shop.id,
+      });
+    });
+  }
+  await prisma.payroll.createMany({ data: payrolls });
+
+  // Salary advances across the year
+  const advances = [];
+  for (let i = 0; i < 48; i++) {
+    const staff = staffRecords[i % staffRecords.length];
+    const advanceDate = new Date();
+    advanceDate.setDate(advanceDate.getDate() - ((i * 9) % 360));
+    advances.push({
+      advanceDate,
+      amount: 1000 + ((i * 137) % 4000),
+      paymentMethod: ["cash", "bkash", "bank"][i % 3],
+      purpose: ["Medical emergency", "Family expense", "Festival advance", "Personal need"][i % 4],
+      isDeducted: i % 4 === 0,
+      notes: "Seed staff advance",
+      branchId: staff.branchId,
+      staffId: staff.id,
+      shopId: shop.id,
+    });
+  }
+  await prisma.salaryAdvance.createMany({ data: advances });
+
   // ==========================================
-  // 11. DAY-END Z-REPORT REGISTERS (7 DAYS)
+  // 11. DAY-END Z-REPORT REGISTERS (FULL YEAR)
   // ==========================================
-  console.log("🔒 [11/12] Seeding 7 Days of Day-End Z-Closings...");
-  for (let day = 7; day >= 1; day--) {
-    const closingDate = new Date();
-    closingDate.setDate(closingDate.getDate() - day);
+  console.log("🔒 [11/12] Seeding 365 Days of Day-End Z-Closings...");
+  const closings = [];
+  for (let day = 364; day >= 0; day--) {
+    for (const branch of [mainBranch, mirpurBranch]) {
+      const isMirpur = branch.id === mirpurBranch.id;
+      const closingDate = new Date();
+      closingDate.setDate(closingDate.getDate() - day);
+      closingDate.setHours(22, 45, 0, 0);
 
-    const cashSales = 28000 + day * 1800;
-    const cashDueCollected = 3500 + day * 400;
-    const cashExpenses = 1200 + (day % 3) * 350;
-    const cashSupplierPaid = day % 2 === 0 ? 12000 : 0;
-    const openingCash = 12000;
+      const openingCash = isMirpur ? 9000 : 12000;
+      const cashSales = (isMirpur ? 16000 : 26000) + (day % 7) * (isMirpur ? 700 : 1200);
+      const cashDueCollected = 2200 + (day % 5) * 350;
+      const cashOtherIncome = day % 6 === 0 ? 450 : 0;
+      const cashExpenses = 900 + (day % 4) * 300;
+      const cashSupplierPaid = day % 5 === 0 ? 8000 : 0;
+      const cashRefunds = day % 11 === 0 ? 750 : 0;
 
-    const expected = openingCash + cashSales + cashDueCollected - cashExpenses - cashSupplierPaid;
-    const diff = day === 2 ? -50 : day === 4 ? 30 : 0;
-    const counted = expected + diff;
+      const expectedCash =
+        openingCash + cashSales + cashDueCollected + cashOtherIncome - cashExpenses - cashSupplierPaid - cashRefunds;
+      const diff = day % 37 === 0 ? -50 : day % 43 === 0 ? 30 : 0;
+      const countedCash = expectedCash + diff;
 
-    await prisma.cashRegister.create({
-      data: {
+      closings.push({
         closingDate,
         openingTime: "08:30:00",
         closingTime: "22:45:00",
         openingCash,
         cashSales,
         cashDueCollected,
-        cashOtherIncome: 0,
+        cashOtherIncome,
         cashExpenses,
         cashSupplierPaid,
-        cashRefunds: 0,
-        expectedCash: expected,
-        countedCash: counted,
+        cashRefunds,
+        expectedCash,
+        countedCash,
         difference: diff,
-        totalInvoices: 32 + day * 3,
+        totalInvoices: (isMirpur ? 18 : 30) + (day % 9),
         notes: diff === 0 ? "দিনশেষে হিসাব নিখুঁতভাবে মিলেছে।" : `ক্যাশ ড্রয়ারে ${diff} টাকার অমিল পরিলক্ষিত হয়েছে।`,
         status: "closed",
-        branchId: mainBranch.id,
-        userId: cashierUser.id,
+        branchId: branch.id,
+        userId: isMirpur ? mirpurCashierUser.id : cashierUser.id,
         shopId: shop.id,
-      },
-    });
+      });
+    }
   }
+  await prisma.cashRegister.createMany({ data: closings });
 
   // ==========================================
   // 12. FAMILY BUSINESS LEDGER & DRAWINGS
@@ -889,6 +1519,7 @@ async function main() {
   ];
 
   const partnerMap = new Map();
+  const partnerRecords: { id: string; relationship: string; name: string }[] = [];
   for (const fp of familyPartners) {
     const p = await prisma.partner.create({
       data: {
@@ -902,6 +1533,7 @@ async function main() {
       },
     });
     partnerMap.set(fp.rel, p);
+    partnerRecords.push({ id: p.id, relationship: fp.rel, name: p.name });
   }
 
   const father = partnerMap.get("FATHER");
@@ -938,16 +1570,425 @@ async function main() {
     });
   }
 
+  // ==========================================
+  // 12b. FULL-YEAR FAMILY LEDGER, RETURNS, ORDERS,
+  //      QUOTATIONS, TRANSFERS, WASTAGE & LEDGER
+  // ==========================================
+  console.log("🧾 [12b] Seeding full-year family, returns, stock & order history...");
+
+  if (mainCashId) {
+    const partnerTransactions = [];
+    const transactionTypes = [
+      "CASH_DRAWING",
+      "HOUSEHOLD_EXPENSE",
+      "PROFIT_DISTRIBUTION",
+      "BANK_DRAWING",
+      "CASH_DRAWING",
+      "HOUSEHOLD_EXPENSE",
+    ] as const;
+
+    for (let m = 11; m >= 0; m--) {
+      for (let idx = 0; idx < partnerRecords.length; idx++) {
+        const partner = partnerRecords[idx];
+        const transactionDate = new Date();
+        transactionDate.setMonth(transactionDate.getMonth() - m);
+        transactionDate.setDate(8 + idx * 2);
+        const type = idx === 0 && m % 3 === 0 ? ("CAPITAL_INJECTION" as const) : transactionTypes[idx];
+        const isInjection = type === "CAPITAL_INJECTION";
+
+        partnerTransactions.push({
+          voucherNo: `PT-Y-${m + 1}-${idx + 1}`,
+          type,
+          amount: isInjection ? 25000 : 4000 + idx * 750 + (m % 4) * 500,
+          transactionDate,
+          purpose: isInjection ? "Additional family capital" : "Monthly family drawing",
+          paymentMethod: idx % 2 === 0 ? "cash" : "bank",
+          partnerId: partner.id,
+          accountId: isInjection ? dbblId : mainCashId,
+          branchId: mainBranch.id,
+          shopId: shop.id,
+        });
+      }
+    }
+    await prisma.partnerTransaction.createMany({ data: partnerTransactions });
+
+    for (let i = 0; i < 36; i++) {
+      const partner = partnerRecords[i % partnerRecords.length];
+      const rationDate = new Date();
+      rationDate.setDate(rationDate.getDate() - ((i * 11) % 360));
+      const items = [] as {
+        productId: string;
+        unitId: string;
+        quantity: number;
+        unitCost: number;
+        lineTotal: number;
+      }[];
+      let totalCost = 0;
+      for (let k = 0; k < 2; k++) {
+        const product = productList[(i * 3 + k) % productList.length];
+        const quantity = 1 + (k % 2);
+        const lineTotal = quantity * product.purchasePrice;
+        totalCost += lineTotal;
+        items.push({
+          productId: product.id,
+          unitId: product.unitId,
+          quantity,
+          unitCost: product.purchasePrice,
+          lineTotal,
+        });
+      }
+
+      await prisma.partnerRation.create({
+        data: {
+          id: `rat-y-${i + 1}`,
+          rationNo: `RAT-Y-${String(i + 1).padStart(3, "0")}`,
+          rationDate,
+          totalCost,
+          notes: "Seed monthly home grocery",
+          partnerId: partner.id,
+          branchId: mainBranch.id,
+          shopId: shop.id,
+          items: { create: items },
+        },
+      });
+    }
+  }
+
+  const yearLoans = [
+    { id: "loan-y-1", type: "TAKEN" as const, name: "ব্যাংক ওয়ার্কিং ক্যাপিটাল", amount: 200000, paid: 80000 },
+    { id: "loan-y-2", type: "TAKEN" as const, name: "মহাজন হাবিবুর রহমান", amount: 150000, paid: 50000 },
+    { id: "loan-y-3", type: "GIVEN" as const, name: "কর্মচারী রফিকুল ইসলাম", amount: 25000, paid: 10000 },
+    { id: "loan-y-4", type: "GIVEN" as const, name: "পার্টনার তারিকুল সেলিম", amount: 50000, paid: 20000 },
+    { id: "loan-y-5", type: "TAKEN" as const, name: "সমিতি ঋণ (Cooperative)", amount: 120000, paid: 45000 },
+    { id: "loan-y-6", type: "GIVEN" as const, name: "মোঃ বাবুল মিয়া", amount: 15000, paid: 5000 },
+  ];
+
+  await prisma.loan.createMany({
+    data: yearLoans.map((loan, index) => {
+      const loanDate = new Date();
+      loanDate.setMonth(loanDate.getMonth() - (11 - index));
+      loanDate.setDate(10);
+      return {
+        id: loan.id,
+        loanNo: `LN-Y-${String(index + 1).padStart(3, "0")}`,
+        type: loan.type,
+        personName: loan.name,
+        phone: `017${String(10000000 + index * 927).slice(0, 8)}`,
+        amount: loan.amount,
+        totalPaid: loan.paid,
+        remainingAmount: loan.amount - loan.paid,
+        loanDate,
+        dueDate: new Date(loanDate.getFullYear() + 1, loanDate.getMonth(), 10),
+        status: loan.paid >= loan.amount ? "PAID" : "ACTIVE",
+        notes: "Seed yearly loan",
+        branchId: mainBranch.id,
+        accountId: index % 2 === 0 ? dbblId : mainCashId,
+        shopId: shop.id,
+      };
+    }),
+  });
+
+  const loanInstallments: Prisma.LoanInstallmentCreateManyInput[] = [];
+  yearLoans.forEach((loan, loanIndex) => {
+    for (let i = 1; i <= 3; i++) {
+      const paymentDate = new Date();
+      paymentDate.setMonth(paymentDate.getMonth() - (11 - loanIndex) + i);
+      paymentDate.setDate(15);
+      if (paymentDate > new Date()) continue;
+      loanInstallments.push({
+        voucherNo: `LI-Y-${loanIndex + 1}-${i}`,
+        paymentDate,
+        amount: Math.round(loan.paid / 3),
+        paymentMethod: i % 2 === 0 ? "bank" : "cash",
+        note: "Seed loan installment",
+        branchId: mainBranch.id,
+        loanId: loan.id,
+        accountId: i % 2 === 0 ? dbblId : mainCashId,
+        userId: cashierUser.id,
+      });
+    }
+  });
+  await prisma.loanInstallment.createMany({ data: loanInstallments });
+
+  const cheques = [];
+  for (let i = 0; i < 12; i++) {
+    const chequeDate = new Date();
+    chequeDate.setDate(chequeDate.getDate() - (i * 27));
+    cheques.push({
+      type: (i % 2 === 0 ? "RECEIVED" : "ISSUED") as "RECEIVED" | "ISSUED",
+      partyType: (i % 2 === 0 ? "CUSTOMER" : "SUPPLIER") as "CUSTOMER" | "SUPPLIER",
+      partyName: i % 2 === 0 ? `Wholesale Customer ${i + 1}` : suppliersData[i % suppliersData.length].company,
+      bankName: ["City Bank", "DBBL", "BRAC Bank", "Islami Bank"][i % 4],
+      chequeNumber: `CHQ-Y-${String(1000 + i)}`,
+      chequeDate,
+      clearingDate: i % 3 === 0 ? new Date(chequeDate.getTime() + 3 * 86400000) : null,
+      amount: 5000 + i * 3500,
+      status: (i % 4 === 0 ? "CLEARED" : i % 4 === 1 ? "PENDING" : i % 4 === 2 ? "BOUNCED" : "CANCELLED") as
+        | "CLEARED"
+        | "PENDING"
+        | "BOUNCED"
+        | "CANCELLED",
+      note: "Seed cheque history",
+      branchId: mainBranch.id,
+      accountId: dbblId,
+      userId: cashierUser.id,
+      shopId: shop.id,
+    });
+  }
+  await prisma.bankCheque.createMany({ data: cheques });
+
+  for (let i = 0; i < 18; i++) {
+    const purchase = purchaseRecords[(i * 3) % purchaseRecords.length];
+    const product = productList[(i * 7) % productList.length];
+    const quantity = 1 + (i % 4);
+    const unitCost = product.purchasePrice;
+    const totalAmount = quantity * unitCost;
+    const returnDate = new Date(purchase.purchaseDate);
+    returnDate.setDate(returnDate.getDate() + 2 + (i % 5));
+
+    await prisma.purchaseReturn.create({
+      data: {
+        id: `pret-y-${i + 1}`,
+        returnNo: `PR-Y-${String(i + 1).padStart(3, "0")}`,
+        returnDate,
+        totalQuantity: quantity,
+        totalAmount,
+        refundAmount: i % 2 === 0 ? totalAmount : 0,
+        dueDeduction: i % 2 === 0 ? 0 : totalAmount,
+        settlementType: i % 2 === 0 ? "CASH_REFUND" : "DUE_DEDUCTION",
+        paymentMethod: i % 2 === 0 ? "cash" : null,
+        notes: "Seed purchase return",
+        branchId: mainBranch.id,
+        supplierId: purchase.supplierId,
+        shopId: shop.id,
+        purchaseId: purchase.id,
+        items: {
+          create: [
+            {
+              quantity,
+              unitCost,
+              lineTotal: totalAmount,
+              reason: ["DAMAGED", "EXPIRED", "WRONG_ITEM", "POOR_QUALITY"][i % 4],
+              productId: product.id,
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  for (let i = 0; i < 18; i++) {
+    const supplier = suppliersData[i % suppliersData.length];
+    const orderDate = new Date();
+    orderDate.setDate(orderDate.getDate() - ((i * 17) % 360));
+    const items = [];
+    let estimatedTotal = 0;
+    for (let k = 0; k < 3; k++) {
+      const product = productList[(i * 5 + k) % productList.length];
+      const quantity = 10 + ((i + k) % 20);
+      const lineTotal = quantity * product.purchasePrice;
+      estimatedTotal += lineTotal;
+      items.push({
+        productId: product.id,
+        quantity,
+        unitCost: product.purchasePrice,
+        lineTotal,
+        currentStock: 10 + ((i + k) % 30),
+      });
+    }
+
+    await prisma.purchaseOrder.create({
+      data: {
+        id: `po-y-${i + 1}`,
+        orderNo: `PO-Y-${String(i + 1).padStart(3, "0")}`,
+        orderDate,
+        status: i % 4 === 0 ? "CONVERTED" : i % 3 === 0 ? "SENT_TO_SR" : "DRAFT",
+        totalItems: items.length,
+        estimatedTotal,
+        notes: "Seed purchase order",
+        supplierId: supplierMap.get(supplier.id)!.id,
+        branchId: i % 2 === 0 ? mainBranch.id : mirpurBranch.id,
+        shopId: shop.id,
+        items: { create: items },
+      },
+    });
+  }
+
+  const quotationCustomer = customerMap.get("cust-tushi");
+  for (let i = 0; i < 15; i++) {
+    const quotationDate = new Date();
+    quotationDate.setDate(quotationDate.getDate() - ((i * 23) % 360));
+    const items = [];
+    let subtotal = 0;
+    for (let k = 0; k < 3; k++) {
+      const product = productList[(i * 4 + k) % productList.length];
+      const quantity = 2 + ((i + k) % 6);
+      const lineTotal = quantity * product.sellingPrice;
+      subtotal += lineTotal;
+      items.push({
+        productId: product.id,
+        unitId: product.unitId,
+        quantity,
+        unitPrice: product.sellingPrice,
+        lineTotal,
+      });
+    }
+
+    await prisma.quotation.create({
+      data: {
+        id: `quo-y-${i + 1}`,
+        quotationNo: `QT-Y-${String(i + 1).padStart(3, "0")}`,
+        quotationDate,
+        expiryDate: new Date(quotationDate.getTime() + 15 * 86400000),
+        subtotal,
+        discount: i % 3 === 0 ? 100 : 0,
+        grandTotal: subtotal - (i % 3 === 0 ? 100 : 0),
+        status: i % 4 === 0 ? "CONVERTED" : i % 5 === 0 ? "EXPIRED" : "PENDING",
+        notes: "Seed quotation",
+        branchId: mainBranch.id,
+        customerId: quotationCustomer?.id || null,
+        shopId: shop.id,
+        items: { create: items },
+      },
+    });
+  }
+
+  for (let i = 0; i < 20; i++) {
+    const fromMain = i % 2 === 0;
+    const dispatchDate = new Date();
+    dispatchDate.setDate(dispatchDate.getDate() - ((i * 19) % 360));
+    const status = i % 3 === 0 ? "COMPLETED" : i % 3 === 1 ? "DISPATCHED" : "CANCELLED";
+    const items = [];
+    let totalQuantity = 0;
+    let totalCost = 0;
+
+    for (let k = 0; k < 3; k++) {
+      const product = productList[(i * 6 + k) % productList.length];
+      const quantitySent = 5 + ((i + k) % 15);
+      const transitDamage = status === "COMPLETED" && k === 0 ? 1 : 0;
+      const received = status === "COMPLETED" ? quantitySent - transitDamage : null;
+      const lineCost = quantitySent * product.purchasePrice;
+      totalQuantity += quantitySent;
+      totalCost += lineCost;
+      items.push({
+        productId: product.id,
+        quantitySent,
+        quantityReceived: received,
+        transitDamage,
+        unitCost: product.purchasePrice,
+        lineCost,
+      });
+    }
+
+    await prisma.stockTransfer.create({
+      data: {
+        id: `tr-y-${i + 1}`,
+        transferNo: `TR-Y-${String(i + 1).padStart(3, "0")}`,
+        dispatchDate,
+        receiveDate: status === "COMPLETED" ? new Date(dispatchDate.getTime() + 86400000) : null,
+        status,
+        totalItems: items.length,
+        totalQuantity,
+        totalCost,
+        notes: "Seed branch transfer",
+        driverName: ["Karim", "Rahim", "Jamal", "Selim"][i % 4],
+        driverPhone: `018${String(10000000 + i * 371).slice(0, 8)}`,
+        vehicleNo: `DHAKA-METRO-${String(1000 + i)}`,
+        fromBranchId: fromMain ? mainBranch.id : mirpurBranch.id,
+        toBranchId: fromMain ? mirpurBranch.id : mainBranch.id,
+        shopId: shop.id,
+        items: { create: items },
+      },
+    });
+  }
+
+  const wastageReasons = [
+    "ROTTEN_PERISHABLE",
+    "BROKEN_DAMAGED",
+    "EXPIRED_NO_RETURN",
+    "PEST_DAMAGE",
+    "INTERNAL_STORE_USE",
+    "OTHER",
+  ] as const;
+
+  for (let i = 0; i < 40; i++) {
+    const wastageDate = new Date();
+    wastageDate.setDate(wastageDate.getDate() - ((i * 9) % 360));
+    const branch = i % 2 === 0 ? mainBranch : mirpurBranch;
+    const reason = wastageReasons[i % wastageReasons.length];
+    const items = [];
+    let totalQuantity = 0;
+    let totalCost = 0;
+
+    for (let k = 0; k < 2; k++) {
+      const product = productList[(i * 5 + k) % productList.length];
+      const quantity = 1 + ((i + k) % 6);
+      const lineCost = quantity * product.purchasePrice;
+      totalQuantity += quantity;
+      totalCost += lineCost;
+      items.push({
+        productId: product.id,
+        quantity,
+        unitCost: product.purchasePrice,
+        lineCost,
+        reason,
+      });
+    }
+
+    await prisma.stockWastage.create({
+      data: {
+        id: `wst-y-${i + 1}`,
+        wastageNo: `WST-Y-${String(i + 1).padStart(3, "0")}`,
+        date: wastageDate,
+        totalQuantity,
+        totalCost,
+        reason,
+        notes: "Seed stock wastage",
+        branchId: branch.id,
+        shopId: shop.id,
+        items: { create: items },
+      },
+    });
+  }
+
+  const accountTransactions = [];
+  const accountIds = [...accountMap.values()];
+  for (let i = 0; i < 120; i++) {
+    const accountId = accountIds[i % accountIds.length];
+    const transactionDate = new Date();
+    transactionDate.setDate(transactionDate.getDate() - ((i * 3) % 360));
+    const amount = 500 + ((i * 211) % 9000);
+    accountTransactions.push({
+      type: (i % 3 === 0 ? "WITHDRAW" : "DEPOSIT") as "WITHDRAW" | "DEPOSIT",
+      amount,
+      balanceAfter: 10000 + i * 150,
+      transactionDate,
+      referenceType: "SEED",
+      referenceId: `seed-tx-${i + 1}`,
+      voucherNo: `LED-Y-${String(i + 1).padStart(4, "0")}`,
+      note: "Seed account ledger entry",
+      branchId: i % 2 === 0 ? mainBranch.id : mirpurBranch.id,
+      accountId,
+      userId: cashierUser.id,
+    });
+  }
+  await prisma.accountTransaction.createMany({ data: accountTransactions });
+
   console.log("============================================================");
   console.log("🎉 SUCCESS: Master Seed Completed with High-Volume Data!");
   console.log("============================================================");
   console.log("🏢 Outlets:          2 Outlets (Main + Mirpur-10 Branch)");
-  console.log("📦 Products:         32 Items with Real Barcodes & Branch Stock");
-  console.log("💰 Sales History:    30 Days of Consecutive POS Invoices");
-  console.log("👥 Customer Khata:   10 Customers (Strict Branch Scoped)");
-  console.log("👨‍👩‍👧‍👦 Family Ledger:   6 Partners (Father, Uncles, Brothers, Self)");
-  console.log("🚚 Suppliers:        5 FMCG Vendors with Active Payables");
-  console.log("🔒 Day-End Closings: 7 Consecutive Cash Register Z-Reports");
+  console.log("📦 Products:         72 Items (32 core + 40 extended catalog)");
+  console.log(`💰 Sales History:    ${invoiceCounter - 26000} invoices across 365 days`);
+  console.log("👥 Customer Khata:   40 Customers (Strict Branch Scoped)");
+  console.log("👨‍👩‍👧‍👦 Family Ledger:   6 Partners + 72 yearly drawings + 36 rations");
+  console.log("🚚 Suppliers:        12 FMCG Vendors + 41 purchase chalans");
+  console.log("📉 Expenses:         12 months OPEX + daily food/transport entries");
+  console.log("👨‍💼 Staff:            12 staff + 144 payrolls + 48 advances");
+  console.log("🔒 Day-End Closings: 730 Z-Reports (365 days × 2 branches)");
+  console.log("🧾 Extras:           90 sale returns, 18 purchase returns, 18 POs, 15 quotations");
+  console.log("🔄 Stock Ops:        20 transfers + 40 wastage records");
+  console.log("💳 Finance:          6 loans + installments, 12 cheques, 120 ledger entries");
   console.log("------------------------------------------------------------");
   console.log("🔑 Demo Login Accounts:");
   console.log("   OWNER:          owner@grocery.com");

@@ -1,6 +1,6 @@
 "use client";
 "use no memo";
-import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { TableActions } from "@/components/common/ui/table/TableHelpers";
 import { ISalaryAdvance, PERMISSIONS } from "@/types";
@@ -30,6 +30,6 @@ export default function AdvancesTab({ advances, currencySymbol, onDelete }: { ad
       ),
     },
   ];
-  const table = useReactTable({ data: advances, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({ data: advances, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() });
   return <DataTable table={table} columns={columns} />;
 }

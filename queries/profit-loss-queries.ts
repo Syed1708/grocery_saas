@@ -9,8 +9,18 @@ export async function getProfitLossData(
 ): Promise<IProfitLossData> {
   const dateFilter: Prisma.DateTimeFilter = {};
   if (filters.startDate || filters.endDate) {
-    if (filters.startDate) dateFilter.gte = new Date(`${filters.startDate}T00:00:00`);
-    if (filters.endDate) dateFilter.lte = new Date(`${filters.endDate}T23:59:59`);
+    if (filters.startDate) {
+      const start = new Date(`${filters.startDate}T00:00:00`);
+      if (!Number.isNaN(start.getTime())) dateFilter.gte = start;
+    }
+    if (filters.endDate) {
+      const end = new Date(`${filters.endDate}T00:00:00`);
+      if (!Number.isNaN(end.getTime())) {
+        // Exclusive next-day boundary includes the whole end date.
+        end.setDate(end.getDate() + 1);
+        dateFilter.lt = end;
+      }
+    }
   } else {
     // Default: This Month
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
@@ -22,7 +32,7 @@ export async function getProfitLossData(
     where: {
       shopId,
       branchId,
-      createdAt: dateFilter,
+      saleDate: dateFilter,
     },
     _sum: {
       subtotal: true,
@@ -37,7 +47,7 @@ export async function getProfitLossData(
       sale: {
         shopId,
         branchId,
-        createdAt: dateFilter,
+        saleDate: dateFilter,
       },
     },
     select: {
@@ -56,10 +66,22 @@ export async function getProfitLossData(
     where: {
       shopId,
       branchId,
-      createdAt: dateFilter,
+      returnDate: dateFilter,
     },
     include: {
-      items: true,
+      sale: {
+        select: {
+          items: { select: { productId: true, purchaseCost: true } },
+        },
+      },
+      items: {
+        select: {
+          productId: true,
+          quantity: true,
+          itemCondition: true,
+          product: { select: { purchasePrice: true } },
+        },
+      },
     },
   });
 
@@ -69,8 +91,20 @@ export async function getProfitLossData(
 
   for (const ret of saleReturns) {
     totalReturnsAmount += Number(ret.totalRefund);
+
+    // Use the original sale line cost so historical cost is preserved even if
+    // the product purchase price changed later.
+    const costByProduct = new Map<string, number>();
+    for (const saleItem of ret.sale.items) {
+      if (!costByProduct.has(saleItem.productId)) {
+        costByProduct.set(saleItem.productId, Number(saleItem.purchaseCost));
+      }
+    }
+
     for (const rItem of ret.items) {
-      const lineCost = Number(rItem.quantity) * Number(rItem.refundPrice);
+      const saleCost = costByProduct.get(rItem.productId);
+      const unitCost = saleCost && saleCost > 0 ? saleCost : Number(rItem.product.purchasePrice);
+      const lineCost = Number(rItem.quantity) * unitCost;
       if (rItem.itemCondition === "DAMAGED") {
         damagedGoodsLoss += lineCost;
       } else {
@@ -79,15 +113,26 @@ export async function getProfitLossData(
     }
   }
 
+  // Stock wastage is written off directly from inventory (no expense row).
+  const wastageAgg = await prisma.stockWastage.aggregate({
+    where: {
+      shopId,
+      branchId,
+      date: dateFilter,
+    },
+    _sum: { totalCost: true },
+  });
+  damagedGoodsLoss += Number(wastageAgg._sum.totalCost || 0);
+
   // 4. Operating Expenses by Category
   const rawExpenses = await prisma.expense.findMany({
     where: {
       shopId,
       branchId,
-      createdAt: dateFilter,
+      expenseDate: dateFilter,
     },
     include: {
-      category: { select: { id: true, name: true } },
+      category: { select: { id: true, name: true, code: true } },
     },
   });
 
@@ -96,6 +141,13 @@ export async function getProfitLossData(
 
   for (const exp of rawExpenses) {
     const amt = Number(exp.amount);
+
+    // Sale-return damage is already counted from the return lines below; the
+    // return action also posts an EXP-DAMAGE expense for the same loss.
+    const isAutoReturnDamage =
+      exp.category.code === "EXP-DAMAGE" && exp.reference?.startsWith("Return #") === true;
+    if (isAutoReturnDamage) continue;
+
     operatingExpenses += amt;
 
     const catId = exp.categoryId;
