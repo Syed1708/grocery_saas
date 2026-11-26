@@ -1,12 +1,12 @@
 // app/dashboard/admin/purchases/_components/tabs/InvoicesTab.tsx
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ColumnDef,
   getCoreRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -27,6 +27,11 @@ import { IPurchase } from "@/types/purchase";
 interface InvoicesTabProps {
   purchases: IPurchase[];
   currencySymbol: string;
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+  };
   onView: (p: IPurchase) => void;
   onPrint: (p: IPurchase) => void;
   onDelete?: (p: IPurchase) => void; // Optional for non-owners
@@ -35,27 +40,58 @@ interface InvoicesTabProps {
 export default function InvoicesTab({
   purchases = [],
   currencySymbol = "৳",
+  pagination,
   onView,
   onPrint,
   onDelete,
 }: InvoicesTabProps) {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const statusFilter = searchParams.get("status") || "ALL";
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
 
-  const filteredPurchases = useMemo(() => {
-    return purchases.filter((p) => {
-      if (search) {
-        const q = search.toLowerCase();
-        const matchesChalan = p.chalanNo?.toLowerCase().includes(q);
-        const matchesSupplier =
-          p.supplierCompany?.toLowerCase().includes(q) ||
-          p.supplierName?.toLowerCase().includes(q);
-        if (!matchesChalan && !matchesSupplier) return false;
-      }
-      if (statusFilter !== "ALL" && p.paymentStatus !== statusFilter) return false;
-      return true;
+  const updateParams = (mutate: (params: URLSearchParams) => void) => {
+    const params = new URLSearchParams(searchParamsRef.current.toString());
+    mutate(params);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const updateFilter = (key: string, value: string) => {
+    updateParams((params) => {
+      if (value && value !== "ALL") params.set(key, value);
+      else params.delete(key);
+      params.delete("page");
     });
-  }, [purchases, search, statusFilter]);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => updateFilter("q", value), 350);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current);
+    };
+  }, []);
+
+  const updatePagination = (nextPage: number, nextPageSize: number) => {
+    updateParams((params) => {
+      if (nextPageSize !== pagination.pageSize) {
+        params.set("pageSize", String(nextPageSize));
+        params.delete("page");
+      } else if (nextPage <= 1) {
+        params.delete("page");
+      } else {
+        params.set("page", String(nextPage));
+      }
+    });
+  };
 
   const columns: ColumnDef<IPurchase>[] = [
     {
@@ -187,10 +223,25 @@ export default function InvoicesTab({
   ];
 
   const table = useReactTable({
-    data: filteredPurchases,
+    data: purchases,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: Math.max(1, Math.ceil(pagination.total / pagination.pageSize)),
+    state: {
+      pagination: {
+        pageIndex: pagination.page - 1,
+        pageSize: pagination.pageSize,
+      },
+    },
+    onPaginationChange: (updater) => {
+      const current = {
+        pageIndex: pagination.page - 1,
+        pageSize: pagination.pageSize,
+      };
+      const next = typeof updater === "function" ? updater(current) : updater;
+      updatePagination(next.pageIndex + 1, next.pageSize);
+    },
   });
 
   return (
@@ -201,7 +252,7 @@ export default function InvoicesTab({
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="চালান নম্বর, কোম্পানি বা সরবরাহকারীর নাম দিয়ে খুঁজুন..."
             className="w-full pl-9 pr-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-neutral-900 dark:text-neutral-100"
           />
@@ -220,7 +271,7 @@ export default function InvoicesTab({
             <button
               key={pill.value}
               type="button"
-              onClick={() => setStatusFilter(pill.value)}
+              onClick={() => updateFilter("status", pill.value)}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition shrink-0 cursor-pointer ${
                 statusFilter === pill.value
                   ? "bg-blue-600 text-white font-semibold shadow-xs"
@@ -233,7 +284,7 @@ export default function InvoicesTab({
         </div>
       </div>
 
-      <DataTable table={table} columns={columns} />
+      <DataTable table={table} columns={columns} totalCount={pagination.total} />
     </div>
   );
 }

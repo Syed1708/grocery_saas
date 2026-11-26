@@ -1,55 +1,81 @@
 import { prisma } from "@/lib/prisma";
-import { PaymentStatus, PurchaseOrderStatus } from "@/generated/prisma/client";
+import { Prisma, PaymentStatus, PurchaseOrderStatus } from "@/generated/prisma/client";
 import { IPurchaseOrder } from "@/types";
-import { IPurchase } from "@/types/purchase";
+import { IPaginatedPurchases, IPurchaseListFilters } from "@/types/purchase";
 
 /**
  * GET PURCHASES CHALANS LIST
  * - Strictly scoped to active branch
- * - Limits to latest 150 chalans (Prevents client RAM overload)
+ * - Server-side search, status filtering and pagination
  * - Includes supplier phone and branch name
  */
 export async function getPurchases(
   shopId: string,
-  branchId?: string | null
-): Promise<IPurchase[]> {
-  const purchases = await prisma.purchase.findMany({
-    where: {
-      shopId,
-      ...(branchId ? { branchId } : {}), // Strictly scoped to active branch
-    },
-    include: {
-      supplier: {
-        select: {
-          id: true,
-          name: true,
-          companyName: true,
-          phone: true,
+  branchId?: string | null,
+  filters: IPurchaseListFilters = {},
+  page = 1,
+  pageSize = 10
+): Promise<IPaginatedPurchases> {
+  const query = filters.q?.trim();
+  const status =
+    filters.status && filters.status !== "ALL" ? (filters.status as PaymentStatus) : undefined;
+
+  const where: Prisma.PurchaseWhereInput = {
+    shopId,
+    ...(branchId ? { branchId } : {}), // Strictly scoped to active branch
+    ...(query
+      ? {
+          OR: [
+            { chalanNo: { contains: query } },
+            { supplier: { name: { contains: query } } },
+            { supplier: { companyName: { contains: query } } },
+          ],
+        }
+      : {}),
+    ...(status ? { paymentStatus: status } : {}),
+  };
+
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, pageSize);
+
+  const [total, purchases] = await Promise.all([
+    prisma.purchase.count({ where }),
+    prisma.purchase.findMany({
+      where,
+      include: {
+        supplier: {
+          select: {
+            id: true,
+            name: true,
+            companyName: true,
+            phone: true,
+          },
         },
-      },
-      branch: {
-        select: {
-          id: true,
-          name: true,
+        branch: {
+          select: {
+            id: true,
+            name: true,
+          },
         },
-      },
-      items: {
-        include: {
-          product: {
-            select: {
-              id: true,
-              name: true,
-              barcode: true,
+        items: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                barcode: true,
+              },
             },
           },
         },
       },
-    },
-    orderBy: { purchaseDate: "desc" },
-    take: 150, // ⚡ Performance optimization
-  });
+      orderBy: { purchaseDate: "desc" },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+    }),
+  ]);
 
-  return purchases.map((p) => ({
+  const items = purchases.map((p) => ({
     id: p.id,
     chalanNo: p.chalanNo,
     purchaseDate: p.purchaseDate,
@@ -84,6 +110,8 @@ export async function getPurchases(
     })),
     createdAt: p.createdAt,
   }));
+
+  return { items, total, page: safePage, pageSize: safePageSize };
 }
 
 export async function getPurchaseOrders(

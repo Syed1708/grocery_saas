@@ -110,6 +110,18 @@ export interface UpdatePurchasePayload extends CreatePurchasePayload {
 // ==========================================
 // REPORT & FILTER PARAMS
 // ==========================================
+export interface IPurchaseListFilters {
+  q?: string;
+  status?: string;
+}
+
+export interface IPaginatedPurchases {
+  items: IPurchase[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface IPurchaseReportKPIs {
   totalPurchasesAmount: number;
   totalPaidAmount: number;

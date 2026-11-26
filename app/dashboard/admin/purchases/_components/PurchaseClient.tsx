@@ -40,6 +40,9 @@ import OrdersTab from "./tabs/OrdersTab";
 
 interface PurchasesClientProps {
   purchases: IPurchase[];
+  invoiceTotal: number;
+  invoicePage: number;
+  invoicePageSize: number;
   suppliers: ISupplier[];
   returns?: IPurchaseReturn[];
   orders?: IPurchaseOrder[];
@@ -54,6 +57,9 @@ interface PurchasesClientProps {
 
 export default function PurchasesClient({
   purchases = [],
+  invoiceTotal,
+  invoicePage,
+  invoicePageSize,
   suppliers = [],
   returns = [],
   orders = [],
@@ -183,7 +189,7 @@ export default function PurchasesClient({
               : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
               }`}
           >
-            <Receipt size={14} /> ক্রয় চালান সমূহ ({purchases.length})
+            <Receipt size={14} /> ক্রয় চালান সমূহ ({invoiceTotal})
           </button>
 
           <button
@@ -286,6 +292,11 @@ export default function PurchasesClient({
         <InvoicesTab
           purchases={purchases}
           currencySymbol={currencySymbol}
+          pagination={{
+            page: invoicePage,
+            pageSize: invoicePageSize,
+            total: invoiceTotal,
+          }}
           onView={(p) => setViewInvoice(p)}
           onPrint={handlePrintInvoice}
           onDelete={userRole === "OWNER" ? (p) => setDeletePurchaseTarget(p) : undefined}

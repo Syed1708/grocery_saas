@@ -469,6 +469,11 @@ The Sales invoice list uses server-side search (`q`), payment status (`status`),
 only the fetched page. Use `manualPagination` with `pageCount` and pass `totalCount` to `DataTable`.
 Debounce the search input before pushing the URL, and keep a ref to the latest search params so a
 debounced search can't overwrite a status/method change.
+
+The Purchases invoice tab follows the same pattern: URL `q`, `status` (`PAID|PARTIAL|DUE`), `page`,
+`pageSize`; server-side `count + skip/take` and `manualPagination` with the shared `DataTable`
+`totalCount`. Purchase orders (100) and purchase returns (150) still use capped lists and are the
+next candidates for the same treatment.
 Validate a submitted `customerId` with `{ id, shopId, OR: [{ branchId: active }, { branchId: null }] }`.
 Returns viewing uses `POS_ACCESS` (the sidebar entry itself is gated by `POS_REFUND_RETURN`);
 processing a return requires `POS_REFUND_RETURN`, whitelists `cash|balance`, re-checks remaining
