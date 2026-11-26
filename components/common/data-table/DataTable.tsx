@@ -11,11 +11,13 @@ import { DataTablePagination } from "./DataTablePagination";
 interface DataTableProps<TData, TValue> {
   table: TableType<TData>;
   columns: ColumnDef<TData, TValue>[];
+  totalCount?: number;
 }
 
 export function DataTable<TData, TValue>({
   table,
   columns,
+  totalCount,
 }: DataTableProps<TData, TValue>) {
   return (
     <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden shadow-xs">
@@ -60,7 +62,7 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Standalone Pagination Attached to Bottom of Table */}
-      <DataTablePagination table={table} />
+      <DataTablePagination table={table} totalCount={totalCount} />
     </div>
   );
 }

@@ -32,6 +32,11 @@ export default function FamilyLedgerClient({
   partners,
   transactions,
   rations,
+  transactionTotal,
+  rationTotal,
+  drawingsPage,
+  rationsPage,
+  pageSize,
   accounts,
   products,
   currencySymbol = "৳",
@@ -41,6 +46,11 @@ export default function FamilyLedgerClient({
   partners: IPartner[];
   transactions: IPartnerTransaction[];
   rations: IPartnerRation[];
+  transactionTotal: number;
+  rationTotal: number;
+  drawingsPage: number;
+  rationsPage: number;
+  pageSize: number;
   accounts: { id: string; name: string; type: string; currentBalance: number }[];
   products: { id: string; name: string; sku: string; purchasePrice: number }[];
   currencySymbol?: string;
@@ -65,6 +75,8 @@ export default function FamilyLedgerClient({
     const params = new URLSearchParams(searchParams.toString());
     if (value && value !== "all") params.set(key, value);
     else params.delete(key);
+    params.delete("drawingsPage");
+    params.delete("rationsPage");
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -74,6 +86,22 @@ export default function FamilyLedgerClient({
     params.delete("endDate");
     params.delete("partnerId");
     params.delete("type");
+    params.delete("drawingsPage");
+    params.delete("rationsPage");
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const updatePagination = (tab: "drawings" | "rations", page: number, nextPageSize: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (nextPageSize !== pageSize) {
+      params.set("pageSize", String(nextPageSize));
+      params.delete("drawingsPage");
+      params.delete("rationsPage");
+    } else {
+      const key = tab === "drawings" ? "drawingsPage" : "rationsPage";
+      if (page <= 1) params.delete(key);
+      else params.set(key, String(page));
+    }
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -200,7 +228,7 @@ export default function FamilyLedgerClient({
               activeTab === "drawings" ? "bg-blue-600 text-white shadow-xs" : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600"
             }`}
           >
-            💸 Drawings & Bills ({transactions.length})
+            💸 Drawings & Bills ({transactionTotal})
           </button>
           <button
             onClick={() => setActiveTab("rations")}
@@ -208,7 +236,7 @@ export default function FamilyLedgerClient({
               activeTab === "rations" ? "bg-blue-600 text-white shadow-xs" : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600"
             }`}
           >
-            🛒 Home Groceries ({rations.length})
+            🛒 Home Groceries ({rationTotal})
           </button>
         </div>
 
@@ -247,7 +275,7 @@ export default function FamilyLedgerClient({
             <div>
               <span className="text-xs font-bold">History Filters</span>
               <span className="text-[10px] text-neutral-500 ml-2">
-                Showing {activeTab === "drawings" ? transactions.length : rations.length} records
+                Showing {activeTab === "drawings" ? transactionTotal : rationTotal} records
               </span>
             </div>
             {hasFilters && (
@@ -323,6 +351,12 @@ export default function FamilyLedgerClient({
           currencySymbol={currencySymbol}
           shop={shop}
           branchName={branchName}
+          pagination={{
+            page: drawingsPage,
+            pageSize,
+            total: transactionTotal,
+            onPageChange: (page, size) => updatePagination("drawings", page, size),
+          }}
           onEdit={(t) => { setEditingDrawing(t); setDrawingModalOpen(true); }}
           onDelete={setDeleteDrawingTarget}
         />
@@ -333,6 +367,12 @@ export default function FamilyLedgerClient({
           currencySymbol={currencySymbol}
           shop={shop}
           branchName={branchName}
+          pagination={{
+            page: rationsPage,
+            pageSize,
+            total: rationTotal,
+            onPageChange: (page, size) => updatePagination("rations", page, size),
+          }}
           onEdit={(r) => { setEditingRation(r); setRationModalOpen(true); }}
           onDelete={setDeleteRationTarget}
         />

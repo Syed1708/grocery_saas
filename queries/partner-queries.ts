@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import {
   IFamilyLedgerFilters,
+  IPaginatedResult,
   IPartner,
   IPartnerRation,
   IPartnerTransaction,
@@ -66,8 +67,10 @@ export async function getPartners(shopId: string, branchId: string): Promise<IPa
 export async function getPartnerTransactions(
   shopId: string,
   branchId: string,
-  filters: IFamilyLedgerFilters = {}
-): Promise<IPartnerTransaction[]> {
+  filters: IFamilyLedgerFilters = {},
+  page = 1,
+  pageSize = 10
+): Promise<IPaginatedResult<IPartnerTransaction>> {
   const dateFilter =
     filters.startDate || filters.endDate
       ? {
@@ -80,36 +83,50 @@ export async function getPartnerTransactions(
         }
       : undefined;
 
-  const raw = await prisma.partnerTransaction.findMany({
-    where: {
-      shopId,
-      branchId,
-      ...(filters.partnerId ? { partnerId: filters.partnerId } : {}),
-      ...(filters.type ? { type: filters.type } : {}),
-      ...(dateFilter ? { transactionDate: dateFilter } : {}),
-    },
-    orderBy: { transactionDate: "desc" },
-    include: {
-      partner: { select: { name: true } },
-      account: { select: { name: true } },
-    },
-  });
+  const where = {
+    shopId,
+    branchId,
+    ...(filters.partnerId ? { partnerId: filters.partnerId } : {}),
+    ...(filters.type ? { type: filters.type } : {}),
+    ...(dateFilter ? { transactionDate: dateFilter } : {}),
+  };
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, pageSize);
 
-  return raw.map((t) => ({
-    id: t.id,
-    voucherNo: t.voucherNo,
-    type: t.type as PartnerTransactionType,
-    amount: Number(t.amount),
-    transactionDate: t.transactionDate,
-    paymentMethod: t.paymentMethod,
-    purpose: t.purpose,
-    notes: t.notes,
-    partnerId: t.partnerId,
-    partnerName: t.partner.name,
-    accountId: t.accountId,
-    accountName: t.account?.name || "N/A",
-    branchId: t.branchId,
-  }));
+  const [total, raw] = await Promise.all([
+    prisma.partnerTransaction.count({ where }),
+    prisma.partnerTransaction.findMany({
+      where,
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+      orderBy: { transactionDate: "desc" },
+      include: {
+        partner: { select: { name: true } },
+        account: { select: { name: true } },
+      },
+    }),
+  ]);
+
+  return {
+    items: raw.map((t) => ({
+      id: t.id,
+      voucherNo: t.voucherNo,
+      type: t.type as PartnerTransactionType,
+      amount: Number(t.amount),
+      transactionDate: t.transactionDate,
+      paymentMethod: t.paymentMethod,
+      purpose: t.purpose,
+      notes: t.notes,
+      partnerId: t.partnerId,
+      partnerName: t.partner.name,
+      accountId: t.accountId,
+      accountName: t.account?.name || "N/A",
+      branchId: t.branchId,
+    })),
+    total,
+    page: safePage,
+    pageSize: safePageSize,
+  };
 }
 
 // ==========================================
@@ -118,8 +135,10 @@ export async function getPartnerTransactions(
 export async function getPartnerRations(
   shopId: string,
   branchId: string,
-  filters: IFamilyLedgerFilters = {}
-): Promise<IPartnerRation[]> {
+  filters: IFamilyLedgerFilters = {},
+  page = 1,
+  pageSize = 10
+): Promise<IPaginatedResult<IPartnerRation>> {
   const dateFilter =
     filters.startDate || filters.endDate
       ? {
@@ -132,41 +151,55 @@ export async function getPartnerRations(
         }
       : undefined;
 
-  const raw = await prisma.partnerRation.findMany({
-    where: {
-      shopId,
-      branchId,
-      ...(filters.partnerId ? { partnerId: filters.partnerId } : {}),
-      ...(dateFilter ? { rationDate: dateFilter } : {}),
-    },
-    orderBy: { rationDate: "desc" },
-    include: {
-      partner: { select: { name: true } },
-      items: {
-        include: {
-          product: { select: { name: true } },
-          unit: { select: { name: true } },
+  const where = {
+    shopId,
+    branchId,
+    ...(filters.partnerId ? { partnerId: filters.partnerId } : {}),
+    ...(dateFilter ? { rationDate: dateFilter } : {}),
+  };
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, pageSize);
+
+  const [total, raw] = await Promise.all([
+    prisma.partnerRation.count({ where }),
+    prisma.partnerRation.findMany({
+      where,
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+      orderBy: { rationDate: "desc" },
+      include: {
+        partner: { select: { name: true } },
+        items: {
+          include: {
+            product: { select: { name: true } },
+            unit: { select: { name: true } },
+          },
         },
       },
-    },
-  });
+    }),
+  ]);
 
-  return raw.map((r) => ({
-    id: r.id,
-    rationNo: r.rationNo,
-    rationDate: r.rationDate,
-    totalCost: Number(r.totalCost),
-    notes: r.notes,
-    partnerId: r.partnerId,
-    partnerName: r.partner.name,
-    items: r.items.map((it) => ({
-      id: it.id,
-      productId: it.productId,
-      productName: it.product.name,
-      quantity: Number(it.quantity),
-      unitCost: Number(it.unitCost),
-      lineTotal: Number(it.lineTotal),
-      unitName: it.unit?.name,
+  return {
+    items: raw.map((r) => ({
+      id: r.id,
+      rationNo: r.rationNo,
+      rationDate: r.rationDate,
+      totalCost: Number(r.totalCost),
+      notes: r.notes,
+      partnerId: r.partnerId,
+      partnerName: r.partner.name,
+      items: r.items.map((it) => ({
+        id: it.id,
+        productId: it.productId,
+        productName: it.product.name,
+        quantity: Number(it.quantity),
+        unitCost: Number(it.unitCost),
+        lineTotal: Number(it.lineTotal),
+        unitName: it.unit?.name,
+      })),
     })),
-  }));
+    total,
+    page: safePage,
+    pageSize: safePageSize,
+  };
 }

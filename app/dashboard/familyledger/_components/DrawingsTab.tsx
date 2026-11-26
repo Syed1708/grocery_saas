@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
-import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
+import { ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Printer } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { TableActions } from "@/components/common/ui/table/TableHelpers";
@@ -23,6 +23,7 @@ export default function DrawingsTab({
   currencySymbol = "৳",
   shop,
   branchName,
+  pagination,
   onEdit,
   onDelete,
 }: {
@@ -30,6 +31,12 @@ export default function DrawingsTab({
   currencySymbol?: string;
   shop: { name: string; phone?: string | null; address?: string | null };
   branchName: string;
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    onPageChange: (page: number, pageSize: number) => void;
+  };
   onEdit: (t: IPartnerTransaction) => void;
   onDelete: (t: IPartnerTransaction) => void;
 }) {
@@ -126,11 +133,26 @@ export default function DrawingsTab({
     data: transactions,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: Math.max(1, Math.ceil(pagination.total / pagination.pageSize)),
+    state: {
+      pagination: {
+        pageIndex: pagination.page - 1,
+        pageSize: pagination.pageSize,
+      },
+    },
+    onPaginationChange: (updater) => {
+      const current = {
+        pageIndex: pagination.page - 1,
+        pageSize: pagination.pageSize,
+      };
+      const next = typeof updater === "function" ? updater(current) : updater;
+      pagination.onPageChange(next.pageIndex + 1, next.pageSize);
+    },
   });
   return (
     <>
-      <DataTable table={table} columns={columns} />
+      <DataTable table={table} columns={columns} totalCount={pagination.total} />
       {printTransaction && (
         <DrawingVoucherPdf
           transaction={printTransaction}

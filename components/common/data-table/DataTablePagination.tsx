@@ -5,16 +5,18 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-r
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
+  totalCount?: number;
 }
 
 export function DataTablePagination<TData>({
   table,
+  totalCount,
 }: DataTablePaginationProps<TData>) {
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 border-t border-neutral-100 dark:border-neutral-800 dark:bg-neutral-850 text-xs">
       {/* Selected Rows count / total count */}
       <div className="text-neutral-500 dark:text-neutral-400">
-        Total: <strong>{table.getFilteredRowModel().rows.length}</strong> items found
+        Total: <strong>{totalCount ?? table.getFilteredRowModel().rows.length}</strong> items found
       </div>
 
       <div className="flex items-center gap-4 sm:gap-6">

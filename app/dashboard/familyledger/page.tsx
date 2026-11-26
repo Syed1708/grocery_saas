@@ -13,6 +13,9 @@ interface PageProps {
     partnerId?: string;
     type?: string;
     tab?: string;
+    pageSize?: string;
+    drawingsPage?: string;
+    rationsPage?: string;
   }>;
 }
 
@@ -23,6 +26,12 @@ const TRANSACTION_TYPES: PartnerTransactionType[] = [
   "CAPITAL_INJECTION",
   "PROFIT_DISTRIBUTION",
 ];
+const PAGE_SIZES = [10, 20, 50, 100];
+
+function parsePage(value: string | undefined): number {
+  const page = Number(value);
+  return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+}
 
 export default async function FamilyLedgerPage({ searchParams }: PageProps) {
   const { shopId, activeBranchId: branchId } = await requireAuth({
@@ -40,12 +49,16 @@ export default async function FamilyLedgerPage({ searchParams }: PageProps) {
     partnerId: rawFilters.partnerId,
     type,
   };
+  const parsedPageSize = Number(rawFilters.pageSize);
+  const pageSize = PAGE_SIZES.includes(parsedPageSize) ? parsedPageSize : 10;
+  const drawingsPage = parsePage(rawFilters.drawingsPage);
+  const rationsPage = parsePage(rawFilters.rationsPage);
 
   // Parallel data fetching matching your AccountsPage pattern
-  const [partners, transactions, rations, accountsRaw, productsRaw, shop, branch] = await Promise.all([
+  const [partners, transactionsResult, rationsResult, accountsRaw, productsRaw, shop, branch] = await Promise.all([
     getPartners(shopId, branchId),
-    getPartnerTransactions(shopId, branchId, filters),
-    getPartnerRations(shopId, branchId, filters),
+    getPartnerTransactions(shopId, branchId, filters, drawingsPage, pageSize),
+    getPartnerRations(shopId, branchId, filters, rationsPage, pageSize),
     prisma.account.findMany({
       where: { 
         shopId, 
@@ -89,8 +102,13 @@ export default async function FamilyLedgerPage({ searchParams }: PageProps) {
     <div className="max-w-7xl mx-auto">
       <FamilyLedgerClient
         partners={partners}
-        transactions={transactions}
-        rations={rations}
+        transactions={transactionsResult.items}
+        rations={rationsResult.items}
+        transactionTotal={transactionsResult.total}
+        rationTotal={rationsResult.total}
+        drawingsPage={transactionsResult.page}
+        rationsPage={rationsResult.page}
+        pageSize={pageSize}
         accounts={accounts}
         products={products}
         currencySymbol={shop?.currencySymbol || "৳"}

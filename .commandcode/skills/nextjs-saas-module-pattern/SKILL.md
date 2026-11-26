@@ -389,10 +389,11 @@ expenses; only genuine store expenses belong there. The report lives at
 `/dashboard/admin/reports/family` (CSV + A4 PDF) and is listed in the reports nav and overview grid.
 The report has quick periods (today / this month / last month / this year / all), date inputs, and
 daily/monthly/yearly partner-statement grouping. The family ledger tabs keep the active tab and
-history filters in the URL (`tab`, `startDate`, `endDate`, `partnerId`, `type`) and query
-transactions/rations server-side without a `take` cap, so old records remain reachable through the
-table pagination. Filter changes use `router.push` and re-render the server page; never slice the
-list to a fixed recent window. Every partner row in the equity table has its own
+history filters in the URL (`tab`, `startDate`, `endDate`, `partnerId`, `type`) and use true
+server-side pagination (`pageSize`, `drawingsPage`, `rationsPage`) with `count + skip/take`, not a
+fixed recent window and not a full-table load. Configure those tables with `manualPagination`,
+`pageCount`, controlled `pagination` state and an `onPaginationChange` that pushes the URL; pass
+`totalCount` to `DataTable` so the footer shows the real total. Every partner row in the equity table has its own
 PDF statement (`PartnerStatementPdf`) with summary, drawings/bills details and grocery line items.
 The Home Groceries table also has a per-row PDF action (`RationInvoicePdf`) that prints that single
 ration invoice with every item, quantity, unit cost and total. Drawings & Bills has the same

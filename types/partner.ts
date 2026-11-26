@@ -76,6 +76,13 @@ export interface IFamilyLedgerFilters {
   type?: PartnerTransactionType;
 }
 
+export interface IPaginatedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface IFamilyReportKpis {
   openingCapital: number;
   injections: number;
