@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ColumnDef,
   getCoreRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { Plus, RotateCcw, Search, Loader2, Printer, CheckCircle2 } from "lucide-react";
@@ -18,15 +18,24 @@ import ReturnReceiptThermalPrint from "./ReturnReceiptThermalPrint";
 
 interface ReturnsClientProps {
   data: ISaleReturn[];
+  total: number;
+  page: number;
+  pageSize: number;
   shop: IPosShopConfig;
   currencySymbol?: string;
 }
 
 export default function ReturnsClient({
   data = [],
+  total,
+  page,
+  pageSize,
   shop,
   currencySymbol = "৳",
 }: ReturnsClientProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [modalOpen, setModalOpen] = useState(false);
   const [searchInvoiceNo, setSearchInvoiceNo] = useState("");
   const [searchedSale, setSearchedSale] = useState<IReturnableSale | null>(null);
@@ -166,9 +175,9 @@ export default function ReturnsClient({
               // Construct return object and trigger print
               setCompletedReturn({
                 returnNo: ret.returnNo,
-                invoiceNo: ret.invoiceNo,
+                invoiceNo: ret.invoiceNo || "",
                 returnDate: ret.returnDate,
-                customerName: ret.customerName,
+                customerName: ret.customerName || "নগদ ক্রেতা (Walk-in)",
                 totalRefund: ret.totalRefund,
                 refundMethod: ret.refundMethod,
                 branchName: ret.branchName || "Main Branch",
@@ -198,7 +207,23 @@ export default function ReturnsClient({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: Math.max(1, Math.ceil(total / pageSize)),
+    state: { pagination: { pageIndex: page - 1, pageSize } },
+    onPaginationChange: (updater) => {
+      const current = { pageIndex: page - 1, pageSize };
+      const next = typeof updater === "function" ? updater(current) : updater;
+      const params = new URLSearchParams(searchParams.toString());
+      if (next.pageSize !== pageSize) {
+        params.set("pageSize", String(next.pageSize));
+        params.delete("page");
+      } else if (next.pageIndex <= 0) {
+        params.delete("page");
+      } else {
+        params.set("page", String(next.pageIndex + 1));
+      }
+      router.push(`${pathname}?${params.toString()}`);
+    },
   });
 
   // Check conditions
@@ -237,7 +262,7 @@ export default function ReturnsClient({
         </button>
       </div>
 
-      <DataTable table={table} columns={columns} />
+      <DataTable table={table} columns={columns} totalCount={total} />
 
       {/* Process Return Modal */}
       <Modal

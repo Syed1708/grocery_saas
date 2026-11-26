@@ -1,38 +1,45 @@
 import { prisma } from "@/lib/prisma";
-import { ISaleReturn } from "@/types/sale";
+import { IPaginatedSaleReturns, ISaleReturn } from "@/types/sale";
 
 /**
  * GET SALE RETURNS LIST
  * - Strictly isolated to active branch
- * - Limits to latest 150 returns (Prevents memory exhaustion)
+ * - Server-side pagination with count + skip/take
  * - Includes line items so historical return slips can be reprinted
  */
 export async function getSaleReturns(
   shopId: string,
-  branchId?: string | null
-): Promise<ISaleReturn[]> {
-  const returns = await prisma.saleReturn.findMany({
-    where: {
-      shopId,
-      ...(branchId ? { branchId } : {}), // Strictly scoped to active branch
-    },
-    include: {
-      sale: { select: { invoiceNo: true } },
-      customer: { select: { name: true } },
-      branch: { select: { name: true } },
-      cashier: { select: { name: true } },
-      items: {
-        include: {
-          product: { select: { name: true, barcode: true } },
-          unit: { select: { shortCode: true } },
+  branchId?: string | null,
+  page = 1,
+  pageSize = 10
+): Promise<IPaginatedSaleReturns> {
+  const where = { shopId, ...(branchId ? { branchId } : {}) };
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, pageSize);
+
+  const [total, returns] = await Promise.all([
+    prisma.saleReturn.count({ where }),
+    prisma.saleReturn.findMany({
+      where,
+      include: {
+        sale: { select: { invoiceNo: true } },
+        customer: { select: { name: true } },
+        branch: { select: { name: true } },
+        cashier: { select: { name: true } },
+        items: {
+          include: {
+            product: { select: { name: true, barcode: true } },
+            unit: { select: { shortCode: true } },
+          },
         },
       },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 150, // Prevents loading thousands of records into client memory
-  });
+      orderBy: { createdAt: "desc" },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+    }),
+  ]);
 
-  return returns.map((r) => ({
+  const items: ISaleReturn[] = returns.map((r) => ({
     id: r.id,
     returnNo: r.returnNo,
     returnDate: r.returnDate,
@@ -60,4 +67,6 @@ export async function getSaleReturns(
     })),
     createdAt: r.createdAt,
   }));
+
+  return { items, total, page: safePage, pageSize: safePageSize };
 }

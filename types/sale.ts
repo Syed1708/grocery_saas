@@ -195,15 +195,22 @@ export interface ISaleReturn {
   totalRefund: number;
   refundMethod: RefundMethodType | string;
   notes?: string | null;
-  saleId: string;
-  invoiceNo: string;
-  customerId?: string | null;
-  customerName: string;
-  branchId: string;
+  saleId?: string;
+  invoiceNo?: string;
+  branchId?: string;
   branchName?: string | null;
-  cashierName?: string;
-  items?: ISaleReturnItem[];
-  createdAt: Date | string;
+  cashierName?: string | null;
+  customerId?: string | null;
+  customerName?: string | null;
+  items: ISaleReturnItem[];
+  createdAt?: Date | string;
+}
+
+export interface IPaginatedSaleReturns {
+  items: ISaleReturn[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 // ==========================================

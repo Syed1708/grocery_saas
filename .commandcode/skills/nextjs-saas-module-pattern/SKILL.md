@@ -468,6 +468,8 @@ tables were created with `db push`, run
 
 **POS / sales / returns / closings:** checkout requires `POS_ACCESS`; voiding a sale is
 OWNER-only, needs `requireActiveStatus`, and must load the sale by `{ id, shopId, activeBranchId }`.
+The sale-returns history uses paginated `getSaleReturns(shopId, branchId, page, pageSize)` with
+`count + skip/take`, URL `page`/`pageSize`, `manualPagination` and true `totalCount`.
 The Sales invoice list uses server-side search (`q`), payment status (`status`), method (`method`),
 `page` and `pageSize` in the URL, with `count + skip/take` — never cap the list at 150 rows or filter
 only the fetched page. Use `manualPagination` with `pageCount` and pass `totalCount` to `DataTable`.
