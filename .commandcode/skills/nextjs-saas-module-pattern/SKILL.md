@@ -388,7 +388,11 @@ partner-equity movements — they must **not** be included in the P&L or counted
 expenses; only genuine store expenses belong there. The report lives at
 `/dashboard/admin/reports/family` (CSV + A4 PDF) and is listed in the reports nav and overview grid.
 The report has quick periods (today / this month / last month / this year / all), date inputs, and
-daily/monthly/yearly partner-statement grouping. Every partner row in the equity table has its own
+daily/monthly/yearly partner-statement grouping. The family ledger tabs keep the active tab and
+history filters in the URL (`tab`, `startDate`, `endDate`, `partnerId`, `type`) and query
+transactions/rations server-side without a `take` cap, so old records remain reachable through the
+table pagination. Filter changes use `router.push` and re-render the server page; never slice the
+list to a fixed recent window. Every partner row in the equity table has its own
 PDF statement (`PartnerStatementPdf`) with summary, drawings/bills details and grocery line items.
 The Home Groceries table also has a per-row PDF action (`RationInvoicePdf`) that prints that single
 ration invoice with every item, quantity, unit cost and total. Drawings & Bills has the same
@@ -399,7 +403,9 @@ just home groceries for one partner. This selector is a server-side URL filter
 and visible sections change along with the PDF; drawings-only also excludes
 `CAPITAL_INJECTION` rows. Render only one print portal at a time (family report,
 partner statement, ration invoice **or** drawing voucher) because each
-`body > *:not(#print-root)` print rule would otherwise hide the other.
+`body > *:not(#print-root)` print rule would otherwise hide the other. Clear the selected
+print record on the window `afterprint` event so a later Ctrl+P doesn't reprint the last voucher;
+add `thead { display: table-header-group; }` and `print-color-adjust: exact` for long tables.
 
 **Stock transfers & wastage:** the stock page uses `requiredAnyPermission: [INVENTORY_TRANSFER,
 INVENTORY_WASTAGE]` (guard supports `requiredAnyPermission`). Dispatch/update/cancel require

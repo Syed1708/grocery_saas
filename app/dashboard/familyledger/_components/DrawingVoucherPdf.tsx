@@ -68,6 +68,8 @@ export default function DrawingVoucherPdf({
                 display: block !important;
                 position: static !important;
                 width: 100% !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
               }
             }
           `,

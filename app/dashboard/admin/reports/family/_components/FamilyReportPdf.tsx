@@ -78,8 +78,11 @@ export default function FamilyReportPdf({
                 display: block !important;
                 position: static !important;
                 width: 100% !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
               }
               .family-print-table { page-break-inside: auto; }
+              .family-print-table thead { display: table-header-group; }
               .family-print-table tr { page-break-inside: avoid; }
             }
           `,

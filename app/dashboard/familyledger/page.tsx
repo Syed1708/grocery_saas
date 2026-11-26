@@ -1,21 +1,51 @@
 import { requireAuth } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { PERMISSIONS } from "@/types";
+import { PartnerTransactionType } from "@/types/partner";
 
 import FamilyLedgerClient from "./_components/FamilyLedgerClient";
 import { getPartnerRations, getPartners, getPartnerTransactions } from "@/queries/partner-queries";
 
-export default async function FamilyLedgerPage() {
+interface PageProps {
+  searchParams: Promise<{
+    startDate?: string;
+    endDate?: string;
+    partnerId?: string;
+    type?: string;
+    tab?: string;
+  }>;
+}
+
+const TRANSACTION_TYPES: PartnerTransactionType[] = [
+  "CASH_DRAWING",
+  "BANK_DRAWING",
+  "HOUSEHOLD_EXPENSE",
+  "CAPITAL_INJECTION",
+  "PROFIT_DISTRIBUTION",
+];
+
+export default async function FamilyLedgerPage({ searchParams }: PageProps) {
   const { shopId, activeBranchId: branchId } = await requireAuth({
     requiredPermission: PERMISSIONS.FAMILY_LEDGER_ACCESS,
     requireActiveStatus: true,
   });
 
+  const rawFilters = await searchParams;
+  const type = TRANSACTION_TYPES.includes(rawFilters.type as PartnerTransactionType)
+    ? (rawFilters.type as PartnerTransactionType)
+    : undefined;
+  const filters = {
+    startDate: rawFilters.startDate,
+    endDate: rawFilters.endDate,
+    partnerId: rawFilters.partnerId,
+    type,
+  };
+
   // Parallel data fetching matching your AccountsPage pattern
   const [partners, transactions, rations, accountsRaw, productsRaw, shop, branch] = await Promise.all([
     getPartners(shopId, branchId),
-    getPartnerTransactions(shopId, branchId, 100),
-    getPartnerRations(shopId, branchId, 100),
+    getPartnerTransactions(shopId, branchId, filters),
+    getPartnerRations(shopId, branchId, filters),
     prisma.account.findMany({
       where: { 
         shopId, 

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import {
+  IFamilyLedgerFilters,
   IPartner,
   IPartnerRation,
   IPartnerTransaction,
@@ -65,11 +66,28 @@ export async function getPartners(shopId: string, branchId: string): Promise<IPa
 export async function getPartnerTransactions(
   shopId: string,
   branchId: string,
-  limit = 100
+  filters: IFamilyLedgerFilters = {}
 ): Promise<IPartnerTransaction[]> {
+  const dateFilter =
+    filters.startDate || filters.endDate
+      ? {
+          ...(filters.startDate
+            ? { gte: new Date(`${filters.startDate}T00:00:00`) }
+            : {}),
+          ...(filters.endDate
+            ? { lte: new Date(`${filters.endDate}T23:59:59.999`) }
+            : {}),
+        }
+      : undefined;
+
   const raw = await prisma.partnerTransaction.findMany({
-    where: { shopId, branchId },
-    take: limit,
+    where: {
+      shopId,
+      branchId,
+      ...(filters.partnerId ? { partnerId: filters.partnerId } : {}),
+      ...(filters.type ? { type: filters.type } : {}),
+      ...(dateFilter ? { transactionDate: dateFilter } : {}),
+    },
     orderBy: { transactionDate: "desc" },
     include: {
       partner: { select: { name: true } },
@@ -100,11 +118,27 @@ export async function getPartnerTransactions(
 export async function getPartnerRations(
   shopId: string,
   branchId: string,
-  limit = 100
+  filters: IFamilyLedgerFilters = {}
 ): Promise<IPartnerRation[]> {
+  const dateFilter =
+    filters.startDate || filters.endDate
+      ? {
+          ...(filters.startDate
+            ? { gte: new Date(`${filters.startDate}T00:00:00`) }
+            : {}),
+          ...(filters.endDate
+            ? { lte: new Date(`${filters.endDate}T23:59:59.999`) }
+            : {}),
+        }
+      : undefined;
+
   const raw = await prisma.partnerRation.findMany({
-    where: { shopId, branchId },
-    take: limit,
+    where: {
+      shopId,
+      branchId,
+      ...(filters.partnerId ? { partnerId: filters.partnerId } : {}),
+      ...(dateFilter ? { rationDate: dateFilter } : {}),
+    },
     orderBy: { rationDate: "desc" },
     include: {
       partner: { select: { name: true } },

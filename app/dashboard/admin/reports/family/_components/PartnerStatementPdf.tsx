@@ -181,8 +181,11 @@ export default function PartnerStatementPdf({
                 display: block !important;
                 position: static !important;
                 width: 100% !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
               }
               .partner-print-table { page-break-inside: auto; }
+              .partner-print-table thead { display: table-header-group; }
               .partner-print-table tr { page-break-inside: avoid; }
             }
           `,

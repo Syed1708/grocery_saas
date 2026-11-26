@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, ArrowDownRight } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Plus, ArrowDownRight, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { StatCard } from "@/components/common/StatCard";
+import { Input } from "@/components/common/ui/Input";
 import { useCrudModal } from "@/hooks/useCrudModal";
 import PartnersTab from "./PartnersTab";
 import DrawingsTab from "./DrawingsTab";
@@ -45,7 +47,43 @@ export default function FamilyLedgerClient({
   shop: { name: string; phone?: string | null; address?: string | null };
   branchName: string;
 }) {
-  const [activeTab, setActiveTab] = useState<"partners" | "drawings" | "rations">("partners");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const activeTab: "partners" | "drawings" | "rations" =
+    tabParam === "drawings" || tabParam === "rations" ? tabParam : "partners";
+
+  const setActiveTab = (tab: "partners" | "drawings" | "rations") => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (tab === "partners") params.delete("tab");
+    else params.set("tab", tab);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const setFilter = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value && value !== "all") params.set(key, value);
+    else params.delete(key);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const clearFilters = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("startDate");
+    params.delete("endDate");
+    params.delete("partnerId");
+    params.delete("type");
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const hasFilters = Boolean(
+    searchParams.get("startDate") ||
+      searchParams.get("endDate") ||
+      searchParams.get("partnerId") ||
+      searchParams.get("type")
+  );
+
   const [drawingModalOpen, setDrawingModalOpen] = useState(false);
   const [rationModalOpen, setRationModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
@@ -201,6 +239,74 @@ export default function FamilyLedgerClient({
           )}
         </div>
       </div>
+
+      {/* HISTORY FILTERS */}
+      {activeTab !== "partners" && (
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-3 rounded-xl space-y-2.5">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold">History Filters</span>
+              <span className="text-[10px] text-neutral-500 ml-2">
+                Showing {activeTab === "drawings" ? transactions.length : rations.length} records
+              </span>
+            </div>
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="flex items-center gap-1 text-[11px] text-rose-600 hover:underline font-semibold cursor-pointer"
+              >
+                <RotateCcw size={12} /> Reset Filters
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            <Input
+              type="date"
+              value={searchParams.get("startDate") || ""}
+              onChange={(e) => setFilter("startDate", e.target.value)}
+              aria-label="Start date"
+            />
+            <Input
+              type="date"
+              value={searchParams.get("endDate") || ""}
+              onChange={(e) => setFilter("endDate", e.target.value)}
+              aria-label="End date"
+            />
+            <select
+              value={searchParams.get("partnerId") || "all"}
+              onChange={(e) => setFilter("partnerId", e.target.value)}
+              aria-label="Filter by partner"
+              className="text-xs px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none cursor-pointer"
+            >
+              <option value="all">All Partners</option>
+              {partners.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+            {activeTab === "drawings" ? (
+              <select
+                value={searchParams.get("type") || "all"}
+                onChange={(e) => setFilter("type", e.target.value)}
+                aria-label="Filter by transaction type"
+                className="text-xs px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none cursor-pointer"
+              >
+                <option value="all">All Transaction Types</option>
+                <option value="CASH_DRAWING">Cash Drawings</option>
+                <option value="BANK_DRAWING">Bank Drawings</option>
+                <option value="HOUSEHOLD_EXPENSE">Household Bills</option>
+                <option value="CAPITAL_INJECTION">Capital Injections</option>
+                <option value="PROFIT_DISTRIBUTION">Profit Distribution</option>
+              </select>
+            ) : (
+              <div className="text-[11px] text-neutral-500 flex items-center px-1">
+                Filter grocery rations by date or partner.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* RENDER ACTIVE TAB */}
       {activeTab === "partners" && (

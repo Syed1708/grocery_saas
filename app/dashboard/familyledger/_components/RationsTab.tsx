@@ -1,7 +1,7 @@
 "use client";
 "use no memo";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { Printer } from "lucide-react";
@@ -27,6 +27,12 @@ export default function RationsTab({
   onDelete: (r: IPartnerRation) => void;
 }) {
   const [printRation, setPrintRation] = useState<IPartnerRation | null>(null);
+
+  useEffect(() => {
+    const clearAfterPrint = () => setPrintRation(null);
+    window.addEventListener("afterprint", clearAfterPrint);
+    return () => window.removeEventListener("afterprint", clearAfterPrint);
+  }, []);
 
   const printRationPdf = (ration: IPartnerRation) => {
     flushSync(() => setPrintRation(ration));

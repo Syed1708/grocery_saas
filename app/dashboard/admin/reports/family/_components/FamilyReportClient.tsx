@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -70,6 +70,15 @@ export default function FamilyReportClient({
     statementTypeParam === "drawings" || statementTypeParam === "rations"
       ? statementTypeParam
       : "all";
+
+  useEffect(() => {
+    const clearAfterPrint = () => {
+      setPrintPartner(null);
+      setPdfSection("all");
+    };
+    window.addEventListener("afterprint", clearAfterPrint);
+    return () => window.removeEventListener("afterprint", clearAfterPrint);
+  }, []);
 
   const printPdf = (section: FamilyPdfSection) => {
     flushSync(() => {

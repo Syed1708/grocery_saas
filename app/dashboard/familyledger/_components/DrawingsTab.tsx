@@ -1,7 +1,7 @@
 "use client";
 "use no memo";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { Printer } from "lucide-react";
@@ -34,6 +34,12 @@ export default function DrawingsTab({
   onDelete: (t: IPartnerTransaction) => void;
 }) {
   const [printTransaction, setPrintTransaction] = useState<IPartnerTransaction | null>(null);
+
+  useEffect(() => {
+    const clearAfterPrint = () => setPrintTransaction(null);
+    window.addEventListener("afterprint", clearAfterPrint);
+    return () => window.removeEventListener("afterprint", clearAfterPrint);
+  }, []);
 
   const printDrawingPdf = (transaction: IPartnerTransaction) => {
     flushSync(() => setPrintTransaction(transaction));

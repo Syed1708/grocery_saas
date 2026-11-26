@@ -69,6 +69,13 @@ export interface IFamilyReportFilters {
   statementType?: "all" | "drawings" | "rations";
 }
 
+export interface IFamilyLedgerFilters {
+  startDate?: string;
+  endDate?: string;
+  partnerId?: string;
+  type?: PartnerTransactionType;
+}
+
 export interface IFamilyReportKpis {
   openingCapital: number;
   injections: number;
