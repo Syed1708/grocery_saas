@@ -29,6 +29,18 @@ export interface IPurchaseOrder {
   createdAt: Date | string;
 }
 
+export interface IPurchaseOrderListFilters {
+  q?: string;
+  status?: string;
+}
+
+export interface IPaginatedPurchaseOrders {
+  items: IPurchaseOrder[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface ReorderSuggestionItem {
   id: string;
   name: string;

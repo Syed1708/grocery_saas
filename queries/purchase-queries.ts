@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma, PaymentStatus, PurchaseOrderStatus } from "@/generated/prisma/client";
-import { IPurchaseOrder } from "@/types";
+import {
+  IPaginatedPurchaseOrders,
+  IPurchaseOrderListFilters,
+} from "@/types/purchase-order";
 import { IPaginatedPurchases, IPurchaseListFilters } from "@/types/purchase";
 
 /**
@@ -116,44 +119,72 @@ export async function getPurchases(
 
 export async function getPurchaseOrders(
   shopId: string,
-  branchId?: string | null
-): Promise<IPurchaseOrder[]> {
-  const orders = await prisma.purchaseOrder.findMany({
-    where: {
-      shopId,
-      ...(branchId ? { branchId } : {}),
-    },
-    include: {
-      supplier: {
-        select: {
-          id: true,
-          name: true,
-          companyName: true,
-          phone: true,
+  branchId?: string | null,
+  filters: IPurchaseOrderListFilters = {},
+  page = 1,
+  pageSize = 10
+): Promise<IPaginatedPurchaseOrders> {
+  const query = filters.q?.trim();
+  const status =
+    filters.status && filters.status !== "ALL"
+      ? (filters.status as PurchaseOrderStatus)
+      : undefined;
+
+  const where: Prisma.PurchaseOrderWhereInput = {
+    shopId,
+    ...(branchId ? { branchId } : {}),
+    ...(query
+      ? {
+          OR: [
+            { orderNo: { contains: query } },
+            { supplier: { name: { contains: query } } },
+            { supplier: { companyName: { contains: query } } },
+          ],
+        }
+      : {}),
+    ...(status ? { status } : {}),
+  };
+
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, pageSize);
+
+  const [total, orders] = await Promise.all([
+    prisma.purchaseOrder.count({ where }),
+    prisma.purchaseOrder.findMany({
+      where,
+      include: {
+        supplier: {
+          select: {
+            id: true,
+            name: true,
+            companyName: true,
+            phone: true,
+          },
         },
-      },
-      branch: {
-        select: {
-          name: true,
+        branch: {
+          select: {
+            name: true,
+          },
         },
-      },
-      items: {
-        include: {
-          product: {
-            select: {
-              name: true,
-              barcode: true,
-              unit: { select: { shortCode: true } },
+        items: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                barcode: true,
+                unit: { select: { shortCode: true } },
+              },
             },
           },
         },
       },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+      orderBy: { createdAt: "desc" },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+    }),
+  ]);
 
-  return orders.map((o) => ({
+  const items = orders.map((o) => ({
     id: o.id,
     orderNo: o.orderNo,
     orderDate: o.orderDate,
@@ -179,4 +210,6 @@ export async function getPurchaseOrders(
       lineTotal: Number(i.lineTotal),
     })),
   }));
+
+  return { items, total, page: safePage, pageSize: safePageSize };
 }

@@ -472,8 +472,9 @@ debounced search can't overwrite a status/method change.
 
 The Purchases invoice tab follows the same pattern: URL `q`, `status` (`PAID|PARTIAL|DUE`), `page`,
 `pageSize`; server-side `count + skip/take` and `manualPagination` with the shared `DataTable`
-`totalCount`. Purchase orders (100) and purchase returns (150) still use capped lists and are the
-next candidates for the same treatment.
+`totalCount`. Purchase orders and purchase returns use the same pattern with their own URL keys
+(`ordersQ`, `ordersStatus`, `ordersPage`; `returnsQ`, `returnsSettlement`, `returnsPage`), shared
+`pageSize`, and `manualPagination`. Never cap these lists at 100/150 rows; use `count + skip/take`.
 Validate a submitted `customerId` with `{ id, shopId, OR: [{ branchId: active }, { branchId: null }] }`.
 Returns viewing uses `POS_ACCESS` (the sidebar entry itself is gated by `POS_REFUND_RETURN`);
 processing a return requires `POS_REFUND_RETURN`, whitelists `cash|balance`, re-checks remaining

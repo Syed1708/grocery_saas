@@ -45,7 +45,12 @@ interface PurchasesClientProps {
   invoicePageSize: number;
   suppliers: ISupplier[];
   returns?: IPurchaseReturn[];
+  returnsTotal: number;
+  returnsPage: number;
   orders?: IPurchaseOrder[];
+  ordersTotal: number;
+  ordersPage: number;
+  pageSize: number;
   currencySymbol?: string;
   shopName?: string;
   userRole?: string;
@@ -62,7 +67,12 @@ export default function PurchasesClient({
   invoicePageSize,
   suppliers = [],
   returns = [],
+  returnsTotal,
+  returnsPage,
   orders = [],
+  ordersTotal,
+  ordersPage,
+  pageSize,
   currencySymbol = "৳",
   shopName = "Grocery Store",
   userRole = "OWNER",
@@ -222,7 +232,7 @@ export default function PurchasesClient({
               : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
               }`}
           >
-            <RotateCcw size={14} /> পণ্য ফেরত / ডেবিট নোট ({returns.length})
+            <RotateCcw size={14} /> পণ্য ফেরত / ডেবিট নোট ({returnsTotal})
           </button>
 
           <button
@@ -233,7 +243,7 @@ export default function PurchasesClient({
                 : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
               }`}
           >
-            <ClipboardList size={14} /> ড্রাফট অর্ডার / PO ({orders.length})
+            <ClipboardList size={14} /> ড্রাফট অর্ডার / PO ({ordersTotal})
           </button>
         </div>
 
@@ -333,6 +343,7 @@ export default function PurchasesClient({
         <ReturnsTab
           returns={returns}
           currencySymbol={currencySymbol}
+          pagination={{ page: returnsPage, pageSize, total: returnsTotal }}
           onPrint={handlePrintReturn}
         />
       )}
@@ -343,6 +354,7 @@ export default function PurchasesClient({
           orders={orders}
           currencySymbol={currencySymbol}
           shopName={shopName}
+          pagination={{ page: ordersPage, pageSize, total: ordersTotal }}
         />
       )}
 

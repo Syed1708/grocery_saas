@@ -42,6 +42,18 @@ export interface IPurchaseReturn {
   createdAt: Date;
 }
 
+export interface IPurchaseReturnListFilters {
+  q?: string;
+  settlementType?: string;
+}
+
+export interface IPaginatedPurchaseReturns {
+  items: IPurchaseReturn[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface CreatePurchaseReturnPayload {
   supplierId: string;
   purchaseId?: string | null;

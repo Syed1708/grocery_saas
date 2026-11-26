@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
     ColumnDef,
     getCoreRowModel,
-    getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -32,15 +32,27 @@ interface Props {
     orders: IPurchaseOrder[];
     currencySymbol?: string;
     shopName: string;
+    pagination: {
+        page: number;
+        pageSize: number;
+        total: number;
+    };
 }
 
 export default function OrdersTab({
     orders = [],
     currencySymbol = "৳",
     shopName,
+    pagination,
 }: Props) {
-    const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState("ALL");
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const statusFilter = searchParams.get("ordersStatus") || "ALL";
+    const [search, setSearch] = useState(searchParams.get("ordersQ") || "");
+    const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const searchParamsRef = useRef(searchParams);
+    searchParamsRef.current = searchParams;
 
     // Modal states
     const [viewingOrder, setViewingOrder] = useState<IPurchaseOrder | null>(null);
@@ -48,20 +60,45 @@ export default function OrdersTab({
     const [deletingOrder, setDeletingOrder] = useState<IPurchaseOrder | null>(null);
     const [loading, setLoading] = useState(false);
 
-    const filteredOrders = useMemo(() => {
-        return orders.filter((o) => {
-            if (search) {
-                const q = search.toLowerCase();
-                const matchesNo = o.orderNo.toLowerCase().includes(q);
-                const matchesSupplier =
-                    o.supplierCompany?.toLowerCase().includes(q) ||
-                    o.supplierName.toLowerCase().includes(q);
-                if (!matchesNo && !matchesSupplier) return false;
-            }
-            if (statusFilter !== "ALL" && o.status !== statusFilter) return false;
-            return true;
+    const updateParams = (mutate: (params: URLSearchParams) => void) => {
+        const params = new URLSearchParams(searchParamsRef.current.toString());
+        mutate(params);
+        router.push(`${pathname}?${params.toString()}`);
+    };
+
+    const updateFilter = (key: string, value: string) => {
+        updateParams((params) => {
+            if (value && value !== "ALL") params.set(key, value);
+            else params.delete(key);
+            params.delete("ordersPage");
         });
-    }, [orders, search, statusFilter]);
+    };
+
+    const handleSearchChange = (value: string) => {
+        setSearch(value);
+        if (searchTimer.current) clearTimeout(searchTimer.current);
+        searchTimer.current = setTimeout(() => updateFilter("ordersQ", value), 350);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (searchTimer.current) clearTimeout(searchTimer.current);
+        };
+    }, []);
+
+    const updatePagination = (nextPage: number, nextPageSize: number) => {
+        updateParams((params) => {
+            if (nextPageSize !== pagination.pageSize) {
+                params.set("pageSize", String(nextPageSize));
+                params.delete("ordersPage");
+                params.delete("returnsPage");
+            } else if (nextPage <= 1) {
+                params.delete("ordersPage");
+            } else {
+                params.set("ordersPage", String(nextPage));
+            }
+        });
+    };
 
     const handleDeleteConfirm = async () => {
         if (!deletingOrder) return;
@@ -210,10 +247,25 @@ export default function OrdersTab({
     ];
 
     const table = useReactTable({
-        data: filteredOrders,
+        data: orders,
         columns,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        manualPagination: true,
+        pageCount: Math.max(1, Math.ceil(pagination.total / pagination.pageSize)),
+        state: {
+            pagination: {
+                pageIndex: pagination.page - 1,
+                pageSize: pagination.pageSize,
+            },
+        },
+        onPaginationChange: (updater) => {
+            const current = {
+                pageIndex: pagination.page - 1,
+                pageSize: pagination.pageSize,
+            };
+            const next = typeof updater === "function" ? updater(current) : updater;
+            updatePagination(next.pageIndex + 1, next.pageSize);
+        },
     });
 
     return (
@@ -225,7 +277,7 @@ export default function OrdersTab({
                     <input
                         type="text"
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e) => handleSearchChange(e.target.value)}
                         placeholder="অর্ডার নম্বর বা সরবরাহকারীর নাম দিয়ে খুঁজুন..."
                         className="w-full pl-9 pr-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -243,7 +295,7 @@ export default function OrdersTab({
                         <button
                             key={pill.value}
                             type="button"
-                            onClick={() => setStatusFilter(pill.value)}
+                            onClick={() => updateFilter("ordersStatus", pill.value)}
                             className={`px-3 py-1 rounded-lg text-xs font-medium transition shrink-0 cursor-pointer ${statusFilter === pill.value
                                     ? "bg-blue-600 text-white font-semibold shadow-xs"
                                     : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
@@ -255,7 +307,7 @@ export default function OrdersTab({
                 </div>
             </div>
 
-            <DataTable table={table} columns={columns} />
+            <DataTable table={table} columns={columns} totalCount={pagination.total} />
 
             {/* View Modal */}
             <ViewOrderModal

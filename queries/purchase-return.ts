@@ -1,52 +1,86 @@
 import { prisma } from "@/lib/prisma";
-import { IPurchaseReturn, ReturnReason, ReturnSettlementType } from "@/types/purchase-return";
+import { Prisma } from "@/generated/prisma/client";
+import {
+  IPaginatedPurchaseReturns,
+  IPurchaseReturnListFilters,
+  ReturnReason,
+  ReturnSettlementType,
+} from "@/types/purchase-return";
 
 export async function getPurchaseReturns(
   shopId: string,
-  branchId?: string | null
-): Promise<IPurchaseReturn[]> {
-  const returns = await prisma.purchaseReturn.findMany({
-    where: {
-      shopId,
-      ...(branchId ? { branchId } : {}),
-    },
-    include: {
-      supplier: {
-        select: {
-          id: true,
-          name: true,
-          companyName: true,
-          phone: true,
+  branchId?: string | null,
+  filters: IPurchaseReturnListFilters = {},
+  page = 1,
+  pageSize = 10
+): Promise<IPaginatedPurchaseReturns> {
+  const query = filters.q?.trim();
+  const settlementType =
+    filters.settlementType && filters.settlementType !== "ALL"
+      ? (filters.settlementType as ReturnSettlementType)
+      : undefined;
+
+  const where: Prisma.PurchaseReturnWhereInput = {
+    shopId,
+    ...(branchId ? { branchId } : {}),
+    ...(query
+      ? {
+          OR: [
+            { returnNo: { contains: query } },
+            { supplier: { name: { contains: query } } },
+            { supplier: { companyName: { contains: query } } },
+          ],
+        }
+      : {}),
+    ...(settlementType ? { settlementType } : {}),
+  };
+
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, pageSize);
+
+  const [total, returns] = await Promise.all([
+    prisma.purchaseReturn.count({ where }),
+    prisma.purchaseReturn.findMany({
+      where,
+      include: {
+        supplier: {
+          select: {
+            id: true,
+            name: true,
+            companyName: true,
+            phone: true,
+          },
         },
-      },
-      branch: {
-        select: {
-          id: true,
-          name: true,
+        branch: {
+          select: {
+            id: true,
+            name: true,
+          },
         },
-      },
-      purchase: {
-        select: {
-          chalanNo: true,
+        purchase: {
+          select: {
+            chalanNo: true,
+          },
         },
-      },
-      items: {
-        include: {
-          product: {
-            select: {
-              id: true,
-              name: true,
-              barcode: true,
+        items: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                barcode: true,
+              },
             },
           },
         },
       },
-    },
-    orderBy: { returnDate: "desc" },
-    take: 150,
-  });
+      orderBy: { returnDate: "desc" },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+    }),
+  ]);
 
-  return returns.map((r) => ({
+  const items = returns.map((r) => ({
     id: r.id,
     returnNo: r.returnNo,
     returnDate: r.returnDate,
@@ -77,4 +111,6 @@ export async function getPurchaseReturns(
     })),
     createdAt: r.createdAt,
   }));
+
+  return { items, total, page: safePage, pageSize: safePageSize };
 }

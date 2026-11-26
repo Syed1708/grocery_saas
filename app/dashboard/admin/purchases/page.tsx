@@ -17,11 +17,19 @@ interface PageProps {
     status?: string;
     page?: string;
     pageSize?: string;
+    ordersQ?: string;
+    ordersStatus?: string;
+    ordersPage?: string;
+    returnsQ?: string;
+    returnsSettlement?: string;
+    returnsPage?: string;
   }>;
 }
 
 const PAGE_SIZES = [10, 20, 50, 100];
 const PAYMENT_STATUSES = ["PAID", "PARTIAL", "DUE"];
+const ORDER_STATUSES = ["DRAFT", "SENT_TO_SR", "CONVERTED", "CANCELLED"];
+const RETURN_SETTLEMENTS = ["DUE_DEDUCTION", "CASH_REFUND", "PARTIAL"];
 
 function parsePage(value: string | undefined): number {
   const page = Number(value);
@@ -44,14 +52,35 @@ export default async function PurchasesPage({ searchParams }: PageProps) {
   const status = rawFilters.status && PAYMENT_STATUSES.includes(rawFilters.status)
     ? rawFilters.status
     : undefined;
+  const ordersStatus =
+    rawFilters.ordersStatus && ORDER_STATUSES.includes(rawFilters.ordersStatus)
+      ? rawFilters.ordersStatus
+      : undefined;
+  const returnsSettlement =
+    rawFilters.returnsSettlement && RETURN_SETTLEMENTS.includes(rawFilters.returnsSettlement)
+      ? rawFilters.returnsSettlement
+      : undefined;
+  const ordersPage = parsePage(rawFilters.ordersPage);
+  const returnsPage = parsePage(rawFilters.returnsPage);
 
   // Parallel server queries (Strictly scoped to active branch)
-  const [purchasesResult, suppliers, returns, orders, shop] = await Promise.all([
+  const [purchasesResult, suppliers, returnsResult, ordersResult, shop] = await Promise.all([
     getPurchases(shopId, activeBranchId, { q: rawFilters.q, status }, page, pageSize),
     getSuppliers(shopId, activeBranchId),
-    getPurchaseReturns(shopId, activeBranchId),
-        getPurchaseOrders(shopId, activeBranchId), // 👈 Fetch orders
-
+    getPurchaseReturns(
+      shopId,
+      activeBranchId,
+      { q: rawFilters.returnsQ, settlementType: returnsSettlement },
+      returnsPage,
+      pageSize
+    ),
+    getPurchaseOrders(
+      shopId,
+      activeBranchId,
+      { q: rawFilters.ordersQ, status: ordersStatus },
+      ordersPage,
+      pageSize
+    ),
     prisma.shop.findUnique({
       where: { id: shopId },
       select: { currencySymbol: true, name: true },
@@ -66,8 +95,13 @@ export default async function PurchasesPage({ searchParams }: PageProps) {
         invoicePage={purchasesResult.page}
         invoicePageSize={purchasesResult.pageSize}
         suppliers={suppliers as ISupplier[]}
-        returns={returns as IPurchaseReturn[]} // 👈 Pass returns prop
-        orders={orders as IPurchaseOrder[]} // 👈 Pass orders prop
+        returns={returnsResult.items as IPurchaseReturn[]} // 👈 Pass returns prop
+        returnsTotal={returnsResult.total}
+        returnsPage={returnsResult.page}
+        orders={ordersResult.items as IPurchaseOrder[]} // 👈 Pass orders prop
+        ordersTotal={ordersResult.total}
+        ordersPage={ordersResult.page}
+        pageSize={pageSize}
         currencySymbol={shop?.currencySymbol || "৳"}
         shopName={shop?.name || "Grocery Store"}
         userRole={role}

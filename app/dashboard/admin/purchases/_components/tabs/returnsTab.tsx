@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ColumnDef,
   getCoreRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -23,6 +23,11 @@ import { IPurchaseReturn } from "@/types/purchase-return";
 interface ReturnsTabProps {
   returns: IPurchaseReturn[];
   currencySymbol: string;
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+  };
   onView?: (r: IPurchaseReturn) => void;
   onPrint: (r: IPurchaseReturn, format?: "80mm" | "58mm" | "a4") => void;
   onDelete?: (r: IPurchaseReturn) => void;
@@ -31,29 +36,59 @@ interface ReturnsTabProps {
 export default function ReturnsTab({
   returns = [],
   currencySymbol = "৳",
+  pagination,
   onView,
   onPrint,
   onDelete,
 }: ReturnsTabProps) {
-  const [search, setSearch] = useState("");
-  const [settlementFilter, setSettlementFilter] = useState("ALL");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const settlementFilter = searchParams.get("returnsSettlement") || "ALL";
+  const [search, setSearch] = useState(searchParams.get("returnsQ") || "");
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
 
-  const filteredReturns = useMemo(() => {
-    return returns.filter((r) => {
-      if (search) {
-        const q = search.toLowerCase();
-        const matchesNo = r.returnNo?.toLowerCase().includes(q);
-        const matchesSupplier =
-          r.supplierCompany?.toLowerCase().includes(q) ||
-          r.supplierName?.toLowerCase().includes(q);
-        if (!matchesNo && !matchesSupplier) return false;
-      }
-      if (settlementFilter !== "ALL" && r.settlementType !== settlementFilter) {
-        return false;
-      }
-      return true;
+  const updateParams = (mutate: (params: URLSearchParams) => void) => {
+    const params = new URLSearchParams(searchParamsRef.current.toString());
+    mutate(params);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const updateFilter = (key: string, value: string) => {
+    updateParams((params) => {
+      if (value && value !== "ALL") params.set(key, value);
+      else params.delete(key);
+      params.delete("returnsPage");
     });
-  }, [returns, search, settlementFilter]);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => updateFilter("returnsQ", value), 350);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current);
+    };
+  }, []);
+
+  const updatePagination = (nextPage: number, nextPageSize: number) => {
+    updateParams((params) => {
+      if (nextPageSize !== pagination.pageSize) {
+        params.set("pageSize", String(nextPageSize));
+        params.delete("returnsPage");
+        params.delete("ordersPage");
+      } else if (nextPage <= 1) {
+        params.delete("returnsPage");
+      } else {
+        params.set("returnsPage", String(nextPage));
+      }
+    });
+  };
 
   const columns: ColumnDef<IPurchaseReturn>[] = [
     {
@@ -184,10 +219,25 @@ export default function ReturnsTab({
   ];
 
   const table = useReactTable({
-    data: filteredReturns,
+    data: returns,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: Math.max(1, Math.ceil(pagination.total / pagination.pageSize)),
+    state: {
+      pagination: {
+        pageIndex: pagination.page - 1,
+        pageSize: pagination.pageSize,
+      },
+    },
+    onPaginationChange: (updater) => {
+      const current = {
+        pageIndex: pagination.page - 1,
+        pageSize: pagination.pageSize,
+      };
+      const next = typeof updater === "function" ? updater(current) : updater;
+      updatePagination(next.pageIndex + 1, next.pageSize);
+    },
   });
 
   return (
@@ -198,7 +248,7 @@ export default function ReturnsTab({
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="ভাউচার নম্বর, কোম্পানি বা সরবরাহকারীর নাম দিয়ে খুঁজুন..."
             className="w-full pl-9 pr-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-neutral-900 dark:text-neutral-100"
           />
@@ -216,7 +266,7 @@ export default function ReturnsTab({
             <button
               key={pill.value}
               type="button"
-              onClick={() => setSettlementFilter(pill.value)}
+              onClick={() => updateFilter("returnsSettlement", pill.value)}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition shrink-0 cursor-pointer ${
                 settlementFilter === pill.value
                   ? "bg-blue-600 text-white font-semibold shadow-xs"
@@ -229,7 +279,7 @@ export default function ReturnsTab({
         </div>
       </div>
 
-      <DataTable table={table} columns={columns} />
+      <DataTable table={table} columns={columns} totalCount={pagination.total} />
     </div>
   );
 }
