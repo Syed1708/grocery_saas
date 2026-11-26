@@ -50,6 +50,18 @@ export interface IStockTransfer {
   createdAt: Date | string;
 }
 
+export interface IStockTransferListFilters {
+  q?: string;
+  direction?: string;
+}
+
+export interface IPaginatedStockTransfers {
+  items: IStockTransfer[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface CreateTransferPayload {
   toBranchId: string;
   driverName?: string;

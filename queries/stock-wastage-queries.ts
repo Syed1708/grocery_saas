@@ -1,34 +1,66 @@
 import { prisma } from "@/lib/prisma";
-import { IStockWastage, WastageReason } from "@/types/stock-wastage";
+import { Prisma } from "@/generated/prisma/client";
+import {
+  IPaginatedStockWastages,
+  IStockWastageListFilters,
+  WastageReason,
+} from "@/types/stock-wastage";
 
 export async function getStockWastages(
   shopId: string,
-  branchId?: string | null
-): Promise<IStockWastage[]> {
-  const records = await prisma.stockWastage.findMany({
-    where: {
-      shopId,
-      ...(branchId ? { branchId } : {}),
-    },
-    include: {
-      branch: { select: { name: true } },
-      items: {
-        include: {
-          product: {
-            select: {
-              name: true,
-              barcode: true,
-              unit: { select: { shortCode: true } },
+  branchId?: string | null,
+  filters: IStockWastageListFilters = {},
+  page = 1,
+  pageSize = 10
+): Promise<IPaginatedStockWastages> {
+  const query = filters.q?.trim();
+  const reason =
+    filters.reason && filters.reason !== "ALL" ? (filters.reason as WastageReason) : undefined;
+
+  const and: Prisma.StockWastageWhereInput[] = [];
+  if (query) {
+    and.push({
+      OR: [
+        { wastageNo: { contains: query } },
+        { items: { some: { product: { name: { contains: query } } } } },
+      ],
+    });
+  }
+  if (reason) and.push({ reason });
+
+  const where: Prisma.StockWastageWhereInput = {
+    shopId,
+    ...(branchId ? { branchId } : {}),
+    ...(and.length ? { AND: and } : {}),
+  };
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, pageSize);
+
+  const [total, records] = await Promise.all([
+    prisma.stockWastage.count({ where }),
+    prisma.stockWastage.findMany({
+      where,
+      include: {
+        branch: { select: { name: true } },
+        items: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                barcode: true,
+                unit: { select: { shortCode: true } },
+              },
             },
           },
         },
       },
-    },
-    orderBy: { date: "desc" },
-    take: 150,
-  });
+      orderBy: { date: "desc" },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+    }),
+  ]);
 
-  return records.map((r) => ({
+  const items = records.map((r) => ({
     id: r.id,
     wastageNo: r.wastageNo,
     date: r.date,
@@ -51,4 +83,6 @@ export async function getStockWastages(
       reason: i.reason as WastageReason,
     })),
   }));
+
+  return { items, total, page: safePage, pageSize: safePageSize };
 }

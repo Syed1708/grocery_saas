@@ -34,7 +34,12 @@ import { cancelTransferAction } from "@/app/actions/stock-transfer-actions";
 
 interface Props {
   wastages: IStockWastage[];
+  wastageTotal: number;
+  wastagesPage: number;
   transfers?: IStockTransfer[];
+  transferTotal: number;
+  transfersPage: number;
+  pageSize: number;
   branches?: IStockBranchOption[];
   currentBranchId: string;
   suppliers?: ISupplier[];
@@ -46,7 +51,12 @@ interface Props {
 
 export default function StockClient({
   wastages = [],
+  wastageTotal,
+  wastagesPage,
   transfers = [],
+  transferTotal,
+  transfersPage,
+  pageSize,
   branches = [],
   currentBranchId,
   suppliers = [],
@@ -132,7 +142,7 @@ export default function StockClient({
                 : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
             }`}
           >
-            <AlertOctagon size={14} /> নষ্ট ও ক্ষতিপূরণ লগ ({wastages.length})
+            <AlertOctagon size={14} /> নষ্ট ও ক্ষতিপূরণ লগ ({wastageTotal})
           </button>
 
           <button
@@ -177,6 +187,7 @@ export default function StockClient({
         <WastageTab
           wastages={wastages}
           currencySymbol={currencySymbol}
+          pagination={{ page: wastagesPage, pageSize, total: wastageTotal }}
           onView={(w) => setViewingWastage(w)}
           onEdit={(w) => setEditingWastage(w)}
           onPrint={(w) => handlePrintWastage(w)}
@@ -190,6 +201,7 @@ export default function StockClient({
           transfers={transfers}
           currentBranchId={currentBranchId}
           currencySymbol={currencySymbol}
+          pagination={{ page: transfersPage, pageSize, total: transferTotal }}
           onReceive={(t) => setReceivingTransfer(t)}
           onView={(t) => setViewingTransfer(t)}
           onEdit={(t) => setEditingTransfer(t)}

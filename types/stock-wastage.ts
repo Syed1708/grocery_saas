@@ -32,6 +32,18 @@ export interface IStockWastage {
   createdAt: Date | string;
 }
 
+export interface IStockWastageListFilters {
+  q?: string;
+  reason?: string;
+}
+
+export interface IPaginatedStockWastages {
+  items: IStockWastage[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface CreateWastagePayload {
   date?: Date | string;
   reason: WastageReason;

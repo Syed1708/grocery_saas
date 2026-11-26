@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ColumnDef,
   getCoreRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -26,6 +26,11 @@ interface Props {
   transfers: IStockTransfer[];
   currentBranchId: string;
   currencySymbol?: string;
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+  };
   onReceive: (t: IStockTransfer) => void;
   onEdit?: (t: IStockTransfer) => void; // 👈 Add onEdit
   onView: (t: IStockTransfer) => void;
@@ -37,36 +42,61 @@ export default function TransfersTab({
   transfers = [],
   currentBranchId,
   currencySymbol = "৳",
+  pagination,
   onReceive,
   onEdit, // 👈 Add onEdit
   onView,
   onPrint,
   onCancel,
 }: Props) {
-  const [search, setSearch] = useState("");
-  const [directionFilter, setDirectionFilter] = useState("ALL");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const directionFilter = searchParams.get("transfersDirection") || "ALL";
+  const [search, setSearch] = useState(searchParams.get("transfersQ") || "");
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
 
-  const filtered = useMemo(() => {
-    return transfers.filter((t) => {
-      if (search) {
-        const q = search.toLowerCase();
-        const matchesNo = t.transferNo.toLowerCase().includes(q);
-        const matchesBranch =
-          t.fromBranchName.toLowerCase().includes(q) ||
-          t.toBranchName.toLowerCase().includes(q);
-        if (!matchesNo && !matchesBranch) return false;
-      }
+  const updateParams = (mutate: (params: URLSearchParams) => void) => {
+    const params = new URLSearchParams(searchParamsRef.current.toString());
+    mutate(params);
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
-      const isOutbound = t.fromBranchId === currentBranchId;
-      const isInbound = t.toBranchId === currentBranchId;
-
-      if (directionFilter === "OUTBOUND" && !isOutbound) return false;
-      if (directionFilter === "INBOUND" && !isInbound) return false;
-      if (directionFilter === "IN_TRANSIT" && t.status !== "DISPATCHED") return false;
-
-      return true;
+  const updateFilter = (key: string, value: string) => {
+    updateParams((params) => {
+      if (value && value !== "ALL") params.set(key, value);
+      else params.delete(key);
+      params.delete("transfersPage");
     });
-  }, [transfers, search, directionFilter, currentBranchId]);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => updateFilter("transfersQ", value), 350);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current);
+    };
+  }, []);
+
+  const updatePagination = (nextPage: number, nextPageSize: number) => {
+    updateParams((params) => {
+      if (nextPageSize !== pagination.pageSize) {
+        params.set("pageSize", String(nextPageSize));
+        params.delete("transfersPage");
+        params.delete("wastagesPage");
+      } else if (nextPage <= 1) {
+        params.delete("transfersPage");
+      } else {
+        params.set("transfersPage", String(nextPage));
+      }
+    });
+  };
 
   const columns: ColumnDef<IStockTransfer>[] = [
     {
@@ -229,10 +259,17 @@ export default function TransfersTab({
   ];
 
   const table = useReactTable({
-    data: filtered,
+    data: transfers,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: Math.max(1, Math.ceil(pagination.total / pagination.pageSize)),
+    state: { pagination: { pageIndex: pagination.page - 1, pageSize: pagination.pageSize } },
+    onPaginationChange: (updater) => {
+      const current = { pageIndex: pagination.page - 1, pageSize: pagination.pageSize };
+      const next = typeof updater === "function" ? updater(current) : updater;
+      updatePagination(next.pageIndex + 1, next.pageSize);
+    },
   });
 
   return (
@@ -243,7 +280,7 @@ export default function TransfersTab({
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="চালান নম্বর বা ব্রাঞ্চের নাম দিয়ে খুঁজুন..."
             className="w-full pl-9 pr-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -262,7 +299,7 @@ export default function TransfersTab({
             <button
               key={pill.value}
               type="button"
-              onClick={() => setDirectionFilter(pill.value)}
+              onClick={() => updateFilter("transfersDirection", pill.value)}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition shrink-0 cursor-pointer ${
                 directionFilter === pill.value
                   ? "bg-blue-600 text-white font-semibold shadow-xs"
@@ -275,7 +312,7 @@ export default function TransfersTab({
         </div>
       </div>
 
-      <DataTable table={table} columns={columns} />
+      <DataTable table={table} columns={columns} totalCount={pagination.total} />
     </div>
   );
 }

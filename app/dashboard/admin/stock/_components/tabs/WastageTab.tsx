@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
     ColumnDef,
     getCoreRowModel,
-    getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -24,6 +24,11 @@ import { IStockWastage } from "@/types/stock-wastage";
 interface Props {
     wastages: IStockWastage[];
     currencySymbol?: string;
+    pagination: {
+        page: number;
+        pageSize: number;
+        total: number;
+    };
     onView: (w: IStockWastage) => void;
     onEdit?: (w: IStockWastage) => void; // 👈 Add this
     onPrint: (w: IStockWastage, format?: "80mm" | "a4") => void;
@@ -41,26 +46,60 @@ const REASON_LABELS: Record<string, { label: string; color: string }> = {
 export default function WastageTab({
     wastages = [],
     currencySymbol = "৳",
+    pagination,
     onView,
     onPrint,
     onDelete,
     onEdit
 }: Props) {
-    const [search, setSearch] = useState("");
-    const [reasonFilter, setReasonFilter] = useState("ALL");
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const reasonFilter = searchParams.get("wastagesReason") || "ALL";
+    const [search, setSearch] = useState(searchParams.get("wastagesQ") || "");
+    const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const searchParamsRef = useRef(searchParams);
+    searchParamsRef.current = searchParams;
 
-    const filtered = useMemo(() => {
-        return wastages.filter((w) => {
-            if (search) {
-                const q = search.toLowerCase();
-                const matchesNo = w.wastageNo.toLowerCase().includes(q);
-                const matchesItem = w.items.some((i) => i.productName.toLowerCase().includes(q));
-                if (!matchesNo && !matchesItem) return false;
-            }
-            if (reasonFilter !== "ALL" && w.reason !== reasonFilter) return false;
-            return true;
+    const updateParams = (mutate: (params: URLSearchParams) => void) => {
+        const params = new URLSearchParams(searchParamsRef.current.toString());
+        mutate(params);
+        router.push(`${pathname}?${params.toString()}`);
+    };
+
+    const updateFilter = (key: string, value: string) => {
+        updateParams((params) => {
+            if (value && value !== "ALL") params.set(key, value);
+            else params.delete(key);
+            params.delete("wastagesPage");
         });
-    }, [wastages, search, reasonFilter]);
+    };
+
+    const handleSearchChange = (value: string) => {
+        setSearch(value);
+        if (searchTimer.current) clearTimeout(searchTimer.current);
+        searchTimer.current = setTimeout(() => updateFilter("wastagesQ", value), 350);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (searchTimer.current) clearTimeout(searchTimer.current);
+        };
+    }, []);
+
+    const updatePagination = (nextPage: number, nextPageSize: number) => {
+        updateParams((params) => {
+            if (nextPageSize !== pagination.pageSize) {
+                params.set("pageSize", String(nextPageSize));
+                params.delete("wastagesPage");
+                params.delete("transfersPage");
+            } else if (nextPage <= 1) {
+                params.delete("wastagesPage");
+            } else {
+                params.set("wastagesPage", String(nextPage));
+            }
+        });
+    };
 
     const columns: ColumnDef<IStockWastage>[] = [
         {
@@ -165,10 +204,17 @@ export default function WastageTab({
     ];
 
     const table = useReactTable({
-        data: filtered,
+        data: wastages,
         columns,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        manualPagination: true,
+        pageCount: Math.max(1, Math.ceil(pagination.total / pagination.pageSize)),
+        state: { pagination: { pageIndex: pagination.page - 1, pageSize: pagination.pageSize } },
+        onPaginationChange: (updater) => {
+            const current = { pageIndex: pagination.page - 1, pageSize: pagination.pageSize };
+            const next = typeof updater === "function" ? updater(current) : updater;
+            updatePagination(next.pageIndex + 1, next.pageSize);
+        },
     });
 
     return (
@@ -180,7 +226,7 @@ export default function WastageTab({
                     <input
                         type="text"
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e) => handleSearchChange(e.target.value)}
                         placeholder="ভাউচার নম্বর বা নষ্ট পণ্যের নাম দিয়ে খুঁজুন..."
                         className="w-full pl-9 pr-3 py-2 text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -200,7 +246,7 @@ export default function WastageTab({
                         <button
                             key={pill.value}
                             type="button"
-                            onClick={() => setReasonFilter(pill.value)}
+                            onClick={() => updateFilter("wastagesReason", pill.value)}
                             className={`px-3 py-1 rounded-lg text-xs font-medium transition shrink-0 cursor-pointer ${reasonFilter === pill.value
                                     ? "bg-blue-600 text-white font-semibold shadow-xs"
                                     : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200"
@@ -212,7 +258,7 @@ export default function WastageTab({
                 </div>
             </div>
 
-            <DataTable table={table} columns={columns} />
+            <DataTable table={table} columns={columns} totalCount={pagination.total} />
         </div>
     );
 }

@@ -409,7 +409,11 @@ print record on the window `afterprint` event so a later Ctrl+P doesn't reprint 
 add `thead { display: table-header-group; }` and `print-color-adjust: exact` for long tables.
 
 **Stock transfers & wastage:** the stock page uses `requiredAnyPermission: [INVENTORY_TRANSFER,
-INVENTORY_WASTAGE]` (guard supports `requiredAnyPermission`). Dispatch/update/cancel require
+INVENTORY_WASTAGE]` (guard supports `requiredAnyPermission`). Both history tabs use server-side
+pagination and filters with URL keys `transfersQ`, `transfersDirection`, `transfersPage` and
+`wastagesQ`, `wastagesReason`, `wastagesPage`, plus shared `pageSize`; queries use `count + skip/take`
+and the tables use `manualPagination` with the real `totalCount`. Direction filters map to
+`status=DISPATCHED`, `toBranchId=active`, or `fromBranchId=active`. Dispatch/update/cancel require
 `INVENTORY_TRANSFER` and are limited to the source branch; receive requires the destination branch.
 Wastage create/update require `INVENTORY_WASTAGE`, delete is OWNER-only, and every lookup is scoped
 by `{ id, shopId, activeBranchId }`. Value transfers and losses at `product.purchasePrice` from the
