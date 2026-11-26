@@ -154,6 +154,19 @@ export interface ISale {
   updatedAt?: Date | string;
 }
 
+export interface ISalesListFilters {
+  q?: string;
+  status?: string;
+  method?: string;
+}
+
+export interface IPaginatedSales {
+  items: ISale[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 // ==========================================
 // 3. RETURN & REFUND TYPES
 // ==========================================

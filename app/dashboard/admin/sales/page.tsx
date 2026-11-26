@@ -6,17 +6,43 @@ import { prisma } from "@/lib/prisma";
 import SalesClient from "./_components/SalesClient";
 import { IPosShopConfig } from "@/types/sale";
 
-export default async function SalesPage() {
+const PAGE_SIZES = [10, 20, 50, 100];
+
+interface PageProps {
+  searchParams: Promise<{
+    q?: string;
+    status?: string;
+    method?: string;
+    page?: string;
+    pageSize?: string;
+  }>;
+}
+
+function parsePage(value: string | undefined): number {
+  const page = Number(value);
+  return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+}
+
+export default async function SalesPage({ searchParams }: PageProps) {
   const user = await requireAuth({
     requiredPermission: PERMISSIONS.POS_ACCESS,
     requireActiveStatus: true,
   });
 
   const { shopId, activeBranchId } = user;
+  const rawFilters = await searchParams;
+  const parsedPageSize = Number(rawFilters.pageSize);
+  const pageSize = PAGE_SIZES.includes(parsedPageSize) ? parsedPageSize : 10;
+  const page = parsePage(rawFilters.page);
+  const filters = {
+    q: rawFilters.q,
+    status: rawFilters.status,
+    method: rawFilters.method,
+  };
 
-  // 👈 FIX: Strictly filter by activeBranchId for everyone (including OWNER
-  const [sales, rawShop] = await Promise.all([
-    getSales(shopId, activeBranchId),
+  // 👈 FIX: Strictly filter by activeBranchId for everyone (including OWNER)
+  const [salesResult, rawShop] = await Promise.all([
+    getSales(shopId, activeBranchId, filters, page, pageSize),
     prisma.shop.findUnique({
       where: { id: shopId },
       select: {
@@ -51,7 +77,10 @@ export default async function SalesPage() {
   return (
     <div className="max-w-7xl mx-auto">
       <SalesClient
-        data={sales}
+        data={salesResult.items}
+        total={salesResult.total}
+        page={salesResult.page}
+        pageSize={salesResult.pageSize}
         shop={shop}
         currencySymbol={shop.currencySymbol}
         userRole={user.role} // 👈 OWNER ONLY

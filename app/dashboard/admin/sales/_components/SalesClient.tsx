@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ColumnDef,
   getCoreRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { Receipt, Printer, Eye, Trash2, Copy, Check } from "lucide-react";
@@ -21,15 +21,30 @@ import { voidSaleAction } from "@/app/actions/sale-actions";
 
 export default function SalesClient({
   data = [],
+  total,
+  page,
+  pageSize,
   shop,
   currencySymbol = "৳",
   userRole = "OWNER",
 }: {
   data: ISale[];
+  total: number;
+  page: number;
+  pageSize: number;
   shop: IPosShopConfig;
   currencySymbol?: string;
   userRole?: string;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const statusFilter = searchParams.get("status") || "all";
+  const methodFilter = searchParams.get("method") || "all";
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
   const [selectedSale, setSelectedSale] = useState<ISale | null>(null);
   const [printSale, setPrintSale] = useState<ISale | null>(null);
   const [voidTarget, setVoidTarget] = useState<ISale | null>(null);
@@ -43,10 +58,6 @@ const handleCopyInvoice = (invNo: string) => {
 };
 
   // Filter States
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [methodFilter, setMethodFilter] = useState("all");
-
   const handlePrint = (sale: ISale) => {
     setPrintSale(sale);
     requestAnimationFrame(() => {
@@ -71,30 +82,55 @@ const handleCopyInvoice = (invNo: string) => {
   }
 
   // Reactive Multi-Filter Logic
-  const filteredData = useMemo(() => {
-    return data.filter((s) => {
-      // 1. Text Search (Invoice, Customer Name, Phone)
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchesInv = s.invoiceNo.toLowerCase().includes(q);
-        const matchesCust = s.customerName?.toLowerCase().includes(q);
-        const matchesPhone = s.customerPhone?.includes(q);
-        if (!matchesInv && !matchesCust && !matchesPhone) return false;
-      }
+  const updateParams = (mutate: (params: URLSearchParams) => void) => {
+    const params = new URLSearchParams(searchParamsRef.current.toString());
+    mutate(params);
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
-      // 2. Status Filter
-      if (statusFilter !== "all" && s.paymentStatus.toLowerCase() !== statusFilter) {
-        return false;
-      }
-
-      // 3. Payment Method Filter
-      if (methodFilter !== "all" && s.paymentMethod.toLowerCase() !== methodFilter) {
-        return false;
-      }
-
-      return true;
+  const updateFilter = (key: string, value: string) => {
+    updateParams((params) => {
+      if (value && value !== "all") params.set(key, value);
+      else params.delete(key);
+      params.delete("page");
     });
-  }, [data, searchQuery, statusFilter, methodFilter]);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => updateFilter("q", value), 350);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current);
+    };
+  }, []);
+
+  const resetFilters = () => {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    setSearchQuery("");
+    updateParams((params) => {
+      params.delete("q");
+      params.delete("status");
+      params.delete("method");
+      params.delete("page");
+    });
+  };
+
+  const updatePagination = (nextPage: number, nextPageSize: number) => {
+    updateParams((params) => {
+      if (nextPageSize !== pageSize) {
+        params.set("pageSize", String(nextPageSize));
+        params.delete("page");
+      } else if (nextPage <= 1) {
+        params.delete("page");
+      } else {
+        params.set("page", String(nextPage));
+      }
+    });
+  };
 
   const columns = useMemo<ColumnDef<ISale>[]>(
     () => [
@@ -229,14 +265,26 @@ const handleCopyInvoice = (invNo: string) => {
         },
       },
     ],
-    [currencySymbol, userRole]
+    [currencySymbol, userRole, copiedInvoice]
   );
 
   const table = useReactTable({
-    data: filteredData,
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: Math.max(1, Math.ceil(total / pageSize)),
+    state: {
+      pagination: {
+        pageIndex: page - 1,
+        pageSize,
+      },
+    },
+    onPaginationChange: (updater) => {
+      const current = { pageIndex: page - 1, pageSize };
+      const next = typeof updater === "function" ? updater(current) : updater;
+      updatePagination(next.pageIndex + 1, next.pageSize);
+    },
   });
 
   return (
@@ -259,20 +307,16 @@ const handleCopyInvoice = (invNo: string) => {
         {/* 👈 Dynamic Filter & Search Toolbar */}
         <SalesFilters
           searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
+          onSearchChange={handleSearchChange}
           statusFilter={statusFilter}
-          onStatusChange={setStatusFilter}
+          onStatusChange={(value) => updateFilter("status", value)}
           methodFilter={methodFilter}
-          onMethodChange={setMethodFilter}
-          onReset={() => {
-            setSearchQuery("");
-            setStatusFilter("all");
-            setMethodFilter("all");
-          }}
-          totalFilteredCount={filteredData.length}
+          onMethodChange={(value) => updateFilter("method", value)}
+          onReset={resetFilters}
+          totalFilteredCount={total}
         />
 
-        <DataTable table={table} columns={columns} />
+        <DataTable table={table} columns={columns} totalCount={total} />
 
         {/* View Invoice Modal */}
         {selectedSale && (

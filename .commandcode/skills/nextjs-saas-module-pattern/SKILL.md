@@ -464,6 +464,11 @@ tables were created with `db push`, run
 
 **POS / sales / returns / closings:** checkout requires `POS_ACCESS`; voiding a sale is
 OWNER-only, needs `requireActiveStatus`, and must load the sale by `{ id, shopId, activeBranchId }`.
+The Sales invoice list uses server-side search (`q`), payment status (`status`), method (`method`),
+`page` and `pageSize` in the URL, with `count + skip/take` — never cap the list at 150 rows or filter
+only the fetched page. Use `manualPagination` with `pageCount` and pass `totalCount` to `DataTable`.
+Debounce the search input before pushing the URL, and keep a ref to the latest search params so a
+debounced search can't overwrite a status/method change.
 Validate a submitted `customerId` with `{ id, shopId, OR: [{ branchId: active }, { branchId: null }] }`.
 Returns viewing uses `POS_ACCESS` (the sidebar entry itself is gated by `POS_REFUND_RETURN`);
 processing a return requires `POS_REFUND_RETURN`, whitelists `cash|balance`, re-checks remaining

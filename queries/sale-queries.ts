@@ -1,5 +1,12 @@
 import { prisma } from "@/lib/prisma";
-import { ISale, IPosProduct, ISplitPaymentDetails } from "@/types/sale";
+import { Prisma } from "@/generated/prisma/client";
+import {
+  ISale,
+  IPosProduct,
+  ISplitPaymentDetails,
+  ISalesListFilters,
+  IPaginatedSales,
+} from "@/types/sale";
 
 /**
  * 1. GET POS CATALOG
@@ -71,59 +78,90 @@ export async function getPosCatalog(
 
 /**
  * 2. GET SALES INVOICES LIST
- * - Strictly scopes to the active branch
- * - Limits to latest 150 invoices (Prevents client-side RAM overload)
+ * - Strictly scoped to the active branch
+ * - Server-side search, status/method filtering and pagination
  * - Resolves customer and branch names accurately from MySQL relations
  * - Parses split payment breakdown (Cash, bKash, Bank) for receipts
  */
 export async function getSales(
   shopId: string,
-  branchId?: string | null
-): Promise<ISale[]> {
-  const sales = await prisma.sale.findMany({
-    where: {
-      shopId,
-      ...(branchId ? { branchId } : {}), // Strictly scoped to active branch
-    },
-    include: {
-      customer: {
-        select: {
-          id: true,
-          name: true,
-          phone: true,
-        },
-      },
-      cashier: {
-        select: {
-          name: true,
-        },
-      },
-      branch: {
-        select: {
-          name: true,
-          code: true,
-        },
-      },
-      items: {
-        include: {
-          product: {
-            select: {
-              name: true,
-            },
-          },
-          unit: {
-            select: {
-              shortCode: true,
-            },
-          },
-        },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 150, // Prevents loading thousands of rows into client RAM
-  });
+  branchId?: string | null,
+  filters: ISalesListFilters = {},
+  page = 1,
+  pageSize = 10
+): Promise<IPaginatedSales> {
+  const query = filters.q?.trim();
+  const status = filters.status && filters.status !== "all" ? filters.status : undefined;
+  const method = filters.method && filters.method !== "all" ? filters.method : undefined;
 
-  return sales.map((s) => {
+  const where: Prisma.SaleWhereInput = {
+    shopId,
+    ...(branchId ? { branchId } : {}), // Strictly scoped to active branch
+    ...(query
+      ? {
+          OR: [
+            { invoiceNo: { contains: query } },
+            { customer: { is: { name: { contains: query } } } },
+            { customer: { is: { phone: { contains: query } } } },
+          ],
+        }
+      : {}),
+    ...(status ? { paymentStatus: status } : {}),
+    ...(method
+      ? method === "mixed"
+        ? { notes: { contains: "SPLIT:" } }
+        : { paymentMethod: method }
+      : {}),
+  };
+
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, pageSize);
+
+  const [total, sales] = await Promise.all([
+    prisma.sale.count({ where }),
+    prisma.sale.findMany({
+      where,
+      include: {
+        customer: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+          },
+        },
+        cashier: {
+          select: {
+            name: true,
+          },
+        },
+        branch: {
+          select: {
+            name: true,
+            code: true,
+          },
+        },
+        items: {
+          include: {
+            product: {
+              select: {
+                name: true,
+              },
+            },
+            unit: {
+              select: {
+                shortCode: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+    }),
+  ]);
+
+  const items = sales.map((s) => {
     // Parse split payment details from the structured notes tag
     let splitPayments: ISplitPaymentDetails | undefined = undefined;
     if (s.notes && s.notes.includes("SPLIT:")) {
@@ -180,6 +218,8 @@ export async function getSales(
       createdAt: s.createdAt,
     };
   });
+
+  return { items, total, page: safePage, pageSize: safePageSize };
 }
 
 /**
