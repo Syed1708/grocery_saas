@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
@@ -12,6 +13,9 @@ import ZReportSlip from "./z-report-slip";
 
 interface ClosingsClientProps {
   data: ICashRegisterClosing[];
+  total: number;
+  page: number;
+  pageSize: number;
   shiftSummary: ICurrentShiftSummary;
   currencySymbol?: string;
   shop: {
@@ -24,13 +28,32 @@ interface ClosingsClientProps {
 
 export default function ClosingsClient({
   data,
+  total,
+  page,
+  pageSize,
   shiftSummary,
   currencySymbol = "৳",
   shop,
   branchName,
 }: ClosingsClientProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [modalOpen, setModalOpen] = useState(false);
   const [activeReceipt, setActiveReceipt] = useState<ICashRegisterClosing | null>(null);
+
+  const updatePagination = (nextPage: number, nextPageSize: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (nextPageSize !== pageSize) {
+      params.set("pageSize", String(nextPageSize));
+      params.delete("page");
+    } else if (nextPage <= 1) {
+      params.delete("page");
+    } else {
+      params.set("page", String(nextPage));
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   const handlePrint = (closing: ICashRegisterClosing) => {
     setActiveReceipt(closing);
@@ -41,7 +64,19 @@ export default function ClosingsClient({
   };
 
   const columns = getClosingColumns(currencySymbol, handlePrint);
-  const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel(), getPaginationRowModel: getPaginationRowModel() });
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    pageCount: Math.max(1, Math.ceil(total / pageSize)),
+    state: { pagination: { pageIndex: page - 1, pageSize } },
+    onPaginationChange: (updater) => {
+      const current = { pageIndex: page - 1, pageSize };
+      const next = typeof updater === "function" ? updater(current) : updater;
+      updatePagination(next.pageIndex + 1, next.pageSize);
+    },
+  });
 
   return (
     <div className="space-y-4">
@@ -61,7 +96,7 @@ export default function ClosingsClient({
           </button>
         </div>
 
-        <DataTable table={table} columns={columns} />
+        <DataTable table={table} columns={columns} totalCount={total} />
 
         <ClosingFormModal
           isOpen={modalOpen}

@@ -1,22 +1,36 @@
 import { prisma } from "@/lib/prisma";
-import { ICashRegisterClosing, ICurrentShiftSummary } from "@/types/closing";
+import {
+  ICashRegisterClosing,
+  ICurrentShiftSummary,
+  IPaginatedClosings,
+} from "@/types/closing";
 
 export async function getPastClosings(
   shopId: string,
-  branchId: string
-): Promise<ICashRegisterClosing[]> {
-  const records = await prisma.cashRegister.findMany({
-    where: { shopId, branchId },
-    include: {
-      user: {
-        select: { name: true },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
+  branchId?: string | null,
+  page = 1,
+  pageSize = 10
+): Promise<IPaginatedClosings> {
+  const where = { shopId, ...(branchId ? { branchId } : {}) };
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, pageSize);
 
-  return records.map((r) => ({
+  const [total, closings] = await Promise.all([
+    prisma.cashRegister.count({ where }),
+    prisma.cashRegister.findMany({
+      where,
+      include: {
+        user: {
+          select: { name: true },
+        },
+      },
+      orderBy: { closingDate: "desc" },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+    }),
+  ]);
+
+  const items: ICashRegisterClosing[] = closings.map((r) => ({
     ...r,
     openingCash: Number(r.openingCash),
     cashSales: Number(r.cashSales),
@@ -29,6 +43,8 @@ export async function getPastClosings(
     countedCash: Number(r.countedCash),
     difference: Number(r.difference),
   }));
+
+  return { items, total, page: safePage, pageSize: safePageSize };
 }
 
 export async function getCurrentShiftSummary(

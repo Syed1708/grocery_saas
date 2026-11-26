@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { ShieldCheck, Plus, DollarSign, Wallet, AlertCircle } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import { getClosingColumns } from "./Columns";
@@ -12,6 +13,9 @@ import { ReportKpiCard } from "../../common/report-kpi-card";
 
 interface Props {
   data: ICashRegisterClosing[];
+  total: number;
+  page: number;
+  pageSize: number;
   shiftSummary: ICurrentShiftSummary;
   currencySymbol?: string;
   shop: { name: string; phone?: string | null; address?: string | null };
@@ -20,13 +24,32 @@ interface Props {
 
 export default function ClosingsClient({
   data = [],
+  total,
+  page,
+  pageSize,
   shiftSummary,
   currencySymbol = "৳",
   shop,
   branchName,
 }: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [modalOpen, setModalOpen] = useState(false);
   const [activeReceipt, setActiveReceipt] = useState<ICashRegisterClosing | null>(null);
+
+  const updatePagination = (nextPage: number, nextPageSize: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (nextPageSize !== pageSize) {
+      params.set("pageSize", String(nextPageSize));
+      params.delete("page");
+    } else if (nextPage <= 1) {
+      params.delete("page");
+    } else {
+      params.set("page", String(nextPage));
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   const handlePrint = (closing: ICashRegisterClosing) => {
     setActiveReceipt(closing);
@@ -41,7 +64,14 @@ export default function ClosingsClient({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: Math.max(1, Math.ceil(total / pageSize)),
+    state: { pagination: { pageIndex: page - 1, pageSize } },
+    onPaginationChange: (updater) => {
+      const current = { pageIndex: page - 1, pageSize };
+      const next = typeof updater === "function" ? updater(current) : updater;
+      updatePagination(next.pageIndex + 1, next.pageSize);
+    },
   });
 
   return (
@@ -88,7 +118,7 @@ export default function ClosingsClient({
           />
           <ReportKpiCard
             title="পূর্ববর্তী ক্লোজিং সংখ্যা"
-            value={`${data.length} টি`}
+            value={`${total} টি`}
             subtitle="Historical shift records"
             icon={ShieldCheck}
             variant="default"
@@ -96,7 +126,7 @@ export default function ClosingsClient({
         </div>
 
         {/* Closings Ledger Table */}
-        <DataTable table={table} columns={columns} />
+        <DataTable table={table} columns={columns} totalCount={total} />
 
         {/* Closing Calculator Modal */}
         <ClosingFormModal

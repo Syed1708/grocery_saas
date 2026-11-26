@@ -475,6 +475,10 @@ The Purchases invoice tab follows the same pattern: URL `q`, `status` (`PAID|PAR
 `totalCount`. Purchase orders and purchase returns use the same pattern with their own URL keys
 (`ordersQ`, `ordersStatus`, `ordersPage`; `returnsQ`, `returnsSettlement`, `returnsPage`), shared
 `pageSize`, and `manualPagination`. Never cap these lists at 100/150 rows; use `count + skip/take`.
+
+**Closings:** both `/admin/closings` and `/reports/closings` use the shared paginated
+`getPastClosings(shopId, branchId, page, pageSize)` with `count + skip/take`, URL `page`/`pageSize`,
+`manualPagination`, and the real total in the KPI/footer. Never load the full closing history at once.
 Validate a submitted `customerId` with `{ id, shopId, OR: [{ branchId: active }, { branchId: null }] }`.
 Returns viewing uses `POS_ACCESS` (the sidebar entry itself is gated by `POS_REFUND_RETURN`);
 processing a return requires `POS_REFUND_RETURN`, whitelists `cash|balance`, re-checks remaining

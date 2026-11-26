@@ -25,6 +25,13 @@ export interface ICashRegisterClosing {
   createdAt: Date | string;
 }
 
+export interface IPaginatedClosings {
+  items: ICashRegisterClosing[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface ICurrentShiftSummary {
   lastClosingTime: Date | null;
   openingCash: number;
