@@ -5,14 +5,20 @@ import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 // Connects directly to MySQL in Laragon
-const adapter = new PrismaMariaDb({
-  host: "127.0.0.1",
-  port: 3306,
-  user: "root",
-  password: "",
-  database: "grocery_pos_saas",
-  connectionLimit: 10,
-});
+// const adapter = new PrismaMariaDb({
+//   host: "127.0.0.1",
+//   port: 3306,
+//   user: "root",
+//   password: "",
+//   database: "grocery_pos_saas",
+//   connectionLimit: 10,
+// });
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) throw new Error("DATABASE_URL is not set");
+
+const adapter = new PrismaMariaDb(databaseUrl);
+
+
 
 export const prisma =
   globalForPrisma.prisma ||
