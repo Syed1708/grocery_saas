@@ -3,6 +3,9 @@
 "use no memo";
 
 import { useState } from "react";
+import { flushSync } from "react-dom";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { downloadCsv } from "@/lib/csv";
 import {
   getCoreRowModel,
@@ -27,11 +30,15 @@ import { getSalesReportColumns } from "./columns";
 import { getItemVelocityColumns } from "./item-velocity-columns";
 import SalesReportPdfDocument from "./sales-report-pdf-document";
 import { ISalesReportKPIs, ISaleReportRow, IItemVelocityRow, ISalesFilterParams } from "@/types/index";
+import { fetchSalesReportInvoicesAction } from "@/app/actions/sales-report-actions";
 import { ReportKpiCard } from "../../common/report-kpi-card";
 
 interface Props {
   kpis: ISalesReportKPIs;
   invoices: ISaleReportRow[];
+  invoicesTotal: number;
+  page: number;
+  pageSize: number;
   itemVelocity: IItemVelocityRow[];
   currencySymbol: string;
   filters: ISalesFilterParams;
@@ -50,6 +57,9 @@ interface Props {
 export default function SalesReportClient({
   kpis,
   invoices = [],
+  invoicesTotal,
+  page,
+  pageSize,
   itemVelocity = [],
   currencySymbol = "৳",
   filters,
@@ -57,10 +67,27 @@ export default function SalesReportClient({
   branchName = "Main Branch",
   userRole = "OWNER",
 }: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"invoices" | "items">("invoices");
+  const [exportInvoices, setExportInvoices] = useState<ISaleReportRow[] | null>(null);
 
   // 🛡️ Privacy Check: Only Owners & Managers can inspect net profit margins
   const canViewMargins = userRole === "OWNER" || userRole === "MANAGER";
+
+  const updatePagination = (nextPage: number, nextPageSize: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (nextPageSize !== pageSize) {
+      params.set("pageSize", String(nextPageSize));
+      params.delete("page");
+    } else if (nextPage <= 1) {
+      params.delete("page");
+    } else {
+      params.set("page", String(nextPage));
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   // Table Setup with safe pagination
   const invoiceColumns = getSalesReportColumns(currencySymbol);
@@ -68,7 +95,14 @@ export default function SalesReportClient({
     data: invoices,
     columns: invoiceColumns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: Math.max(1, Math.ceil(invoicesTotal / pageSize)),
+    state: { pagination: { pageIndex: page - 1, pageSize } },
+    onPaginationChange: (updater) => {
+      const current = { pageIndex: page - 1, pageSize };
+      const next = typeof updater === "function" ? updater(current) : updater;
+      updatePagination(next.pageIndex + 1, next.pageSize);
+    },
   });
 
   const itemColumns = getItemVelocityColumns(currencySymbol, canViewMargins);
@@ -79,17 +113,32 @@ export default function SalesReportClient({
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  const handlePrintPdf = () => {
-    window.print();
+  const loadAllInvoices = async (): Promise<ISaleReportRow[] | null> => {
+    const result = await fetchSalesReportInvoicesAction(filters);
+    if (!result.success) {
+      toast.error(result.error);
+      return null;
+    }
+    return result.data;
+  };
+
+  const handlePrintPdf = async () => {
+    const allInvoices = await loadAllInvoices();
+    if (!allInvoices) return;
+    flushSync(() => setExportInvoices(allInvoices));
+    requestAnimationFrame(() => {
+      setTimeout(() => window.print(), 80);
+    });
   };
 
   // 📊 Multi-Tab CSV Export Engine
- // 📊 Multi-Tab CSV Export Engine (Typesafe)
-  const handleExportCSV = () => {
+  // 📊 Multi-Tab CSV Export Engine (Typesafe)
+  const handleExportCSV = async () => {
     if (activeTab === "invoices") {
-      if (invoices.length === 0) return;
+      const allInvoices = await loadAllInvoices();
+      if (!allInvoices || allInvoices.length === 0) return;
       const headers = ["Invoice #", "Date", "Customer", "Subtotal", "Discount", "Grand Total", "Paid", "Due", "Payment Method", "Status"];
-      const rows = invoices.map((inv) => [
+      const rows = allInvoices.map((inv) => [
         `"#${inv.invoiceNo}"`,
         `"${new Date(inv.saleDate).toLocaleDateString()}"`,
         `"${inv.customerName || "Walk-in"}"`,
@@ -191,7 +240,7 @@ export default function SalesReportClient({
                 : "border-transparent text-neutral-500 hover:text-neutral-800"
             }`}
           >
-            চালান বিবরণী (Invoices: {invoices.length})
+            চালান বিবরণী (Invoices: {invoicesTotal})
           </button>
           <button
             type="button"
@@ -208,7 +257,7 @@ export default function SalesReportClient({
 
         {/* Render Active Table */}
         {activeTab === "invoices" ? (
-          <DataTable table={invoiceTable} columns={invoiceColumns} />
+          <DataTable table={invoiceTable} columns={invoiceColumns} totalCount={invoicesTotal} />
         ) : (
           <DataTable table={itemTable} columns={itemColumns} />
         )}
@@ -217,7 +266,7 @@ export default function SalesReportClient({
       {/* Official A4 PDF Document Element */}
       <SalesReportPdfDocument
         kpis={kpis}
-        invoices={invoices}
+        invoices={exportInvoices ?? invoices}
         currencySymbol={currencySymbol}
         filters={filters}
         shop={shop}

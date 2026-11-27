@@ -16,6 +16,7 @@ export function SalesReportFilters() {
     } else {
       params.delete(key);
     }
+    params.delete("page");
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -27,6 +28,7 @@ export function SalesReportFilters() {
     const params = new URLSearchParams(searchParams.toString());
     params.set("startDate", start.toISOString().split("T")[0]);
     params.set("endDate", end.toISOString().split("T")[0]);
+    params.delete("page");
     router.push(`${pathname}?${params.toString()}`);
   };
 

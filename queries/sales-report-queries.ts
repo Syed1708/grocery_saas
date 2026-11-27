@@ -1,23 +1,29 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma, PaymentStatus } from "@/generated/prisma/client";
-import { ISalesFilterParams, ISalesReportKPIs, ISaleReportRow, IItemVelocityRow } from "@/types/index";
+import {
+  ISalesFilterParams,
+  ISalesReportKPIs,
+  ISaleReportRow,
+  IItemVelocityRow,
+} from "@/types/index";
 
-export async function getSalesReportData(
+const salesReportInclude = {
+  customer: { select: { name: true, phone: true } },
+  cashier: { select: { name: true } },
+} satisfies Prisma.SaleInclude;
+
+type SalesReportSale = Prisma.SaleGetPayload<{ include: typeof salesReportInclude }>;
+
+function buildSalesReportWhere(
   shopId: string,
   branchId: string,
   filters: ISalesFilterParams
-): Promise<{
-  kpis: ISalesReportKPIs;
-  invoices: ISaleReportRow[];
-  itemVelocity: IItemVelocityRow[];
-}> {
-  // 👈 Simple, clean, and no extra imports needed
+): Prisma.SaleWhereInput {
   const where: Prisma.SaleWhereInput = {
     shopId,
     branchId,
   };
 
-  // Date range filter on saleDate
   if (filters.startDate || filters.endDate) {
     const saleDate: Prisma.DateTimeFilter = {};
     if (filters.startDate) saleDate.gte = new Date(`${filters.startDate}T00:00:00`);
@@ -25,7 +31,6 @@ export async function getSalesReportData(
     where.saleDate = saleDate;
   }
 
-  // Payment method & status filters
   if (filters.paymentMethod && filters.paymentMethod !== "all") {
     where.paymentMethod = filters.paymentMethod;
   }
@@ -33,15 +38,68 @@ export async function getSalesReportData(
     where.paymentStatus = filters.paymentStatus as PaymentStatus;
   }
 
-  // Invoice or customer search
   if (filters.search && filters.search.trim()) {
     const q = filters.search.trim();
     where.OR = [
       { invoiceNo: { contains: q } },
-      { customer: { name: { contains: q } } },
-      { customer: { phone: { contains: q } } },
+      { customer: { is: { name: { contains: q } } } },
+      { customer: { is: { phone: { contains: q } } } },
     ];
   }
+
+  return where;
+}
+
+function mapSaleReportRow(s: SalesReportSale): ISaleReportRow {
+  return {
+    id: s.id,
+    invoiceNo: s.invoiceNo,
+    saleDate: s.saleDate,
+    customerName: s.customer?.name || "নগদ ক্রেতা (Walk-in)",
+    customerPhone: s.customer?.phone,
+    paymentMethod: s.paymentMethod,
+    paymentStatus: s.paymentStatus,
+    subtotal: Number(s.subtotal),
+    discount: Number(s.discount),
+    grandTotal: Number(s.grandTotal),
+    paidAmount: Number(s.paidAmount),
+    dueAmount: Number(s.dueAmount),
+    cashierName: s.cashier?.name || "Cashier",
+  };
+}
+
+/** All filtered invoices for CSV/PDF exports (never paginated). */
+export async function getAllSalesReportInvoices(
+  shopId: string,
+  branchId: string,
+  filters: ISalesFilterParams
+): Promise<ISaleReportRow[]> {
+  const where = buildSalesReportWhere(shopId, branchId, filters);
+  const sales = await prisma.sale.findMany({
+    where,
+    include: salesReportInclude,
+    orderBy: { createdAt: "desc" },
+  });
+  return sales.map(mapSaleReportRow);
+}
+
+export async function getSalesReportData(
+  shopId: string,
+  branchId: string,
+  filters: ISalesFilterParams,
+  page = 1,
+  pageSize = 10
+): Promise<{
+  kpis: ISalesReportKPIs;
+  invoices: ISaleReportRow[];
+  invoicesTotal: number;
+  invoicePage: number;
+  invoicePageSize: number;
+  itemVelocity: IItemVelocityRow[];
+}> {
+  const where = buildSalesReportWhere(shopId, branchId, filters);
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, pageSize);
 
   // 1. KPI Aggregations
   const agg = await prisma.sale.aggregate({
@@ -65,32 +123,19 @@ export async function getSalesReportData(
     totalInvoices: agg._count.id || 0,
   };
 
-  // 2. Recent Invoices List
-  const sales = await prisma.sale.findMany({
-    where,
-    include: {
-      customer: { select: { name: true, phone: true } },
-      cashier: { select: { name: true } },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+  // 2. Paginated invoice list
+  const [invoicesTotal, sales] = await Promise.all([
+    prisma.sale.count({ where }),
+    prisma.sale.findMany({
+      where,
+      include: salesReportInclude,
+      orderBy: { createdAt: "desc" },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+    }),
+  ]);
 
-  const invoices: ISaleReportRow[] = sales.map((s) => ({
-    id: s.id,
-    invoiceNo: s.invoiceNo,
-    saleDate: s.saleDate,
-    customerName: s.customer?.name || "নগদ ক্রেতা (Walk-in)",
-    customerPhone: s.customer?.phone,
-    paymentMethod: s.paymentMethod,
-    paymentStatus: s.paymentStatus,
-    subtotal: Number(s.subtotal),
-    discount: Number(s.discount),
-    grandTotal: Number(s.grandTotal),
-    paidAmount: Number(s.paidAmount),
-    dueAmount: Number(s.dueAmount),
-    cashierName: s.cashier?.name || "Cashier",
-  }));
+  const invoices = sales.map(mapSaleReportRow);
 
   // 3. Item-wise sales velocity & profit analysis
   const saleItems = await prisma.saleItem.groupBy({
@@ -118,7 +163,6 @@ export async function getSalesReportData(
 
   const productMap = new Map(products.map((p) => [p.id, p]));
 
-  // 🛡️ Accurate Profit Calculation: (rev - unitPurchaseCost * qty)
   const itemVelocity: IItemVelocityRow[] = saleItems.map((item) => {
     const prod = productMap.get(item.productId);
     const qty = Number(item._sum.quantity || 0);
@@ -139,5 +183,12 @@ export async function getSalesReportData(
     };
   });
 
-  return { kpis, invoices, itemVelocity };
+  return {
+    kpis,
+    invoices,
+    invoicesTotal,
+    invoicePage: safePage,
+    invoicePageSize: safePageSize,
+    itemVelocity,
+  };
 }

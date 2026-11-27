@@ -482,6 +482,13 @@ The Purchases invoice tab follows the same pattern: URL `q`, `status` (`PAID|PAR
 (`ordersQ`, `ordersStatus`, `ordersPage`; `returnsQ`, `returnsSettlement`, `returnsPage`), shared
 `pageSize`, and `manualPagination`. Never cap these lists at 100/150 rows; use `count + skip/take`.
 
+**Report tables & exports:** report KPIs are full-period aggregates, but the voucher/chalan tables
+are paginated server-side (`count + skip/take`, URL `page`/`pageSize`, `manualPagination`,
+`totalCount`). CSV/PDF must never export only the current page: keep a separate un-paginated query
+(`getAllSalesReportInvoices`) behind a guarded server action, fetch it on export/print, then render
+the full rows in the print document. The Sales report is the reference implementation; apply the
+same split to purchase and expense reports.
+
 **Closings:** both `/admin/closings` and `/reports/closings` use the shared paginated
 `getPastClosings(shopId, branchId, page, pageSize)` with `count + skip/take`, URL `page`/`pageSize`,
 `manualPagination`, and the real total in the KPI/footer. Never load the full closing history at once.

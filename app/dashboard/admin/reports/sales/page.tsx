@@ -8,7 +8,14 @@ import { ISalesFilterParams } from "@/types/index";
 import SalesReportClient from "./_components/sales-report-client";
 
 interface PageProps {
-  searchParams: Promise<ISalesFilterParams>;
+  searchParams: Promise<ISalesFilterParams & { page?: string; pageSize?: string }>;
+}
+
+const PAGE_SIZES = [10, 20, 50, 100];
+
+function parsePage(value: string | undefined): number {
+  const page = Number(value);
+  return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
 }
 
 export default async function SalesReportPage({ searchParams }: PageProps) {
@@ -19,11 +26,14 @@ export default async function SalesReportPage({ searchParams }: PageProps) {
   });
 
   const { shopId, activeBranchId, role } = user;
-  const filters = await searchParams;
+  const rawFilters = await searchParams;
+  const parsedPageSize = Number(rawFilters.pageSize);
+  const pageSize = PAGE_SIZES.includes(parsedPageSize) ? parsedPageSize : 10;
+  const page = parsePage(rawFilters.page);
 
   // Parallel server queries scoped strictly to activeBranchId
   const [reportData, shop, branch] = await Promise.all([
-    getSalesReportData(shopId, activeBranchId, filters),
+    getSalesReportData(shopId, activeBranchId, rawFilters, page, pageSize),
     prisma.shop.findUnique({
       where: { id: shopId },
       select: {
@@ -47,9 +57,12 @@ export default async function SalesReportPage({ searchParams }: PageProps) {
       <SalesReportClient
         kpis={reportData.kpis}
         invoices={reportData.invoices}
+        invoicesTotal={reportData.invoicesTotal}
+        page={reportData.invoicePage}
+        pageSize={reportData.invoicePageSize}
         itemVelocity={reportData.itemVelocity}
         currencySymbol={shop?.currencySymbol || "৳"}
-        filters={filters}
+        filters={rawFilters}
         shop={{
           name: shop?.name || "Grocery Store",
           phone: shop?.phone,
