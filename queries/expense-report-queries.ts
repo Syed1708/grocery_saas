@@ -1,41 +1,46 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
-import { 
-  IExpenseReportKPIs, 
-  IExpenseCategoryStat, 
-  IExpenseReportRow, 
-  IExpenseFilterParams 
+import {
+  IExpenseReportKPIs,
+  IExpenseCategoryStat,
+  IExpenseReportRow,
+  IExpenseFilterParams,
 } from "@/types/expenses";
 
-export async function getExpenseReportData(
+const expenseReportInclude = {
+  category: { select: { id: true, name: true, code: true } },
+  user: { select: { name: true } },
+} satisfies Prisma.ExpenseInclude;
+
+type ExpenseReportExpense = Prisma.ExpenseGetPayload<{
+  include: typeof expenseReportInclude;
+}>;
+
+function buildExpenseReportWhere(
   shopId: string,
   branchId: string,
   filters: IExpenseFilterParams
-) {
+): Prisma.ExpenseWhereInput {
   const where: Prisma.ExpenseWhereInput = {
     shopId,
     branchId,
   };
 
-  // Date Range Filter
   if (filters.startDate || filters.endDate) {
     const expenseDate: Prisma.DateTimeFilter = {};
     if (filters.startDate) expenseDate.gte = new Date(`${filters.startDate}T00:00:00`);
-    if (filters.endDate) expenseDate.lte = new Date(`${filters.endDate}T23:59:59`);
+    if (filters.endDate) expenseDate.lte = new Date(`${filters.endDate}T23:59:59.999`);
     where.expenseDate = expenseDate;
   }
 
-  // Category Filter
   if (filters.categoryId && filters.categoryId !== "all") {
     where.categoryId = filters.categoryId;
   }
 
-  // Payment Method Filter
   if (filters.paymentMethod && filters.paymentMethod !== "all") {
     where.paymentMethod = filters.paymentMethod;
   }
 
-  // Search Filter
   if (filters.search) {
     where.OR = [
       { voucherNo: { contains: filters.search } },
@@ -44,73 +49,138 @@ export async function getExpenseReportData(
     ];
   }
 
-  // 1. Fetch Expenses with category & user relations
-  const rawExpenses = await prisma.expense.findMany({
-    where,
-    include: {
-      category: { select: { id: true, name: true, code: true } },
-      user: { select: { name: true } },
-    },
-    orderBy: { expenseDate: "desc" },
-    take: 150,
-  });
+  return where;
+}
 
-  let totalExpenseAmount = 0;
+function mapExpenseReportRow(e: ExpenseReportExpense): IExpenseReportRow {
+  return {
+    id: e.id,
+    voucherNo: e.voucherNo,
+    expenseDate: e.expenseDate,
+    amount: Number(e.amount),
+    paymentMethod: e.paymentMethod,
+    reference: e.reference,
+    note: e.note,
+    receiptImage: e.receiptImage,
+    categoryId: e.categoryId,
+    categoryName: e.category.name,
+    categoryCode: e.category.code,
+    spentBy: e.user?.name || "Authorized Staff",
+  };
+}
+
+/** All filtered rows for CSV/PDF exports (never paginated). */
+export async function getAllExpenseReportRows(
+  shopId: string,
+  branchId: string,
+  filters: IExpenseFilterParams
+): Promise<IExpenseReportRow[]> {
+  const where = buildExpenseReportWhere(shopId, branchId, filters);
+  const rows = await prisma.expense.findMany({
+    where,
+    include: expenseReportInclude,
+    orderBy: { expenseDate: "desc" },
+  });
+  return rows.map(mapExpenseReportRow);
+}
+
+export async function getExpenseReportData(
+  shopId: string,
+  branchId: string,
+  filters: IExpenseFilterParams,
+  page = 1,
+  pageSize = 10
+): Promise<{
+  kpis: IExpenseReportKPIs;
+  rows: IExpenseReportRow[];
+  rowsTotal: number;
+  rowsPage: number;
+  rowsPageSize: number;
+  categoryStats: IExpenseCategoryStat[];
+}> {
+  const where = buildExpenseReportWhere(shopId, branchId, filters);
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, pageSize);
+
+  const [agg, methodGroups, categoryGroups, rowsTotal, rawExpenses] = await Promise.all([
+    prisma.expense.aggregate({
+      where,
+      _sum: { amount: true },
+      _count: { id: true },
+    }),
+    prisma.expense.groupBy({
+      by: ["paymentMethod"],
+      where,
+      _sum: { amount: true },
+    }),
+    prisma.expense.groupBy({
+      by: ["categoryId"],
+      where,
+      _sum: { amount: true },
+      _count: { id: true },
+    }),
+    prisma.expense.count({ where }),
+    prisma.expense.findMany({
+      where,
+      include: expenseReportInclude,
+      orderBy: { expenseDate: "desc" },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+    }),
+  ]);
+
+  const totalExpenseAmount = Number(agg._sum.amount || 0);
   let cashExpenseAmount = 0;
   let bankExpenseAmount = 0;
   let otherMethodExpenseAmount = 0;
 
-  const categoryMap = new Map<string, { name: string; code: string; total: number; count: number }>();
+  for (const group of methodGroups) {
+    const amount = Number(group._sum.amount || 0);
+    const method = group.paymentMethod?.toLowerCase() || "cash";
+    if (method === "cash") cashExpenseAmount += amount;
+    else if (method === "bank") bankExpenseAmount += amount;
+    else otherMethodExpenseAmount += amount;
+  }
 
-  const rows: IExpenseReportRow[] = rawExpenses.map((e) => {
-    const amt = Number(e.amount);
-    totalExpenseAmount += amt;
-
-    const method = e.paymentMethod?.toLowerCase() || "cash";
-    if (method === "cash") cashExpenseAmount += amt;
-    else if (method === "bank") bankExpenseAmount += amt;
-    else otherMethodExpenseAmount += amt;
-
-    // Category Aggregation
-    const catId = e.categoryId;
-    const catName = e.category.name;
-    const catCode = e.category.code;
-    const cur = categoryMap.get(catId) || { name: catName, code: catCode, total: 0, count: 0 };
-    categoryMap.set(catId, { name: catName, code: catCode, total: cur.total + amt, count: cur.count + 1 });
-
-    return {
-      id: e.id,
-      voucherNo: e.voucherNo,
-      expenseDate: e.expenseDate,
-      amount: amt,
-      paymentMethod: e.paymentMethod,
-      reference: e.reference,
-      note: e.note,
-      receiptImage: e.receiptImage,
-      categoryId: e.categoryId,
-      categoryName: e.category.name,
-      categoryCode: e.category.code,
-      spentBy: e.user?.name || "Authorized Staff",
-    };
+  const categoryIds = categoryGroups.map((group) => group.categoryId);
+  const categories = await prisma.expenseCategory.findMany({
+    where: { id: { in: categoryIds } },
+    select: { id: true, name: true, code: true },
   });
+  const categoryMap = new Map(categories.map((category) => [category.id, category]));
 
-  // Calculate percentage per category
-  const categoryStats: IExpenseCategoryStat[] = Array.from(categoryMap.entries()).map(([id, val]) => ({
-    categoryId: id,
-    categoryName: val.name,
-    categoryCode: val.code,
-    totalAmount: val.total,
-    percentage: totalExpenseAmount > 0 ? Number(((val.total / totalExpenseAmount) * 100).toFixed(1)) : 0,
-    vouchersCount: val.count,
-  })).sort((a, b) => b.totalAmount - a.totalAmount);
+  const categoryStats: IExpenseCategoryStat[] = categoryGroups
+    .map((group) => {
+      const category = categoryMap.get(group.categoryId);
+      const amount = Number(group._sum.amount || 0);
+      return {
+        categoryId: group.categoryId,
+        categoryName: category?.name || "Unknown Category",
+        categoryCode: category?.code || "N/A",
+        totalAmount: amount,
+        percentage:
+          totalExpenseAmount > 0
+            ? Number(((amount / totalExpenseAmount) * 100).toFixed(1))
+            : 0,
+        vouchersCount: group._count.id,
+      };
+    })
+    .sort((a, b) => b.totalAmount - a.totalAmount);
 
   const kpis: IExpenseReportKPIs = {
     totalExpenseAmount,
     cashExpenseAmount,
     bankExpenseAmount,
     otherMethodExpenseAmount,
-    totalVouchersCount: rows.length,
+    totalVouchersCount: agg._count.id || 0,
   };
 
-  return { kpis, rows, categoryStats };
+  return {
+    kpis,
+    rows: rawExpenses.map(mapExpenseReportRow),
+    rowsTotal,
+    rowsPage: safePage,
+    rowsPageSize: safePageSize,
+    categoryStats,
+  };
 }

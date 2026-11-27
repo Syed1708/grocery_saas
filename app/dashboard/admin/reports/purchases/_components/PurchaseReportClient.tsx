@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
+import { flushSync } from "react-dom";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Truck, DollarSign, Wallet, CreditCard, Percent } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import PurchaseReportFilters from "./PurchaseReportFilters";
@@ -9,12 +12,18 @@ import PurchaseExportActions from "./PurchaseExportActions";
 import PurchaseDetailsModal from "./PurchaseDetailsModal";
 import { getPurchaseColumns } from "./Columns";
 import PurchaseReportPdf from "./PurchaseReportPdf";
-import { IPurchaseReportKPIs, IPurchaseReportRow } from "@/types/purchases";
+import { IPurchaseFilterParams, IPurchaseReportKPIs, IPurchaseReportRow } from "@/types/purchases";
+import { fetchPurchaseReportRowsAction } from "@/app/actions/purchase-report-actions";
 import { ReportKpiCard } from "../../common/report-kpi-card";
 
 interface Props {
   kpis: IPurchaseReportKPIs;
   rows: IPurchaseReportRow[];
+  rowsTotal: number;
+  dueTotal: number;
+  page: number;
+  pageSize: number;
+  filters: IPurchaseFilterParams;
   currencySymbol: string;
   suppliers: { id: string; name: string; companyName: string | null }[];
   shop: { name: string; phone?: string | null; address?: string | null };
@@ -24,22 +33,59 @@ interface Props {
 export default function PurchaseReportClient({
   kpis,
   rows = [],
+  rowsTotal,
+  dueTotal,
+  page,
+  pageSize,
+  filters,
   currencySymbol = "৳",
   suppliers,
   shop,
   branchName,
 }: Props) {
-  const [activeTab, setActiveTab] = useState<"all" | "due">("all");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeTab = searchParams.get("tab") === "due" ? "due" : "all";
   const [selectedChalan, setSelectedChalan] = useState<IPurchaseReportRow | null>(null);
+  const [exportRows, setExportRows] = useState<IPurchaseReportRow[] | null>(null);
 
-  // Stable data memoization
-  const filteredData = useMemo(() => {
-    if (!Array.isArray(rows)) return [];
-    if (activeTab === "due") {
-      return rows.filter((r) => r.dueAmount > 0);
+  const setActiveTab = (tab: "all" | "due") => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (tab === "due") params.set("tab", "due");
+    else params.delete("tab");
+    params.delete("page");
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const updatePagination = (nextPage: number, nextPageSize: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (nextPageSize !== pageSize) {
+      params.set("pageSize", String(nextPageSize));
+      params.delete("page");
+    } else if (nextPage <= 1) {
+      params.delete("page");
+    } else {
+      params.set("page", String(nextPage));
     }
-    return rows;
-  }, [activeTab, rows]);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const loadAllRows = async (): Promise<IPurchaseReportRow[] | null> => {
+    const result = await fetchPurchaseReportRowsAction(filters, activeTab === "due");
+    if (!result.success) {
+      toast.error(result.error);
+      return null;
+    }
+    return result.data;
+  };
+
+  const handlePrintRows = (allRows: IPurchaseReportRow[]) => {
+    flushSync(() => setExportRows(allRows));
+    requestAnimationFrame(() => {
+      setTimeout(() => window.print(), 80);
+    });
+  };
 
   // Stable column definition
   const columns = useMemo(
@@ -48,10 +94,17 @@ export default function PurchaseReportClient({
   );
 
   const table = useReactTable({
-    data: filteredData,
+    data: rows,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: Math.max(1, Math.ceil(rowsTotal / pageSize)),
+    state: { pagination: { pageIndex: page - 1, pageSize } },
+    onPaginationChange: (updater) => {
+      const current = { pageIndex: page - 1, pageSize };
+      const next = typeof updater === "function" ? updater(current) : updater;
+      updatePagination(next.pageIndex + 1, next.pageSize);
+    },
   });
 
   return (
@@ -64,7 +117,7 @@ export default function PurchaseReportClient({
             <p className="text-xs text-neutral-500">Track wholesale distributor chalans, supplier dues, and cash outflows</p>
           </div>
 
-          <PurchaseExportActions rows={filteredData} />
+          <PurchaseExportActions getRows={loadAllRows} onPrintRows={handlePrintRows} />
         </div>
 
         {/* Financial KPI Cards */}
@@ -120,7 +173,7 @@ export default function PurchaseReportClient({
                 : "border-transparent text-neutral-500 hover:text-neutral-800"
             }`}
           >
-            সকল ক্রয় চালান ({rows.length})
+            সকল ক্রয় চালান ({kpis.totalChalansCount})
           </button>
           <button
             type="button"
@@ -131,11 +184,11 @@ export default function PurchaseReportClient({
                 : "border-transparent text-neutral-500 hover:text-neutral-800"
             }`}
           >
-            🛑 বকেয়া দেনা চালান ({rows.filter((r) => r.dueAmount > 0).length})
+            🛑 বকেয়া দেনা চালান ({dueTotal})
           </button>
         </div>
 
-        <DataTable table={table} columns={columns} />
+        <DataTable table={table} columns={columns} totalCount={rowsTotal} />
       </div>
 
       {/* Modal for Chalan Line Items */}
@@ -150,7 +203,7 @@ export default function PurchaseReportClient({
       {/* Printable A4 PDF Sheet */}
       <PurchaseReportPdf
         kpis={kpis}
-        rows={filteredData}
+        rows={exportRows ?? rows}
         currencySymbol={currencySymbol}
         shop={shop}
         branchName={branchName}

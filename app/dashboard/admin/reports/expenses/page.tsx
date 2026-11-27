@@ -6,7 +6,14 @@ import ExpenseReportClient from "./_components/ExpenseReportClient";
 import { IExpenseFilterParams } from "@/types/expenses";
 
 interface PageProps {
-  searchParams: Promise<IExpenseFilterParams>;
+  searchParams: Promise<IExpenseFilterParams & { page?: string; pageSize?: string }>;
+}
+
+const PAGE_SIZES = [10, 20, 50, 100];
+
+function parsePage(value: string | undefined): number {
+  const page = Number(value);
+  return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
 }
 
 export default async function ExpenseReportPage({ searchParams }: PageProps) {
@@ -14,10 +21,13 @@ export default async function ExpenseReportPage({ searchParams }: PageProps) {
     requiredPermission: PERMISSIONS.REPORTS_EXPENSES,
     requireActiveStatus: true,
   });
-  const filters = await searchParams;
+  const rawFilters = await searchParams;
+  const parsedPageSize = Number(rawFilters.pageSize);
+  const pageSize = PAGE_SIZES.includes(parsedPageSize) ? parsedPageSize : 10;
+  const page = parsePage(rawFilters.page);
 
   const [expenseData, categories, shop, branch] = await Promise.all([
-    getExpenseReportData(shopId, branchId, filters),
+    getExpenseReportData(shopId, branchId, rawFilters, page, pageSize),
     prisma.expenseCategory.findMany({
       where: { shopId, status: "active" },
       select: { id: true, name: true },
@@ -37,6 +47,10 @@ export default async function ExpenseReportPage({ searchParams }: PageProps) {
       <ExpenseReportClient
         kpis={expenseData.kpis}
         rows={expenseData.rows}
+        rowsTotal={expenseData.rowsTotal}
+        page={expenseData.rowsPage}
+        pageSize={expenseData.rowsPageSize}
+        filters={rawFilters}
         categoryStats={expenseData.categoryStats}
         currencySymbol={shop?.currencySymbol || "৳"}
         categories={categories}

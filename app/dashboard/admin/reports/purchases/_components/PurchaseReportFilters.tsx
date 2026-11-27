@@ -17,6 +17,7 @@ export default function PurchaseReportFilters({ suppliers }: FilterProps) {
     const params = new URLSearchParams(searchParams.toString());
     if (value && value !== "all") params.set(key, value);
     else params.delete(key);
+    params.delete("page");
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -28,11 +29,14 @@ export default function PurchaseReportFilters({ suppliers }: FilterProps) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("startDate", start.toISOString().split("T")[0]);
     params.set("endDate", end.toISOString().split("T")[0]);
+    params.delete("page");
     router.push(`${pathname}?${params.toString()}`);
   };
 
   const handleReset = () => {
-    router.push(pathname);
+    const params = new URLSearchParams();
+    if (searchParams.get("tab") === "due") params.set("tab", "due");
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   const hasActiveFilters = searchParams.toString().length > 0;

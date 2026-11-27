@@ -1,19 +1,27 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
+import { flushSync } from "react-dom";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { ReceiptText, DollarSign, Wallet, CreditCard } from "lucide-react";
 import { DataTable } from "@/components/common/data-table/DataTable";
 import ExpenseReportFilters from "./ExpenseReportFilters";
 import ExpenseExportActions from "./ExpenseExportActions";
 import { getExpenseColumns } from "./Columns";
 import ExpenseReportPdf from "./ExpenseReportPdf";
-import { IExpenseReportKPIs, IExpenseReportRow, IExpenseCategoryStat } from "@/types/expenses";
+import { IExpenseReportKPIs, IExpenseReportRow, IExpenseCategoryStat, IExpenseFilterParams } from "@/types/expenses";
+import { fetchExpenseReportRowsAction } from "@/app/actions/expense-report-actions";
 import { ReportKpiCard } from "../../common/report-kpi-card";
 
 interface Props {
   kpis: IExpenseReportKPIs;
   rows: IExpenseReportRow[];
+  rowsTotal: number;
+  page: number;
+  pageSize: number;
+  filters: IExpenseFilterParams;
   categoryStats: IExpenseCategoryStat[];
   currencySymbol: string;
   categories: { id: string; name: string }[];
@@ -24,13 +32,50 @@ interface Props {
 export default function ExpenseReportClient({
   kpis,
   rows = [],
+  rowsTotal,
+  page,
+  pageSize,
+  filters,
   categoryStats = [],
   currencySymbol = "৳",
   categories,
   shop,
   branchName,
 }: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"vouchers" | "categories">("vouchers");
+  const [exportRows, setExportRows] = useState<IExpenseReportRow[] | null>(null);
+
+  const updatePagination = (nextPage: number, nextPageSize: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (nextPageSize !== pageSize) {
+      params.set("pageSize", String(nextPageSize));
+      params.delete("page");
+    } else if (nextPage <= 1) {
+      params.delete("page");
+    } else {
+      params.set("page", String(nextPage));
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const loadAllRows = async (): Promise<IExpenseReportRow[] | null> => {
+    const result = await fetchExpenseReportRowsAction(filters);
+    if (!result.success) {
+      toast.error(result.error);
+      return null;
+    }
+    return result.data;
+  };
+
+  const handlePrintRows = (allRows: IExpenseReportRow[]) => {
+    flushSync(() => setExportRows(allRows));
+    requestAnimationFrame(() => {
+      setTimeout(() => window.print(), 80);
+    });
+  };
 
   // Stable column definitions
   const columns = useMemo(() => getExpenseColumns(currencySymbol), [currencySymbol]);
@@ -40,7 +85,14 @@ export default function ExpenseReportClient({
     data: rows,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: Math.max(1, Math.ceil(rowsTotal / pageSize)),
+    state: { pagination: { pageIndex: page - 1, pageSize } },
+    onPaginationChange: (updater) => {
+      const current = { pageIndex: page - 1, pageSize };
+      const next = typeof updater === "function" ? updater(current) : updater;
+      updatePagination(next.pageIndex + 1, next.pageSize);
+    },
   });
 
   return (
@@ -53,7 +105,7 @@ export default function ExpenseReportClient({
             <p className="text-xs text-neutral-500">Track petty cash outflows, recurring utilities, rent, and staff food costs</p>
           </div>
 
-          <ExpenseExportActions rows={rows} />
+          <ExpenseExportActions getRows={loadAllRows} onPrintRows={handlePrintRows} />
         </div>
 
         {/* Financial KPI Cards */}
@@ -102,7 +154,7 @@ export default function ExpenseReportClient({
                 : "border-transparent text-neutral-500 hover:text-neutral-800"
             }`}
           >
-            খরচের ভাউচার তালিকা ({rows.length})
+            খরচের ভাউচার তালিকা ({rowsTotal})
           </button>
           <button
             type="button"
@@ -119,7 +171,7 @@ export default function ExpenseReportClient({
 
         {/* Tab Content */}
         {activeTab === "vouchers" ? (
-          <DataTable table={table} columns={columns} />
+          <DataTable table={table} columns={columns} totalCount={rowsTotal} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {categoryStats.map((c) => (
@@ -160,7 +212,7 @@ export default function ExpenseReportClient({
       {/* Printable A4 Physical Expense Sheet */}
       <ExpenseReportPdf
         kpis={kpis}
-        rows={rows}
+        rows={exportRows ?? rows}
         categoryStats={categoryStats}
         currencySymbol={currencySymbol}
         shop={shop}

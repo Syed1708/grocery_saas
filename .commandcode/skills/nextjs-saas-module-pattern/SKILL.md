@@ -486,8 +486,9 @@ The Purchases invoice tab follows the same pattern: URL `q`, `status` (`PAID|PAR
 are paginated server-side (`count + skip/take`, URL `page`/`pageSize`, `manualPagination`,
 `totalCount`). CSV/PDF must never export only the current page: keep a separate un-paginated query
 (`getAllSalesReportInvoices`) behind a guarded server action, fetch it on export/print, then render
-the full rows in the print document. The Sales report is the reference implementation; apply the
-same split to purchase and expense reports.
+the full rows in the print document. Sales, Purchase and Expense reports all follow this split;
+Purchase keeps its Due tab as a URL/server `tab=due` filter, and Expense computes KPIs/category
+stats from full-set aggregate/groupBy queries rather than the paginated rows.
 
 **Closings:** both `/admin/closings` and `/reports/closings` use the shared paginated
 `getPastClosings(shopId, branchId, page, pageSize)` with `count + skip/take`, URL `page`/`pageSize`,

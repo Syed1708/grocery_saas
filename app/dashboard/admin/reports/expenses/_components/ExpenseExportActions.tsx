@@ -5,13 +5,25 @@ import { IExpenseReportRow } from "@/types/expenses";
 import { toast } from "sonner";
 import { downloadCsv } from "@/lib/csv";
 
-export default function ExpenseExportActions({ rows }: { rows: IExpenseReportRow[] }) {
-  const handlePrintPdf = () => {
-    window.print();
+export default function ExpenseExportActions({
+  getRows,
+  onPrintRows,
+}: {
+  getRows: () => Promise<IExpenseReportRow[] | null>;
+  onPrintRows: (rows: IExpenseReportRow[]) => void;
+}) {
+  const handlePrintPdf = async () => {
+    const rows = await getRows();
+    if (!rows || rows.length === 0) {
+      toast.error("No expenses to print.");
+      return;
+    }
+    onPrintRows(rows);
   };
 
-  const handleDownloadCsv = () => {
-    if (!rows.length) {
+  const handleDownloadCsv = async () => {
+    const rows = await getRows();
+    if (!rows || rows.length === 0) {
       toast.error("No expenses to export.");
       return;
     }

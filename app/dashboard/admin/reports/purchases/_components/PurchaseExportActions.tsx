@@ -5,13 +5,25 @@ import { IPurchaseReportRow } from "@/types/purchases";
 import { toast } from "sonner";
 import { downloadCsv } from "@/lib/csv";
 
-export default function PurchaseExportActions({ rows }: { rows: IPurchaseReportRow[] }) {
-  const handlePrintPdf = () => {
-    window.print();
+export default function PurchaseExportActions({
+  getRows,
+  onPrintRows,
+}: {
+  getRows: () => Promise<IPurchaseReportRow[] | null>;
+  onPrintRows: (rows: IPurchaseReportRow[]) => void;
+}) {
+  const handlePrintPdf = async () => {
+    const rows = await getRows();
+    if (!rows || rows.length === 0) {
+      toast.error("No purchase chalans to print.");
+      return;
+    }
+    onPrintRows(rows);
   };
 
-  const handleDownloadCsv = () => {
-    if (!rows.length) {
+  const handleDownloadCsv = async () => {
+    const rows = await getRows();
+    if (!rows || rows.length === 0) {
       toast.error("No purchase chalans to export.");
       return;
     }
